@@ -33,33 +33,41 @@ func NewYZRect(y0 float64, y1 float64, z0 float64, z1 float64, k float64, mat ma
 	}
 }
 
-func (xyr *YZRect) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
-	t := (xyr.k - r.Origin().X) / r.Direction().X
+func (yzr *YZRect) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+	t := (yzr.k - r.Origin().X) / r.Direction().X
 	if t < tMin || t > tMax {
 		return nil, nil, false
 	}
 
 	y := r.Origin().Y + (t * r.Direction().Y)
 	z := r.Origin().Z + (t * r.Direction().Z)
-	if y < xyr.y0 || y > xyr.y1 || z < xyr.z0 || z > xyr.z1 {
+	if y < yzr.y0 || y > yzr.y1 || z < yzr.z0 || z > yzr.z1 {
 		return nil, nil, false
 	}
 
-	u := (y - xyr.y0) / (xyr.y1 - xyr.y0)
-	v := (z - xyr.z0) / (xyr.z1 - xyr.z0)
-	return hitrecord.New(t, u, v, r.PointAtParameter(t), &vec3.Vec3Impl{X: 1}), xyr.material, true
+	u := (y - yzr.y0) / (yzr.y1 - yzr.y0)
+	v := (z - yzr.z0) / (yzr.z1 - yzr.z0)
+	return hitrecord.New(t, u, v, r.PointAtParameter(t), &vec3.Vec3Impl{X: 1}), yzr.material, true
 }
 
-func (xyr *YZRect) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
+func (yzr *YZRect) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return aabb.New(
 		&vec3.Vec3Impl{
-			X: xyr.k - 0.0001,
-			Y: xyr.y0,
-			Z: xyr.z0,
+			X: yzr.k - 0.0001,
+			Y: yzr.y0,
+			Z: yzr.z0,
 		},
 		&vec3.Vec3Impl{
-			X: xyr.k + 0.001,
-			Y: xyr.y1,
-			Z: xyr.z1,
+			X: yzr.k + 0.001,
+			Y: yzr.y1,
+			Z: yzr.z1,
 		}), true
+}
+
+func (yzr *YZRect) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+	return 0.0
+}
+
+func (yzr *YZRect) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return &vec3.Vec3Impl{X: 1}
 }

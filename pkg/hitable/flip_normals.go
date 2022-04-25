@@ -33,3 +33,11 @@ func (fn *FlipNormals) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.Hi
 func (fn *FlipNormals) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return fn.hitable.BoundingBox(time0, time1)
 }
+
+func (fn *FlipNormals) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+	return fn.hitable.PDFValue(o, v)
+}
+
+func (fn *FlipNormals) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return fn.hitable.Random(o)
+}

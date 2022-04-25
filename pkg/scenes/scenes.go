@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 
+	"gitlab.com/flynn-nrg/izpi/pkg/camera"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
 	"gitlab.com/flynn-nrg/izpi/pkg/material"
 	"gitlab.com/flynn-nrg/izpi/pkg/texture"
@@ -108,32 +109,38 @@ func SimpleLight() *hitable.HitableSlice {
 }
 
 // CornellBox returns a scene recreating the Cornell box.
-func CornellBox() *hitable.HitableSlice {
+func CornellBox(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
 	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 15, Y: 15, Z: 15}))
-	b1 := hitable.NewTranslate(hitable.NewRotateY(hitable.NewBox(&vec3.Vec3Impl{X: 0, Y: 0, Z: 0}, &vec3.Vec3Impl{X: 165, Y: 165, Z: 165}, white), -18), &vec3.Vec3Impl{X: 130, Y: 0, Z: 65})
-	b2 := hitable.NewTranslate(hitable.NewRotateY(hitable.NewBox(&vec3.Vec3Impl{X: 0, Y: 0, Z: 0}, &vec3.Vec3Impl{X: 165, Y: 330, Z: 165}, white), 15), &vec3.Vec3Impl{X: 265, Y: 0, Z: 295})
-
+	glass := material.NewDielectric(1.5)
 	hitables := []hitable.Hitable{
 		hitable.NewFlipNormals(hitable.NewYZRect(0, 555, 0, 555, 555, green)),
 		hitable.NewYZRect(0, 555, 0, 555, 0, red),
-		hitable.NewXZRect(213, 343, 227, 332, 554, light),
+		hitable.NewFlipNormals(hitable.NewXZRect(213, 343, 227, 332, 554, light)),
 		hitable.NewFlipNormals(hitable.NewXZRect(0, 555, 0, 555, 555, white)),
 		hitable.NewXZRect(0, 555, 0, 555, 0, white),
 		hitable.NewFlipNormals(hitable.NewXYRect(0, 555, 0, 555, 555, white)),
-		hitable.NewTranslate(hitable.NewRotateY(hitable.NewBox(&vec3.Vec3Impl{X: 0, Y: 0, Z: 0}, &vec3.Vec3Impl{X: 165, Y: 165, Z: 165}, white), -18), &vec3.Vec3Impl{X: 130, Y: 0, Z: 65}),
+		hitable.NewSphere(&vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, &vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, 0, 1, 90, glass),
 		hitable.NewTranslate(hitable.NewRotateY(hitable.NewBox(&vec3.Vec3Impl{X: 0, Y: 0, Z: 0}, &vec3.Vec3Impl{X: 165, Y: 330, Z: 165}, white), 15), &vec3.Vec3Impl{X: 265, Y: 0, Z: 295}),
-		hitable.NewConstantMedium(b1, 0.01, texture.NewConstant(&vec3.Vec3Impl{X: 1, Y: 1, Z: 1})),
-		hitable.NewConstantMedium(b2, 0.01, texture.NewConstant(&vec3.Vec3Impl{})),
 	}
 
-	return hitable.NewSlice(hitables)
+	lookFrom := &vec3.Vec3Impl{X: 278.0, Y: 278.0, Z: -800.0}
+	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
+	vup := &vec3.Vec3Impl{Y: 1}
+	distToFocus := 10.0
+	aperture := 0.0
+	vfov := float64(40.0)
+	time0 := 0.0
+	time1 := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+
+	return hitable.NewSlice(hitables), cam
 }
 
 // Final returns the scene from the last chapter in the book.
-func Final() *hitable.HitableSlice {
+func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 	nb := 20
 	list := []hitable.Hitable{}
 	boxList := []hitable.Hitable{}
@@ -193,5 +200,15 @@ func Final() *hitable.HitableSlice {
 
 	list = append(list, hitable.NewTranslate(hitable.NewRotateY(hitable.NewBVH(boxList2, 0, 1), 15), &vec3.Vec3Impl{X: -100, Y: 270, Z: 395}))
 
-	return hitable.NewSlice(list)
+	lookFrom := &vec3.Vec3Impl{X: 478.0, Y: 278.0, Z: -600.0}
+	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
+	vup := &vec3.Vec3Impl{Y: 1}
+	distToFocus := 10.0
+	aperture := 0.0
+	vfov := float64(40.0)
+	time0 := 0.0
+	time1 := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+
+	return hitable.NewSlice(list), cam
 }

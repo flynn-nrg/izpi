@@ -6,6 +6,7 @@ import (
 	"gitlab.com/flynn-nrg/izpi/pkg/aabb"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitrecord"
 	"gitlab.com/flynn-nrg/izpi/pkg/material"
+	"gitlab.com/flynn-nrg/izpi/pkg/onb"
 	"gitlab.com/flynn-nrg/izpi/pkg/ray"
 	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
 )
@@ -21,6 +22,14 @@ type Sphere struct {
 	time1    float64
 	radius   float64
 	material material.Material
+}
+
+func getSphereUV(p *vec3.Vec3Impl) (float64, float64) {
+	phi := math.Atan2(p.Z, p.X)
+	theta := math.Asin(p.Y)
+	u := 1.0 - (phi+math.Pi)/(2.0*math.Pi)
+	v := (theta + math.Pi/2.0) / math.Pi
+	return u, v
 }
 
 // NewSphere returns a new instance of Sphere.
@@ -85,10 +94,20 @@ func (s *Sphere) center(time float64) *vec3.Vec3Impl {
 	return vec3.Add(s.center0, vec3.ScalarMul(vec3.Sub(s.center1, s.center0), ((time-s.time0)/(s.time1-s.time0))))
 }
 
-func getSphereUV(p *vec3.Vec3Impl) (float64, float64) {
-	phi := math.Atan2(p.Z, p.X)
-	theta := math.Asin(p.Y)
-	u := 1.0 - (phi+math.Pi)/(2.0*math.Pi)
-	v := (theta + math.Pi/2.0) / math.Pi
-	return u, v
+func (s *Sphere) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+	if _, _, ok := s.Hit((ray.New(o, v, 0)), 0.001, math.MaxFloat64); ok {
+		cosThetaMax := math.Sqrt(1 - s.radius*s.radius/vec3.Sub(s.center0, o).SquaredLength())
+		solidAngle := 2 * math.Pi * (1 - cosThetaMax)
+		return 1 / solidAngle
+	}
+
+	return 0.0
+}
+
+func (s *Sphere) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+	direction := vec3.Sub(s.center0, o)
+	distanceSquared := direction.SquaredLength()
+	uvw := onb.New()
+	uvw.BuildFromW(direction)
+	return uvw.Local(vec3.RandomToSphere(s.radius, distanceSquared))
 }

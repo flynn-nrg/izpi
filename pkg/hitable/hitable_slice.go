@@ -1,10 +1,13 @@
 package hitable
 
 import (
+	"math/rand"
+
 	"gitlab.com/flynn-nrg/izpi/pkg/aabb"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitrecord"
 	"gitlab.com/flynn-nrg/izpi/pkg/material"
 	"gitlab.com/flynn-nrg/izpi/pkg/ray"
+	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Ensure interface compliance.
@@ -65,4 +68,18 @@ func (hs *HitableSlice) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, b
 	}
 
 	return box, true
+}
+
+func (hs *HitableSlice) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+	weight := 1.0 / float64(len(hs.hitables))
+	sum := float64(0)
+	for _, h := range hs.hitables {
+		sum += weight * h.PDFValue(o, v)
+	}
+	return sum
+}
+
+func (hs *HitableSlice) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+	index := int(rand.Float64() * float64(len(hs.hitables)))
+	return hs.hitables[index].Random(o)
 }

@@ -10,6 +10,7 @@ import (
 
 	"gitlab.com/flynn-nrg/izpi/pkg/camera"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
+	"gitlab.com/flynn-nrg/izpi/pkg/pdf"
 	"gitlab.com/flynn-nrg/izpi/pkg/ray"
 	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
 )
@@ -25,13 +26,26 @@ type workUnit struct {
 	y1         int
 }
 
-func colour(r ray.Ray, world *hitable.HitableSlice, depth int) *vec3.Vec3Impl {
+func colour(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int) *vec3.Vec3Impl {
 	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
-		scattered, attenuation, ok := mat.Scatter(r, rec)
-		emitted := mat.Emitted(rec.U(), rec.V(), rec.P())
+		_, srec, ok := mat.Scatter(r, rec)
+		emitted := mat.Emitted(r, rec, rec.U(), rec.V(), rec.P())
 		if depth < 50 && ok {
-			// emitted + (attenuation * color)
-			return vec3.Add(emitted, vec3.Mul(attenuation, colour(scattered, world, depth+1)))
+			if srec.IsSpecular() {
+				// srec.Attenuation() * colour(...)
+				return vec3.Mul(srec.Attenuation(), colour(srec.SpecularRay(), world, lightShape, depth+1))
+			} else {
+				pLight := pdf.NewHitable(lightShape, rec.P())
+				p := pdf.NewMixture(pLight, srec.PDF())
+				scattered := ray.New(rec.P(), p.Generate(), r.Time())
+				pdfVal := p.Value(scattered.Direction())
+				// emitted + (albedo * scatteringPDF())*colour() / pdf
+				v1 := vec3.ScalarMul(colour(scattered, world, lightShape, depth+1), mat.ScatteringPDF(r, rec, scattered))
+				v2 := vec3.Mul(srec.Attenuation(), v1)
+				v3 := vec3.ScalarDiv(v2, pdfVal)
+				res := vec3.Add(emitted, v3)
+				return res
+			}
 		} else {
 			return emitted
 		}
@@ -57,7 +71,10 @@ func renderRect(w workUnit) {
 				u := (float64(x) + rand.Float64()) / float64(nx)
 				v := (float64(y) + rand.Float64()) / float64(ny)
 				r := w.cam.GetRay(u, v)
-				col = vec3.Add(col, colour(r, w.world, 0))
+				lightShape := hitable.NewXZRect(213, 343, 227, 332, 554, nil)
+				glassSphere := hitable.NewSphere(&vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, &vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, 0, 1, 90, nil)
+				hList := hitable.NewSlice([]hitable.Hitable{lightShape, glassSphere})
+				col = vec3.Add(col, vec3.DeNAN(colour(r, w.world, hList, 0)))
 			}
 
 			col = vec3.ScalarDiv(col, float64(w.numSamples))

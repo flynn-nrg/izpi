@@ -41,3 +41,11 @@ func (tr *Translate) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool
 
 	return nil, false
 }
+
+func (tr *Translate) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+	return tr.hitable.PDFValue(o, v)
+}
+
+func (tr *Translate) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return tr.hitable.Random(o)
+}

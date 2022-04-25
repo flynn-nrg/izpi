@@ -3,6 +3,7 @@ package material
 import (
 	"gitlab.com/flynn-nrg/izpi/pkg/hitrecord"
 	"gitlab.com/flynn-nrg/izpi/pkg/ray"
+	"gitlab.com/flynn-nrg/izpi/pkg/scatterrecord"
 	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
 )
 
@@ -11,6 +12,7 @@ var _ Material = (*Metal)(nil)
 
 // Metal represents metallic materials.
 type Metal struct {
+	nonEmitter
 	albedo *vec3.Vec3Impl
 	fuzz   float64
 }
@@ -24,14 +26,15 @@ func NewMetal(albedo *vec3.Vec3Impl, fuzz float64) *Metal {
 }
 
 // Scatter computes how the ray bounces off the surface of a metallic object.
-func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *vec3.Vec3Impl, bool) {
+func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	reflected := reflect(vec3.UnitVector(r.Direction()), hr.Normal())
-	scattered := ray.New(hr.P(), vec3.Add(reflected, vec3.ScalarMul(randomInUnitSphere(), m.fuzz)), r.Time())
+	specular := ray.New(hr.P(), vec3.Add(reflected, vec3.ScalarMul(randomInUnitSphere(), m.fuzz)), r.Time())
 	attenuation := m.albedo
-	return scattered, attenuation, (vec3.Dot(scattered.Direction(), hr.Normal()) > 0)
+	scatterRecord := scatterrecord.New(specular, true, attenuation, nil)
+	return nil, scatterRecord, true
 }
 
-// Emitted returns black for metallic materials.
-func (m *Metal) Emitted(_ float64, _ float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
-	return &vec3.Vec3Impl{}
+// ScatteringPDF implements the probability distribution function for metals.
+func (m *Metal) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
+	return 0
 }

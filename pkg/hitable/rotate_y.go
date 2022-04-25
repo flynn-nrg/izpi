@@ -112,3 +112,11 @@ func (ry *RotateY) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 func (ry *RotateY) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return ry.bbox, ry.hasBox
 }
+
+func (ry *RotateY) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+	return ry.hitable.PDFValue(o, v)
+}
+
+func (ry *RotateY) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return ry.hitable.Random(o)
+}

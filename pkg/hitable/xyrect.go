@@ -63,3 +63,11 @@ func (xyr *XYRect) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) 
 			Z: xyr.k + 0.001,
 		}), true
 }
+
+func (xyr *XYRect) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+	return 0.0
+}
+
+func (xyr *XYRect) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return &vec3.Vec3Impl{X: 1}
+}

@@ -45,3 +45,11 @@ func (b *Box) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, 
 func (b *Box) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return b.sides.BoundingBox(time0, time1)
 }
+
+func (b *Box) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+	return 0.0
+}
+
+func (b *Box) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return &vec3.Vec3Impl{X: 1}
+}
