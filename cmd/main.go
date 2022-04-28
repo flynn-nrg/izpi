@@ -2,36 +2,39 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"image"
+	"log"
 	"math/rand"
+	"runtime"
 	"time"
 
+	"gitlab.com/flynn-nrg/izpi/pkg/output"
 	"gitlab.com/flynn-nrg/izpi/pkg/render"
 	"gitlab.com/flynn-nrg/izpi/pkg/scenes"
 )
 
 func main() {
 
-	numWorkers := flag.Int("num-workers", 1, "the number of worker threads")
+	numWorkers := flag.Int("num-workers", runtime.NumCPU(), "the number of worker threads")
 	nx := flag.Int("x", 500, "output image x size")
 	ny := flag.Int("y", 500, "output image y size")
 	ns := flag.Int("samples", 1000, "number of samples per ray")
-
+	outputFile := flag.String("output", "output.png", "output file")
+	verbose := flag.Bool("v", false, "verbose")
 	flag.Parse()
 
-	canvas := image.NewNRGBA(image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: *nx, Y: *ny}})
 	rand.Seed(time.Now().UnixNano())
 
 	world, cam := scenes.CornellBox(float64(*nx) / float64(*ny))
-	render.Render(cam, world, canvas, *ns, *numWorkers)
+	r := render.New(cam, world, *nx, *ny, *ns, *numWorkers, 10, *verbose)
+	canvas := r.Render()
 
-	fmt.Printf("P3\n%v %v\n255\n", *nx, *ny)
-	for j := *ny - 1; j >= 0; j-- {
-		for i := 0; i < *nx; i++ {
-			pixel := canvas.At(i, j)
-			r, g, b, _ := pixel.RGBA()
-			fmt.Printf("%v %v %v\n", r>>8, g>>8, b>>8)
-		}
+	out, err := output.NewPNG(*outputFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = out.Write(canvas)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
