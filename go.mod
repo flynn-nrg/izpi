@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/cheggaaa/pb/v3 v3.0.8
+	github.com/flynn-nrg/gube v0.0.0-20220427125900-42c21a7b19e9
 	github.com/google/go-cmp v0.5.7
 )
 
