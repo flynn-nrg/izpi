@@ -83,7 +83,7 @@ func renderRect(w workUnit) {
 			ir := clamp(col.X)
 			ig := clamp(col.Y)
 			ib := clamp(col.Z)
-			w.canvas.SetNRGBA(x, y, color.NRGBA{R: ir, G: ig, B: ib, A: 255})
+			w.canvas.SetNRGBA(x, ny-y, color.NRGBA{R: ir, G: ig, B: ib, A: 255})
 		}
 	}
 }
@@ -115,7 +115,7 @@ func Render(cam *camera.Camera, world *hitable.HitableSlice, canvas *image.NRGBA
 		go worker(queue, quit, wg)
 	}
 
-	for y := 0; y <= ny; y += 10 {
+	for y := 0; y <= ny; y += 2 {
 		queue <- workUnit{
 			cam:        cam,
 			world:      world,
@@ -124,7 +124,7 @@ func Render(cam *camera.Camera, world *hitable.HitableSlice, canvas *image.NRGBA
 			x0:         0,
 			x1:         nx,
 			y0:         y,
-			y1:         y + 10,
+			y1:         y + 1,
 		}
 	}
 
