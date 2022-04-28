@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"gitlab.com/flynn-nrg/izpi/pkg/output"
+	"gitlab.com/flynn-nrg/izpi/pkg/postprocess"
 	"gitlab.com/flynn-nrg/izpi/pkg/render"
 	"gitlab.com/flynn-nrg/izpi/pkg/scenes"
 )
@@ -24,10 +25,21 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 
+	// Render
 	world, cam := scenes.CornellBox(float64(*nx) / float64(*ny))
 	r := render.New(cam, world, *nx, *ny, *ns, *numWorkers, 10, *verbose)
 	canvas := r.Render()
 
+	// Post-process pipeline.
+	pp := postprocess.NewPipeline([]postprocess.Filter{
+		postprocess.NewClamp(1.0),
+	})
+	err := pp.Apply(canvas, cam)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Output
 	out, err := output.NewPNG(*outputFile)
 	if err != nil {
 		log.Fatal(err)
