@@ -35,6 +35,8 @@ type workUnit struct {
 	cam        *camera.Camera
 	world      *hitable.HitableSlice
 	canvas     *floatimage.FloatNRGBA
+	bar        *pb.ProgressBar
+	verbose    bool
 	numSamples int
 	x0         int
 	x1         int
@@ -90,6 +92,9 @@ func renderRect(w workUnit) {
 			col = &vec3.Vec3Impl{X: math.Sqrt(col.X), Y: math.Sqrt(col.Y), Z: math.Sqrt(col.Z)}
 			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
 		}
+		if w.verbose {
+			w.bar.Increment()
+		}
 	}
 }
 
@@ -125,29 +130,32 @@ func New(cam *camera.Camera, world *hitable.HitableSlice, sizeX int, sizeY int, 
 // Render performs the rendering task spread across 1 or more worker goroutines.
 // It returns a FloatNRGBA image that can be further processed before output or fed to an output directly.
 func (r *Renderer) Render() image.Image {
-	queue := make(chan workUnit, r.numWorkers)
+	var bar *pb.ProgressBar
+
+	queue := make(chan workUnit)
 	quit := make(chan struct{})
 	wg := sync.WaitGroup{}
 
-	bar := pb.StartNew(r.sizeY)
+	if r.verbose {
+		bar = pb.StartNew(r.sizeY)
+	}
 
 	for i := 0; i < r.numWorkers; i++ {
 		go worker(queue, quit, wg)
 	}
 
-	for y := 0; y < r.sizeY; y += r.stepSize {
-		if r.verbose {
-			bar.Add(r.stepSize)
-		}
+	for y := 0; y <= (r.sizeY - r.stepSize); y += r.stepSize {
 		queue <- workUnit{
 			cam:        r.cam,
 			world:      r.world,
 			canvas:     r.canvas,
+			bar:        bar,
+			verbose:    r.verbose,
 			numSamples: r.numSamples,
 			x0:         0,
 			x1:         r.sizeX,
 			y0:         y,
-			y1:         y + r.stepSize,
+			y1:         y + (r.stepSize - 1),
 		}
 	}
 
@@ -156,7 +164,10 @@ func (r *Renderer) Render() image.Image {
 	}
 
 	wg.Wait()
-	bar.Finish()
+
+	if r.verbose {
+		bar.Finish()
+	}
 
 	return r.canvas
 }
