@@ -36,7 +36,7 @@ func (c *Clamp) Apply(i image.Image, cam *camera.Camera) error {
 				R: clamp(pixel.R, c.max),
 				G: clamp(pixel.G, c.max),
 				B: clamp(pixel.B, c.max),
-				A: 1.0})
+				A: pixel.A})
 		}
 	}
 
@@ -44,7 +44,7 @@ func (c *Clamp) Apply(i image.Image, cam *camera.Camera) error {
 }
 
 func clamp(v float64, max float64) float64 {
-	if v <= max {
+	if v < max {
 		return v
 	}
 	return max
