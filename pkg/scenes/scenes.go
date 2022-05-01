@@ -9,6 +9,7 @@ import (
 	"gitlab.com/flynn-nrg/izpi/pkg/camera"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
 	"gitlab.com/flynn-nrg/izpi/pkg/material"
+	"gitlab.com/flynn-nrg/izpi/pkg/scene"
 	"gitlab.com/flynn-nrg/izpi/pkg/texture"
 	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
 )
@@ -109,7 +110,7 @@ func SimpleLight() *hitable.HitableSlice {
 }
 
 // CornellBox returns a scene recreating the Cornell box.
-func CornellBox(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
+func CornellBox(aspect float64) *scene.Scene {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
@@ -126,6 +127,13 @@ func CornellBox(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 		hitable.NewTranslate(hitable.NewRotateY(hitable.NewBox(&vec3.Vec3Impl{X: 0, Y: 0, Z: 0}, &vec3.Vec3Impl{X: 165, Y: 330, Z: 165}, white), 15), &vec3.Vec3Impl{X: 265, Y: 0, Z: 295}),
 	}
 
+	lights := []hitable.Hitable{}
+	for _, h := range hitables {
+		if h.IsEmitter() {
+			lights = append(lights, h)
+		}
+	}
+
 	lookFrom := &vec3.Vec3Impl{X: 278.0, Y: 278.0, Z: -800.0}
 	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
 	vup := &vec3.Vec3Impl{Y: 1}
@@ -136,7 +144,7 @@ func CornellBox(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
 
-	return hitable.NewSlice(hitables), cam
+	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam)
 }
 
 // Final returns the scene from the last chapter in the book.
