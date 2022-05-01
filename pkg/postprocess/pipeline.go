@@ -3,7 +3,7 @@ package postprocess
 import (
 	"image"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/camera"
+	"gitlab.com/flynn-nrg/izpi/pkg/scene"
 )
 
 // Pipeline represents a filter pipeline.
@@ -19,9 +19,9 @@ func NewPipeline(filters []Filter) *Pipeline {
 }
 
 // Apply applies all the filters in the pipeline in the order they were added to the slice.
-func (p *Pipeline) Apply(i image.Image, cam *camera.Camera) error {
+func (p *Pipeline) Apply(i image.Image, scene *scene.Scene) error {
 	for _, f := range p.filters {
-		err := f.Apply(i, cam)
+		err := f.Apply(i, scene)
 		if err != nil {
 			return err
 		}

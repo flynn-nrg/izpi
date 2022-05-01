@@ -6,9 +6,9 @@ import (
 	"io"
 
 	"github.com/flynn-nrg/gube/gube"
-	"gitlab.com/flynn-nrg/izpi/pkg/camera"
 	"gitlab.com/flynn-nrg/izpi/pkg/colour"
 	"gitlab.com/flynn-nrg/izpi/pkg/floatimage"
+	"gitlab.com/flynn-nrg/izpi/pkg/scene"
 )
 
 // Ensure interface compliance.
@@ -31,7 +31,7 @@ func NewColourGradingFromCube(r io.Reader) (*ColourGrading, error) {
 	}, nil
 }
 
-func (cg *ColourGrading) Apply(i image.Image, cam *camera.Camera) error {
+func (cg *ColourGrading) Apply(i image.Image, _ *scene.Scene) error {
 	im, ok := i.(*floatimage.FloatNRGBA)
 	if !ok {
 		return errors.New("only FloatNRGBA image format is supported")

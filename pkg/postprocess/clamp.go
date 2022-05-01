@@ -4,9 +4,9 @@ import (
 	"errors"
 	"image"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/camera"
 	"gitlab.com/flynn-nrg/izpi/pkg/colour"
 	"gitlab.com/flynn-nrg/izpi/pkg/floatimage"
+	"gitlab.com/flynn-nrg/izpi/pkg/scene"
 )
 
 // Ensure interface compliance.
@@ -24,7 +24,7 @@ func NewClamp(max float64) *Clamp {
 	}
 }
 
-func (c *Clamp) Apply(i image.Image, cam *camera.Camera) error {
+func (c *Clamp) Apply(i image.Image, _ *scene.Scene) error {
 	im, ok := i.(*floatimage.FloatNRGBA)
 	if !ok {
 		return errors.New("only FloatNRGBA image format is supported")
