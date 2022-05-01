@@ -15,4 +15,5 @@ type Hitable interface {
 	BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool)
 	PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64
 	Random(o *vec3.Vec3Impl) *vec3.Vec3Impl
+	IsEmitter() bool
 }

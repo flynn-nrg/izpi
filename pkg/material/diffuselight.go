@@ -37,7 +37,11 @@ func (dl *DiffuseLight) Emitted(rIn ray.Ray, rec *hitrecord.HitRecord, u float64
 	return &vec3.Vec3Impl{}
 }
 
-// ScatteringPDF implements the probability distribution function for diffise lights.
+// ScatteringPDF implements the probability distribution function for diffuse lights.
 func (dl *DiffuseLight) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
 	return 0
+}
+
+func (dl *DiffuseLight) IsEmitter() bool {
+	return true
 }

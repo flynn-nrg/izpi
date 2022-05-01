@@ -41,3 +41,7 @@ func (fn *FlipNormals) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 func (fn *FlipNormals) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return fn.hitable.Random(o)
 }
+
+func (fn *FlipNormals) IsEmitter() bool {
+	return fn.hitable.IsEmitter()
+}

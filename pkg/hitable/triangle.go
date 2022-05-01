@@ -111,3 +111,7 @@ func (tri *Triangle) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return &vec3.Vec3Impl{X: 1}
 }
+
+func (tri *Triangle) IsEmitter() bool {
+	return tri.material.IsEmitter()
+}

@@ -120,3 +120,7 @@ func (ry *RotateY) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 func (ry *RotateY) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return ry.hitable.Random(o)
 }
+
+func (ry *RotateY) IsEmitter() bool {
+	return ry.hitable.IsEmitter()
+}

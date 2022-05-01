@@ -88,3 +88,7 @@ func (xzr *XZRect) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 
 	return vec3.Sub(randomPoint, o)
 }
+
+func (xzr *XZRect) IsEmitter() bool {
+	return xzr.material.IsEmitter()
+}

@@ -71,3 +71,7 @@ func (yzr *YZRect) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 func (yzr *YZRect) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return &vec3.Vec3Impl{X: 1}
 }
+
+func (yzr *YZRect) IsEmitter() bool {
+	return yzr.material.IsEmitter()
+}

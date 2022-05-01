@@ -83,3 +83,7 @@ func (hs *HitableSlice) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 	index := int(rand.Float64() * float64(len(hs.hitables)))
 	return hs.hitables[index].Random(o)
 }
+
+func (hs *HitableSlice) IsEmitter() bool {
+	return false
+}

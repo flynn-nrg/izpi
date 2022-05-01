@@ -14,7 +14,6 @@ var _ Material = (*Dielectric)(nil)
 
 // Dielectric represents a dielectric material.
 type Dielectric struct {
-	nonEmitter
 	refIdx float64
 }
 
@@ -63,7 +62,16 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, 
 	return scattered, scatterRecord, true
 }
 
-// ScatteringPDF implements the probability distribution function for dieletric materials.
+// ScatteringPDF implements the probability distribution function for dielectric materials.
 func (d *Dielectric) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
 	return 0
+}
+
+// IsEmitter() is true for dielectric materials as they reflect light and can be considered emitters.
+func (d *Dielectric) IsEmitter() bool {
+	return true
+}
+
+func (d *Dielectric) Emitted(_ ray.Ray, _ *hitrecord.HitRecord, _ float64, _ float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return &vec3.Vec3Impl{}
 }

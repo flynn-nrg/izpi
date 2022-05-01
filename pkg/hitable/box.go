@@ -14,6 +14,7 @@ var _ Hitable = (*Box)(nil)
 // Box represents a box.
 type Box struct {
 	sides HitableSlice
+	mat   material.Material
 	pMin  *vec3.Vec3Impl
 	pMax  *vec3.Vec3Impl
 }
@@ -33,6 +34,7 @@ func NewBox(p0 *vec3.Vec3Impl, p1 *vec3.Vec3Impl, mat material.Material) *Box {
 
 	return &Box{
 		sides: *NewSlice(box),
+		mat:   mat,
 		pMin:  pMin,
 		pMax:  pMax,
 	}
@@ -52,4 +54,8 @@ func (b *Box) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 
 func (b *Box) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return &vec3.Vec3Impl{X: 1}
+}
+
+func (b *Box) IsEmitter() bool {
+	return b.mat.IsEmitter()
 }

@@ -49,3 +49,7 @@ func (tr *Translate) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 func (tr *Translate) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return tr.hitable.Random(o)
 }
+
+func (tr *Translate) IsEmitter() bool {
+	return tr.hitable.IsEmitter()
+}

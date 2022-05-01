@@ -111,3 +111,7 @@ func (s *Sphere) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 	uvw.BuildFromW(direction)
 	return uvw.Local(vec3.RandomToSphere(s.radius, distanceSquared))
 }
+
+func (s *Sphere) IsEmitter() bool {
+	return s.material.IsEmitter()
+}
