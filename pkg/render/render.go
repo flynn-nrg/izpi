@@ -7,12 +7,12 @@ import (
 	"math/rand"
 	"sync"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/camera"
 	"gitlab.com/flynn-nrg/izpi/pkg/colour"
 	"gitlab.com/flynn-nrg/izpi/pkg/floatimage"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
 	"gitlab.com/flynn-nrg/izpi/pkg/pdf"
 	"gitlab.com/flynn-nrg/izpi/pkg/ray"
+	"gitlab.com/flynn-nrg/izpi/pkg/scene"
 	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
 
 	pb "github.com/cheggaaa/pb/v3"
@@ -20,8 +20,7 @@ import (
 
 // Renderer represents a renderer config.
 type Renderer struct {
-	cam        *camera.Camera
-	world      *hitable.HitableSlice
+	scene      *scene.Scene
 	canvas     *floatimage.FloatNRGBA
 	sizeX      int
 	sizeY      int
@@ -32,8 +31,7 @@ type Renderer struct {
 }
 
 type workUnit struct {
-	cam        *camera.Camera
-	world      *hitable.HitableSlice
+	scene      *scene.Scene
 	canvas     *floatimage.FloatNRGBA
 	bar        *pb.ProgressBar
 	verbose    bool
@@ -80,11 +78,8 @@ func renderRect(w workUnit) {
 			for s := 0; s < w.numSamples; s++ {
 				u := (float64(x) + rand.Float64()) / float64(nx)
 				v := (float64(y) + rand.Float64()) / float64(ny)
-				r := w.cam.GetRay(u, v)
-				lightShape := hitable.NewXZRect(213, 343, 227, 332, 554, nil)
-				glassSphere := hitable.NewSphere(&vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, &vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, 0, 1, 90, nil)
-				hList := hitable.NewSlice([]hitable.Hitable{lightShape, glassSphere})
-				col = vec3.Add(col, vec3.DeNAN(computeColour(r, w.world, hList, 0)))
+				r := w.scene.Camera.GetRay(u, v)
+				col = vec3.Add(col, vec3.DeNAN(computeColour(r, w.scene.World, w.scene.Lights, 0)))
 			}
 
 			col = vec3.ScalarDiv(col, float64(w.numSamples))
@@ -113,10 +108,9 @@ func worker(input chan workUnit, quit chan struct{}, wg sync.WaitGroup) {
 }
 
 // New returns a new instance of a renderer.
-func New(cam *camera.Camera, world *hitable.HitableSlice, sizeX int, sizeY int, numSamples int, numWorkers int, stepSize int, verbose bool) *Renderer {
+func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, numWorkers int, stepSize int, verbose bool) *Renderer {
 	return &Renderer{
-		cam:        cam,
-		world:      world,
+		scene:      scene,
 		canvas:     floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY)),
 		sizeX:      sizeX,
 		sizeY:      sizeY,
@@ -146,8 +140,7 @@ func (r *Renderer) Render() image.Image {
 
 	for y := 0; y <= (r.sizeY - r.stepSize); y += r.stepSize {
 		queue <- workUnit{
-			cam:        r.cam,
-			world:      r.world,
+			scene:      r.scene,
 			canvas:     r.canvas,
 			bar:        bar,
 			verbose:    r.verbose,
