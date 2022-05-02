@@ -220,3 +220,39 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 
 	return hitable.NewSlice(list), cam
 }
+
+// Environment returns a scene that tests the sky dome and HDR textures functionality.
+func Environment(aspect float64) *scene.Scene {
+	dome, err := hitable.NewSkyDome(&vec3.Vec3Impl{}, 100, "decor_shop_4k.hdr")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	glass := material.NewDielectric(1.5)
+	glassSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -9, Y: 0, Z: 3}, &vec3.Vec3Impl{X: -9, Y: 0, Z: 3}, 0, 1, 4, glass)
+	metal := material.NewMetal(&vec3.Vec3Impl{X: 0.5, Y: 1.0, Z: 1.0}, 0)
+	metalSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -24, Y: -4, Z: 6}, &vec3.Vec3Impl{X: -24, Y: -4, Z: 6}, 0, 1, 3, metal)
+	//noiseMat := material.NewLambertian(texture.NewNoise(1.5))
+	//noiseSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -20, Y: -4, Z: -2}, &vec3.Vec3Impl{X: -20, Y: -4, Z: -2}, 0, 1, 3, noiseMat)
+	hitables := []hitable.Hitable{glassSphere, metalSphere, dome}
+
+	lights := []hitable.Hitable{}
+	for _, h := range hitables {
+		if h.IsEmitter() {
+			lights = append(lights, h)
+		}
+	}
+
+	lookFrom := &vec3.Vec3Impl{X: 0, Y: 0, Z: 10}
+	lookAt := &vec3.Vec3Impl{X: -20, Y: 0, Z: -1}
+	vup := &vec3.Vec3Impl{Y: 1}
+	distToFocus := 10.0
+	aperture := 0.0
+	vfov := float64(60.0)
+	time0 := 0.0
+	time1 := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+
+	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam)
+
+}
