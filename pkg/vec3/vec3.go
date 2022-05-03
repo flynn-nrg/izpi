@@ -164,3 +164,93 @@ func DeNAN(v *Vec3Impl) *Vec3Impl {
 
 	return &Vec3Impl{X: x, Y: y, Z: z}
 }
+
+// Min3 returns a new vector with the minimum coordinates among the supplied ones.
+func Min3(v0 *Vec3Impl, v1 *Vec3Impl, v2 *Vec3Impl) *Vec3Impl {
+	xMin := math.MaxFloat64
+	yMin := math.MaxFloat64
+	zMin := math.MaxFloat64
+
+	if v0.X < xMin {
+		xMin = v0.X
+	}
+
+	if v1.X < xMin {
+		xMin = v1.X
+	}
+
+	if v2.X < xMin {
+		xMin = v2.X
+	}
+
+	if v0.Y < yMin {
+		yMin = v0.Y
+	}
+
+	if v1.Y < yMin {
+		yMin = v1.Y
+	}
+
+	if v2.Y < yMin {
+		yMin = v2.Y
+	}
+
+	if v0.Z < zMin {
+		zMin = v0.Z
+	}
+
+	if v1.Z < zMin {
+		zMin = v1.Z
+	}
+
+	if v2.Z < zMin {
+		zMin = v2.Z
+	}
+
+	return &Vec3Impl{X: xMin, Y: yMin, Z: zMin}
+}
+
+// Max3 returns a new vector with the maximum coordinates among the supplied ones.
+func Max3(v0 *Vec3Impl, v1 *Vec3Impl, v2 *Vec3Impl) *Vec3Impl {
+	xMax := -math.MaxFloat64
+	yMax := -math.MaxFloat64
+	zMax := -math.MaxFloat64
+
+	if v0.X > xMax {
+		xMax = v0.X
+	}
+
+	if v1.X > xMax {
+		xMax = v1.X
+	}
+
+	if v2.X > xMax {
+		xMax = v2.X
+	}
+
+	if v0.Y > yMax {
+		yMax = v0.Y
+	}
+
+	if v1.Y > yMax {
+		yMax = v1.Y
+	}
+
+	if v2.Y > yMax {
+		yMax = v2.Y
+	}
+
+	if v0.Z > zMax {
+		zMax = v0.Z
+	}
+
+	if v1.Z > zMax {
+		zMax = v1.Z
+	}
+
+	if v2.Z > zMax {
+		zMax = v2.Z
+	}
+
+	return &Vec3Impl{X: xMax, Y: yMax, Z: zMax}
+}
