@@ -90,7 +90,7 @@ func (it *ImageTxt) FlipY() {
 	if !ok {
 		return
 	}
-	for y := it.data.Bounds().Min.Y; y < it.data.Bounds().Max.Y/2; y++ {
+	for y := it.data.Bounds().Min.Y; y <= it.data.Bounds().Max.Y/2; y++ {
 		for x := it.data.Bounds().Min.X; x <= it.data.Bounds().Max.X; x++ {
 			c1 := it.data.At(x, y)
 			c2 := it.data.At(x, it.data.Bounds().Max.Y-y)
@@ -106,7 +106,7 @@ func (it *ImageTxt) FlipX() {
 	if !ok {
 		return
 	}
-	for y := it.data.Bounds().Min.Y; y < it.data.Bounds().Max.Y; y++ {
+	for y := it.data.Bounds().Min.Y; y <= it.data.Bounds().Max.Y; y++ {
 		for x := it.data.Bounds().Min.X; x <= it.data.Bounds().Max.X/2; x++ {
 			c1 := it.data.At(x, y)
 			c2 := it.data.At(it.data.Bounds().Max.X-x, y)
