@@ -61,6 +61,7 @@ func NewTriangleWithUV(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *
 		v0:       v0,
 		v1:       v1,
 		v2:       v2,
+		bb:       aabb.New(vec3.Min3(vertex0, vertex1, vertex2), vec3.Max3(vertex0, vertex1, vertex2)),
 	}
 }
 
