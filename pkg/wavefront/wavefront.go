@@ -1,4 +1,6 @@
 // Package wavefront implements functions to parse Wavefront OBJ files and transform the data.
+// This is not meant to be a fully compliant parser but rather something good enough that allows for easy use
+// of triangle meshes.
 package wavefront
 
 import (
@@ -40,12 +42,17 @@ var (
 
 // WavefrontObj represents the data contained in a Wavefront OBJ file.
 type WavefrontObj struct {
-	ObjectName    string
-	Vertices      []*vec3.Vec3Impl
-	VertexNormals []*vec3.Vec3Impl
-	VertexUV      []*texture.UV
-	MtlLib        map[string]*Material
-	Groups        []*Group
+	IgnoreMaterials bool
+	IgnoreNormals   bool
+	IgnoreTextures  bool
+	HasNormals      bool
+	HasUV           bool
+	ObjectName      string
+	Vertices        []*vec3.Vec3Impl
+	VertexNormals   []*vec3.Vec3Impl
+	VertexUV        []*texture.UV
+	MtlLib          map[string]*Material
+	Groups          []*Group
 }
 
 // Material represents a material defined in a .mtl file.
@@ -93,6 +100,11 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 		switch option {
 		case IGNORE_MATERIALS:
 			ignoreMaterials = true
+			o.IgnoreMaterials = true
+		case IGNORE_NORMALS:
+			o.IgnoreNormals = true
+		case IGNORE_TEXTURES:
+			o.IgnoreTextures = true
 		}
 	}
 
@@ -122,6 +134,7 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 			continue
 		}
 		if strings.HasPrefix(s, "vn") {
+			o.HasNormals = true
 			values := strings.Split(s, " ")
 			vn, err := parseFloats(values[1:])
 			if err != nil {
@@ -131,6 +144,7 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 			continue
 		}
 		if strings.HasPrefix(s, "vt") {
+			o.HasUV = true
 			values := strings.Split(s, " ")
 			vt, err := parseFloats(values[1:])
 			if err != nil {
@@ -213,11 +227,21 @@ func (wo *WavefrontObj) groupToTrianglesWithCustomMaterial(g *Group, mat materia
 		vertex0 := wo.Vertices[face.Vertices[0].VIdx-1]
 		vertex1 := wo.Vertices[face.Vertices[1].VIdx-1]
 		vertex2 := wo.Vertices[face.Vertices[2].VIdx-1]
-		uv0 := wo.VertexUV[face.Vertices[0].VtIdx-1]
-		uv1 := wo.VertexUV[face.Vertices[1].VtIdx-1]
-		uv2 := wo.VertexUV[face.Vertices[2].VtIdx-1]
-		hitables = append(hitables, hitable.NewTriangleWithUV(
-			vertex0, vertex1, vertex2, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat))
+		if wo.HasUV {
+			uv0 := wo.VertexUV[face.Vertices[0].VtIdx-1]
+			uv1 := wo.VertexUV[face.Vertices[1].VtIdx-1]
+			uv2 := wo.VertexUV[face.Vertices[2].VtIdx-1]
+			if wo.IgnoreNormals {
+				hitables = append(hitables, hitable.NewTriangleWithUV(
+					vertex0, vertex1, vertex2, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat))
+			} else {
+				normal := wo.VertexNormals[face.Vertices[0].VnIdx-1]
+				hitables = append(hitables, hitable.NewTriangleWithUVAndNormal(
+					vertex0, vertex1, vertex2, normal, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat))
+			}
+		} else {
+			hitables = append(hitables, hitable.NewTriangle(vertex0, vertex1, vertex2, mat))
+		}
 	}
 
 	return hitables, nil
@@ -276,9 +300,10 @@ func parseFaceVertex(s string) (*VertexIndices, error) {
 	}
 
 	for _, index := range indices {
+		// Some fields might not exist and that's ok.
 		i, err := strconv.ParseInt(index, 10, 32)
 		if err != nil {
-			return nil, ErrInvalidFaceData
+			i = 0
 		}
 		idx = append(idx, i)
 	}

@@ -22,6 +22,8 @@ func TestNewObjFromReader(t *testing.T) {
 			dataFile: "testdata/cube.obj",
 			want: &WavefrontObj{
 				ObjectName: "Cube",
+				HasNormals: true,
+				HasUV:      true,
 				Vertices: []*vec3.Vec3Impl{
 					{X: -0.5, Y: -0.5, Z: -0.5}, {X: 0.5, Y: -0.5, Z: -0.5},
 					{X: 0.5, Y: -0.5, Z: 0.5}, {X: -0.5, Y: -0.5, Z: 0.5},
