@@ -49,6 +49,30 @@ func NewTriangleWithUV(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *
 	normal := vec3.Cross(edge1, edge2)
 	normal.MakeUnitVector()
 
+	delta := &vec3.Vec3Impl{X: 0.0001, Y: 0.0001, Z: 00001}
+	min := vec3.Sub(vec3.Min3(vertex0, vertex1, vertex2), delta)
+	max := vec3.Add(vec3.Max3(vertex0, vertex1, vertex2), delta)
+
+	return &Triangle{
+		vertex0:  vertex0,
+		vertex1:  vertex1,
+		vertex2:  vertex2,
+		normal:   normal,
+		material: mat,
+		u0:       u0,
+		u1:       u1,
+		u2:       u2,
+		v0:       v0,
+		v1:       v1,
+		v2:       v2,
+		bb:       aabb.New(min, max),
+	}
+}
+
+// NewTriangleWithUV returns a new texture triangle.
+func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
+	normal *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64, mat material.Material) *Triangle {
+
 	return &Triangle{
 		vertex0:  vertex0,
 		vertex1:  vertex1,
