@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 
 	"gitlab.com/flynn-nrg/izpi/pkg/camera"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
@@ -12,6 +13,7 @@ import (
 	"gitlab.com/flynn-nrg/izpi/pkg/scene"
 	"gitlab.com/flynn-nrg/izpi/pkg/texture"
 	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"gitlab.com/flynn-nrg/izpi/pkg/wavefront"
 )
 
 // RandomScene returns a random scene.
@@ -232,8 +234,6 @@ func Environment(aspect float64) *scene.Scene {
 	glassSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -9, Y: 0, Z: 3}, &vec3.Vec3Impl{X: -9, Y: 0, Z: 3}, 0, 1, 4, glass)
 	metal := material.NewMetal(&vec3.Vec3Impl{X: 0.5, Y: 1.0, Z: 1.0}, 0)
 	metalSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -24, Y: -4, Z: 6}, &vec3.Vec3Impl{X: -24, Y: -4, Z: 6}, 0, 1, 3, metal)
-	//noiseMat := material.NewLambertian(texture.NewNoise(1.5))
-	//noiseSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -20, Y: -4, Z: -2}, &vec3.Vec3Impl{X: -20, Y: -4, Z: -2}, 0, 1, 3, noiseMat)
 	hitables := []hitable.Hitable{glassSphere, metalSphere, dome}
 
 	lights := []hitable.Hitable{}
@@ -255,4 +255,68 @@ func Environment(aspect float64) *scene.Scene {
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam)
 
+}
+
+// CornellBox returns a scene recreating the Cornell box.
+func CornellBoxObj(aspect float64) (*scene.Scene, error) {
+	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
+	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
+	blue := material.NewMetal(&vec3.Vec3Impl{X: 0.8, Y: 0.8, Z: 0.9}, .25)
+	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
+	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 15, Y: 15, Z: 15}))
+	glass := material.NewDielectric(1.5)
+
+	objectName := "dragon.obj"
+	r, err := os.Open(objectName)
+	if err != nil {
+		return nil, err
+	}
+	cube, err := wavefront.NewObjFromReader(r, filepath.Dir(objectName))
+	if err != nil {
+		return nil, err
+	}
+
+	//cube.Scale(&vec3.Vec3Impl{X: 70, Y: 70, Z: 70})
+	//cube.Translate(&vec3.Vec3Impl{X: 340, Y: 190, Z: 150})
+
+	cube.Scale(&vec3.Vec3Impl{X: 35, Y: 35, Z: 35})
+	cube.Translate(&vec3.Vec3Impl{X: 280, Y: 0, Z: 320})
+
+	hitables := []hitable.Hitable{
+		hitable.NewFlipNormals(hitable.NewYZRect(0, 555, 0, 555, 555, green)),
+		hitable.NewYZRect(0, 555, 0, 555, 0, red),
+		hitable.NewFlipNormals(hitable.NewXZRect(213, 343, 227, 332, 554, light)),
+		hitable.NewFlipNormals(hitable.NewXZRect(0, 555, 0, 555, 555, white)),
+		hitable.NewXZRect(0, 555, 0, 555, 0, white),
+		hitable.NewFlipNormals(hitable.NewXYRect(0, 555, 0, 555, 555, white)),
+		hitable.NewSphere(&vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, &vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, 0, 1, 90, glass),
+	}
+
+	for i := range cube.Groups {
+		cubeHitables, err := cube.GroupToHitablesWithCustomMaterial(i, blue)
+		if err != nil {
+			return nil, err
+		}
+		bvh := hitable.NewBVH(cubeHitables, 0, 1)
+		hitables = append(hitables, bvh)
+	}
+
+	lights := []hitable.Hitable{}
+	for _, h := range hitables {
+		if h.IsEmitter() {
+			lights = append(lights, h)
+		}
+	}
+
+	lookFrom := &vec3.Vec3Impl{X: 278.0, Y: 278.0, Z: -800.0}
+	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
+	vup := &vec3.Vec3Impl{Y: 1}
+	distToFocus := 10.0
+	aperture := 0.0
+	vfov := float64(40.0)
+	time0 := 0.0
+	time1 := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+
+	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }
