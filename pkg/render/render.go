@@ -26,7 +26,6 @@ type Renderer struct {
 	sizeY      int
 	numSamples int
 	numWorkers int
-	stepSize   int
 	verbose    bool
 }
 
@@ -87,9 +86,9 @@ func renderRect(w workUnit) {
 			col = &vec3.Vec3Impl{X: math.Sqrt(col.X), Y: math.Sqrt(col.Y), Z: math.Sqrt(col.Z)}
 			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
 		}
-		if w.verbose {
-			w.bar.Increment()
-		}
+	}
+	if w.verbose {
+		w.bar.Increment()
 	}
 }
 
@@ -108,7 +107,7 @@ func worker(input chan workUnit, quit chan struct{}, wg sync.WaitGroup) {
 }
 
 // New returns a new instance of a renderer.
-func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, numWorkers int, stepSize int, verbose bool) *Renderer {
+func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, numWorkers int, verbose bool) *Renderer {
 	return &Renderer{
 		scene:      scene,
 		canvas:     floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY)),
@@ -116,7 +115,6 @@ func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, numWorkers in
 		sizeY:      sizeY,
 		numSamples: numSamples,
 		numWorkers: numWorkers,
-		stepSize:   stepSize,
 		verbose:    verbose,
 	}
 }
@@ -124,34 +122,53 @@ func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, numWorkers in
 // Render performs the rendering task spread across 1 or more worker goroutines.
 // It returns a FloatNRGBA image that can be further processed before output or fed to an output directly.
 func (r *Renderer) Render() image.Image {
+	stepSizes := []int{32, 25, 24, 20, 16, 12, 10, 8, 5, 4}
+
 	var bar *pb.ProgressBar
+	var stepSizeX, stepSizeY int
 
 	queue := make(chan workUnit)
 	quit := make(chan struct{})
 	wg := sync.WaitGroup{}
 
+	for _, size := range stepSizes {
+		if r.sizeX%size == 0 {
+			stepSizeX = size
+			break
+		}
+	}
+
+	for _, size := range stepSizes {
+		if r.sizeY%size == 0 {
+			stepSizeY = size
+			break
+		}
+	}
+
+	numTiles := (r.sizeX / stepSizeX) * (r.sizeY / stepSizeY)
 	if r.verbose {
-		bar = pb.StartNew(r.sizeY)
+		bar = pb.StartNew(numTiles)
 	}
 
 	for i := 0; i < r.numWorkers; i++ {
 		go worker(queue, quit, wg)
 	}
 
-	for y := 0; y <= (r.sizeY - r.stepSize); y += r.stepSize {
-		queue <- workUnit{
-			scene:      r.scene,
-			canvas:     r.canvas,
-			bar:        bar,
-			verbose:    r.verbose,
-			numSamples: r.numSamples,
-			x0:         0,
-			x1:         r.sizeX,
-			y0:         y,
-			y1:         y + (r.stepSize - 1),
+	for y := 0; y <= (r.sizeY - stepSizeY); y += stepSizeY {
+		for x := 0; x <= (r.sizeX - stepSizeX); x += stepSizeX {
+			queue <- workUnit{
+				scene:      r.scene,
+				canvas:     r.canvas,
+				bar:        bar,
+				verbose:    r.verbose,
+				numSamples: r.numSamples,
+				x0:         x,
+				x1:         x + (stepSizeX - 1),
+				y0:         y,
+				y1:         y + (stepSizeY - 1),
+			}
 		}
 	}
-
 	for i := 0; i < r.numWorkers; i++ {
 		quit <- struct{}{}
 	}
