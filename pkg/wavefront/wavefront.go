@@ -88,7 +88,7 @@ type Group struct {
 	Faces    []*Face
 }
 
-// NewObjFromReader returns a slice of Hitable with the geometry contained in a Wavefront .obj file.
+// NewObjFromReader returns WavefrontObj with the geometry contained in a Wavefront .obj file.
 func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOption) (*WavefrontObj, error) {
 	var currentGroup *Group
 	var activeMaterial string
