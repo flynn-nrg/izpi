@@ -26,8 +26,11 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	// Render
-	scene := scenes.Environment(float64(*nx) / float64(*ny))
-	r := render.New(scene, *nx, *ny, *ns, *numWorkers, 10, *verbose)
+	scene, err := scenes.CornellBoxObj(float64(*nx) / float64(*ny))
+	if err != nil {
+		log.Fatal(err)
+	}
+	r := render.New(scene, *nx, *ny, *ns, *numWorkers, *verbose)
 	canvas := r.Render()
 
 	// Post-process pipeline.
@@ -43,7 +46,7 @@ func main() {
 		postprocess.NewClamp(1.0),
 		//	cg,
 	})
-	err := pp.Apply(canvas, scene)
+	err = pp.Apply(canvas, scene)
 	if err != nil {
 		log.Fatal(err)
 	}
