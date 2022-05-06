@@ -121,7 +121,11 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 		return nil, nil, false
 	}
 
-	return hitrecord.New(t, 0, 0, r.PointAtParameter(t), tri.normal), tri.material, true
+	uv := 1.0 - u - v
+	uu := uv*tri.u0 + u*tri.u1 + v*tri.u2
+	vv := uv*tri.v0 + u*tri.v1 + v*tri.v2
+
+	return hitrecord.New(t, uu, vv, r.PointAtParameter(t), tri.normal), tri.material, true
 
 }
 
