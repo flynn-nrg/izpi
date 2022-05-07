@@ -2,6 +2,7 @@ package hitable
 
 import (
 	"math"
+	"math/rand"
 
 	"gitlab.com/flynn-nrg/izpi/pkg/aabb"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitrecord"
@@ -21,6 +22,8 @@ type Triangle struct {
 	vertex2 *vec3.Vec3Impl
 	// Normal
 	normal *vec3.Vec3Impl
+	// Area
+	area float64
 	// Material
 	material material.Material
 	// Texture coordinates
@@ -47,6 +50,7 @@ func NewTriangleWithUV(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *
 	edge2 := vec3.Sub(vertex2, vertex0)
 
 	normal := vec3.Cross(edge1, edge2)
+	area := normal.Length() / 2.0
 	normal.MakeUnitVector()
 
 	delta := &vec3.Vec3Impl{X: 0.0001, Y: 0.0001, Z: 00001}
@@ -58,6 +62,7 @@ func NewTriangleWithUV(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *
 		vertex1:  vertex1,
 		vertex2:  vertex2,
 		normal:   normal,
+		area:     area,
 		material: mat,
 		u0:       u0,
 		u1:       u1,
@@ -134,11 +139,24 @@ func (tri *Triangle) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool
 }
 
 func (tri *Triangle) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
-	return 0.0
+	r := ray.New(o, v, 0)
+	if rec, _, ok := tri.Hit(r, 0.001, math.MaxFloat64); ok {
+		distanceSquared := rec.T() * rec.T() * v.SquaredLength()
+		cosine := math.Abs(vec3.Dot(v, vec3.ScalarDiv(rec.Normal(), v.Length())))
+		return distanceSquared / (cosine * tri.area)
+	}
+
+	return 0
 }
 
 func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
-	return &vec3.Vec3Impl{X: 1}
+	randomPoint := &vec3.Vec3Impl{
+		X: tri.vertex0.X + rand.Float64()*(tri.vertex1.X-tri.vertex0.X) + rand.Float64()*(tri.vertex2.X-tri.vertex0.X),
+		Y: tri.vertex0.Y + rand.Float64()*(tri.vertex1.Y-tri.vertex0.Y) + rand.Float64()*(tri.vertex2.Y-tri.vertex0.Y),
+		Z: tri.vertex0.Z + rand.Float64()*(tri.vertex1.Z-tri.vertex0.Z) + rand.Float64()*(tri.vertex2.Z-tri.vertex0.Z),
+	}
+
+	return vec3.Sub(randomPoint, o)
 }
 
 func (tri *Triangle) IsEmitter() bool {
