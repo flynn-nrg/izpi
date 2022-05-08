@@ -150,10 +150,11 @@ func (tri *Triangle) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 }
 
 func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+	r := rand.Float64()
 	randomPoint := &vec3.Vec3Impl{
-		X: tri.vertex0.X + rand.Float64()*(tri.vertex1.X-tri.vertex0.X) + rand.Float64()*(tri.vertex2.X-tri.vertex0.X),
-		Y: tri.vertex0.Y + rand.Float64()*(tri.vertex1.Y-tri.vertex0.Y) + rand.Float64()*(tri.vertex2.Y-tri.vertex0.Y),
-		Z: tri.vertex0.Z + rand.Float64()*(tri.vertex1.Z-tri.vertex0.Z) + rand.Float64()*(tri.vertex2.Z-tri.vertex0.Z),
+		X: tri.vertex0.X + r*(tri.vertex1.X-tri.vertex0.X) + (1-r)*(tri.vertex2.X-tri.vertex0.X),
+		Y: tri.vertex0.Y + r*(tri.vertex1.Y-tri.vertex0.Y) + (1-r)*(tri.vertex2.Y-tri.vertex0.Y),
+		Z: tri.vertex0.Z + r*(tri.vertex1.Z-tri.vertex0.Z) + (1-r)*(tri.vertex2.Z-tri.vertex0.Z),
 	}
 
 	return vec3.Sub(randomPoint, o)
