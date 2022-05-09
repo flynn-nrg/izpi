@@ -84,7 +84,7 @@ func renderRect(w workUnit) {
 			col = vec3.ScalarDiv(col, float64(w.numSamples))
 			// gamma 2
 			col = &vec3.Vec3Impl{X: math.Sqrt(col.X), Y: math.Sqrt(col.Y), Z: math.Sqrt(col.Z)}
-			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
+			w.canvas.Set(nx-x, ny-y, colour.FloatNRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
 		}
 	}
 	if w.verbose {
