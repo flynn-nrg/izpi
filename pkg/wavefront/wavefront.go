@@ -47,6 +47,7 @@ type WavefrontObj struct {
 	IgnoreTextures  bool
 	HasNormals      bool
 	HasUV           bool
+	Centre          *vec3.Vec3Impl
 	ObjectName      string
 	Vertices        []*vec3.Vec3Impl
 	VertexNormals   []*vec3.Vec3Impl
@@ -94,7 +95,10 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 	var activeMaterial string
 	var ignoreMaterials bool
 
-	o := &WavefrontObj{}
+	o := &WavefrontObj{
+		// Objects are expected to have their centre at the origin.
+		Centre: &vec3.Vec3Impl{},
+	}
 
 	for _, option := range opts {
 		switch option {
@@ -249,6 +253,7 @@ func (wo *WavefrontObj) groupToTrianglesWithCustomMaterial(g *Group, mat materia
 
 // Translate translates all the vertices in this object by the specified amount.
 func (wo *WavefrontObj) Translate(translate *vec3.Vec3Impl) {
+	wo.Centre = vec3.Add(wo.Centre, translate)
 	for _, v := range wo.Vertices {
 		v.X += translate.X
 		v.Y += translate.Y
@@ -259,9 +264,9 @@ func (wo *WavefrontObj) Translate(translate *vec3.Vec3Impl) {
 // Scale scales all the vertices in this object by the specified amount.
 func (wo *WavefrontObj) Scale(scale *vec3.Vec3Impl) {
 	for _, v := range wo.Vertices {
-		v.X *= scale.X
-		v.Y *= scale.Y
-		v.Z *= scale.Z
+		v.X = ((v.X - wo.Centre.X) * scale.X) + wo.Centre.X
+		v.Y = ((v.Y - wo.Centre.Y) * scale.Y) + wo.Centre.Y
+		v.Z = ((v.Z - wo.Centre.Z) * scale.Z) + wo.Centre.Z
 	}
 }
 

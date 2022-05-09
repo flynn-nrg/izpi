@@ -24,6 +24,7 @@ func TestNewObjFromReader(t *testing.T) {
 				ObjectName: "Cube",
 				HasNormals: true,
 				HasUV:      true,
+				Centre:     &vec3.Vec3Impl{},
 				Vertices: []*vec3.Vec3Impl{
 					{X: -0.5, Y: -0.5, Z: -0.5}, {X: 0.5, Y: -0.5, Z: -0.5},
 					{X: 0.5, Y: -0.5, Z: 0.5}, {X: -0.5, Y: -0.5, Z: 0.5},
