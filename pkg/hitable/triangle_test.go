@@ -48,8 +48,8 @@ func TestNewTriangleWithUV(t *testing.T) {
 				u1:        1,
 				v2:        1,
 				bb: aabb.New(
-					&vec3.Vec3Impl{X: -1.0001, Y: -0.0001, Z: -1},
-					&vec3.Vec3Impl{X: 0.0001, Y: 1.0001, Z: 1}),
+					&vec3.Vec3Impl{X: -1.0001, Y: -0.0001, Z: -0.0001},
+					&vec3.Vec3Impl{X: 0.0001, Y: 1.0001, Z: 0.0001}),
 			},
 		},
 	}

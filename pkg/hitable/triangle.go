@@ -94,7 +94,7 @@ func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, 
 
 	bitangent.MakeUnitVector()
 
-	delta := &vec3.Vec3Impl{X: 0.0001, Y: 0.0001, Z: 00001}
+	delta := &vec3.Vec3Impl{X: 0.0001, Y: 0.0001, Z: 0.0001}
 	min := vec3.Sub(vec3.Min3(vertex0, vertex1, vertex2), delta)
 	max := vec3.Add(vec3.Max3(vertex0, vertex1, vertex2), delta)
 
