@@ -26,7 +26,7 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	// Render
-	scene, err := scenes.CornellBoxObj(float64(*nx) / float64(*ny))
+	scene, err := scenes.PBRTest(float64(*nx) / float64(*ny))
 	if err != nil {
 		log.Fatal(err)
 	}

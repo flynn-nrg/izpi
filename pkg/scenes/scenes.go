@@ -399,3 +399,73 @@ func TVSet(aspect float64) (*scene.Scene, error) {
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }
+
+// PBRTest returns a scene recreating the Cornell box with a PBR material on the floor.
+func PBRTest(aspect float64) (*scene.Scene, error) {
+	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
+	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
+	//green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
+	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 15, Y: 15, Z: 15}))
+	glass := material.NewDielectric(1.5)
+
+	floorAlbedoFile, err := os.Open("Bricks078_4K-PNG/Bricks078_4K_Color.png")
+	if err != nil {
+		return nil, err
+	}
+
+	floorAlbedoText, err := texture.NewFromPNG(floorAlbedoFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// https://ambientcg.com/view?id=Bricks078
+	floorNormalMapFile, err := os.Open("Bricks078_4K-PNG/Bricks078_4K_NormalGL.png")
+	if err != nil {
+		return nil, err
+	}
+
+	floorNormalMapText, err := texture.NewFromPNG(floorNormalMapFile)
+	if err != nil {
+		return nil, err
+	}
+
+	placeHolderTxt := texture.NewConstant(&vec3.Vec3Impl{X: 1, Y: 1, Z: 1})
+	floorMat := material.NewPBR(floorAlbedoText, floorNormalMapText, placeHolderTxt, placeHolderTxt)
+
+	hitables := []hitable.Hitable{
+		//hitable.NewFlipNormals(hitable.NewYZRect(0, 555, 0, 555, 555, floorMat)),
+		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: 555},
+			&vec3.Vec3Impl{X: 355, Y: 555, Z: 555},
+			&vec3.Vec3Impl{X: 555, Y: 555},
+			0, 1, 1, 0, 0, 0, floorMat),
+		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: 555},
+			&vec3.Vec3Impl{X: 355, Y: 0, Z: 555},
+			&vec3.Vec3Impl{X: 355, Y: 555, Z: 555},
+			0, 1, 1, 1, 1, 0, floorMat),
+		hitable.NewYZRect(0, 555, 0, 555, 0, red),
+		hitable.NewFlipNormals(hitable.NewXZRect(213, 343, 227, 332, 554, light)),
+		hitable.NewFlipNormals(hitable.NewXZRect(0, 555, 0, 555, 555, white)),
+		hitable.NewXZRect(0, 555, 0, 555, 0, white),
+		hitable.NewFlipNormals(hitable.NewXYRect(0, 555, 0, 555, 555, white)),
+		hitable.NewSphere(&vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, &vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, 0, 1, 90, glass),
+	}
+
+	lights := []hitable.Hitable{}
+	for _, h := range hitables {
+		if h.IsEmitter() {
+			lights = append(lights, h)
+		}
+	}
+
+	lookFrom := &vec3.Vec3Impl{X: 278.0, Y: 278.0, Z: -800.0}
+	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
+	vup := &vec3.Vec3Impl{Y: 1}
+	distToFocus := 10.0
+	aperture := 0.0
+	vfov := float64(40.0)
+	time0 := 0.0
+	time1 := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+
+	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
+}
