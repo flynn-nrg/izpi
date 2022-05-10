@@ -6,6 +6,7 @@ import (
 
 	"gitlab.com/flynn-nrg/izpi/pkg/aabb"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitrecord"
+	"gitlab.com/flynn-nrg/izpi/pkg/mat3"
 	"gitlab.com/flynn-nrg/izpi/pkg/material"
 	"gitlab.com/flynn-nrg/izpi/pkg/ray"
 	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
@@ -157,8 +158,15 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 		return hitrecord.New(t, uu, vv, r.PointAtParameter(t), tri.normal), tri.material, true
 	}
 
+	// We use OpenGL normal maps.
 	normalTangentSpace := normalMap.Value(uu, vv, nil)
-	return hitrecord.New(t, uu, vv, r.PointAtParameter(t), normalTangentSpace), tri.material, true
+	normalTangentSpace.X = 2*normalTangentSpace.X - 1.0
+	normalTangentSpace.Y = 2*normalTangentSpace.Y - 1.0
+	normalTangentSpace.Z = 2*normalTangentSpace.Z - 1.0
+
+	tbn := mat3.NewTBN(tri.tangent, tri.bitangent, tri.normal)
+	normal := mat3.MatrixVectorMul(tbn, normalTangentSpace)
+	return hitrecord.New(t, uu, vv, r.PointAtParameter(t), normal), tri.material, true
 }
 
 func (tri *Triangle) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
