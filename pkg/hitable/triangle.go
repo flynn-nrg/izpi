@@ -20,8 +20,14 @@ type Triangle struct {
 	vertex0 *vec3.Vec3Impl
 	vertex1 *vec3.Vec3Impl
 	vertex2 *vec3.Vec3Impl
+	// Edges
+	edge1 *vec3.Vec3Impl
+	edge2 *vec3.Vec3Impl
 	// Normal
 	normal *vec3.Vec3Impl
+	// Used for normal mapping
+	tangent   *vec3.Vec3Impl
+	bitangent *vec3.Vec3Impl
 	// Area
 	area float64
 	// Material
@@ -50,47 +56,66 @@ func NewTriangleWithUV(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *
 	edge2 := vec3.Sub(vertex2, vertex0)
 
 	normal := vec3.Cross(edge1, edge2)
-	area := normal.Length() / 2.0
 	normal.MakeUnitVector()
 
-	delta := &vec3.Vec3Impl{X: 0.0001, Y: 0.0001, Z: 00001}
-	min := vec3.Sub(vec3.Min3(vertex0, vertex1, vertex2), delta)
-	max := vec3.Add(vec3.Max3(vertex0, vertex1, vertex2), delta)
-
-	return &Triangle{
-		vertex0:  vertex0,
-		vertex1:  vertex1,
-		vertex2:  vertex2,
-		normal:   normal,
-		area:     area,
-		material: mat,
-		u0:       u0,
-		u1:       u1,
-		u2:       u2,
-		v0:       v0,
-		v1:       v1,
-		v2:       v2,
-		bb:       aabb.New(min, max),
-	}
+	return NewTriangleWithUVAndNormal(vertex0, vertex1, vertex2,
+		normal, u0, v0, u1, v1, u2, v2, mat)
 }
 
 // NewTriangleWithUV returns a new texture triangle.
 func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
 	normal *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64, mat material.Material) *Triangle {
 
+	deltaU1 := u1 - u0
+	deltaU2 := u2 - u0
+	deltaV1 := v1 - v0
+	deltaV2 := v2 - v0
+
+	edge1 := vec3.Sub(vertex1, vertex0)
+	edge2 := vec3.Sub(vertex2, vertex0)
+
+	n := vec3.Cross(edge1, edge2)
+	area := n.Length() / 2.0
+
+	f := 1.0 / (deltaU1*deltaV2 - deltaU2*deltaV1)
+	tanget := &vec3.Vec3Impl{
+		X: f * (deltaV2*edge1.X - deltaV1*edge2.X),
+		Y: f * (deltaV2*edge1.Y - deltaV1*edge2.Y),
+		Z: f * (deltaV2*edge1.Z - deltaV1*edge2.Z),
+	}
+
+	tanget.MakeUnitVector()
+
+	bitangent := &vec3.Vec3Impl{
+		X: f * (-deltaU2*edge1.X + deltaU1*edge2.X),
+		Y: f * (-deltaU2*edge1.Y + deltaU1*edge2.Y),
+		Z: f * (-deltaU2*edge1.Z + deltaU1*edge2.Z),
+	}
+
+	bitangent.MakeUnitVector()
+
+	delta := &vec3.Vec3Impl{X: 0.0001, Y: 0.0001, Z: 00001}
+	min := vec3.Sub(vec3.Min3(vertex0, vertex1, vertex2), delta)
+	max := vec3.Add(vec3.Max3(vertex0, vertex1, vertex2), delta)
+
 	return &Triangle{
-		vertex0:  vertex0,
-		vertex1:  vertex1,
-		vertex2:  vertex2,
-		normal:   normal,
-		material: mat,
-		u0:       u0,
-		u1:       u1,
-		u2:       u2,
-		v0:       v0,
-		v1:       v1,
-		v2:       v2,
-		bb:       aabb.New(vec3.Min3(vertex0, vertex1, vertex2), vec3.Max3(vertex0, vertex1, vertex2)),
+		vertex0:   vertex0,
+		vertex1:   vertex1,
+		vertex2:   vertex2,
+		edge1:     edge1,
+		edge2:     edge2,
+		normal:    normal,
+		tangent:   tanget,
+		bitangent: bitangent,
+		area:      area,
+		material:  mat,
+		u0:        u0,
+		u1:        u1,
+		u2:        u2,
+		v0:        v0,
+		v1:        v1,
+		v2:        v2,
+		bb:        aabb.New(min, max),
 	}
 }
 
@@ -98,11 +123,8 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	// https://en.wikipedia.org/wiki/Möller–Trumbore_intersection_algorithm
 	epsilon := math.Nextafter(1, 2) - 1
 
-	edge1 := vec3.Sub(tri.vertex1, tri.vertex0)
-	edge2 := vec3.Sub(tri.vertex2, tri.vertex0)
-
-	h := vec3.Cross(r.Direction(), edge2)
-	a := vec3.Dot(edge1, h)
+	h := vec3.Cross(r.Direction(), tri.edge2)
+	a := vec3.Dot(tri.edge1, h)
 
 	if a > -epsilon && a < epsilon {
 		// Ray is parallel to triangle.
@@ -115,13 +137,13 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	if u < 0.0 || u > 1.0 {
 		return nil, nil, false
 	}
-	q := vec3.Cross(s, edge1)
+	q := vec3.Cross(s, tri.edge1)
 	v := f * vec3.Dot(r.Direction(), q)
 	if v < 0.0 || u+v > 1.0 {
 		return nil, nil, false
 	}
 
-	t := f * vec3.Dot(edge2, q)
+	t := f * vec3.Dot(tri.edge2, q)
 	if t <= epsilon {
 		return nil, nil, false
 	}
@@ -130,8 +152,13 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	uu := uv*tri.u0 + u*tri.u1 + v*tri.u2
 	vv := uv*tri.v0 + u*tri.v1 + v*tri.v2
 
-	return hitrecord.New(t, uu, vv, r.PointAtParameter(t), tri.normal), tri.material, true
+	normalMap := tri.material.NormalMap()
+	if normalMap == nil {
+		return hitrecord.New(t, uu, vv, r.PointAtParameter(t), tri.normal), tri.material, true
+	}
 
+	normalTangentSpace := normalMap.Value(uu, vv, nil)
+	return hitrecord.New(t, uu, vv, r.PointAtParameter(t), normalTangentSpace), tri.material, true
 }
 
 func (tri *Triangle) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
