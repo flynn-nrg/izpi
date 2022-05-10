@@ -14,6 +14,7 @@ var _ Material = (*Isotropic)(nil)
 // Isotropic represents an isotropic material.
 type Isotropic struct {
 	nonEmitter
+	nonPBR
 	albedo texture.Texture
 }
 
@@ -29,7 +30,7 @@ func (i *Isotropic) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *
 	scattered := ray.New(hr.P(), randomInUnitSphere(), r.Time())
 	attenuation := i.albedo.Value(hr.U(), hr.V(), hr.P())
 	pdf := pdf.NewCosine(hr.Normal())
-	scatterRecord := scatterrecord.New(nil, false, attenuation, pdf)
+	scatterRecord := scatterrecord.New(nil, false, attenuation, nil, nil, nil, pdf)
 	return scattered, scatterRecord, true
 }
 

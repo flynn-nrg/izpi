@@ -13,6 +13,7 @@ var _ Material = (*Metal)(nil)
 // Metal represents metallic materials.
 type Metal struct {
 	nonEmitter
+	nonPBR
 	albedo *vec3.Vec3Impl
 	fuzz   float64
 }
@@ -30,7 +31,7 @@ func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *scat
 	reflected := reflect(vec3.UnitVector(r.Direction()), hr.Normal())
 	specular := ray.New(hr.P(), vec3.Add(reflected, vec3.ScalarMul(randomInUnitSphere(), m.fuzz)), r.Time())
 	attenuation := m.albedo
-	scatterRecord := scatterrecord.New(specular, true, attenuation, nil)
+	scatterRecord := scatterrecord.New(specular, true, attenuation, nil, nil, nil, nil)
 	return nil, scatterRecord, true
 }
 

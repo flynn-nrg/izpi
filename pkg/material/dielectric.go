@@ -14,6 +14,7 @@ var _ Material = (*Dielectric)(nil)
 
 // Dielectric represents a dielectric material.
 type Dielectric struct {
+	nonPBR
 	refIdx float64
 }
 
@@ -58,7 +59,7 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, 
 	} else {
 		scattered = ray.New(hr.P(), refracted, r.Time())
 	}
-	scatterRecord := scatterrecord.New(scattered, true, attenuation, nil)
+	scatterRecord := scatterrecord.New(scattered, true, attenuation, nil, nil, nil, nil)
 	return scattered, scatterRecord, true
 }
 

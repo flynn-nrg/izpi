@@ -17,6 +17,7 @@ var _ Material = (*Lambertian)(nil)
 
 // Lambertian represents a diffuse material.
 type Lambertian struct {
+	nonPBR
 	nonEmitter
 	albedo texture.Texture
 }
@@ -36,7 +37,7 @@ func (l *Lambertian) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, 
 	scattered := ray.New(hr.P(), vec3.UnitVector(direction), r.Time())
 	albedo := l.albedo.Value(hr.U(), hr.V(), hr.P())
 	pdf := pdf.NewCosine(hr.Normal())
-	scatterRecord := scatterrecord.New(nil, false, albedo, pdf)
+	scatterRecord := scatterrecord.New(nil, false, albedo, nil, nil, nil, pdf)
 	return scattered, scatterRecord, true
 }
 

@@ -2,6 +2,7 @@
 package scenes
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -261,26 +262,35 @@ func Environment(aspect float64) *scene.Scene {
 func CornellBoxObj(aspect float64) (*scene.Scene, error) {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
-	blue := material.NewMetal(&vec3.Vec3Impl{X: 0.8, Y: 0.8, Z: 0.9}, .25)
 	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
 	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 15, Y: 15, Z: 15}))
+	gold := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: .7, Y: .7, Z: .85}))
 	glass := material.NewDielectric(1.5)
 
-	objectName := "dragon.obj"
+	/*
+		plaFile, err := os.Open("platano/ripe-banana_u1_v1.png")
+		if err != nil {
+			return nil, err
+		}
+		plaTex, err := texture.NewFromPNG(plaFile)
+		if err != nil {
+			return nil, err
+		}
+		platano := material.NewLambertian(plaTex)
+	*/
+	objectName := "PP.obj"
 	r, err := os.Open(objectName)
 	if err != nil {
 		return nil, err
 	}
+
 	cube, err := wavefront.NewObjFromReader(r, filepath.Dir(objectName))
 	if err != nil {
 		return nil, err
 	}
 
-	//cube.Scale(&vec3.Vec3Impl{X: 70, Y: 70, Z: 70})
-	//cube.Translate(&vec3.Vec3Impl{X: 340, Y: 190, Z: 150})
-
-	cube.Scale(&vec3.Vec3Impl{X: 35, Y: 35, Z: 35})
-	cube.Translate(&vec3.Vec3Impl{X: 280, Y: 0, Z: 320})
+	cube.Translate(&vec3.Vec3Impl{X: 280, Y: 20, Z: 390})
+	cube.Scale(&vec3.Vec3Impl{X: 14, Y: 14, Z: 14})
 
 	hitables := []hitable.Hitable{
 		hitable.NewFlipNormals(hitable.NewYZRect(0, 555, 0, 555, 555, green)),
@@ -293,7 +303,76 @@ func CornellBoxObj(aspect float64) (*scene.Scene, error) {
 	}
 
 	for i := range cube.Groups {
-		cubeHitables, err := cube.GroupToHitablesWithCustomMaterial(i, blue)
+		cubeHitables, err := cube.GroupToHitablesWithCustomMaterial(i, gold)
+		if err != nil {
+			return nil, err
+		}
+		bvh := hitable.NewBVH(cubeHitables, 0, 1)
+		hitables = append(hitables, bvh)
+	}
+
+	lights := []hitable.Hitable{}
+	for _, h := range hitables {
+		if h.IsEmitter() {
+			lights = append(lights, h)
+		}
+	}
+
+	lookFrom := &vec3.Vec3Impl{X: 278.0, Y: 278.0, Z: -800.0}
+	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
+	vup := &vec3.Vec3Impl{Y: 1}
+	distToFocus := 10.0
+	aperture := 0.0
+	vfov := float64(40.0)
+	time0 := 0.0
+	time1 := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+
+	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
+}
+
+func TVSet(aspect float64) (*scene.Scene, error) {
+	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
+	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
+	tvTextFile, err := os.Open("Television_01_diff_4k.png")
+	if err != nil {
+		return nil, err
+	}
+	tvText, err := texture.NewFromPNG(tvTextFile)
+	if err != nil {
+		return nil, err
+	}
+	tvMat := material.NewLambertian(tvText)
+	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
+	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 15, Y: 15, Z: 15}))
+	glass := material.NewDielectric(1.5)
+
+	objectName := "Television_01_4k.obj"
+	r, err := os.Open(objectName)
+	if err != nil {
+		return nil, err
+	}
+	cube, err := wavefront.NewObjFromReader(r, filepath.Dir(objectName))
+	if err != nil {
+		return nil, err
+	}
+
+	cube.Scale(&vec3.Vec3Impl{X: 500, Y: 500, Z: 500})
+	cube.Translate(&vec3.Vec3Impl{X: 280, Y: 100, Z: 420})
+
+	hitables := []hitable.Hitable{
+		hitable.NewFlipNormals(hitable.NewYZRect(0, 555, 0, 555, 555, green)),
+		hitable.NewYZRect(0, 555, 0, 555, 0, red),
+		hitable.NewFlipNormals(hitable.NewXZRect(213, 343, 227, 332, 554, light)),
+		hitable.NewFlipNormals(hitable.NewXZRect(0, 555, 0, 555, 555, white)),
+		hitable.NewXZRect(0, 555, 0, 555, 0, white),
+		hitable.NewFlipNormals(hitable.NewXYRect(0, 555, 0, 555, 555, white)),
+		hitable.NewSphere(&vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, &vec3.Vec3Impl{X: 190, Y: 90, Z: 190}, 0, 1, 90, glass),
+	}
+
+	for i := range cube.Groups {
+		fmt.Printf("Grupana...\n")
+		cubeHitables, err := cube.GroupToHitablesWithCustomMaterial(i, tvMat)
 		if err != nil {
 			return nil, err
 		}

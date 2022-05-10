@@ -54,7 +54,7 @@ func NewFromHDR(r io.Reader) (*ImageTxt, error) {
 	return nil, errors.New("not an HDR image")
 }
 
-func (it *ImageTxt) Value(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
 	i := int(u * float64(it.sizeX))
 	j := int((1 - v) * (float64(it.sizeY) - 0.001))
 
