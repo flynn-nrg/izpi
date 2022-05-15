@@ -5,9 +5,17 @@ jobs:
     strategy:
       matrix:
         go-version: [1.18.x]
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
+    - name: Setup Linux dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install \
+          libsdl2-dev \
+          pkg-config \
+          ${NULL+}
     - name: Install Go
       uses: actions/setup-go@v2
       with:
