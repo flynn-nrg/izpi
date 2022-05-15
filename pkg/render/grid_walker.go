@@ -3,6 +3,7 @@ package render
 const (
 	PATTERN_INVALID = iota
 	PATTERN_SPIRAL
+	PATTERN_LINEAR
 )
 
 const (
@@ -21,9 +22,22 @@ func walkGrid(sizeX int, sizeY int, pattern int) []gridPos {
 	switch pattern {
 	case PATTERN_SPIRAL:
 		return walkGridSpiral(sizeX, sizeY)
+	case PATTERN_LINEAR:
+		return walkGridLinear(sizeX, sizeY)
 	default:
 		return []gridPos{}
 	}
+}
+
+func walkGridLinear(sizeX int, sizeY int) []gridPos {
+	path := []gridPos{}
+	for y := 0; y < sizeY; y++ {
+		for x := 0; x < sizeX; x++ {
+			path = append(path, gridPos{X: x, Y: y})
+		}
+	}
+
+	return path
 }
 
 func walkGridSpiral(sizeX int, sizeY int) []gridPos {
