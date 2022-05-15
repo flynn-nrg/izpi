@@ -2,11 +2,14 @@ package main
 
 import (
 	"flag"
+	"image"
 	"log"
 	"math/rand"
 	"runtime"
+	"sync"
 	"time"
 
+	"gitlab.com/flynn-nrg/izpi/pkg/display"
 	"gitlab.com/flynn-nrg/izpi/pkg/output"
 	"gitlab.com/flynn-nrg/izpi/pkg/postprocess"
 	"gitlab.com/flynn-nrg/izpi/pkg/render"
@@ -14,6 +17,9 @@ import (
 )
 
 func main() {
+	var disp display.Display
+	var err error
+	var canvas image.Image
 
 	numWorkers := flag.Int("num-workers", runtime.NumCPU(), "the number of worker threads")
 	nx := flag.Int("x", 500, "output image x size")
@@ -21,6 +27,8 @@ func main() {
 	ns := flag.Int("samples", 1000, "number of samples per ray")
 	outputFile := flag.String("output", "output.png", "output file")
 	verbose := flag.Bool("v", false, "verbose")
+	preview := flag.Bool("p", false, "display rendering progress in a window")
+
 	flag.Parse()
 
 	rand.Seed(time.Now().UnixNano())
@@ -30,8 +38,26 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	r := render.New(scene, *nx, *ny, *ns, *numWorkers, *verbose)
-	canvas := r.Render()
+
+	previewChan := make(chan display.DisplayTile)
+	defer close(previewChan)
+
+	r := render.New(scene, *nx, *ny, *ns, *numWorkers, *verbose, previewChan, *preview)
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	// Detach the renderer as SDL needs to use the main thread for everything.
+	go func() {
+		canvas = r.Render()
+		wg.Done()
+	}()
+
+	if *preview {
+		disp = display.NewSDLDisplay("Izpi Render Output", *nx, *ny, previewChan)
+		disp.Start()
+	}
+
+	wg.Wait()
 
 	// Post-process pipeline.
 	//file, err := os.Open("test.cube")
@@ -60,5 +86,9 @@ func main() {
 	err = out.Write(canvas)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if *preview {
+		disp.Wait()
 	}
 }
