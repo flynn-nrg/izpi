@@ -52,10 +52,11 @@ func walkGridSpiral(sizeX int, sizeY int) []gridPos {
 	cursor := gridPos{X: sizeX / 2, Y: sizeY / 2}
 	path = append(path, cursor)
 	grid[cursor] = struct{}{}
+	unsuccessfulTries := 0
 
 	for {
-		if walkedPositions == totalPositions {
-			for y := 0; y < sizeY; y++ {
+		if walkedPositions == totalPositions || unsuccessfulTries > 4 {
+			for y := sizeY - 1; y >= 0; y-- {
 				for x := 0; x < sizeX; x++ {
 					pos := gridPos{X: x, Y: y}
 					if _, ok := grid[pos]; !ok {
@@ -71,9 +72,11 @@ func walkGridSpiral(sizeX int, sizeY int) []gridPos {
 		case DIRECTION_UP:
 			if cursor.Y == 0 {
 				directionIdx++
+				unsuccessfulTries++
 				continue
 			}
 			if _, ok := grid[gridPos{X: cursor.X, Y: cursor.Y - 1}]; ok {
+				unsuccessfulTries++
 				directionIdx--
 				continue
 			}
@@ -82,14 +85,16 @@ func walkGridSpiral(sizeX int, sizeY int) []gridPos {
 			walkedPositions++
 			path = append(path, cursor)
 			directionIdx++
+			unsuccessfulTries = 0
 			continue
 
 		case DIRECTION_DOWN:
-			if cursor.Y == sizeY {
+			if cursor.Y+1 == sizeY {
 				directionIdx++
 				continue
 			}
 			if _, ok := grid[gridPos{X: cursor.X, Y: cursor.Y + 1}]; ok {
+				unsuccessfulTries++
 				directionIdx--
 				continue
 			}
@@ -98,14 +103,17 @@ func walkGridSpiral(sizeX int, sizeY int) []gridPos {
 			walkedPositions++
 			path = append(path, cursor)
 			directionIdx++
+			unsuccessfulTries = 0
 			continue
 
 		case DIRECTION_LEFT:
 			if cursor.X == 0 {
 				directionIdx++
+				unsuccessfulTries++
 				continue
 			}
 			if _, ok := grid[gridPos{X: cursor.X - 1, Y: cursor.Y}]; ok {
+				unsuccessfulTries++
 				directionIdx--
 				continue
 			}
@@ -114,14 +122,17 @@ func walkGridSpiral(sizeX int, sizeY int) []gridPos {
 			walkedPositions++
 			path = append(path, cursor)
 			directionIdx++
+			unsuccessfulTries = 0
 			continue
 
 		case DIRECTION_RIGHT:
-			if cursor.X == sizeX {
+			if cursor.X+1 == sizeX {
 				directionIdx++
+				unsuccessfulTries++
 				continue
 			}
 			if _, ok := grid[gridPos{X: cursor.X + 1, Y: cursor.Y}]; ok {
+				unsuccessfulTries++
 				directionIdx--
 				continue
 			}
@@ -130,6 +141,7 @@ func walkGridSpiral(sizeX int, sizeY int) []gridPos {
 			walkedPositions++
 			path = append(path, cursor)
 			directionIdx++
+			unsuccessfulTries = 0
 			continue
 		}
 	}

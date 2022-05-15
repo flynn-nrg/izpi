@@ -188,7 +188,7 @@ func (r *Renderer) Render() image.Image {
 
 	gridSizeX := r.sizeX / stepSizeX
 	gridSizeY := r.sizeY / stepSizeY
-	path := walkGrid(gridSizeX, gridSizeY, PATTERN_LINEAR)
+	path := walkGrid(gridSizeX, gridSizeY, PATTERN_SPIRAL)
 	for _, t := range path {
 		queue <- workUnit{
 			scene:       r.scene,
