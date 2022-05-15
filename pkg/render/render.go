@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"gitlab.com/flynn-nrg/izpi/pkg/colour"
+	"gitlab.com/flynn-nrg/izpi/pkg/display"
 	"gitlab.com/flynn-nrg/izpi/pkg/floatimage"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
 	"gitlab.com/flynn-nrg/izpi/pkg/pdf"
@@ -20,25 +21,29 @@ import (
 
 // Renderer represents a renderer config.
 type Renderer struct {
-	scene      *scene.Scene
-	canvas     *floatimage.FloatNRGBA
-	sizeX      int
-	sizeY      int
-	numSamples int
-	numWorkers int
-	verbose    bool
+	scene       *scene.Scene
+	canvas      *floatimage.FloatNRGBA
+	previewChan chan display.DisplayTile
+	preview     bool
+	sizeX       int
+	sizeY       int
+	numSamples  int
+	numWorkers  int
+	verbose     bool
 }
 
 type workUnit struct {
-	scene      *scene.Scene
-	canvas     *floatimage.FloatNRGBA
-	bar        *pb.ProgressBar
-	verbose    bool
-	numSamples int
-	x0         int
-	x1         int
-	y0         int
-	y1         int
+	scene       *scene.Scene
+	canvas      *floatimage.FloatNRGBA
+	bar         *pb.ProgressBar
+	previewChan chan display.DisplayTile
+	preview     bool
+	verbose     bool
+	numSamples  int
+	x0          int
+	x1          int
+	y0          int
+	y1          int
 }
 
 func computeColour(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int) *vec3.Vec3Impl {
@@ -69,9 +74,23 @@ func computeColour(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hi
 }
 
 func renderRect(w workUnit) {
+	var tile display.DisplayTile
+
 	nx := w.canvas.Bounds().Max.X
 	ny := w.canvas.Bounds().Max.Y
+
+	if w.preview {
+		tile = display.DisplayTile{
+			Width:  w.x1 - w.x0 + 1,
+			Height: 1,
+			PosX:   w.x0,
+			Pixels: make([]float64, (w.x1-w.x0+1)*4),
+		}
+	}
+
 	for y := w.y0; y <= w.y1; y++ {
+		i := 0
+		tile.PosY = ny - y
 		for x := w.x0; x <= w.x1; x++ {
 			col := &vec3.Vec3Impl{}
 			for s := 0; s < w.numSamples; s++ {
@@ -85,6 +104,16 @@ func renderRect(w workUnit) {
 			// gamma 2
 			col = &vec3.Vec3Impl{X: math.Sqrt(col.X), Y: math.Sqrt(col.Y), Z: math.Sqrt(col.Z)}
 			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
+			if w.preview {
+				tile.Pixels[i] = col.Z
+				tile.Pixels[i+1] = col.Y
+				tile.Pixels[i+2] = col.X
+				tile.Pixels[i+3] = 1.0
+				i += 4
+			}
+		}
+		if w.preview {
+			w.previewChan <- tile
 		}
 	}
 	if w.verbose {
@@ -107,15 +136,18 @@ func worker(input chan workUnit, quit chan struct{}, wg sync.WaitGroup) {
 }
 
 // New returns a new instance of a renderer.
-func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, numWorkers int, verbose bool) *Renderer {
+func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int,
+	numWorkers int, verbose bool, previewChan chan display.DisplayTile, preview bool) *Renderer {
 	return &Renderer{
-		scene:      scene,
-		canvas:     floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY)),
-		sizeX:      sizeX,
-		sizeY:      sizeY,
-		numSamples: numSamples,
-		numWorkers: numWorkers,
-		verbose:    verbose,
+		scene:       scene,
+		canvas:      floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY)),
+		previewChan: previewChan,
+		preview:     preview,
+		sizeX:       sizeX,
+		sizeY:       sizeY,
+		numSamples:  numSamples,
+		numWorkers:  numWorkers,
+		verbose:     verbose,
 	}
 }
 
@@ -154,19 +186,22 @@ func (r *Renderer) Render() image.Image {
 		go worker(queue, quit, wg)
 	}
 
-	for y := 0; y <= (r.sizeY - stepSizeY); y += stepSizeY {
-		for x := 0; x <= (r.sizeX - stepSizeX); x += stepSizeX {
-			queue <- workUnit{
-				scene:      r.scene,
-				canvas:     r.canvas,
-				bar:        bar,
-				verbose:    r.verbose,
-				numSamples: r.numSamples,
-				x0:         x,
-				x1:         x + (stepSizeX - 1),
-				y0:         y,
-				y1:         y + (stepSizeY - 1),
-			}
+	gridSizeX := r.sizeX / stepSizeX
+	gridSizeY := r.sizeY / stepSizeY
+	path := walkGrid(gridSizeX, gridSizeY, PATTERN_SPIRAL)
+	for _, t := range path {
+		queue <- workUnit{
+			scene:       r.scene,
+			canvas:      r.canvas,
+			bar:         bar,
+			previewChan: r.previewChan,
+			preview:     r.preview,
+			verbose:     r.verbose,
+			numSamples:  r.numSamples,
+			x0:          t.X * stepSizeX,
+			x1:          t.X*stepSizeX + (stepSizeX - 1),
+			y0:          t.Y * stepSizeY,
+			y1:          t.Y*stepSizeY + (stepSizeY - 1),
 		}
 	}
 	for i := 0; i < r.numWorkers; i++ {
