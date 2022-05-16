@@ -89,9 +89,18 @@ func (sd *SDLDisplay) Start() {
 		sd.quit <- struct{}{}
 		sd.wg.Wait()
 		sdl.Do(func() {
-			sd.texture.Destroy()
-			sd.renderer.Destroy()
-			sd.window.Destroy()
+			err := sd.texture.Destroy()
+			if err != nil {
+				log.Println(err)
+			}
+			err = sd.renderer.Destroy()
+			if err != nil {
+				log.Println(err)
+			}
+			err = sd.window.Destroy()
+			if err != nil {
+				log.Println(err)
+			}
 		})
 	})
 }
@@ -118,8 +127,14 @@ func (sd *SDLDisplay) busyLoop() {
 				pixels[i] = floatToByte(in.Pixels[i])
 			}
 
-			sd.texture.Update(rect, pixels, int(sd.pitch))
-			sd.renderer.Copy(sd.texture, nil, nil)
+			err := sd.texture.Update(rect, pixels, int(sd.pitch))
+			if err != nil {
+				log.Println(err)
+			}
+			err = sd.renderer.Copy(sd.texture, nil, nil)
+			if err != nil {
+				log.Println(err)
+			}
 			sd.renderer.Present()
 
 		case <-sd.quit:

@@ -121,7 +121,7 @@ func renderRect(w workUnit) {
 	}
 }
 
-func worker(input chan workUnit, quit chan struct{}, wg sync.WaitGroup) {
+func worker(input chan workUnit, quit chan struct{}, wg *sync.WaitGroup) {
 	wg.Add(1)
 	defer wg.Done()
 	for {
@@ -161,7 +161,7 @@ func (r *Renderer) Render() image.Image {
 
 	queue := make(chan workUnit)
 	quit := make(chan struct{})
-	wg := sync.WaitGroup{}
+	wg := &sync.WaitGroup{}
 
 	for _, size := range stepSizes {
 		if r.sizeX%size == 0 {
