@@ -231,7 +231,7 @@ func (wo *WavefrontObj) groupToTrianglesWithCustomMaterial(g *Group, mat materia
 		vertex0 := wo.Vertices[face.Vertices[0].VIdx-1]
 		vertex1 := wo.Vertices[face.Vertices[1].VIdx-1]
 		vertex2 := wo.Vertices[face.Vertices[2].VIdx-1]
-		if wo.HasUV {
+		if wo.HasUV && !wo.IgnoreTextures {
 			uv0 := wo.VertexUV[face.Vertices[0].VtIdx-1]
 			uv1 := wo.VertexUV[face.Vertices[1].VtIdx-1]
 			uv2 := wo.VertexUV[face.Vertices[2].VtIdx-1]
