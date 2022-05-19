@@ -10,6 +10,7 @@ import (
 	"gitlab.com/flynn-nrg/izpi/pkg/colour"
 	"gitlab.com/flynn-nrg/izpi/pkg/display"
 	"gitlab.com/flynn-nrg/izpi/pkg/floatimage"
+	"gitlab.com/flynn-nrg/izpi/pkg/grid"
 	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
 	"gitlab.com/flynn-nrg/izpi/pkg/pdf"
 	"gitlab.com/flynn-nrg/izpi/pkg/ray"
@@ -188,7 +189,7 @@ func (r *Renderer) Render() image.Image {
 
 	gridSizeX := r.sizeX / stepSizeX
 	gridSizeY := r.sizeY / stepSizeY
-	path := walkGrid(gridSizeX, gridSizeY, PATTERN_SPIRAL)
+	path := grid.WalkGrid(gridSizeX, gridSizeY, grid.PATTERN_SPIRAL)
 	for _, t := range path {
 		queue <- workUnit{
 			scene:       r.scene,

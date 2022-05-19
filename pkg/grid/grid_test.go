@@ -1,4 +1,4 @@
-package render
+package grid
 
 import (
 	"testing"
@@ -11,13 +11,13 @@ func TestWalkGridSpiral(t *testing.T) {
 		name  string
 		sizeX int
 		sizeY int
-		want  []gridPos
+		want  []GridPos
 	}{
 		{
 			name:  "3x3 grid",
 			sizeX: 3,
 			sizeY: 3,
-			want: []gridPos{
+			want: []GridPos{
 				{X: 1, Y: 1},
 				{X: 1},
 				{X: 2},
@@ -33,7 +33,7 @@ func TestWalkGridSpiral(t *testing.T) {
 			name:  "4x4 grid",
 			sizeX: 4,
 			sizeY: 4,
-			want: []gridPos{
+			want: []GridPos{
 				{X: 2, Y: 2},
 				{X: 2, Y: 1},
 				{X: 3, Y: 1},
@@ -56,7 +56,7 @@ func TestWalkGridSpiral(t *testing.T) {
 			name:  "5x5 grid",
 			sizeX: 5,
 			sizeY: 5,
-			want: []gridPos{
+			want: []GridPos{
 				{X: 2, Y: 2}, {X: 2, Y: 1}, {X: 3, Y: 1}, {X: 3, Y: 2}, {X: 3, Y: 3},
 				{X: 2, Y: 3}, {X: 1, Y: 3}, {X: 1, Y: 2}, {X: 1, Y: 1}, {X: 1}, {X: 2}, {X: 3},
 				{X: 4}, {X: 4, Y: 1}, {X: 4, Y: 2}, {X: 4, Y: 3}, {X: 4, Y: 4}, {X: 3, Y: 4},
