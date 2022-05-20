@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/flynn-nrg/izpi/pkg/texture"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestNewObjFromReader(t *testing.T) {

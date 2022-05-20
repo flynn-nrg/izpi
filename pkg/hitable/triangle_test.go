@@ -4,12 +4,12 @@ import (
 	"math"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/flynn-nrg/izpi/pkg/aabb"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/ray"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestNewTriangleWithUV(t *testing.T) {
