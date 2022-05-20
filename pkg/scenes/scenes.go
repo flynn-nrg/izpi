@@ -8,13 +8,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/camera"
-	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
-	"gitlab.com/flynn-nrg/izpi/pkg/material"
-	"gitlab.com/flynn-nrg/izpi/pkg/scene"
-	"gitlab.com/flynn-nrg/izpi/pkg/texture"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
-	"gitlab.com/flynn-nrg/izpi/pkg/wavefront"
+	"github.com/flynn-nrg/izpi/pkg/camera"
+	"github.com/flynn-nrg/izpi/pkg/hitable"
+	"github.com/flynn-nrg/izpi/pkg/material"
+	"github.com/flynn-nrg/izpi/pkg/scene"
+	"github.com/flynn-nrg/izpi/pkg/texture"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/wavefront"
 )
 
 // RandomScene returns a random scene.

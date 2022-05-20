@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/display"
-	"gitlab.com/flynn-nrg/izpi/pkg/output"
-	"gitlab.com/flynn-nrg/izpi/pkg/postprocess"
-	"gitlab.com/flynn-nrg/izpi/pkg/render"
-	"gitlab.com/flynn-nrg/izpi/pkg/scenes"
+	"github.com/flynn-nrg/izpi/pkg/display"
+	"github.com/flynn-nrg/izpi/pkg/output"
+	"github.com/flynn-nrg/izpi/pkg/postprocess"
+	"github.com/flynn-nrg/izpi/pkg/render"
+	"github.com/flynn-nrg/izpi/pkg/scenes"
 )
 
 func main() {

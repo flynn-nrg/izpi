@@ -3,7 +3,7 @@ package postprocess
 import (
 	"image"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/scene"
+	"github.com/flynn-nrg/izpi/pkg/scene"
 )
 
 // Pipeline represents a filter pipeline.

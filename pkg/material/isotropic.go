@@ -1,11 +1,11 @@
 package material
 
 import (
-	"gitlab.com/flynn-nrg/izpi/pkg/hitrecord"
-	"gitlab.com/flynn-nrg/izpi/pkg/pdf"
-	"gitlab.com/flynn-nrg/izpi/pkg/ray"
-	"gitlab.com/flynn-nrg/izpi/pkg/scatterrecord"
-	"gitlab.com/flynn-nrg/izpi/pkg/texture"
+	"github.com/flynn-nrg/izpi/pkg/hitrecord"
+	"github.com/flynn-nrg/izpi/pkg/pdf"
+	"github.com/flynn-nrg/izpi/pkg/ray"
+	"github.com/flynn-nrg/izpi/pkg/scatterrecord"
+	"github.com/flynn-nrg/izpi/pkg/texture"
 )
 
 // Ensure interface compliance.

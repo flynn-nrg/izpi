@@ -1,6 +1,6 @@
 package ray
 
-import "gitlab.com/flynn-nrg/izpi/pkg/vec3"
+import "github.com/flynn-nrg/izpi/pkg/vec3"
 
 // Ensure interface compliance.
 var _ Ray = (*RayImpl)(nil)

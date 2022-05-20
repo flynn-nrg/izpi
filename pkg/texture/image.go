@@ -10,7 +10,7 @@ import (
 	"github.com/mdouchement/hdr"
 	_ "github.com/mdouchement/hdr/codec/rgbe"
 	"github.com/mdouchement/hdr/hdrcolor"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Ensure interface compliance.

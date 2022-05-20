@@ -1,4 +1,4 @@
-module gitlab.com/flynn-nrg/izpi
+module github.com/flynn-nrg/izpi
 
 go 1.17
 
@@ -18,5 +18,5 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	golang.org/x/sys v0.0.0-20220513210249-45d2b4557a2a // indirect
+	golang.org/x/sys v0.0.0-20220519141025-dcacdad47464 // indirect
 )

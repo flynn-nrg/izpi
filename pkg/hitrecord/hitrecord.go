@@ -1,6 +1,6 @@
 package hitrecord
 
-import "gitlab.com/flynn-nrg/izpi/pkg/vec3"
+import "github.com/flynn-nrg/izpi/pkg/vec3"
 
 // HitRecord contains data related to an intersection between a ray and an object.
 type HitRecord struct {

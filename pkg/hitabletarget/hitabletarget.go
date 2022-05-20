@@ -2,7 +2,7 @@
 // This is done avoid a circular dependency between pdf, hitable and material.
 package hitabletarget
 
-import "gitlab.com/flynn-nrg/izpi/pkg/vec3"
+import "github.com/flynn-nrg/izpi/pkg/vec3"
 
 // HitableTarget defines the methods used to embed hitables in a PDF.
 type HitableTarget interface {

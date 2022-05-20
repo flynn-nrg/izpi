@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"gitlab.com/flynn-nrg/izpi/pkg/aabb"
-	"gitlab.com/flynn-nrg/izpi/pkg/material"
-	"gitlab.com/flynn-nrg/izpi/pkg/texture"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/aabb"
+	"github.com/flynn-nrg/izpi/pkg/material"
+	"github.com/flynn-nrg/izpi/pkg/texture"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 func TestNewBVH(t *testing.T) {

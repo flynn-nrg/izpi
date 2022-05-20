@@ -1,8 +1,8 @@
 package pdf
 
 import (
-	"gitlab.com/flynn-nrg/izpi/pkg/hitabletarget"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/hitabletarget"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Ensure interface compliance.

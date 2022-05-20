@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"gitlab.com/flynn-nrg/izpi/pkg/texture"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/texture"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 func TestNewObjFromReader(t *testing.T) {

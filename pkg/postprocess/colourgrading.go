@@ -6,9 +6,9 @@ import (
 	"io"
 
 	"github.com/flynn-nrg/gube/gube"
-	"gitlab.com/flynn-nrg/izpi/pkg/colour"
-	"gitlab.com/flynn-nrg/izpi/pkg/floatimage"
-	"gitlab.com/flynn-nrg/izpi/pkg/scene"
+	"github.com/flynn-nrg/izpi/pkg/colour"
+	"github.com/flynn-nrg/izpi/pkg/floatimage"
+	"github.com/flynn-nrg/izpi/pkg/scene"
 )
 
 // Ensure interface compliance.

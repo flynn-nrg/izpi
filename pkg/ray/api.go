@@ -1,7 +1,7 @@
 // Package ray implements the interface and methods to work with rays.
 package ray
 
-import "gitlab.com/flynn-nrg/izpi/pkg/vec3"
+import "github.com/flynn-nrg/izpi/pkg/vec3"
 
 // Ray defines the methods used to work with rays.
 type Ray interface {

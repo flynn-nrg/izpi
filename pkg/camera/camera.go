@@ -5,8 +5,8 @@ import (
 	"math"
 	"math/rand"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/ray"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/ray"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Camera represents a camera in the world.

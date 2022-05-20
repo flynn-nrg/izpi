@@ -1,7 +1,7 @@
 // Package texture implements different types of textures.
 package texture
 
-import "gitlab.com/flynn-nrg/izpi/pkg/vec3"
+import "github.com/flynn-nrg/izpi/pkg/vec3"
 
 // Texture represents a texture.
 type Texture interface {

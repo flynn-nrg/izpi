@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/rand"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Perlin represents an instance of a Perlin noise generator.

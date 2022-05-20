@@ -1,7 +1,7 @@
 // Package pdf implements methods to work with probability density functions.
 package pdf
 
-import "gitlab.com/flynn-nrg/izpi/pkg/vec3"
+import "github.com/flynn-nrg/izpi/pkg/vec3"
 
 // PDF represents a probability density function.
 type PDF interface {

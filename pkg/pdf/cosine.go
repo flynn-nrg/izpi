@@ -3,8 +3,8 @@ package pdf
 import (
 	"math"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/onb"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/onb"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Ensure interface compliance.
