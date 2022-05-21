@@ -28,13 +28,14 @@ func main() {
 	outputFile := flag.String("output", "output.png", "output file")
 	verbose := flag.Bool("v", false, "verbose")
 	preview := flag.Bool("p", false, "display rendering progress in a window")
+	normal := flag.Bool("n", false, "render the normals at the ray intersection point")
 
 	flag.Parse()
 
 	rand.Seed(time.Now().UnixNano())
 
 	// Render
-	scene, err := scenes.PBRTest(float64(*nx) / float64(*ny))
+	scene, err := scenes.SWHangar(float64(*nx) / float64(*ny))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,7 +43,7 @@ func main() {
 	previewChan := make(chan display.DisplayTile)
 	defer close(previewChan)
 
-	r := render.New(scene, *nx, *ny, *ns, *numWorkers, *verbose, previewChan, *preview)
+	r := render.New(scene, *nx, *ny, *ns, *numWorkers, *verbose, previewChan, *preview, *normal)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
