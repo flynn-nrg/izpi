@@ -3,7 +3,6 @@ package scenes
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -15,6 +14,8 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/texture"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
 	"github.com/flynn-nrg/izpi/pkg/wavefront"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // RandomScene returns a random scene.
@@ -471,7 +472,10 @@ func PBRTest(aspect float64) (*scene.Scene, error) {
 }
 
 func SWHangar(aspect float64) (*scene.Scene, error) {
-	white := material.NewMetal(&vec3.Vec3Impl{X: 0.6, Y: .8, Z: .8}, 0.4)
+	green := material.NewMetal(&vec3.Vec3Impl{X: 0.6, Y: .8, Z: .8}, 0.4)
+	red := material.NewMetal(&vec3.Vec3Impl{X: 0.8, Y: .4, Z: .4}, 0)
+	blue := material.NewMetal(&vec3.Vec3Impl{X: 0.4, Y: .4, Z: .8}, 0)
+	white := material.NewMetal(&vec3.Vec3Impl{X: 0.7, Y: .7, Z: .7}, 0)
 	glass := material.NewDielectric(1.5)
 
 	// https://www.cgtrader.com/free-3d-models/space/spaceship/star-wars-destroyer-hangar
@@ -491,10 +495,13 @@ func SWHangar(aspect float64) (*scene.Scene, error) {
 	hitables := []hitable.Hitable{
 		hitable.NewSphere(&vec3.Vec3Impl{X: 0, Y: 20, Z: -30}, &vec3.Vec3Impl{X: 0, Y: 20, Z: -30}, 0, 1, 20, light),
 		hitable.NewSphere(&vec3.Vec3Impl{X: -50, Y: 15, Z: 80}, &vec3.Vec3Impl{X: -50, Y: 15, Z: 80}, 0, 1, 20, glass),
+		hitable.NewSphere(&vec3.Vec3Impl{X: -130, Y: 35, Z: 100}, &vec3.Vec3Impl{X: -130, Y: 35, Z: 100}, 0, 1, 20, red),
+		hitable.NewSphere(&vec3.Vec3Impl{X: -70, Y: 10, Z: 60}, &vec3.Vec3Impl{X: -70, Y: 10, Z: 60}, 0, 1, 4, blue),
+		hitable.NewSphere(&vec3.Vec3Impl{X: -130, Y: 40, Z: 110}, &vec3.Vec3Impl{X: -130, Y: 40, Z: 110}, 0, 1, 5, white),
 	}
 
 	for i := range hangar.Groups {
-		hangarHitables, err := hangar.GroupToHitablesWithCustomMaterial(i, white)
+		hangarHitables, err := hangar.GroupToHitablesWithCustomMaterial(i, green)
 		if err != nil {
 			return nil, err
 		}

@@ -1,8 +1,6 @@
 package hitable
 
 import (
-	"fmt"
-	"log"
 	"math/rand"
 	"sort"
 
@@ -11,6 +9,8 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/ray"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Ensure interface compliance.
@@ -38,11 +38,11 @@ func NewBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
 			var box0, box1 *aabb.AABB
 			var ok bool
 			if box0, ok = hitables[i].BoundingBox(0, 0); !ok {
-				log.Printf("no bounding box in BVH node\n")
+				log.Warning("no bounding box in BVH node")
 				return false
 			}
 			if box1, ok = hitables[j].BoundingBox(0, 0); !ok {
-				log.Printf("no bounding box in BVH node\n")
+				log.Warning("no bounding box in BVH node")
 				return false
 			}
 			return aabb.BoxLessX(box0, box1)
@@ -53,11 +53,11 @@ func NewBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
 			var box0, box1 *aabb.AABB
 			var ok bool
 			if box0, ok = hitables[i].BoundingBox(0, 0); !ok {
-				log.Printf("no bounding box in BVH node\n")
+				log.Warning("no bounding box in BVH node")
 				return false
 			}
 			if box1, ok = hitables[j].BoundingBox(0, 0); !ok {
-				log.Printf("no bounding box in BVH node\n")
+				log.Warning("no bounding box in BVH node")
 				return false
 			}
 			return aabb.BoxLessY(box0, box1)
@@ -92,10 +92,10 @@ func NewBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
 	var leftBox, rightBox *aabb.AABB
 	var ok bool
 	if leftBox, ok = bn.left.BoundingBox(time0, time1); !ok {
-		fmt.Printf("no bounding box in BVH node\n")
+		log.Warning("no bounding box in BVH node")
 	}
 	if rightBox, ok = bn.right.BoundingBox(time0, time1); !ok {
-		fmt.Printf("no bounding box in BVH node\n")
+		log.Warning("no bounding box in BVH node")
 	}
 
 	bn.box = aabb.SurroundingBox(leftBox, rightBox)

@@ -6,11 +6,12 @@
 package display
 
 import (
-	"log"
 	"sync"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var _ Display = (*SDLDisplay)(nil)
@@ -92,15 +93,15 @@ func (sd *SDLDisplay) Start() {
 		sdl.Do(func() {
 			err := sd.texture.Destroy()
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 			err = sd.renderer.Destroy()
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 			err = sd.window.Destroy()
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 		})
 	})
@@ -130,11 +131,11 @@ func (sd *SDLDisplay) busyLoop() {
 
 			err := sd.texture.Update(rect, pixels, int(sd.pitch))
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 			err = sd.renderer.Copy(sd.texture, nil, nil)
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 			sd.renderer.Present()
 

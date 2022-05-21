@@ -1,9 +1,8 @@
 package main
 
 import (
-	"flag"
+	"fmt"
 	"image"
-	"log"
 	"math/rand"
 	"runtime"
 	"sync"
@@ -14,28 +13,52 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/postprocess"
 	"github.com/flynn-nrg/izpi/pkg/render"
 	"github.com/flynn-nrg/izpi/pkg/scenes"
+
+	"github.com/alecthomas/kong"
+
+	log "github.com/sirupsen/logrus"
 )
+
+const (
+	programName    = "izpi"
+	defaultXSize   = "500"
+	defaultYSize   = "500"
+	defaultSamples = "1000"
+)
+
+var flags struct {
+	LogLevel   string `name:"log-level" help:"The log level: error, warn, info, debug, trace." default:"info"`
+	NumWorkers int64  `name:"num-workers" help:"Number of worker threads" default:"${defaultNumWorkers}"`
+	XSize      int64  `name:"x" help:"Output image x size" default:"${defaultXSize}"`
+	YSize      int64  `name:"y" help:"Output image y size" default:"${defaultYSize}"`
+	Samples    int64  `name:"samples" help:"Number of samples per ray" default:"${defaultSamples}"`
+	OutputFile string `type:"file" name:"output-file" help:"Output file."`
+	Verbose    bool   `name:"v" help:"Print rendering progress bar"`
+	Preview    bool   `name:"p" help:"Display rendering progress in a window"`
+	Normal     bool   `name:"n" help:"Render the normals at the ray intersection point"`
+}
 
 func main() {
 	var disp display.Display
 	var err error
 	var canvas image.Image
 
-	numWorkers := flag.Int("num-workers", runtime.NumCPU(), "the number of worker threads")
-	nx := flag.Int("x", 500, "output image x size")
-	ny := flag.Int("y", 500, "output image y size")
-	ns := flag.Int("samples", 1000, "number of samples per ray")
-	outputFile := flag.String("output", "output.png", "output file")
-	verbose := flag.Bool("v", false, "verbose")
-	preview := flag.Bool("p", false, "display rendering progress in a window")
-	normal := flag.Bool("n", false, "render the normals at the ray intersection point")
-
-	flag.Parse()
+	kong.Parse(&flags,
+		kong.Name(programName),
+		kong.Description("A path tracer implemented in Go"),
+		kong.Vars{
+			"defaultNumWorkers": fmt.Sprintf("%v", runtime.NumCPU()),
+			"defaultXSize":      defaultXSize,
+			"defaultYSize":      defaultYSize,
+			"defaultSamples":    defaultSamples,
+		})
 
 	rand.Seed(time.Now().UnixNano())
 
+	setupLogging(flags.LogLevel)
+
 	// Render
-	scene, err := scenes.SWHangar(float64(*nx) / float64(*ny))
+	scene, err := scenes.SWHangar(float64(flags.XSize) / float64(flags.YSize))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,7 +66,7 @@ func main() {
 	previewChan := make(chan display.DisplayTile)
 	defer close(previewChan)
 
-	r := render.New(scene, *nx, *ny, *ns, *numWorkers, *verbose, previewChan, *preview, *normal)
+	r := render.New(scene, int(flags.XSize), int(flags.YSize), int(flags.Samples), int(flags.NumWorkers), flags.Verbose, previewChan, flags.Preview, flags.Normal)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -53,8 +76,8 @@ func main() {
 		wg.Done()
 	}()
 
-	if *preview {
-		disp = display.NewSDLDisplay("Izpi Render Output", *nx, *ny, previewChan)
+	if flags.Preview {
+		disp = display.NewSDLDisplay("Izpi Render Output", int(flags.XSize), int(flags.YSize), previewChan)
 		disp.Start()
 	}
 
@@ -79,7 +102,7 @@ func main() {
 	}
 
 	// Output
-	out, err := output.NewPNG(*outputFile)
+	out, err := output.NewPNG(flags.OutputFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,7 +112,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if *preview {
+	if flags.Preview {
 		disp.Wait()
+	}
+}
+
+func setupLogging(level string) {
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
+
+	switch level {
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	case "trace":
+		log.SetLevel(log.TraceLevel)
 	}
 }
