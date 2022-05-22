@@ -234,3 +234,7 @@ func (tri *Triangle) V1() float64 {
 func (tri *Triangle) V2() float64 {
 	return tri.v2
 }
+
+func (tri *Triangle) Material() material.Material {
+	return tri.material
+}

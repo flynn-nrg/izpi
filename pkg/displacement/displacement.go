@@ -123,15 +123,16 @@ func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture
 
 	for _, tri := range triangles {
 		in = append(in, &minimalTriangle{
-			vertex0: tri.Vertex0(),
-			vertex1: tri.Vertex1(),
-			vertex2: tri.Vertex2(),
-			u0:      tri.U0(),
-			u1:      tri.U1(),
-			u2:      tri.U2(),
-			v0:      tri.V0(),
-			v1:      tri.V1(),
-			v2:      tri.V2(),
+			vertex0:  tri.Vertex0(),
+			vertex1:  tri.Vertex1(),
+			vertex2:  tri.Vertex2(),
+			material: tri.Material(),
+			u0:       tri.U0(),
+			u1:       tri.U1(),
+			u2:       tri.U2(),
+			v0:       tri.V0(),
+			v1:       tri.V1(),
+			v2:       tri.V2(),
 		})
 	}
 
