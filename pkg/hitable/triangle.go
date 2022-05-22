@@ -216,8 +216,8 @@ type minimalTriangle struct {
 	v2 float64
 }
 
-// tesselate splits a triangle in for smaller triangles.
-func tesselate(in *minimalTriangle) []*minimalTriangle {
+// tessellate splits a triangle in four smaller triangles.
+func tessellate(in *minimalTriangle) []*minimalTriangle {
 	a := vec3.ScalarDiv(vec3.Add(in.vertex0, in.vertex1), 2.0)
 	b := vec3.ScalarDiv(vec3.Add(in.vertex1, in.vertex2), 2.0)
 	c := vec3.ScalarDiv(vec3.Add(in.vertex2, in.vertex0), 2.0)
@@ -282,4 +282,16 @@ func tesselate(in *minimalTriangle) []*minimalTriangle {
 		},
 	}
 
+}
+
+func requiresFurtherTessellation(tri *minimalTriangle, resU int64, resV int64) bool {
+	maxDeltaU := 1.0 / float64(resU)
+	maxDeltaV := 1.0 / float64(resV)
+
+	return math.Abs(tri.u1-tri.u0) <= maxDeltaU &&
+		math.Abs(tri.u2-tri.u1) <= maxDeltaU &&
+		math.Abs(tri.u0-tri.u2) <= maxDeltaU &&
+		math.Abs(tri.v1-tri.v0) <= maxDeltaV &&
+		math.Abs(tri.v2-tri.v1) <= maxDeltaV &&
+		math.Abs(tri.v0-tri.v2) <= maxDeltaV
 }

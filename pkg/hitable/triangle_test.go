@@ -133,7 +133,7 @@ func TestTriangleHit(t *testing.T) {
 	}
 }
 
-func TestTesselate(t *testing.T) {
+func TestTessellate(t *testing.T) {
 	testData := []struct {
 		name  string
 		input *minimalTriangle
@@ -195,7 +195,7 @@ func TestTesselate(t *testing.T) {
 
 	for _, test := range testData {
 		t.Run(test.name, func(t *testing.T) {
-			got := tesselate(test.input)
+			got := tessellate(test.input)
 			if diff := cmp.Diff(test.want, got, cmp.AllowUnexported(minimalTriangle{})); diff != "" {
 				t.Errorf("NewTriangleWithUVAndNormal() mismatch (-want +got):\n%s", diff)
 			}
