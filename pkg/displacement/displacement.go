@@ -2,6 +2,7 @@
 package displacement
 
 import (
+	"errors"
 	"math"
 
 	"github.com/flynn-nrg/izpi/pkg/hitable"
@@ -13,9 +14,9 @@ import (
 // minimalTriangle is a more lightweight structure used when performing multiple tesselation passes.
 type minimalTriangle struct {
 	// Vertices
-	vertex0 *vec3.Vec3Impl
-	vertex1 *vec3.Vec3Impl
-	vertex2 *vec3.Vec3Impl
+	vertex0 vec3.Vec3Impl
+	vertex1 vec3.Vec3Impl
+	vertex2 vec3.Vec3Impl
 	// Material
 	material material.Material
 	// Texture coordinates
@@ -29,9 +30,9 @@ type minimalTriangle struct {
 
 // tessellate splits a triangle in four smaller triangles.
 func tessellate(in *minimalTriangle) []*minimalTriangle {
-	a := vec3.ScalarDiv(vec3.Add(in.vertex0, in.vertex1), 2.0)
-	b := vec3.ScalarDiv(vec3.Add(in.vertex1, in.vertex2), 2.0)
-	c := vec3.ScalarDiv(vec3.Add(in.vertex2, in.vertex0), 2.0)
+	a := *vec3.ScalarDiv(vec3.Add(&in.vertex0, &in.vertex1), 2.0)
+	b := *vec3.ScalarDiv(vec3.Add(&in.vertex1, &in.vertex2), 2.0)
+	c := *vec3.ScalarDiv(vec3.Add(&in.vertex2, &in.vertex0), 2.0)
 
 	ua := (in.u0 + in.u1) / 2.0
 	va := (in.v0 + in.v1) / 2.0
@@ -95,9 +96,9 @@ func tessellate(in *minimalTriangle) []*minimalTriangle {
 
 }
 
-func requiresFurtherTessellation(tri *minimalTriangle, resU int64, resV int64) bool {
-	maxDeltaU := 1.0 / float64(resU)
-	maxDeltaV := 1.0 / float64(resV)
+func isTessellatedEnough(tri *minimalTriangle, resU int, resV int) bool {
+	maxDeltaU := 1.0 / float64(resU-1)
+	maxDeltaV := 1.0 / float64(resV-1)
 
 	return math.Abs(tri.u1-tri.u0) <= maxDeltaU &&
 		math.Abs(tri.u2-tri.u1) <= maxDeltaU &&
@@ -108,6 +109,61 @@ func requiresFurtherTessellation(tri *minimalTriangle, resU int64, resV int64) b
 }
 
 // ApplyDisplacementMap tessellates the triangles and applies the displacement map to all of them.
-func ApplyDisplacementMap(triangles []*hitable.Triangle, normalMap texture.Texture) []*hitable.Triangle {
+func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture.Texture, min, max, scale float64) ([]*hitable.Triangle, error) {
+	var resU, resV int
+
+	if displacementTexture, ok := displacementMap.(*texture.ImageTxt); !ok {
+		return nil, errors.New("only ImageTxt texture type is supported")
+	} else {
+		resU = displacementTexture.SizeX()
+		resV = displacementTexture.SizeY()
+	}
+
+	in := []*minimalTriangle{}
+
+	for _, tri := range triangles {
+		in = append(in, &minimalTriangle{
+			vertex0: tri.Vertex0(),
+			vertex1: tri.Vertex1(),
+			vertex2: tri.Vertex2(),
+			u0:      tri.U0(),
+			u1:      tri.U1(),
+			u2:      tri.U2(),
+			v0:      tri.V0(),
+			v1:      tri.V1(),
+			v2:      tri.V2(),
+		})
+	}
+
+	tessellated := applyTessellation(in, resU, resV)
+
+	return applyDisplacement(tessellated, displacementMap, min, max, scale), nil
+}
+
+func applyTessellation(in []*minimalTriangle, resU int, resV int) []*minimalTriangle {
+	out := []*minimalTriangle{}
+
+	for {
+		if len(in) == 0 {
+			return out
+		}
+
+		toIn := []*minimalTriangle{}
+		for _, triangle := range in {
+			newTriangles := tessellate(triangle)
+			for _, tessellated := range newTriangles {
+				if isTessellatedEnough(tessellated, resU, resV) {
+					out = append(out, tessellated)
+				} else {
+					toIn = append(toIn, tessellated)
+				}
+			}
+		}
+
+		in = toIn
+	}
+}
+
+func applyDisplacement(in []*minimalTriangle, displacementMap texture.Texture, min, max, scale float64) []*hitable.Triangle {
 	return nil
 }
