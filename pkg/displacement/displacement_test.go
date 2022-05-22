@@ -87,22 +87,6 @@ func TestApplyTessellation(t *testing.T) {
 		wantNumTriangles int
 	}{
 		{
-			name: "2x2 displacement map",
-			resU: 2,
-			resV: 2,
-			input: []*minimalTriangle{
-				{
-					vertex0: vec3.Vec3Impl{X: -1},
-					vertex1: vec3.Vec3Impl{X: 1},
-					vertex2: vec3.Vec3Impl{Y: 1},
-					u1:      1.0,
-					u2:      0.5,
-					v2:      1.0,
-				},
-			},
-			wantNumTriangles: 4,
-		},
-		{
 			name: "3x3 displacement map",
 			resU: 3,
 			resV: 3,
