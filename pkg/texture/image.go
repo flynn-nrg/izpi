@@ -115,3 +115,13 @@ func (it *ImageTxt) FlipX() {
 		}
 	}
 }
+
+// SizeX returns the width of the underlying image.
+func (it *ImageTxt) SizeX() int {
+	return it.sizeX
+}
+
+// SizeX returns the height of the underlying image.
+func (it *ImageTxt) SizeY() int {
+	return it.sizeY
+}
