@@ -87,7 +87,7 @@ func TestApplyTessellation(t *testing.T) {
 		wantNumTriangles int
 	}{
 		{
-			name: "Triangle on the XY plane",
+			name: "2x2 displacement map",
 			resU: 2,
 			resV: 2,
 			input: []*minimalTriangle{
@@ -103,7 +103,7 @@ func TestApplyTessellation(t *testing.T) {
 			wantNumTriangles: 4,
 		},
 		{
-			name: "Triangle on the XY plane",
+			name: "3x3 displacement map",
 			resU: 3,
 			resV: 3,
 			input: []*minimalTriangle{
@@ -119,7 +119,7 @@ func TestApplyTessellation(t *testing.T) {
 			wantNumTriangles: 4,
 		},
 		{
-			name: "Triangle on the XY plane",
+			name: "4x2 displacement map",
 			resU: 4,
 			resV: 2,
 			input: []*minimalTriangle{
@@ -135,7 +135,7 @@ func TestApplyTessellation(t *testing.T) {
 			wantNumTriangles: 16,
 		},
 		{
-			name: "Triangle on the XY plane",
+			name: "2x4 displacement map",
 			resU: 2,
 			resV: 4,
 			input: []*minimalTriangle{
@@ -154,7 +154,9 @@ func TestApplyTessellation(t *testing.T) {
 
 	for _, test := range testData {
 		t.Run(test.name, func(t *testing.T) {
-			got := applyTessellation(test.input, test.resU, test.resV)
+			maxDeltaU := 1.0 / float64(test.resU-1)
+			maxDeltaV := 1.0 / float64(test.resV-1)
+			got := applyTessellation(test.input, maxDeltaU, maxDeltaV)
 			if len(got) != test.wantNumTriangles {
 				t.Errorf("applyTessellation() mismatch: expected %v triangles, got %v\n", test.wantNumTriangles, len(got))
 			}

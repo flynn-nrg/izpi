@@ -96,10 +96,7 @@ func tessellate(in *minimalTriangle) []*minimalTriangle {
 
 }
 
-func isTessellatedEnough(tri *minimalTriangle, resU int, resV int) bool {
-	maxDeltaU := 1.0 / float64(resU-1)
-	maxDeltaV := 1.0 / float64(resV-1)
-
+func isTessellatedEnough(tri *minimalTriangle, maxDeltaU float64, maxDeltaV float64) bool {
 	return math.Abs(tri.u1-tri.u0) <= maxDeltaU &&
 		math.Abs(tri.u2-tri.u1) <= maxDeltaU &&
 		math.Abs(tri.u0-tri.u2) <= maxDeltaU &&
@@ -136,12 +133,14 @@ func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture
 		})
 	}
 
-	tessellated := applyTessellation(in, resU, resV)
+	maxDeltaU := 1.0 / float64(resU-1)
+	maxDeltaV := 1.0 / float64(resV-1)
+	tessellated := applyTessellation(in, maxDeltaU, maxDeltaV)
 
 	return applyDisplacement(tessellated, displacementMap, min, max, scale), nil
 }
 
-func applyTessellation(in []*minimalTriangle, resU int, resV int) []*minimalTriangle {
+func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float64) []*minimalTriangle {
 	out := []*minimalTriangle{}
 
 	for {
@@ -153,7 +152,7 @@ func applyTessellation(in []*minimalTriangle, resU int, resV int) []*minimalTria
 		for _, triangle := range in {
 			newTriangles := tessellate(triangle)
 			for _, tessellated := range newTriangles {
-				if isTessellatedEnough(tessellated, resU, resV) {
+				if isTessellatedEnough(tessellated, maxDeltaU, maxDeltaV) {
 					out = append(out, tessellated)
 				} else {
 					toIn = append(toIn, tessellated)
