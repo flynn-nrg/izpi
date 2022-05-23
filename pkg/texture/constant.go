@@ -18,5 +18,6 @@ func NewConstant(color *vec3.Vec3Impl) *Constant {
 }
 
 func (c *Constant) Value(_ float64, _ float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
-	return c.color
+	col := *c.color
+	return &col
 }

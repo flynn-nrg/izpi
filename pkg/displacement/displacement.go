@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/flynn-nrg/izpi/pkg/hitable"
+	"github.com/flynn-nrg/izpi/pkg/mat3"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/texture"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
@@ -106,7 +107,7 @@ func isTessellatedEnough(tri *minimalTriangle, maxDeltaU float64, maxDeltaV floa
 }
 
 // ApplyDisplacementMap tessellates the triangles and applies the displacement map to all of them.
-func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture.Texture, min, max, scale float64) ([]*hitable.Triangle, error) {
+func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture.Texture, min, max float64) ([]*hitable.Triangle, error) {
 	var resU, resV int
 
 	if displacementTexture, ok := displacementMap.(*texture.ImageTxt); !ok {
@@ -137,7 +138,7 @@ func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture
 	maxDeltaV := 1.0 / float64(resV-1)
 	tessellated := applyTessellation(in, maxDeltaU, maxDeltaV)
 
-	return applyDisplacement(tessellated, displacementMap, min, max, scale), nil
+	return applyDisplacement(tessellated, displacementMap, min, max), nil
 }
 
 func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float64) []*minimalTriangle {
@@ -164,6 +165,63 @@ func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float
 	}
 }
 
-func applyDisplacement(in []*minimalTriangle, displacementMap texture.Texture, min, max, scale float64) []*hitable.Triangle {
-	return nil
+func applyDisplacement(in []*minimalTriangle, displacementMap texture.Texture, min, max float64) []*hitable.Triangle {
+	displaced := []*hitable.Triangle{}
+
+	for _, tri := range in {
+
+		edge1 := vec3.Sub(&tri.vertex1, &tri.vertex0)
+		edge2 := vec3.Sub(&tri.vertex2, &tri.vertex0)
+		normal := vec3.Cross(edge1, edge2)
+		normal.MakeUnitVector()
+		deltaU1 := tri.u1 - tri.u0
+		deltaU2 := tri.u2 - tri.u0
+		deltaV1 := tri.v1 - tri.v0
+		deltaV2 := tri.v2 - tri.v0
+
+		f := 1.0 / (deltaU1*deltaV2 - deltaU2*deltaV1)
+		tangent := &vec3.Vec3Impl{
+			X: f * (deltaV2*edge1.X - deltaV1*edge2.X),
+			Y: f * (deltaV2*edge1.Y - deltaV1*edge2.Y),
+			Z: f * (deltaV2*edge1.Z - deltaV1*edge2.Z),
+		}
+
+		tangent.MakeUnitVector()
+
+		bitangent := &vec3.Vec3Impl{
+			X: f * (-deltaU2*edge1.X + deltaU1*edge2.X),
+			Y: f * (-deltaU2*edge1.Y + deltaU1*edge2.Y),
+			Z: f * (-deltaU2*edge1.Z + deltaU1*edge2.Z),
+		}
+
+		bitangent.MakeUnitVector()
+
+		tbn := mat3.NewTBN(tangent, bitangent, normal)
+
+		displacementVertex0TangentSpace := displacementMap.Value(tri.u0, tri.v0, nil)
+		displacementVertex0TangentSpace.X = 0.0
+		displacementVertex0TangentSpace.Y = 0.0
+		displacementVertex0TangentSpace.Z = min + ((max - min) * displacementVertex0TangentSpace.Z)
+		displacementVertex0 := mat3.MatrixVectorMul(tbn, displacementVertex0TangentSpace)
+		vertex0 := vec3.Add(&tri.vertex0, displacementVertex0)
+
+		displacementVertex1TangentSpace := displacementMap.Value(tri.u1, tri.v1, nil)
+		displacementVertex1TangentSpace.X = 0.0
+		displacementVertex1TangentSpace.Y = 0.0
+		displacementVertex1TangentSpace.Z = min + ((max - min) * displacementVertex1TangentSpace.Z)
+		displacementVertex1 := mat3.MatrixVectorMul(tbn, displacementVertex1TangentSpace)
+		vertex1 := vec3.Add(&tri.vertex1, displacementVertex1)
+
+		displacementVertex2TangentSpace := displacementMap.Value(tri.u2, tri.v2, nil)
+		displacementVertex2TangentSpace.X = 0.0
+		displacementVertex2TangentSpace.Y = 0.0
+		displacementVertex2TangentSpace.Z = min + ((max - min) * displacementVertex2TangentSpace.Z)
+		displacementVertex2 := mat3.MatrixVectorMul(tbn, displacementVertex2TangentSpace)
+		vertex2 := vec3.Add(&tri.vertex2, displacementVertex2)
+
+		displaced = append(displaced, hitable.NewTriangleWithUV(vertex0, vertex1, vertex2,
+			tri.u0, tri.v0, tri.u1, tri.v1, tri.u2, tri.v2, tri.material))
+	}
+
+	return displaced
 }
