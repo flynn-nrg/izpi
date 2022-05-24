@@ -2,7 +2,7 @@
 
 ![Unit Tests](https://github.com/flynn-nrg/izpi/actions/workflows/test.yml/badge.svg)
 
-A path tracer implemented in Golang built on top of [Peter Shirley's Raytracing books](https://raytracing.github.io).
+A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) implemented in Golang built on top of [Peter Shirley's Raytracing books](https://raytracing.github.io).
 
 ## Features
 
