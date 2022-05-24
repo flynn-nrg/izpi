@@ -20,10 +20,11 @@ import (
 )
 
 const (
-	programName    = "izpi"
-	defaultXSize   = "500"
-	defaultYSize   = "500"
-	defaultSamples = "1000"
+	programName       = "izpi"
+	defaultXSize      = "500"
+	defaultYSize      = "500"
+	defaultSamples    = "1000"
+	defaultOutputFile = "output.png"
 )
 
 var flags struct {
@@ -32,7 +33,7 @@ var flags struct {
 	XSize      int64  `name:"x" help:"Output image x size" default:"${defaultXSize}"`
 	YSize      int64  `name:"y" help:"Output image y size" default:"${defaultYSize}"`
 	Samples    int64  `name:"samples" help:"Number of samples per ray" default:"${defaultSamples}"`
-	OutputFile string `type:"file" name:"output-file" help:"Output file."`
+	OutputFile string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
 	Verbose    bool   `name:"v" help:"Print rendering progress bar"`
 	Preview    bool   `name:"p" help:"Display rendering progress in a window"`
 	Normal     bool   `name:"n" help:"Render the normals at the ray intersection point"`
@@ -51,6 +52,7 @@ func main() {
 			"defaultXSize":      defaultXSize,
 			"defaultYSize":      defaultYSize,
 			"defaultSamples":    defaultSamples,
+			"defaultOutputFile": defaultOutputFile,
 		})
 
 	rand.Seed(time.Now().UnixNano())
@@ -58,7 +60,7 @@ func main() {
 	setupLogging(flags.LogLevel)
 
 	// Render
-	scene, err := scenes.SWHangar(float64(flags.XSize) / float64(flags.YSize))
+	scene, err := scenes.DisplacementTest(float64(flags.XSize) / float64(flags.YSize))
 	if err != nil {
 		log.Fatal(err)
 	}
