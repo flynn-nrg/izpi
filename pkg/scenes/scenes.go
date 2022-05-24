@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/flynn-nrg/izpi/pkg/camera"
+	"github.com/flynn-nrg/izpi/pkg/displacement"
 	"github.com/flynn-nrg/izpi/pkg/hitable"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/scene"
@@ -522,6 +523,89 @@ func SWHangar(aspect float64) (*scene.Scene, error) {
 	distToFocus := 10.0
 	aperture := 0.0
 	vfov := float64(100.0)
+	time0 := 0.0
+	time1 := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+
+	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
+}
+
+// DisplacementTest returns a scene recreating the Cornell box and a displacement map applied to the floor.
+func DisplacementTest(aspect float64) (*scene.Scene, error) {
+	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
+	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
+	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
+	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 15, Y: 15, Z: 15}))
+	glass := material.NewDielectric(1.5)
+
+	// https://ambientcg.com/view?id=Bricks078
+	floorTextFile, err := os.Open("bricks/Bricks078_4K_Color.png")
+	if err != nil {
+		return nil, err
+	}
+
+	floorText, err := texture.NewFromPNG(floorTextFile)
+	if err != nil {
+		return nil, err
+	}
+
+	floorMat := material.NewLambertian(floorText)
+
+	fmt.Printf("%v", floorMat)
+
+	floor := []*hitable.Triangle{
+		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: 555}, &vec3.Vec3Impl{}, &vec3.Vec3Impl{X: 555, Z: 555}, 1, 0, 0, 0, 1, 1, floorMat),
+		hitable.NewTriangleWithUV(&vec3.Vec3Impl{}, &vec3.Vec3Impl{Z: 555}, &vec3.Vec3Impl{X: 555, Z: 555}, 0, 0, 0, 1, 1, 1, floorMat),
+	}
+
+	// https://ambientcg.com/view?id=Bricks078 scaled down to 400x200.
+	displacementFile, err := os.Open("bricks/displacement.png")
+	if err != nil {
+		return nil, err
+	}
+
+	displacementText, err := texture.NewFromPNG(displacementFile)
+	if err != nil {
+		return nil, err
+	}
+
+	displacedFloor, err := displacement.ApplyDisplacementMap(floor, displacementText, 0, 20)
+	if err != nil {
+		return nil, err
+	}
+
+	hitables := []hitable.Hitable{
+		hitable.NewFlipNormals(hitable.NewYZRect(0, 555, 0, 555, 555, green)),
+		hitable.NewYZRect(0, 555, 0, 555, 0, red),
+		hitable.NewFlipNormals(hitable.NewXZRect(213, 343, 227, 332, 554, light)),
+		hitable.NewFlipNormals(hitable.NewXZRect(0, 555, 0, 555, 555, white)),
+		hitable.NewFlipNormals(hitable.NewXYRect(0, 555, 0, 555, 555, white)),
+		//	hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: 555}, &vec3.Vec3Impl{}, &vec3.Vec3Impl{X: 555, Z: 555}, 1, 0, 0, 0, 1, 1, floorMat),
+		//	hitable.NewTriangleWithUV(&vec3.Vec3Impl{}, &vec3.Vec3Impl{Z: 555}, &vec3.Vec3Impl{X: 555, Z: 555}, 0, 0, 0, 1, 1, 1, floorMat),
+		hitable.NewSphere(&vec3.Vec3Impl{X: 190, Y: 130, Z: 190}, &vec3.Vec3Impl{X: 190, Y: 130, Z: 190}, 0, 1, 90, glass),
+	}
+
+	triangles := []hitable.Hitable{}
+	for _, t := range displacedFloor {
+		triangles = append(triangles, t)
+	}
+	bvh := hitable.NewBVH(triangles, 0, 1)
+
+	lights := []hitable.Hitable{}
+	for _, h := range hitables {
+		if h.IsEmitter() {
+			lights = append(lights, h)
+		}
+	}
+
+	hitables = append(hitables, bvh)
+
+	lookFrom := &vec3.Vec3Impl{X: 278.0, Y: 278.0, Z: -800.0}
+	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
+	vup := &vec3.Vec3Impl{Y: 1}
+	distToFocus := 10.0
+	aperture := 0.0
+	vfov := float64(40.0)
 	time0 := 0.0
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
