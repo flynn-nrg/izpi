@@ -36,8 +36,8 @@ func (cg *ColourGrading) Apply(i image.Image, _ *scene.Scene) error {
 	if !ok {
 		return errors.New("only FloatNRGBA image format is supported")
 	}
-	for y := i.Bounds().Min.Y; y < i.Bounds().Max.Y; y++ {
-		for x := i.Bounds().Min.X; x < i.Bounds().Max.X; x++ {
+	for y := i.Bounds().Min.Y; y <= i.Bounds().Max.Y; y++ {
+		for x := i.Bounds().Min.X; x <= i.Bounds().Max.X; x++ {
 			pixel := im.FloatNRGBAAt(x, y)
 			rgb, err := cg.g.LookUp(pixel.R, pixel.G, pixel.B)
 			if err != nil {
