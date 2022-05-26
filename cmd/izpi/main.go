@@ -60,7 +60,7 @@ func main() {
 	setupLogging(flags.LogLevel)
 
 	// Render
-	scene, err := scenes.DisplacementTest(float64(flags.XSize) / float64(flags.YSize))
+	scene, err := scenes.VWBeetle(float64(flags.XSize) / float64(flags.YSize))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,6 +95,7 @@ func main() {
 	//	log.Fatal(err)
 	//}
 	pp := postprocess.NewPipeline([]postprocess.Filter{
+		postprocess.NewGamma(),
 		postprocess.NewClamp(1.0),
 		//	cg,
 	})

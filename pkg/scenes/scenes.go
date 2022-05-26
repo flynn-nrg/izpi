@@ -612,3 +612,58 @@ func DisplacementTest(aspect float64) (*scene.Scene, error) {
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }
+
+// VWBeetle returns a scene that tests the sky dome and HDR textures functionality.
+func VWBeetle(aspect float64) (*scene.Scene, error) {
+	dome, err := hitable.NewSkyDome(&vec3.Vec3Impl{}, 100, "OutdoorHDRI019_4K-HDR.hdr")
+	if err != nil {
+		return nil, err
+	}
+
+	beetleFile, err := os.Open("beetle.obj")
+	if err != nil {
+		return nil, err
+	}
+
+	beetleObj, err := wavefront.NewObjFromReader(beetleFile, "./", wavefront.IGNORE_MATERIALS)
+	if err != nil {
+		return nil, err
+	}
+
+	beetleObj.Scale(&vec3.Vec3Impl{X: 4, Y: 4, Z: 4})
+	//	glass := material.NewDielectric(1.5)
+	//	glassSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -9, Y: 0, Z: 3}, &vec3.Vec3Impl{X: -9, Y: 0, Z: 3}, 0, 1, 4, glass)
+	//	metal := material.NewMetal(&vec3.Vec3Impl{X: 0.5, Y: 1.0, Z: 1.0}, 0)
+	//	metalSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -24, Y: -4, Z: 6}, &vec3.Vec3Impl{X: -24, Y: -4, Z: 6}, 0, 1, 3, metal)
+	hitables := []hitable.Hitable{dome}
+	green := material.NewMetal(&vec3.Vec3Impl{X: 0.8, Y: .8, Z: .8}, 0.3)
+
+	for i := range beetleObj.Groups {
+		bettleHitables, err := beetleObj.GroupToHitablesWithCustomMaterial(i, green)
+		if err != nil {
+			return nil, err
+		}
+		bvh := hitable.NewBVH(bettleHitables, 0, 1)
+		hitables = append(hitables, bvh)
+	}
+
+	lights := []hitable.Hitable{}
+	for _, h := range hitables {
+		if h.IsEmitter() {
+			lights = append(lights, h)
+		}
+	}
+
+	lookFrom := &vec3.Vec3Impl{X: 1.0, Y: 2, Z: 3.0}
+	lookAt := &vec3.Vec3Impl{X: -.4, Y: 1.3, Z: 1}
+	vup := &vec3.Vec3Impl{Y: 1}
+	distToFocus := 10.0
+	aperture := 0.0
+	vfov := float64(60.0)
+	time0 := 0.0
+	time1 := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+
+	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
+
+}
