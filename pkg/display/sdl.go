@@ -6,6 +6,7 @@
 package display
 
 import (
+	"math"
 	"sync"
 	"time"
 
@@ -160,6 +161,8 @@ func (sd *SDLDisplay) poll() {
 }
 
 func floatToByte(in float64) byte {
+	// Gamma 2.0
+	in = math.Sqrt(in)
 	p := int(in * 255)
 	if p > 255 {
 		return 255
