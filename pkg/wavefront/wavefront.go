@@ -158,6 +158,13 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 			continue
 		}
 		if strings.HasPrefix(s, "f") {
+			// Some programs export meshes without groups.
+			// Create a default one.
+			if currentGroup == nil {
+				currentGroup = &Group{
+					Name: "default",
+				}
+			}
 			f := strings.Split(s, " ")
 			switch len(f) {
 			case 4:
