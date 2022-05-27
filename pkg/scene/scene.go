@@ -2,8 +2,8 @@
 package scene
 
 import (
-	"gitlab.com/flynn-nrg/izpi/pkg/camera"
-	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
+	"github.com/flynn-nrg/izpi/pkg/camera"
+	"github.com/flynn-nrg/izpi/pkg/hitable"
 )
 
 // Scene represents a scene with the world elements, lights and camera.

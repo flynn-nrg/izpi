@@ -3,8 +3,8 @@ package mat3
 import (
 	"testing"
 
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 	"github.com/google/go-cmp/cmp"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 func TestMatrixVectorMul(t *testing.T) {

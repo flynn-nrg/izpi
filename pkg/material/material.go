@@ -4,7 +4,7 @@ import (
 	"math"
 	"math/rand"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 func randomInUnitSphere() *vec3.Vec3Impl {

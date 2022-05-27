@@ -4,7 +4,7 @@ package onb
 import (
 	"math"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Onb represents an ortho-normal base.

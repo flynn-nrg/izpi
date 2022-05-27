@@ -4,8 +4,8 @@ package aabb
 import (
 	"math"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/ray"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/ray"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // AABB represents an axis-aligned bounding box.

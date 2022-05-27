@@ -254,3 +254,12 @@ func Max3(v0 *Vec3Impl, v1 *Vec3Impl, v2 *Vec3Impl) *Vec3Impl {
 
 	return &Vec3Impl{X: xMax, Y: yMax, Z: zMax}
 }
+
+// Lerp performs a linear interpolation between the two provided vectors.
+func Lerp(v0, v1 *Vec3Impl, t float64) *Vec3Impl {
+	return &Vec3Impl{
+		X: (1-t)*v0.X + t*v1.X,
+		Y: (1-t)*v0.Y + t*v1.Y,
+		Z: (1-t)*v0.Z + t*v1.Z,
+	}
+}

@@ -6,11 +6,13 @@
 package display
 
 import (
-	"log"
+	"math"
 	"sync"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var _ Display = (*SDLDisplay)(nil)
@@ -92,15 +94,15 @@ func (sd *SDLDisplay) Start() {
 		sdl.Do(func() {
 			err := sd.texture.Destroy()
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 			err = sd.renderer.Destroy()
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 			err = sd.window.Destroy()
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 		})
 	})
@@ -130,11 +132,11 @@ func (sd *SDLDisplay) busyLoop() {
 
 			err := sd.texture.Update(rect, pixels, int(sd.pitch))
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 			err = sd.renderer.Copy(sd.texture, nil, nil)
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 			}
 			sd.renderer.Present()
 
@@ -159,6 +161,8 @@ func (sd *SDLDisplay) poll() {
 }
 
 func floatToByte(in float64) byte {
+	// Gamma 2.0
+	in = math.Sqrt(in)
 	p := int(in * 255)
 	if p > 255 {
 		return 255

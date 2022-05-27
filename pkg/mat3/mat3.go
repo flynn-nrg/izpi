@@ -1,7 +1,7 @@
 // Package mat3 implements functions to work with 3x3 matrices.
 package mat3
 
-import "gitlab.com/flynn-nrg/izpi/pkg/vec3"
+import "github.com/flynn-nrg/izpi/pkg/vec3"
 
 type Mat3 struct {
 	A11 float64

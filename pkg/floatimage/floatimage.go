@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/colour"
+	"github.com/flynn-nrg/izpi/pkg/colour"
 )
 
 // Ensure interface compliance.

@@ -2,9 +2,9 @@
 package scatterrecord
 
 import (
-	"gitlab.com/flynn-nrg/izpi/pkg/pdf"
-	"gitlab.com/flynn-nrg/izpi/pkg/ray"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/pdf"
+	"github.com/flynn-nrg/izpi/pkg/ray"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // ScatterRecord represents a scatter record.

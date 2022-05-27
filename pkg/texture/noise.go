@@ -3,8 +3,8 @@ package texture
 import (
 	"math"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/perlin"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/perlin"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Ensure interface compliance.

@@ -7,15 +7,15 @@ import (
 	"math/rand"
 	"sync"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/colour"
-	"gitlab.com/flynn-nrg/izpi/pkg/display"
-	"gitlab.com/flynn-nrg/izpi/pkg/floatimage"
-	"gitlab.com/flynn-nrg/izpi/pkg/grid"
-	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
-	"gitlab.com/flynn-nrg/izpi/pkg/pdf"
-	"gitlab.com/flynn-nrg/izpi/pkg/ray"
-	"gitlab.com/flynn-nrg/izpi/pkg/scene"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/colour"
+	"github.com/flynn-nrg/izpi/pkg/display"
+	"github.com/flynn-nrg/izpi/pkg/floatimage"
+	"github.com/flynn-nrg/izpi/pkg/grid"
+	"github.com/flynn-nrg/izpi/pkg/hitable"
+	"github.com/flynn-nrg/izpi/pkg/pdf"
+	"github.com/flynn-nrg/izpi/pkg/ray"
+	"github.com/flynn-nrg/izpi/pkg/scene"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 
 	pb "github.com/cheggaaa/pb/v3"
 )
@@ -26,6 +26,7 @@ type Renderer struct {
 	canvas      *floatimage.FloatNRGBA
 	previewChan chan display.DisplayTile
 	preview     bool
+	normalOnly  bool
 	sizeX       int
 	sizeY       int
 	numSamples  int
@@ -37,6 +38,7 @@ type workUnit struct {
 	scene       *scene.Scene
 	canvas      *floatimage.FloatNRGBA
 	bar         *pb.ProgressBar
+	renderFunc  func(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int) *vec3.Vec3Impl
 	previewChan chan display.DisplayTile
 	preview     bool
 	verbose     bool
@@ -45,6 +47,17 @@ type workUnit struct {
 	x1          int
 	y0          int
 	y1          int
+}
+
+func computeNormal(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int) *vec3.Vec3Impl {
+	if rec, _, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
+		normal := rec.Normal()
+		normal.X = math.Abs(normal.X)
+		normal.Y = math.Abs(normal.Y)
+		normal.Z = math.Abs(normal.Z)
+		return normal
+	}
+	return &vec3.Vec3Impl{}
 }
 
 func computeColour(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int) *vec3.Vec3Impl {
@@ -98,12 +111,11 @@ func renderRect(w workUnit) {
 				u := (float64(x) + rand.Float64()) / float64(nx)
 				v := (float64(y) + rand.Float64()) / float64(ny)
 				r := w.scene.Camera.GetRay(u, v)
-				col = vec3.Add(col, vec3.DeNAN(computeColour(r, w.scene.World, w.scene.Lights, 0)))
+				col = vec3.Add(col, vec3.DeNAN(w.renderFunc(r, w.scene.World, w.scene.Lights, 0)))
 			}
 
+			// Linear colour space.
 			col = vec3.ScalarDiv(col, float64(w.numSamples))
-			// gamma 2
-			col = &vec3.Vec3Impl{X: math.Sqrt(col.X), Y: math.Sqrt(col.Y), Z: math.Sqrt(col.Z)}
 			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
 			if w.preview {
 				tile.Pixels[i] = col.Z
@@ -138,12 +150,13 @@ func worker(input chan workUnit, quit chan struct{}, wg *sync.WaitGroup) {
 
 // New returns a new instance of a renderer.
 func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int,
-	numWorkers int, verbose bool, previewChan chan display.DisplayTile, preview bool) *Renderer {
+	numWorkers int, verbose bool, previewChan chan display.DisplayTile, preview bool, normalOnly bool) *Renderer {
 	return &Renderer{
 		scene:       scene,
 		canvas:      floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY)),
 		previewChan: previewChan,
 		preview:     preview,
+		normalOnly:  normalOnly,
 		sizeX:       sizeX,
 		sizeY:       sizeY,
 		numSamples:  numSamples,
@@ -190,11 +203,17 @@ func (r *Renderer) Render() image.Image {
 	gridSizeX := r.sizeX / stepSizeX
 	gridSizeY := r.sizeY / stepSizeY
 	path := grid.WalkGrid(gridSizeX, gridSizeY, grid.PATTERN_SPIRAL)
+	renderFunc := computeColour
+	if r.normalOnly {
+		renderFunc = computeNormal
+	}
+
 	for _, t := range path {
 		queue <- workUnit{
 			scene:       r.scene,
 			canvas:      r.canvas,
 			bar:         bar,
+			renderFunc:  renderFunc,
 			previewChan: r.previewChan,
 			preview:     r.preview,
 			verbose:     r.verbose,

@@ -1,11 +1,11 @@
 package hitable
 
 import (
-	"gitlab.com/flynn-nrg/izpi/pkg/aabb"
-	"gitlab.com/flynn-nrg/izpi/pkg/hitrecord"
-	"gitlab.com/flynn-nrg/izpi/pkg/material"
-	"gitlab.com/flynn-nrg/izpi/pkg/ray"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/aabb"
+	"github.com/flynn-nrg/izpi/pkg/hitrecord"
+	"github.com/flynn-nrg/izpi/pkg/material"
+	"github.com/flynn-nrg/izpi/pkg/ray"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Ensure interface compliance.

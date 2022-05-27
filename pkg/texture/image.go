@@ -7,10 +7,10 @@ import (
 	"image/png"
 	"io"
 
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 	"github.com/mdouchement/hdr"
 	_ "github.com/mdouchement/hdr/codec/rgbe"
 	"github.com/mdouchement/hdr/hdrcolor"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Ensure interface compliance.
@@ -114,4 +114,14 @@ func (it *ImageTxt) FlipX() {
 			im.Set(it.data.Bounds().Max.X-x, y, c1)
 		}
 	}
+}
+
+// SizeX returns the width of the underlying image.
+func (it *ImageTxt) SizeX() int {
+	return it.sizeX
+}
+
+// SizeX returns the height of the underlying image.
+func (it *ImageTxt) SizeY() int {
+	return it.sizeY
 }

@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/hitable"
-	"gitlab.com/flynn-nrg/izpi/pkg/material"
-	"gitlab.com/flynn-nrg/izpi/pkg/texture"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/hitable"
+	"github.com/flynn-nrg/izpi/pkg/material"
+	"github.com/flynn-nrg/izpi/pkg/texture"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 type ParseOption int
@@ -158,6 +158,13 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 			continue
 		}
 		if strings.HasPrefix(s, "f") {
+			// Some programs export meshes without groups.
+			// Create a default one.
+			if currentGroup == nil {
+				currentGroup = &Group{
+					Name: "default",
+				}
+			}
 			f := strings.Split(s, " ")
 			switch len(f) {
 			case 4:

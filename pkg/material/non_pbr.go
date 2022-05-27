@@ -1,6 +1,6 @@
 package material
 
-import "gitlab.com/flynn-nrg/izpi/pkg/texture"
+import "github.com/flynn-nrg/izpi/pkg/texture"
 
 type nonPBR struct{}
 

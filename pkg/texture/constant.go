@@ -1,6 +1,6 @@
 package texture
 
-import "gitlab.com/flynn-nrg/izpi/pkg/vec3"
+import "github.com/flynn-nrg/izpi/pkg/vec3"
 
 // Ensure interface compliance.
 var _ Texture = (*Constant)(nil)
@@ -18,5 +18,6 @@ func NewConstant(color *vec3.Vec3Impl) *Constant {
 }
 
 func (c *Constant) Value(_ float64, _ float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
-	return c.color
+	col := *c.color
+	return &col
 }

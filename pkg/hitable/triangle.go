@@ -4,12 +4,12 @@ import (
 	"math"
 	"math/rand"
 
-	"gitlab.com/flynn-nrg/izpi/pkg/aabb"
-	"gitlab.com/flynn-nrg/izpi/pkg/hitrecord"
-	"gitlab.com/flynn-nrg/izpi/pkg/mat3"
-	"gitlab.com/flynn-nrg/izpi/pkg/material"
-	"gitlab.com/flynn-nrg/izpi/pkg/ray"
-	"gitlab.com/flynn-nrg/izpi/pkg/vec3"
+	"github.com/flynn-nrg/izpi/pkg/aabb"
+	"github.com/flynn-nrg/izpi/pkg/hitrecord"
+	"github.com/flynn-nrg/izpi/pkg/mat3"
+	"github.com/flynn-nrg/izpi/pkg/material"
+	"github.com/flynn-nrg/izpi/pkg/ray"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Ensure interface compliance.
@@ -197,4 +197,44 @@ func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 
 func (tri *Triangle) IsEmitter() bool {
 	return tri.material.IsEmitter()
+}
+
+func (tri *Triangle) Vertex0() vec3.Vec3Impl {
+	return *tri.vertex0
+}
+
+func (tri *Triangle) Vertex1() vec3.Vec3Impl {
+	return *tri.vertex1
+}
+
+func (tri *Triangle) Vertex2() vec3.Vec3Impl {
+	return *tri.vertex2
+}
+
+func (tri *Triangle) U0() float64 {
+	return tri.u0
+}
+
+func (tri *Triangle) U1() float64 {
+	return tri.u1
+}
+
+func (tri *Triangle) U2() float64 {
+	return tri.u2
+}
+
+func (tri *Triangle) V0() float64 {
+	return tri.v0
+}
+
+func (tri *Triangle) V1() float64 {
+	return tri.v1
+}
+
+func (tri *Triangle) V2() float64 {
+	return tri.v2
+}
+
+func (tri *Triangle) Material() material.Material {
+	return tri.material
 }

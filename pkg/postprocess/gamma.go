@@ -3,6 +3,7 @@ package postprocess
 import (
 	"errors"
 	"image"
+	"math"
 
 	"github.com/flynn-nrg/izpi/pkg/colour"
 	"github.com/flynn-nrg/izpi/pkg/floatimage"
@@ -10,21 +11,17 @@ import (
 )
 
 // Ensure interface compliance.
-var _ Filter = (*Clamp)(nil)
+var _ Filter = (*Gamma)(nil)
 
-// Clamp represents a clamp filter.
-type Clamp struct {
-	max float64
-}
+// Gamma represents a gamma adjustment filter.
+type Gamma struct{}
 
 // NewClamp returns a new clamp filter.
-func NewClamp(max float64) *Clamp {
-	return &Clamp{
-		max: max,
-	}
+func NewGamma() *Gamma {
+	return &Gamma{}
 }
 
-func (c *Clamp) Apply(i image.Image, _ *scene.Scene) error {
+func (g *Gamma) Apply(i image.Image, _ *scene.Scene) error {
 	im, ok := i.(*floatimage.FloatNRGBA)
 	if !ok {
 		return errors.New("only FloatNRGBA image format is supported")
@@ -33,19 +30,12 @@ func (c *Clamp) Apply(i image.Image, _ *scene.Scene) error {
 		for x := i.Bounds().Min.X; x <= i.Bounds().Max.X; x++ {
 			pixel := im.FloatNRGBAAt(x, y)
 			im.Set(x, y, colour.FloatNRGBA{
-				R: clamp(pixel.R, c.max),
-				G: clamp(pixel.G, c.max),
-				B: clamp(pixel.B, c.max),
+				R: math.Sqrt(pixel.R),
+				G: math.Sqrt(pixel.G),
+				B: math.Sqrt(pixel.B),
 				A: pixel.A})
 		}
 	}
 
 	return nil
-}
-
-func clamp(v float64, max float64) float64 {
-	if v < max {
-		return v
-	}
-	return max
 }
