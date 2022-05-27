@@ -403,7 +403,7 @@ func TVSet(aspect float64) (*scene.Scene, error) {
 }
 
 func SWHangar(aspect float64) (*scene.Scene, error) {
-	white := material.NewMetal(&vec3.Vec3Impl{X: 0.6, Y: .8, Z: .8}, 0.4)
+	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	glass := material.NewDielectric(1.5)
 
 	objectName := "sw/hangar.obj"
@@ -543,7 +543,8 @@ func VWBeetle(aspect float64) (*scene.Scene, error) {
 		return nil, err
 	}
 
-	beetleFile, err := os.Open("beetle.obj")
+	// https://github.com/alecjacobson/common-3d-test-models
+	beetleFile, err := os.Open("beetle2.obj")
 	if err != nil {
 		return nil, err
 	}
@@ -577,8 +578,10 @@ func VWBeetle(aspect float64) (*scene.Scene, error) {
 		}
 	}
 
-	lookFrom := &vec3.Vec3Impl{X: 1.0, Y: 2, Z: 3.0}
-	lookAt := &vec3.Vec3Impl{X: -.4, Y: 1.3, Z: 1}
+	//	lookFrom := &vec3.Vec3Impl{X: 1.0, Y: 2, Z: 3.0}
+	//	lookAt := &vec3.Vec3Impl{X: -.4, Y: 1.3, Z: 1}
+	lookFrom := &vec3.Vec3Impl{X: 2.0, Y: 0.6, Z: 2.0}
+	lookAt := &vec3.Vec3Impl{X: .4, Y: 0, Z: 1}
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
