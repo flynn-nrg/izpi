@@ -5,6 +5,8 @@ import (
 	"image/color"
 
 	"github.com/flynn-nrg/izpi/pkg/colour"
+	"github.com/mdouchement/hdr"
+	"github.com/mdouchement/hdr/hdrcolor"
 )
 
 // Ensure interface compliance.
@@ -68,4 +70,19 @@ func (f *FloatNRGBA) Set(x, y int, c color.Color) {
 	s[1] = c1.G
 	s[2] = c1.B
 	s[3] = c1.A
+}
+
+func (f *FloatNRGBA) ToHDR() (hdr.Image, error) {
+	rgbImage := hdr.NewRGB(f.Rect)
+	for y := f.Bounds().Min.Y; y <= f.Bounds().Max.Y; y++ {
+		for x := f.Bounds().Min.X; x <= f.Bounds().Max.X; x++ {
+			pixel := f.FloatNRGBAAt(x, y)
+			rgbImage.Set(x, y, hdrcolor.RGB{
+				R: pixel.R,
+				G: pixel.G,
+				B: pixel.B,
+			})
+		}
+	}
+	return rgbImage, nil
 }
