@@ -430,7 +430,7 @@ func PBRTest(aspect float64) (*scene.Scene, error) {
 	}
 
 	placeHolderTxt := texture.NewConstant(&vec3.Vec3Impl{X: 1, Y: 1, Z: 1})
-	floorMat := material.NewPBR(floorAlbedoText, floorNormalMapText, placeHolderTxt, placeHolderTxt)
+	floorMat := material.NewPBR(floorAlbedoText, floorNormalMapText, placeHolderTxt, placeHolderTxt, placeHolderTxt, 1.0)
 
 	hitables := []hitable.Hitable{
 		//hitable.NewFlipNormals(hitable.NewYZRect(0, 555, 0, 555, 555, floorMat)),
@@ -463,6 +463,57 @@ func PBRTest(aspect float64) (*scene.Scene, error) {
 	distToFocus := 10.0
 	aperture := 0.0
 	vfov := float64(40.0)
+	time0 := 0.0
+	time1 := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+
+	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
+}
+
+func SWHangar(aspect float64) (*scene.Scene, error) {
+	white := material.NewMetal(&vec3.Vec3Impl{X: 0.6, Y: .8, Z: .8}, 0.4)
+	glass := material.NewDielectric(1.5)
+
+	objectName := "sw/hangar.obj"
+	objFile, err := os.Open(objectName)
+	if err != nil {
+		return nil, err
+	}
+
+	hangar, err := wavefront.NewObjFromReader(objFile, filepath.Dir(objectName), wavefront.IGNORE_TEXTURES)
+	if err != nil {
+		return nil, err
+	}
+
+	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 10, Y: 10, Z: 10}))
+
+	hitables := []hitable.Hitable{
+		hitable.NewSphere(&vec3.Vec3Impl{X: 0, Y: 20, Z: -30}, &vec3.Vec3Impl{X: 0, Y: 20, Z: -30}, 0, 1, 20, light),
+		hitable.NewSphere(&vec3.Vec3Impl{X: -50, Y: 15, Z: 80}, &vec3.Vec3Impl{X: -50, Y: 15, Z: 80}, 0, 1, 20, glass),
+	}
+
+	for i := range hangar.Groups {
+		hangarHitables, err := hangar.GroupToHitablesWithCustomMaterial(i, white)
+		if err != nil {
+			return nil, err
+		}
+		bvh := hitable.NewBVH(hangarHitables, 0, 1)
+		hitables = append(hitables, bvh)
+	}
+
+	lights := []hitable.Hitable{}
+	for _, h := range hitables {
+		if h.IsEmitter() {
+			lights = append(lights, h)
+		}
+	}
+
+	lookFrom := &vec3.Vec3Impl{X: 0.0, Y: 25.0, Z: 30.0}
+	lookAt := &vec3.Vec3Impl{X: -1, Y: 25, Z: 31}
+	vup := &vec3.Vec3Impl{Y: 1}
+	distToFocus := 10.0
+	aperture := 0.0
+	vfov := float64(100.0)
 	time0 := 0.0
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
