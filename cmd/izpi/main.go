@@ -5,10 +5,12 @@ import (
 	"image"
 	"math/rand"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/flynn-nrg/izpi/pkg/display"
+	"github.com/flynn-nrg/izpi/pkg/floatimage"
 	"github.com/flynn-nrg/izpi/pkg/output"
 	"github.com/flynn-nrg/izpi/pkg/postprocess"
 	"github.com/flynn-nrg/izpi/pkg/render"
@@ -33,6 +35,7 @@ var flags struct {
 	XSize      int64  `name:"x" help:"Output image x size" default:"${defaultXSize}"`
 	YSize      int64  `name:"y" help:"Output image y size" default:"${defaultYSize}"`
 	Samples    int64  `name:"samples" help:"Number of samples per ray" default:"${defaultSamples}"`
+	HDR        bool   `name:"hdr" help:"Output an HDR image"`
 	OutputFile string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
 	Verbose    bool   `name:"v" help:"Print rendering progress bar"`
 	Preview    bool   `name:"p" help:"Display rendering progress in a window"`
@@ -94,25 +97,51 @@ func main() {
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
-	pp := postprocess.NewPipeline([]postprocess.Filter{
-		postprocess.NewGamma(),
-		postprocess.NewClamp(1.0),
-		//	cg,
-	})
-	err = pp.Apply(canvas, scene)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	// Output
-	out, err := output.NewPNG(flags.OutputFile)
-	if err != nil {
-		log.Fatal(err)
-	}
+	if flags.HDR {
+		var hdrCanvas image.Image
+		var err error
 
-	err = out.Write(canvas)
-	if err != nil {
-		log.Fatal(err)
+		if floatNRGBACanvas, ok := canvas.(*floatimage.FloatNRGBA); ok {
+			hdrCanvas, err = floatNRGBACanvas.ToHDR()
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Fatal("image format is not FloatNRGBA")
+		}
+
+		outFileName := strings.Replace(flags.OutputFile, "png", "hdr", 1)
+		out, err := output.NewHDR(outFileName)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = out.Write(hdrCanvas)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		pp := postprocess.NewPipeline([]postprocess.Filter{
+			postprocess.NewGamma(),
+			postprocess.NewClamp(1.0),
+			//	cg,
+		})
+		err = pp.Apply(canvas, scene)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Output
+		out, err := output.NewPNG(flags.OutputFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = out.Write(canvas)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	if flags.Preview {
