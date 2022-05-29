@@ -3,7 +3,7 @@ package render
 
 import (
 	"image"
-	"math"
+	"log"
 	"math/rand"
 	"sync"
 
@@ -11,9 +11,7 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/display"
 	"github.com/flynn-nrg/izpi/pkg/floatimage"
 	"github.com/flynn-nrg/izpi/pkg/grid"
-	"github.com/flynn-nrg/izpi/pkg/hitable"
-	"github.com/flynn-nrg/izpi/pkg/pdf"
-	"github.com/flynn-nrg/izpi/pkg/ray"
+	"github.com/flynn-nrg/izpi/pkg/sampler"
 	"github.com/flynn-nrg/izpi/pkg/scene"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
 
@@ -25,8 +23,10 @@ type Renderer struct {
 	scene       *scene.Scene
 	canvas      *floatimage.FloatNRGBA
 	previewChan chan display.DisplayTile
+	maxDepth    int
+	background  *vec3.Vec3Impl
 	preview     bool
-	normalOnly  bool
+	samplerType sampler.SamplerType
 	sizeX       int
 	sizeY       int
 	numSamples  int
@@ -38,7 +38,7 @@ type workUnit struct {
 	scene       *scene.Scene
 	canvas      *floatimage.FloatNRGBA
 	bar         *pb.ProgressBar
-	renderFunc  func(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int) *vec3.Vec3Impl
+	sampler     sampler.Sampler
 	previewChan chan display.DisplayTile
 	preview     bool
 	verbose     bool
@@ -47,44 +47,6 @@ type workUnit struct {
 	x1          int
 	y0          int
 	y1          int
-}
-
-func computeNormal(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int) *vec3.Vec3Impl {
-	if rec, _, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
-		normal := rec.Normal()
-		normal.X = math.Abs(normal.X)
-		normal.Y = math.Abs(normal.Y)
-		normal.Z = math.Abs(normal.Z)
-		return normal
-	}
-	return &vec3.Vec3Impl{}
-}
-
-func computeColour(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int) *vec3.Vec3Impl {
-	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
-		_, srec, ok := mat.Scatter(r, rec)
-		emitted := mat.Emitted(r, rec, rec.U(), rec.V(), rec.P())
-		if depth < 50 && ok {
-			if srec.IsSpecular() {
-				// srec.Attenuation() * colour(...)
-				return vec3.Mul(srec.Attenuation(), computeColour(srec.SpecularRay(), world, lightShape, depth+1))
-			} else {
-				pLight := pdf.NewHitable(lightShape, rec.P())
-				p := pdf.NewMixture(pLight, srec.PDF())
-				scattered := ray.New(rec.P(), p.Generate(), r.Time())
-				pdfVal := p.Value(scattered.Direction())
-				// emitted + (albedo * scatteringPDF())*colour() / pdf
-				v1 := vec3.ScalarMul(computeColour(scattered, world, lightShape, depth+1), mat.ScatteringPDF(r, rec, scattered))
-				v2 := vec3.Mul(srec.Attenuation(), v1)
-				v3 := vec3.ScalarDiv(v2, pdfVal)
-				res := vec3.Add(emitted, v3)
-				return res
-			}
-		} else {
-			return emitted
-		}
-	}
-	return &vec3.Vec3Impl{}
 }
 
 func renderRect(w workUnit) {
@@ -111,7 +73,7 @@ func renderRect(w workUnit) {
 				u := (float64(x) + rand.Float64()) / float64(nx)
 				v := (float64(y) + rand.Float64()) / float64(ny)
 				r := w.scene.Camera.GetRay(u, v)
-				col = vec3.Add(col, vec3.DeNAN(w.renderFunc(r, w.scene.World, w.scene.Lights, 0)))
+				col = vec3.Add(col, vec3.DeNAN(w.sampler.Sample(r, w.scene.World, w.scene.Lights, 0)))
 			}
 
 			// Linear colour space.
@@ -149,14 +111,16 @@ func worker(input chan workUnit, quit chan struct{}, wg *sync.WaitGroup) {
 }
 
 // New returns a new instance of a renderer.
-func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int,
-	numWorkers int, verbose bool, previewChan chan display.DisplayTile, preview bool, normalOnly bool) *Renderer {
+func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, maxDepth int, background *vec3.Vec3Impl,
+	numWorkers int, verbose bool, previewChan chan display.DisplayTile, preview bool, samplerType sampler.SamplerType) *Renderer {
 	return &Renderer{
 		scene:       scene,
 		canvas:      floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY)),
 		previewChan: previewChan,
+		maxDepth:    maxDepth,
+		background:  background,
 		preview:     preview,
-		normalOnly:  normalOnly,
+		samplerType: samplerType,
 		sizeX:       sizeX,
 		sizeY:       sizeY,
 		numSamples:  numSamples,
@@ -203,9 +167,15 @@ func (r *Renderer) Render() image.Image {
 	gridSizeX := r.sizeX / stepSizeX
 	gridSizeY := r.sizeY / stepSizeY
 	path := grid.WalkGrid(gridSizeX, gridSizeY, grid.PATTERN_SPIRAL)
-	renderFunc := computeColour
-	if r.normalOnly {
-		renderFunc = computeNormal
+
+	var s sampler.Sampler
+	switch r.samplerType {
+	case sampler.ColourSampler:
+		s = sampler.NewColour(r.maxDepth, r.background)
+	case sampler.NormalSampler:
+		s = sampler.NewNormal()
+	default:
+		log.Fatalf("invalid sampler type %v", r.samplerType)
 	}
 
 	for _, t := range path {
@@ -213,7 +183,7 @@ func (r *Renderer) Render() image.Image {
 			scene:       r.scene,
 			canvas:      r.canvas,
 			bar:         bar,
-			renderFunc:  renderFunc,
+			sampler:     s,
 			previewChan: r.previewChan,
 			preview:     r.preview,
 			verbose:     r.verbose,
