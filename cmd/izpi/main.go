@@ -14,7 +14,9 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/output"
 	"github.com/flynn-nrg/izpi/pkg/postprocess"
 	"github.com/flynn-nrg/izpi/pkg/render"
+	"github.com/flynn-nrg/izpi/pkg/sampler"
 	"github.com/flynn-nrg/izpi/pkg/scenes"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 
 	"github.com/alecthomas/kong"
 
@@ -26,6 +28,7 @@ const (
 	defaultXSize      = "500"
 	defaultYSize      = "500"
 	defaultSamples    = "1000"
+	defaultMaxDepth   = "50"
 	defaultOutputFile = "output.png"
 )
 
@@ -35,11 +38,12 @@ var flags struct {
 	XSize      int64  `name:"x" help:"Output image x size" default:"${defaultXSize}"`
 	YSize      int64  `name:"y" help:"Output image y size" default:"${defaultYSize}"`
 	Samples    int64  `name:"samples" help:"Number of samples per ray" default:"${defaultSamples}"`
+	Sampler    string `name:"sampler-type" help:"Sampler function to use: colour, normal, wireframe" default:"colour"`
+	Depth      int64  `name:"max-depth" help:"Maximum depth" default:"${defaultMaxDepth}"`
 	HDR        bool   `name:"hdr" help:"Output an HDR image"`
 	OutputFile string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
 	Verbose    bool   `name:"v" help:"Print rendering progress bar"`
 	Preview    bool   `name:"p" help:"Display rendering progress in a window"`
-	Normal     bool   `name:"n" help:"Render the normals at the ray intersection point"`
 }
 
 func main() {
@@ -55,6 +59,7 @@ func main() {
 			"defaultXSize":      defaultXSize,
 			"defaultYSize":      defaultYSize,
 			"defaultSamples":    defaultSamples,
+			"defaultMaxDepth":   defaultMaxDepth,
 			"defaultOutputFile": defaultOutputFile,
 		})
 
@@ -63,7 +68,7 @@ func main() {
 	setupLogging(flags.LogLevel)
 
 	// Render
-	scene, err := scenes.VWBeetle(float64(flags.XSize) / float64(flags.YSize))
+	scene, err := scenes.Challenger(float64(flags.XSize) / float64(flags.YSize))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,7 +76,7 @@ func main() {
 	previewChan := make(chan display.DisplayTile)
 	defer close(previewChan)
 
-	r := render.New(scene, int(flags.XSize), int(flags.YSize), int(flags.Samples), int(flags.NumWorkers), flags.Verbose, previewChan, flags.Preview, flags.Normal)
+	r := render.New(scene, int(flags.XSize), int(flags.YSize), int(flags.Samples), int(flags.Depth), &vec3.Vec3Impl{}, int(flags.NumWorkers), flags.Verbose, previewChan, flags.Preview, sampler.StringToType(flags.Sampler))
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
