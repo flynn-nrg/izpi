@@ -544,7 +544,7 @@ func VWBeetle(aspect float64) (*scene.Scene, error) {
 	}
 
 	// https://github.com/alecjacobson/common-3d-test-models
-	beetleFile, err := os.Open("beetle2.obj")
+	beetleFile, err := os.Open("beetle.obj")
 	if err != nil {
 		return nil, err
 	}
@@ -578,10 +578,76 @@ func VWBeetle(aspect float64) (*scene.Scene, error) {
 		}
 	}
 
-	//	lookFrom := &vec3.Vec3Impl{X: 1.0, Y: 2, Z: 3.0}
-	//	lookAt := &vec3.Vec3Impl{X: -.4, Y: 1.3, Z: 1}
-	lookFrom := &vec3.Vec3Impl{X: 2.0, Y: 0.6, Z: 2.0}
-	lookAt := &vec3.Vec3Impl{X: .4, Y: 0, Z: 1}
+	lookFrom := &vec3.Vec3Impl{X: 1.0, Y: 2, Z: 3.0}
+	lookAt := &vec3.Vec3Impl{X: -.4, Y: 1.3, Z: 1}
+	//lookFrom := &vec3.Vec3Impl{X: 2.0, Y: 0.6, Z: 2.0}
+	//lookAt := &vec3.Vec3Impl{X: .4, Y: 0, Z: 1}
+	vup := &vec3.Vec3Impl{Y: 1}
+	distToFocus := 10.0
+	aperture := 0.0
+	vfov := float64(60.0)
+	time0 := 0.0
+	time1 := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+
+	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
+
+}
+
+// Challenger returns a scene that tests the sky dome and HDR textures functionality.
+func Challenger(aspect float64) (*scene.Scene, error) {
+	// https://www.cgtrader.com/free-3d-models/car/sport-car/dodge-challenger-87e47a62-3aaf-4d8f-84c9-6af70b9792b0
+	challengerFile, err := os.Open("ferreti_tri_low.obj")
+	if err != nil {
+		return nil, err
+	}
+
+	challengerObj, err := wavefront.NewObjFromReader(challengerFile, "./", wavefront.IGNORE_MATERIALS, wavefront.IGNORE_TEXTURES)
+	if err != nil {
+		return nil, err
+	}
+
+	challengerObj.Scale(&vec3.Vec3Impl{X: 6, Y: 6, Z: 6})
+
+	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
+	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 15, Y: 15, Z: 15}))
+	//carMat := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.8, Y: 8, Z: 0.8}))
+	metal := material.NewMetal(&vec3.Vec3Impl{X: 0.8, Y: .6, Z: .6}, 0)
+	//	glass := material.NewDielectric(1.5)
+	//	glassSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -9, Y: 0, Z: 3}, &vec3.Vec3Impl{X: -9, Y: 0, Z: 3}, 0, 1, 4, glass)
+	//	metal := material.NewMetal(&vec3.Vec3Impl{X: 0.5, Y: 1.0, Z: 1.0}, 0)
+	//	metalSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -24, Y: -4, Z: 6}, &vec3.Vec3Impl{X: -24, Y: -4, Z: 6}, 0, 1, 3, metal)
+	hitables := []hitable.Hitable{
+		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: 50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: -50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: 50, Y: 0, Z: 50}, 1, 0, 0, 0, 1, 1, white),
+		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: -50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: -50, Y: 0, Z: 50}, &vec3.Vec3Impl{X: 50, Y: 0, Z: 50}, 0, 0, 0, 1, 1, 1, white),
+
+		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: 50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: -50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: 50, Y: 50, Z: 50}, 1, 0, 0, 0, 1, 1, metal),
+
+		//hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: -50, Y: -5, Z: -50}, &vec3.Vec3Impl{X: -50, Y: -5, Z: 50}, &vec3.Vec3Impl{X: -50, Y: 85, Z: -50}, 1, 0, 0, 0, 1, 1, metal),
+
+		hitable.NewSphere(&vec3.Vec3Impl{X: -0, Y: 40, Z: 40}, &vec3.Vec3Impl{X: 0, Y: 40, Z: 40}, 0, 1, 15, light),
+	}
+
+	for i := range challengerObj.Groups {
+		challengerHitables, err := challengerObj.GroupToHitablesWithCustomMaterial(i, white)
+		if err != nil {
+			return nil, err
+		}
+		bvh := hitable.NewBVH(challengerHitables, 0, 1)
+		hitables = append(hitables, bvh)
+	}
+
+	lights := []hitable.Hitable{}
+	for _, h := range hitables {
+		if h.IsEmitter() {
+			lights = append(lights, h)
+		}
+	}
+
+	lookFrom := &vec3.Vec3Impl{X: 12.0, Y: 6, Z: 12.0}
+	lookAt := &vec3.Vec3Impl{X: -3, Y: .7, Z: 0}
+	//lookFrom := &vec3.Vec3Impl{X: 2.0, Y: 0.6, Z: 2.0}
+	//lookAt := &vec3.Vec3Impl{X: .4, Y: 0, Z: 1}
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
