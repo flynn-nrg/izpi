@@ -95,8 +95,25 @@ func (s *Sphere) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecor
 				vec3.ScalarDiv(vec3.Sub(r.PointAtParameter(temp), s.center(r.Time())), s.radius)), s.material, true
 		}
 	}
-
 	return nil, nil, false
+}
+
+func (s *Sphere) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	rec, _, ok := s.Hit(r, tMin, tMax)
+	if !ok {
+		return nil, false, false
+	}
+
+	a := vec3.Sub(rec.P(), r.Origin())
+	b := vec3.Sub(rec.P(), s.center(r.Time()))
+
+	ab := vec3.Dot(a, b)
+	theta := math.Acos(ab / (a.Length() * b.Length()))
+	if math.Abs(theta) <= (math.Pi/2.0 + 0.1) {
+		return rec, true, true
+	}
+
+	return rec, true, false
 }
 
 func (s *Sphere) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {

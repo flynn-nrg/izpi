@@ -5,6 +5,7 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/ray"
+	"github.com/flynn-nrg/izpi/pkg/segment"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
@@ -48,6 +49,41 @@ func (yzr *YZRect) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 	u := (y - yzr.y0) / (yzr.y1 - yzr.y0)
 	v := (z - yzr.z0) / (yzr.z1 - yzr.z0)
 	return hitrecord.New(t, u, v, r.PointAtParameter(t), &vec3.Vec3Impl{X: 1}), yzr.material, true
+}
+
+func (yzr *YZRect) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	rec, _, ok := yzr.Hit(r, tMin, tMax)
+	if !ok {
+		return nil, false, false
+	}
+
+	segments := []*segment.Segment{
+		{
+			A: &vec3.Vec3Impl{X: yzr.k, Y: yzr.y0, Z: yzr.z0},
+			B: &vec3.Vec3Impl{X: yzr.k, Y: yzr.y0, Z: yzr.z1},
+		},
+		{
+			A: &vec3.Vec3Impl{X: yzr.k, Y: yzr.y0, Z: yzr.z1},
+			B: &vec3.Vec3Impl{X: yzr.k, Y: yzr.y1, Z: yzr.z1},
+		},
+		{
+			A: &vec3.Vec3Impl{X: yzr.k, Y: yzr.y1, Z: yzr.z1},
+			B: &vec3.Vec3Impl{X: yzr.k, Y: yzr.y1, Z: yzr.z0},
+		},
+		{
+			A: &vec3.Vec3Impl{X: yzr.k, Y: yzr.y1, Z: yzr.z0},
+			B: &vec3.Vec3Impl{X: yzr.k, Y: yzr.y0, Z: yzr.z0},
+		},
+	}
+
+	c := rec.P()
+	for _, s := range segments {
+		if segment.Belongs(s, c) {
+			return rec, true, true
+		}
+	}
+
+	return nil, true, false
 }
 
 func (yzr *YZRect) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {

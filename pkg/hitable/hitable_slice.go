@@ -1,6 +1,7 @@
 package hitable
 
 import (
+	"math"
 	"math/rand"
 
 	"github.com/flynn-nrg/izpi/pkg/aabb"
@@ -31,7 +32,6 @@ func (hs *HitableSlice) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.H
 	var mat material.Material
 	var hitAnything bool
 	closestSoFar := tMax
-
 	for _, h := range hs.hitables {
 		if tempRec, tempMat, ok := h.Hit(r, tMin, closestSoFar); ok {
 			rec = tempRec
@@ -42,6 +42,31 @@ func (hs *HitableSlice) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.H
 	}
 
 	return rec, mat, hitAnything
+}
+
+// HitEdge computes whether a ray intersects with the edge of any of the elements in the slice.
+func (hs *HitableSlice) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	var rec *hitrecord.HitRecord
+	var obj Hitable
+	var hitAnything bool
+
+	closestSoFar := tMax
+	epsilon := math.Nextafter(1, 2) - 1
+
+	for _, h := range hs.hitables {
+		if tempRec, _, ok := h.Hit(r, tMin, closestSoFar); ok {
+			obj = h
+			rec = tempRec
+			hitAnything = ok
+			closestSoFar = rec.T()
+		}
+	}
+
+	if hitAnything {
+		return obj.HitEdge(r, tMin, closestSoFar+epsilon)
+	}
+
+	return nil, false, false
 }
 
 func (hs *HitableSlice) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {

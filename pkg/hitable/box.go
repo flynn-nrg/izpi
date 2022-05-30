@@ -44,6 +44,10 @@ func (b *Box) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, 
 	return b.sides.Hit(r, tMin, tMax)
 }
 
+func (b *Box) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	return b.sides.HitEdge(r, tMin, tMax)
+}
+
 func (b *Box) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return b.sides.BoundingBox(time0, time1)
 }

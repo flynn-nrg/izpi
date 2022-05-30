@@ -109,6 +109,38 @@ func (ry *RotateY) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 	return nil, nil, false
 }
 
+func (ry *RotateY) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	origin := &vec3.Vec3Impl{
+		X: ry.cosTheta*r.Origin().X - ry.sinTheta*r.Origin().Z,
+		Y: r.Origin().Y,
+		Z: ry.sinTheta*r.Origin().X + ry.cosTheta*r.Origin().Z,
+	}
+	direction := &vec3.Vec3Impl{
+		X: ry.cosTheta*r.Direction().X - ry.sinTheta*r.Direction().Z,
+		Y: r.Direction().Y,
+		Z: ry.sinTheta*r.Direction().X + ry.cosTheta*r.Direction().Z,
+	}
+
+	rotatedRay := ray.New(origin, direction, r.Time())
+
+	if hr, ok, edgeOk := ry.hitable.HitEdge(rotatedRay, tMin, tMax); ok {
+		p := &vec3.Vec3Impl{
+			X: ry.cosTheta*hr.P().X + ry.sinTheta*hr.P().Z,
+			Y: hr.P().Y,
+			Z: -ry.sinTheta*hr.P().X + ry.cosTheta*hr.P().Z,
+		}
+		normal := &vec3.Vec3Impl{
+			X: ry.cosTheta*hr.Normal().X + ry.sinTheta*hr.Normal().Z,
+			Y: hr.Normal().Y,
+			Z: -ry.sinTheta*hr.Normal().X + ry.cosTheta*hr.Normal().Z,
+		}
+
+		return hitrecord.New(hr.T(), hr.U(), hr.V(), p, normal), true, edgeOk
+	}
+
+	return nil, false, false
+}
+
 func (ry *RotateY) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return ry.bbox, ry.hasBox
 }

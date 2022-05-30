@@ -34,6 +34,16 @@ func (tr *Translate) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	return nil, nil, false
 }
 
+func (tr *Translate) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	movedRay := ray.New(vec3.Sub(r.Origin(), tr.offset), r.Direction(), r.Time())
+	hr, hitOk, edgeOk := tr.hitable.HitEdge(movedRay, tMin, tMax)
+	if hitOk {
+		return hitrecord.New(hr.T(), hr.U(), hr.V(), vec3.Add(hr.P(), tr.offset), hr.Normal()), true, edgeOk
+	}
+
+	return nil, false, false
+}
+
 func (tr *Translate) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	if bbox, ok := tr.hitable.BoundingBox(time0, time1); ok {
 		return aabb.New(vec3.Add(bbox.Min(), tr.offset), vec3.Add(bbox.Max(), tr.offset)), true

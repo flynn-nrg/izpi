@@ -64,6 +64,10 @@ func (cm *ConstantMedium) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord
 	return nil, nil, false
 }
 
+func (cm *ConstantMedium) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	return nil, false, false
+}
+
 func (cm *ConstantMedium) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return cm.hitable.BoundingBox(time0, time1)
 }

@@ -30,6 +30,13 @@ func (fn *FlipNormals) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.Hi
 	return nil, nil, false
 }
 
+func (fn *FlipNormals) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	if hr, ok, edgeOk := fn.hitable.HitEdge(r, tMin, tMax); ok {
+		return hitrecord.New(hr.T(), hr.U(), hr.V(), hr.P(), vec3.ScalarMul(hr.Normal(), -1)), true, edgeOk
+	}
+	return nil, false, false
+}
+
 func (fn *FlipNormals) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return fn.hitable.BoundingBox(time0, time1)
 }

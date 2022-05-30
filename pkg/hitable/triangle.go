@@ -9,6 +9,7 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/mat3"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/ray"
+	"github.com/flynn-nrg/izpi/pkg/segment"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
@@ -182,6 +183,32 @@ func (tri *Triangle) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 	}
 
 	return 0
+}
+
+func (tri *Triangle) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	rec, _, ok := tri.Hit(r, tMin, tMax)
+	if !ok {
+		return nil, false, false
+	}
+
+	segments := []*segment.Segment{
+		{A: tri.vertex0, B: tri.vertex1},
+		{A: tri.vertex1, B: tri.vertex2},
+		{A: tri.vertex2, B: tri.vertex0},
+	}
+
+	c := rec.P()
+	//fmt.Printf("Triangle hit at c: %v\n", c)
+	//	fmt.Printf("Triangle hit: %v, %v, %v, %v\n", c, tri.vertex0, tri.vertex1, tri.vertex2)
+	for _, s := range segments {
+		//	fmt.Printf("Triangle hit edge: %v, %v, %v\n", c, s.A, s.B)
+		if segment.Belongs(s, c) {
+			//		fmt.Printf("exposito\n")
+			return rec, true, true
+		}
+	}
+
+	return rec, true, false
 }
 
 func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {

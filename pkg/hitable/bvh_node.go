@@ -127,6 +127,30 @@ func (bn *BVHNode) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 	return nil, nil, false
 }
 
+func (bn *BVHNode) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	if bn.box.Hit(r, tMin, tMax) {
+		leftRec, hitLeft, hitLeftEdge := bn.left.HitEdge(r, tMin, tMax)
+		rightRec, hitRight, hitRightEdge := bn.right.HitEdge(r, tMin, tMax)
+
+		if hitLeft && hitRight {
+			if leftRec.T() < rightRec.T() {
+				return leftRec, true, hitLeftEdge
+			}
+			return rightRec, true, hitRightEdge
+		}
+
+		if hitLeft {
+			return leftRec, true, hitLeftEdge
+		}
+
+		if hitRight {
+			return rightRec, true, hitRightEdge
+		}
+	}
+
+	return nil, false, false
+}
+
 func (bn *BVHNode) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return bn.box, true
 }
