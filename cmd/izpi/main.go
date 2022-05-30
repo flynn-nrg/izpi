@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/flynn-nrg/izpi/pkg/colours"
 	"github.com/flynn-nrg/izpi/pkg/display"
 	"github.com/flynn-nrg/izpi/pkg/floatimage"
 	"github.com/flynn-nrg/izpi/pkg/output"
@@ -16,7 +17,6 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/render"
 	"github.com/flynn-nrg/izpi/pkg/sampler"
 	"github.com/flynn-nrg/izpi/pkg/scenes"
-	"github.com/flynn-nrg/izpi/pkg/vec3"
 
 	"github.com/alecthomas/kong"
 
@@ -76,7 +76,8 @@ func main() {
 	previewChan := make(chan display.DisplayTile)
 	defer close(previewChan)
 
-	r := render.New(scene, int(flags.XSize), int(flags.YSize), int(flags.Samples), int(flags.Depth), &vec3.Vec3Impl{}, int(flags.NumWorkers), flags.Verbose, previewChan, flags.Preview, sampler.StringToType(flags.Sampler))
+	r := render.New(scene, int(flags.XSize), int(flags.YSize), int(flags.Samples), int(flags.Depth),
+		colours.Black, colours.White, int(flags.NumWorkers), flags.Verbose, previewChan, flags.Preview, sampler.StringToType(flags.Sampler))
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
