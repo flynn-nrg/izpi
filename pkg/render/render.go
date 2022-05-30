@@ -25,6 +25,7 @@ type Renderer struct {
 	previewChan chan display.DisplayTile
 	maxDepth    int
 	background  *vec3.Vec3Impl
+	ink         *vec3.Vec3Impl
 	preview     bool
 	samplerType sampler.SamplerType
 	sizeX       int
@@ -111,7 +112,7 @@ func worker(input chan workUnit, quit chan struct{}, wg *sync.WaitGroup) {
 }
 
 // New returns a new instance of a renderer.
-func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, maxDepth int, background *vec3.Vec3Impl,
+func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, maxDepth int, background *vec3.Vec3Impl, ink *vec3.Vec3Impl,
 	numWorkers int, verbose bool, previewChan chan display.DisplayTile, preview bool, samplerType sampler.SamplerType) *Renderer {
 	return &Renderer{
 		scene:       scene,
@@ -119,6 +120,7 @@ func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, maxDepth int,
 		previewChan: previewChan,
 		maxDepth:    maxDepth,
 		background:  background,
+		ink:         ink,
 		preview:     preview,
 		samplerType: samplerType,
 		sizeX:       sizeX,
@@ -174,6 +176,8 @@ func (r *Renderer) Render() image.Image {
 		s = sampler.NewColour(r.maxDepth, r.background)
 	case sampler.NormalSampler:
 		s = sampler.NewNormal()
+	case sampler.WireFrameSampler:
+		s = sampler.NewWireFrame(r.background, r.ink)
 	default:
 		log.Fatalf("invalid sampler type %v", r.samplerType)
 	}

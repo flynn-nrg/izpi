@@ -13,11 +13,13 @@ const (
 	InvalidSampler SamplerType = iota
 	NormalSampler
 	ColourSampler
+	WireFrameSampler
 )
 
 var samplerMap = map[string]SamplerType{
-	"colour": ColourSampler,
-	"normal": NormalSampler,
+	"colour":    ColourSampler,
+	"normal":    NormalSampler,
+	"wireframe": WireFrameSampler,
 }
 
 type Sampler interface {
