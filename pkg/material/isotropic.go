@@ -6,6 +6,7 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/ray"
 	"github.com/flynn-nrg/izpi/pkg/scatterrecord"
 	"github.com/flynn-nrg/izpi/pkg/texture"
+	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
 // Ensure interface compliance.
@@ -37,4 +38,8 @@ func (i *Isotropic) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *
 // ScatteringPDF implements the probability distribution function for isotropic materials.
 func (i *Isotropic) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
 	return 0
+}
+
+func (i *Isotropic) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return i.albedo.Value(u, v, p)
 }

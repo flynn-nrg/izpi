@@ -63,3 +63,7 @@ func (pbr *PBR) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.
 func (pbr *PBR) NormalMap() texture.Texture {
 	return pbr.normalMap
 }
+
+func (pbr *PBR) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return pbr.albedo.Value(u, v, p)
+}

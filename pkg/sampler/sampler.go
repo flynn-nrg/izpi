@@ -14,12 +14,14 @@ const (
 	NormalSampler
 	ColourSampler
 	WireFrameSampler
+	AlbedoSampler
 )
 
 var samplerMap = map[string]SamplerType{
 	"colour":    ColourSampler,
 	"normal":    NormalSampler,
 	"wireframe": WireFrameSampler,
+	"albedo":    AlbedoSampler,
 }
 
 type Sampler interface {

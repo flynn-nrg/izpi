@@ -13,6 +13,7 @@ import (
 type Material interface {
 	Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool)
 	NormalMap() texture.Texture
+	Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl
 	ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64
 	IsEmitter() bool
 	Emitted(rIn ray.Ray, rec *hitrecord.HitRecord, u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl

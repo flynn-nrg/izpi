@@ -178,6 +178,8 @@ func (r *Renderer) Render() image.Image {
 		s = sampler.NewNormal()
 	case sampler.WireFrameSampler:
 		s = sampler.NewWireFrame(r.background, r.ink)
+	case sampler.AlbedoSampler:
+		s = sampler.NewAlbedo()
 	default:
 		log.Fatalf("invalid sampler type %v", r.samplerType)
 	}

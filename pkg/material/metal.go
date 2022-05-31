@@ -39,3 +39,8 @@ func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *scat
 func (m *Metal) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
 	return 0
 }
+
+func (m *Metal) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+	a := *m.albedo
+	return &a
+}

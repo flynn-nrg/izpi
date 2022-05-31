@@ -76,3 +76,7 @@ func (d *Dielectric) IsEmitter() bool {
 func (d *Dielectric) Emitted(_ ray.Ray, _ *hitrecord.HitRecord, _ float64, _ float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return &vec3.Vec3Impl{}
 }
+
+func (d *Dielectric) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return &vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0}
+}

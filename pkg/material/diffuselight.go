@@ -46,3 +46,7 @@ func (dl *DiffuseLight) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scatte
 func (dl *DiffuseLight) IsEmitter() bool {
 	return true
 }
+
+func (dl *DiffuseLight) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return dl.emit.Value(u, v, p)
+}

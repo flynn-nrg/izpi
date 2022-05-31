@@ -50,3 +50,7 @@ func (l *Lambertian) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered
 
 	return cosine / math.Pi
 }
+
+func (l *Lambertian) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+	return l.albedo.Value(u, v, p)
+}
