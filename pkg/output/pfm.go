@@ -17,7 +17,7 @@ type PFM struct {
 	w io.Writer
 }
 
-// NewPNG returns a new PNG output.
+// NewPFM returns a new PFM output.
 func NewPFM(fileName string) (*PFM, error) {
 	file, err := os.Create(fileName)
 	if err != nil {
