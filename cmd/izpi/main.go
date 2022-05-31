@@ -40,7 +40,7 @@ var flags struct {
 	Samples    int64  `name:"samples" help:"Number of samples per ray" default:"${defaultSamples}"`
 	Sampler    string `name:"sampler-type" help:"Sampler function to use: colour, albedo, normal, wireframe" default:"colour"`
 	Depth      int64  `name:"max-depth" help:"Maximum depth" default:"${defaultMaxDepth}"`
-	HDR        bool   `name:"hdr" help:"Output an HDR image"`
+	OutputMode string `name:"output-mode" help:"Output mode: png, hdr or pfm" default:"png"`
 	OutputFile string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
 	Verbose    bool   `name:"v" help:"Print rendering progress bar"`
 	Preview    bool   `name:"p" help:"Display rendering progress in a window"`
@@ -94,17 +94,28 @@ func main() {
 
 	wg.Wait()
 
-	// Post-process pipeline.
-	//file, err := os.Open("test.cube")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//cg, err := postprocess.NewColourGradingFromCube(file)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	switch flags.OutputMode {
+	case "png":
+		pp := postprocess.NewPipeline([]postprocess.Filter{
+			postprocess.NewGamma(),
+			postprocess.NewClamp(1.0),
+		})
+		err = pp.Apply(canvas, scene)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	if flags.HDR {
+		// Output
+		out, err := output.NewPNG(flags.OutputFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = out.Write(canvas)
+		if err != nil {
+			log.Fatal(err)
+		}
+	case "hdr":
 		var hdrCanvas image.Image
 		var err error
 
@@ -127,24 +138,26 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-	} else {
-		pp := postprocess.NewPipeline([]postprocess.Filter{
-			postprocess.NewGamma(),
-			postprocess.NewClamp(1.0),
-			//	cg,
-		})
-		err = pp.Apply(canvas, scene)
+	case "pfm":
+		var hdrCanvas image.Image
+		var err error
+
+		if floatNRGBACanvas, ok := canvas.(*floatimage.FloatNRGBA); ok {
+			hdrCanvas, err = floatNRGBACanvas.ToHDR()
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Fatal("image format is not FloatNRGBA")
+		}
+
+		outFileName := strings.Replace(flags.OutputFile, "png", "pfm", 1)
+		out, err := output.NewPFM(outFileName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		// Output
-		out, err := output.NewPNG(flags.OutputFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = out.Write(canvas)
+		err = out.Write(hdrCanvas)
 		if err != nil {
 			log.Fatal(err)
 		}
