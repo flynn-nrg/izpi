@@ -38,7 +38,7 @@ var flags struct {
 	XSize      int64  `name:"x" help:"Output image x size" default:"${defaultXSize}"`
 	YSize      int64  `name:"y" help:"Output image y size" default:"${defaultYSize}"`
 	Samples    int64  `name:"samples" help:"Number of samples per ray" default:"${defaultSamples}"`
-	Sampler    string `name:"sampler-type" help:"Sampler function to use: colour, normal, wireframe" default:"colour"`
+	Sampler    string `name:"sampler-type" help:"Sampler function to use: colour, albedo, normal, wireframe" default:"colour"`
 	Depth      int64  `name:"max-depth" help:"Maximum depth" default:"${defaultMaxDepth}"`
 	HDR        bool   `name:"hdr" help:"Output an HDR image"`
 	OutputFile string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
