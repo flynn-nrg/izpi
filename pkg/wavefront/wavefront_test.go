@@ -57,7 +57,7 @@ func TestNewObjFromReader(t *testing.T) {
 				Groups: []*Group{
 					{
 						Name:     "Cube1",
-						FaceType: OBJ_FACE_TYPE_TRIANGLE,
+						FaceType: OBJ_FACE_TYPE_POLYGON,
 						Material: "Material1",
 						Faces: []*Face{
 							{[]*VertexIndices{{VIdx: 1, VtIdx: 1, VnIdx: 1}, {VIdx: 2, VtIdx: 2, VnIdx: 1}, {VIdx: 4, VtIdx: 3, VnIdx: 1}}},
