@@ -3,9 +3,9 @@ package render
 
 import (
 	"image"
-	"log"
 	"math/rand"
 	"sync"
+	"time"
 
 	"github.com/flynn-nrg/izpi/pkg/colour"
 	"github.com/flynn-nrg/izpi/pkg/display"
@@ -16,11 +16,13 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/vec3"
 
 	pb "github.com/cheggaaa/pb/v3"
+	log "github.com/sirupsen/logrus"
 )
 
 // Renderer represents a renderer config.
 type Renderer struct {
 	scene       *scene.Scene
+	numRays     uint64
 	canvas      *floatimage.FloatNRGBA
 	previewChan chan display.DisplayTile
 	maxDepth    int
@@ -173,16 +175,19 @@ func (r *Renderer) Render() image.Image {
 	var s sampler.Sampler
 	switch r.samplerType {
 	case sampler.ColourSampler:
-		s = sampler.NewColour(r.maxDepth, r.background)
+		s = sampler.NewColour(r.maxDepth, r.background, &r.numRays)
 	case sampler.NormalSampler:
-		s = sampler.NewNormal()
+		s = sampler.NewNormal(&r.numRays)
 	case sampler.WireFrameSampler:
-		s = sampler.NewWireFrame(r.background, r.ink)
+		s = sampler.NewWireFrame(r.background, r.ink, &r.numRays)
 	case sampler.AlbedoSampler:
-		s = sampler.NewAlbedo()
+		s = sampler.NewAlbedo(&r.numRays)
 	default:
 		log.Fatalf("invalid sampler type %v", r.samplerType)
 	}
+
+	log.Infof("Begin rendering using %v worker threads", r.numWorkers)
+	startTime := time.Now()
 
 	for _, t := range path {
 		queue <- workUnit{
@@ -210,5 +215,6 @@ func (r *Renderer) Render() image.Image {
 		bar.Finish()
 	}
 
+	log.Infof("Rendering completed in %v using %v rays", time.Since(startTime), r.numRays)
 	return r.canvas
 }

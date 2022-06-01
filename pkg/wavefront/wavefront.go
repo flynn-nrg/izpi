@@ -11,11 +11,14 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/flynn-nrg/izpi/pkg/hitable"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/texture"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type ParseOption int
@@ -31,8 +34,7 @@ type ObjFaceType int
 
 const (
 	OBJ_FACE_TYPE_INVALID ObjFaceType = iota
-	OBJ_FACE_TYPE_TRIANGLE
-	OBJ_FACE_TYPE_QUAD
+	OBJ_FACE_TYPE_POLYGON
 )
 
 var (
@@ -91,9 +93,13 @@ type Group struct {
 
 // NewObjFromReader returns WavefrontObj with the geometry contained in a Wavefront .obj file.
 func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOption) (*WavefrontObj, error) {
+	var numFaces int64
 	var currentGroup *Group
 	var activeMaterial string
 	var ignoreMaterials bool
+
+	log.Info("Reading Wavefront data")
+	startTime := time.Now()
 
 	o := &WavefrontObj{
 		// Objects are expected to have their centre at the origin.
@@ -165,19 +171,14 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 					Name: "default",
 				}
 			}
+			numFaces++
 			f := strings.Split(s, " ")
-			switch len(f) {
-			case 4:
-				currentGroup.FaceType = OBJ_FACE_TYPE_TRIANGLE
-				face, err := parseFace(f[1:])
-				if err != nil {
-					return nil, err
-				}
-				currentGroup.Faces = append(currentGroup.Faces, face)
-			default:
-				return nil, ErrUnsupportedPolygonType
+			currentGroup.FaceType = OBJ_FACE_TYPE_POLYGON
+			face, err := parseFace(f[1:])
+			if err != nil {
+				return nil, err
 			}
-
+			currentGroup.Faces = append(currentGroup.Faces, face)
 			continue
 		}
 		if strings.HasPrefix(s, "mtllib") {
@@ -214,6 +215,8 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 	// Add pending group
 	o.Groups = append(o.Groups, currentGroup)
 
+	log.Infof("Parsed %v faces in %v", numFaces, time.Since(startTime))
+
 	return o, nil
 }
 
@@ -225,7 +228,7 @@ func (wo *WavefrontObj) NumGroups() int {
 func (wo *WavefrontObj) GroupToHitablesWithCustomMaterial(index int, mat material.Material) ([]hitable.Hitable, error) {
 	g := wo.Groups[index]
 	switch g.FaceType {
-	case OBJ_FACE_TYPE_TRIANGLE:
+	case OBJ_FACE_TYPE_POLYGON:
 		return wo.groupToTrianglesWithCustomMaterial(g, mat)
 	default:
 		return nil, ErrUnsupportedPolygonType
@@ -235,6 +238,17 @@ func (wo *WavefrontObj) GroupToHitablesWithCustomMaterial(index int, mat materia
 func (wo *WavefrontObj) groupToTrianglesWithCustomMaterial(g *Group, mat material.Material) ([]hitable.Hitable, error) {
 	hitables := []hitable.Hitable{}
 	for _, face := range g.Faces {
+		tris := wo.triangulate(face, mat)
+		for _, tri := range tris {
+			hitables = append(hitables, tri)
+		}
+	}
+
+	return hitables, nil
+}
+
+func (wo *WavefrontObj) triangulate(face *Face, mat material.Material) []*hitable.Triangle {
+	if len(face.Vertices) == 3 {
 		vertex0 := wo.Vertices[face.Vertices[0].VIdx-1]
 		vertex1 := wo.Vertices[face.Vertices[1].VIdx-1]
 		vertex2 := wo.Vertices[face.Vertices[2].VIdx-1]
@@ -243,19 +257,27 @@ func (wo *WavefrontObj) groupToTrianglesWithCustomMaterial(g *Group, mat materia
 			uv1 := wo.VertexUV[face.Vertices[1].VtIdx-1]
 			uv2 := wo.VertexUV[face.Vertices[2].VtIdx-1]
 			if wo.IgnoreNormals {
-				hitables = append(hitables, hitable.NewTriangleWithUV(
-					vertex0, vertex1, vertex2, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat))
+				return []*hitable.Triangle{hitable.NewTriangleWithUV(
+					vertex0, vertex1, vertex2, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat)}
 			} else {
 				normal := wo.VertexNormals[face.Vertices[0].VnIdx-1]
-				hitables = append(hitables, hitable.NewTriangleWithUVAndNormal(
-					vertex0, vertex1, vertex2, normal, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat))
+				return []*hitable.Triangle{hitable.NewTriangleWithUVAndNormal(
+					vertex0, vertex1, vertex2, normal, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat)}
 			}
 		} else {
-			hitables = append(hitables, hitable.NewTriangle(vertex0, vertex1, vertex2, mat))
+			return []*hitable.Triangle{hitable.NewTriangle(vertex0, vertex1, vertex2, mat)}
 		}
 	}
 
-	return hitables, nil
+	// Fan triangulation
+	vertex0 := wo.Vertices[face.Vertices[0].VIdx-1]
+	vertex1 := wo.Vertices[face.Vertices[1].VIdx-1]
+	vertex2 := wo.Vertices[face.Vertices[2].VIdx-1]
+	vertex3 := wo.Vertices[face.Vertices[3].VIdx-1]
+	return []*hitable.Triangle{
+		hitable.NewTriangle(vertex0, vertex1, vertex2, mat),
+		hitable.NewTriangle(vertex0, vertex2, vertex3, mat),
+	}
 }
 
 // Translate translates all the vertices in this object by the specified amount.

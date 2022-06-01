@@ -3,6 +3,7 @@ package hitable
 import (
 	"math/rand"
 	"sort"
+	"time"
 
 	"github.com/flynn-nrg/izpi/pkg/aabb"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
@@ -26,6 +27,14 @@ type BVHNode struct {
 }
 
 func NewBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
+	log.Infof("Building BVH with %v elements", len(hitables))
+	startTime := time.Now()
+	bvh := newBVH(hitables, time0, time1)
+	log.Infof("Completed BVH construction in %v", time.Since(startTime))
+	return bvh
+}
+
+func newBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
 	bn := &BVHNode{
 		time0: time0,
 		time1: time1,
@@ -85,8 +94,8 @@ func NewBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
 		bn.left = hitables[0]
 		bn.right = hitables[1]
 	} else {
-		bn.left = NewBVH(hitables[:len(hitables)/2], time0, time1)
-		bn.right = NewBVH(hitables[len(hitables)/2:], time0, time1)
+		bn.left = newBVH(hitables[:len(hitables)/2], time0, time1)
+		bn.right = newBVH(hitables[len(hitables)/2:], time0, time1)
 	}
 
 	var leftBox, rightBox *aabb.AABB

@@ -4,12 +4,15 @@ package displacement
 import (
 	"errors"
 	"math"
+	"time"
 
 	"github.com/flynn-nrg/izpi/pkg/hitable"
 	"github.com/flynn-nrg/izpi/pkg/mat3"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/texture"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // minimalTriangle is a more lightweight structure used when performing multiple tesselation passes.
@@ -144,8 +147,12 @@ func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture
 func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float64) []*minimalTriangle {
 	out := []*minimalTriangle{}
 
+	log.Info("Applying tessellation")
+	startTime := time.Now()
+
 	for {
 		if len(in) == 0 {
+			log.Infof("Tessellation completed. Created %v triangles in %v", len(out), time.Since(startTime))
 			return out
 		}
 
@@ -167,6 +174,9 @@ func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float
 
 func applyDisplacement(in []*minimalTriangle, displacementMap texture.Texture, min, max float64) []*hitable.Triangle {
 	displaced := []*hitable.Triangle{}
+
+	log.Info("Applying displacement")
+	startTime := time.Now()
 
 	for _, tri := range in {
 
@@ -222,6 +232,8 @@ func applyDisplacement(in []*minimalTriangle, displacementMap texture.Texture, m
 		displaced = append(displaced, hitable.NewTriangleWithUV(vertex0, vertex1, vertex2,
 			tri.u0, tri.v0, tri.u1, tri.v1, tri.u2, tri.v2, tri.material))
 	}
+
+	log.Infof("Displacement completed in %v", time.Since(startTime))
 
 	return displaced
 }

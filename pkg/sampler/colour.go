@@ -2,6 +2,7 @@ package sampler
 
 import (
 	"math"
+	"sync/atomic"
 
 	"github.com/flynn-nrg/izpi/pkg/hitable"
 	"github.com/flynn-nrg/izpi/pkg/pdf"
@@ -14,12 +15,14 @@ var _ Sampler = (*Colour)(nil)
 
 type Colour struct {
 	maxDepth   int
+	numRays    *uint64
 	background *vec3.Vec3Impl
 }
 
-func NewColour(maxDepth int, background *vec3.Vec3Impl) *Colour {
+func NewColour(maxDepth int, background *vec3.Vec3Impl, numRays *uint64) *Colour {
 	return &Colour{
 		maxDepth:   maxDepth,
+		numRays:    numRays,
 		background: background,
 	}
 }
@@ -28,6 +31,8 @@ func (cs *Colour) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hita
 	if depth >= cs.maxDepth {
 		return &vec3.Vec3Impl{Z: 1.0}
 	}
+
+	atomic.AddUint64(cs.numRays, 1)
 
 	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
 		_, srec, ok := mat.Scatter(r, rec)
