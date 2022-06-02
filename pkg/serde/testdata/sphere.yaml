@@ -18,7 +18,7 @@ camera:
     time0: 0
     time1: 1
 objects:
-    Spheres:
+    spheres:
         - center:
             x: 0
             "y": 5
@@ -27,17 +27,15 @@ objects:
           material:
             name: White
             type: lambert
-            Lambert:
+            lambert:
                 albedo:
                     name: White
                     type: constant
-                    Constant:
+                    constant:
                         value:
                             x: 0.73
                             "y": 0.73
                             z: 0.73
-lights:
-    Spheres:
         - center:
             x: -50
             "y": 50
@@ -46,11 +44,11 @@ lights:
           material:
             name: Green light
             type: diffuse_light
-            DiffuseLight:
+            diffuselight:
                 emit:
                     name: Green
                     type: constant
-                    Constant:
+                    constant:
                         value:
                             x: 0
                             "y": 0.7

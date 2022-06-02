@@ -38,7 +38,7 @@ func TestSerialise(t *testing.T) {
 							Radius: 5,
 							Material: Material{
 								Name: "White",
-								Type: "lambert",
+								Type: LambertMaterial,
 								Lambert: Lambert{
 									Albedo: Texture{
 										Name: "White",
@@ -50,16 +50,12 @@ func TestSerialise(t *testing.T) {
 								},
 							},
 						},
-					},
-				},
-				Lights: Lights{
-					Spheres: []Sphere{
 						{
 							Center: Vec3{X: -50, Y: 50, Z: 3},
 							Radius: 1,
 							Material: Material{
 								Name: "Green light",
-								Type: "diffuse_light",
+								Type: DiffuseLightMaterial,
 								DiffuseLight: DiffuseLight{
 									Emit: Texture{
 										Name: "Green",
@@ -132,7 +128,7 @@ func TestDeserialise(t *testing.T) {
 							Radius: 5,
 							Material: Material{
 								Name: "White",
-								Type: "lambert",
+								Type: LambertMaterial,
 								Lambert: Lambert{
 									Albedo: Texture{
 										Name: "White",
@@ -144,16 +140,12 @@ func TestDeserialise(t *testing.T) {
 								},
 							},
 						},
-					},
-				},
-				Lights: Lights{
-					Spheres: []Sphere{
 						{
 							Center: Vec3{X: -50, Y: 50, Z: 3},
 							Radius: 1,
 							Material: Material{
 								Name: "Green light",
-								Type: "diffuse_light",
+								Type: DiffuseLightMaterial,
 								DiffuseLight: DiffuseLight{
 									Emit: Texture{
 										Name: "Green",

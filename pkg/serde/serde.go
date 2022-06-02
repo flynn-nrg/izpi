@@ -5,6 +5,17 @@ import (
 	"io"
 )
 
+const (
+	ConstantTexture      = "constant"
+	ImageTexture         = "image"
+	NoiseTexture         = "noise"
+	LambertMaterial      = "lambert"
+	DiffuseLightMaterial = "diffuse_light"
+	IsotropicMaterial    = "isotropic"
+	MetalMaterial        = "metal"
+	DielectricMaterial   = "dielectric"
+)
+
 // Serde defines the methods to seralise and deserialise scene data.
 type Serde interface {
 	// Serialise writes a serialised version of the data to the provided writer.
@@ -34,7 +45,7 @@ type Camera struct {
 	// VFov define the field of view.
 	VFov float64
 	// Aspect is the aspect ratio.
-	Aspect float64 `yaml:"Aspect,omitempty"`
+	Aspect float64 `yaml:"aspect,omitempty"`
 	// Aperture is the lens aperture for this camera.
 	Aperture float64
 	// FocusDist is the focus distance.
@@ -70,11 +81,11 @@ type Texture struct {
 	// Type is the texture type: constant, image or noise.
 	Type string
 	// Image is an instance of an Image texture.
-	Image Image `yaml:"Image,omitempty"`
+	Image Image `yaml:"image,omitempty"`
 	// Constant is an instance of a Constant texture.
-	Constant Constant `yaml:"Constant,omitempty"`
+	Constant Constant `yaml:"constant,omitempty"`
 	// Noise is an instance of a Perlin noise texture.
-	Noise Noise `yaml:"Noise,omitempty"`
+	Noise Noise `yaml:"noise,omitempty"`
 }
 
 // Lambert represents a Lambertian material.
@@ -98,7 +109,7 @@ type Isotropic struct {
 // Metal represents a metallic material.
 type Metal struct {
 	// Albedo is the colour texture.
-	Albedo Texture
+	Albedo Vec3
 	// Fuzz defines how shiny a metallic surface is. 0 is a perfect mirror.
 	Fuzz float64
 }
@@ -116,15 +127,25 @@ type Material struct {
 	// Type is the type of material: lambert, diffuse_light, isotropic, metal, dielectric.
 	Type string
 	// Lambert is a lambert material.
-	Lambert Lambert `yaml:"Lambert,omitempty"`
+	Lambert Lambert `yaml:"lambert,omitempty"`
 	// DiffuseLight is a diffuse light.
-	DiffuseLight DiffuseLight `yaml:"DiffuseLight,omitempty"`
+	DiffuseLight DiffuseLight `yaml:"diffuselight,omitempty"`
 	// Isotropic is an isotropic material.
-	Isotropic Isotropic `yaml:"Isotropic,omitempty"`
+	Isotropic Isotropic `yaml:"isotropic,omitempty"`
 	// Metal is a metallic material.
-	Metal Metal `yaml:"Metal,omitempty"`
+	Metal Metal `yaml:"metal,omitempty"`
 	// Dielectric is a dielectric material.
-	Dielectric Dielectric `yaml:"Dielectric,omitempty"`
+	Dielectric Dielectric `yaml:"dielectric,omitempty"`
+}
+
+// Displacement represents a displacement mapping operator.
+type Displacement struct {
+	// DisplacementMap is the displacement map that gets applied.
+	DisplacementMap Image `yaml:"displacementmap,omitempty"`
+	// Min is the lower value of the displacement.
+	Min float64
+	// Max is the upper value of the displacement.
+	Max float64
 }
 
 // Sphere represents a sphere.
@@ -147,19 +168,19 @@ type Triangle struct {
 	// Vertex2 is the third vertex of this triangle.
 	Vertex2 Vec3
 	// U0 is the u coordinate of the first vertex.
-	U0 float64 `yaml:"U0,omitempty"`
+	U0 float64 `yaml:"u0,omitempty"`
 	// V0 is the v coordinate of the first vertex.
-	V0 float64 `yaml:"V0,omitempty"`
+	V0 float64 `yaml:"v0,omitempty"`
 	// U1 is the u coordinate of the second vertex.
-	U1 float64 `yaml:"U1,omitempty"`
+	U1 float64 `yaml:"u1,omitempty"`
 	// V1 is the v coordinate of the second vertex.
-	V1 float64 `yaml:"V1,omitempty"`
+	V1 float64 `yaml:"v1,omitempty"`
 	// U2 is the u coordinate of the third vertex.
-	U2 float64 `yaml:"U2,omitempty"`
+	U2 float64 `yaml:"u2,omitempty"`
 	// V2 is the v coordinate of the third vertex.
-	V2 float64 `yaml:"V2,omitempty"`
-	// NormalMap is the normnal map texture associated with this triangle.
-	NormalMap Image `yaml:"NormalMap,omitempty"`
+	V2 float64 `yaml:"v2,omitempty"`
+	// Displacement is the displacement map associated with this triangle.
+	Displacement Displacement `yaml:"displacement,omitempty"`
 	// Material is the material for this triangle.
 	Material Material
 }
@@ -172,8 +193,8 @@ type Mesh struct {
 	Translate Vec3
 	// Scale is a the scale vector that is applied to all the vetices.
 	Scale Vec3
-	// NormalMap is the normal map that gets applied to this mesh.
-	NormalMap Image `yaml:"NormalMap,omitempty"`
+	// Displacement is the displacement map associated with this triangle.
+	Displacement Displacement `yaml:"displacement,omitempty"`
 	// Material is the material associated with this mesh.
 	Material Material
 }
@@ -181,21 +202,11 @@ type Mesh struct {
 // Objects represents the objects in a scene.
 type Objects struct {
 	// Meshes is a slice of all the meshes in the scene.
-	Meshes []Mesh `yaml:"Meshes,omitempty"`
+	Meshes []Mesh `yaml:"meshes,omitempty"`
 	// Triangles is a slice of all the triangles in the scene.
-	Triangles []Triangle `yaml:"Triangles,omitempty"`
+	Triangles []Triangle `yaml:"triangles,omitempty"`
 	// Spheres is a slice of all the spheres in the scene.
-	Spheres []Sphere `yaml:"Spheres,omitempty"`
-}
-
-// Lights represents the lights in a scene.
-type Lights struct {
-	// Meshes is a slice of all the light meshes in the scene.
-	Meshes []Mesh `yaml:"Meshes,omitempty"`
-	// Triangles is a slice of all the light triangles in the scene.
-	Triangles []Triangle `yaml:"Triangles,omitempty"`
-	// Spheres is a slice of all the light spheres in the scene.
-	Spheres []Sphere `yaml:"Spheres,omitempty"`
+	Spheres []Sphere `yaml:"spheres,omitempty"`
 }
 
 // Scene represents a scene that can be rendered.
@@ -206,6 +217,4 @@ type Scene struct {
 	Camera Camera
 	// Objects contains all the objects in the scene.
 	Objects Objects
-	// Lights contains all the lights in the scene.
-	Lights Lights
 }
