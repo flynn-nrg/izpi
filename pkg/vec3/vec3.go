@@ -263,3 +263,10 @@ func Lerp(v0, v1 *Vec3Impl, t float64) *Vec3Impl {
 		Z: (1-t)*v0.Z + t*v1.Z,
 	}
 }
+
+// Equals returns whether two vectors are the same.
+func Equals(v0, v1 *Vec3Impl) bool {
+	return v0.X == v1.X &&
+		v0.Y == v1.Y &&
+		v0.Z == v1.Z
+}
