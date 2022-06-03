@@ -3,6 +3,7 @@ package scene
 
 import (
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,6 +37,22 @@ func New(world *hitable.HitableSlice, lights *hitable.HitableSlice, camera *came
 		Lights: lights,
 		Camera: camera,
 	}
+}
+
+// FromStruct returns the internal representation of a scene from YAML data.
+func FromYAML(r io.Reader, aspectOverride float64) (*Scene, error) {
+	y := &serde.Yaml{}
+	sceneStruct, err := y.Deserialise(r)
+	if err != nil {
+		return nil, err
+	}
+
+	s, err := FromStruct(sceneStruct, aspectOverride)
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
 }
 
 // FromStruct returns the internal representation of a scene from struct data.
@@ -269,20 +286,20 @@ func objectsFromStruct(objects *serde.Objects) ([]hitable.Hitable, error) {
 		hitables = append(hitables, h...)
 	}
 
-	for _, sphere := range objects.Spheres {
-		s, err := sphereFromStruct(&sphere)
-		if err != nil {
-			return nil, err
-		}
-		hitables = append(hitables, s...)
-	}
-
 	for _, tri := range objects.Triangles {
 		t, err := triangleFromStruct(&tri)
 		if err != nil {
 			return nil, err
 		}
 		hitables = append(hitables, t...)
+	}
+
+	for _, sphere := range objects.Spheres {
+		s, err := sphereFromStruct(&sphere)
+		if err != nil {
+			return nil, err
+		}
+		hitables = append(hitables, s...)
 	}
 
 	return hitables, nil
