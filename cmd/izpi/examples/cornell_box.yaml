@@ -273,11 +273,11 @@ objects:
             "y": 100
             z: 0
           material:
-            name: Green
+            name: Red
             type: lambert
             lambert:
                 albedo:
-                    name: Green
+                    name: Red
                     type: constant
                     constant:
                         value:
@@ -297,11 +297,11 @@ objects:
             "y": 0
             z: 0
           material:
-            name: Green
+            name: Red
             type: lambert
             lambert:
                 albedo:
-                    name: Green
+                    name: Red
                     type: constant
                     constant:
                         value:
