@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"math/rand"
+	"os"
 	"runtime"
 	"strings"
 	"sync"
@@ -16,7 +17,7 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/postprocess"
 	"github.com/flynn-nrg/izpi/pkg/render"
 	"github.com/flynn-nrg/izpi/pkg/sampler"
-	"github.com/flynn-nrg/izpi/pkg/scenes"
+	"github.com/flynn-nrg/izpi/pkg/scene"
 
 	"github.com/alecthomas/kong"
 
@@ -30,10 +31,12 @@ const (
 	defaultSamples    = "1000"
 	defaultMaxDepth   = "50"
 	defaultOutputFile = "output.png"
+	defaultSceneFile  = "examples/cornell_box.yaml"
 )
 
 var flags struct {
 	LogLevel   string `name:"log-level" help:"The log level: error, warn, info, debug, trace." default:"info"`
+	Scene      string `type:"existingfile" name:"scene" help:"Scene file to render" default:"${defaultSceneFile}"`
 	NumWorkers int64  `name:"num-workers" help:"Number of worker threads" default:"${defaultNumWorkers}"`
 	XSize      int64  `name:"x" help:"Output image x size" default:"${defaultXSize}"`
 	YSize      int64  `name:"y" help:"Output image y size" default:"${defaultYSize}"`
@@ -42,8 +45,8 @@ var flags struct {
 	Depth      int64  `name:"max-depth" help:"Maximum depth" default:"${defaultMaxDepth}"`
 	OutputMode string `name:"output-mode" help:"Output mode: png, hdr or pfm" default:"png"`
 	OutputFile string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
-	Verbose    bool   `name:"v" help:"Print rendering progress bar"`
-	Preview    bool   `name:"p" help:"Display rendering progress in a window"`
+	Verbose    bool   `name:"v" help:"Print rendering progress bar" default:"true"`
+	Preview    bool   `name:"p" help:"Display rendering progress in a window" default:"true"`
 }
 
 func main() {
@@ -61,14 +64,19 @@ func main() {
 			"defaultSamples":    defaultSamples,
 			"defaultMaxDepth":   defaultMaxDepth,
 			"defaultOutputFile": defaultOutputFile,
+			"defaultSceneFile":  defaultSceneFile,
 		})
 
 	rand.Seed(time.Now().UnixNano())
 
 	setupLogging(flags.LogLevel)
 
-	// Render
-	scene, err := scenes.Challenger(float64(flags.XSize) / float64(flags.YSize))
+	sceneFile, err := os.Open(flags.Scene)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	scene, err := scene.FromYAML(sceneFile, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
