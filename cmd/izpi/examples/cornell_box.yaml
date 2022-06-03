@@ -1,0 +1,386 @@
+name: Cornell box
+camera:
+    lookfrom:
+        x: 50
+        "y": 50
+        z: -140
+    lookat:
+        x: 50
+        "y": 50
+        z: 0
+    vup:
+        x: 0
+        "y": 1
+        z: 0
+    vfov: 40
+    aspect: 1
+    aperture: 0
+    focusdist: 10
+    time0: 0
+    time1: 1
+objects:
+    triangles:
+        - vertex0:
+            x: 100
+            "y": 0
+            z: 100
+          vertex1:
+            x: 0
+            "y": 0
+            z: 100
+          vertex2:
+            x: 100
+            "y": 100
+            z: 100
+          material:
+            name: White
+            type: lambert
+            lambert:
+                albedo:
+                    name: White
+                    type: constant
+                    constant:
+                        value:
+                            x: 0.73
+                            "y": 0.73
+                            z: 0.73
+        - vertex0:
+            x: 100
+            "y": 100
+            z: 100
+          vertex1:
+            x: 0
+            "y": 0
+            z: 100
+          vertex2:
+            x: 0
+            "y": 100
+            z: 100
+          material:
+            name: White
+            type: lambert
+            lambert:
+                albedo:
+                    name: White
+                    type: constant
+                    constant:
+                        value:
+                            x: 0.73
+                            "y": 0.73
+                            z: 0.73
+        - vertex0:
+            x: 0
+            "y": 0
+            z: 100
+          vertex1:
+            x: 0
+            "y": 0
+            z: 0
+          vertex2:
+            x: 100
+            "y": 0
+            z: 100
+          material:
+            name: White
+            type: lambert
+            lambert:
+                albedo:
+                    name: White
+                    type: constant
+                    constant:
+                        value:
+                            x: 0.73
+                            "y": 0.73
+                            z: 0.73
+        - vertex0:
+            x: 0
+            "y": 100
+            z: 0
+          vertex1:
+            x: 100
+            "y": 100
+            z: 0
+          vertex2:
+            x: 100
+            "y": 100
+            z: 100
+          material:
+            name: White
+            type: lambert
+            lambert:
+                albedo:
+                    name: White
+                    type: constant
+                    constant:
+                        value:
+                            x: 0.73
+                            "y": 0.73
+                            z: 0.73
+        - vertex0:
+            x: 0
+            "y": 100
+            z: 100
+          vertex1:
+            x: 0
+            "y": 100
+            z: 0
+          vertex2:
+            x: 100
+            "y": 100
+            z: 100
+          material:
+            name: White
+            type: lambert
+            lambert:
+                albedo:
+                    name: White
+                    type: constant
+                    constant:
+                        value:
+                            x: 0.73
+                            "y": 0.73
+                            z: 0.73
+        - vertex0:
+            x: 100
+            "y": 0
+            z: 0
+          vertex1:
+            x: 0
+            "y": 0
+            z: 0
+          vertex2:
+            x: 100
+            "y": 0
+            z: 100
+          material:
+            name: White
+            type: lambert
+            lambert:
+                albedo:
+                    name: White
+                    type: constant
+                    constant:
+                        value:
+                            x: 0.73
+                            "y": 0.73
+                            z: 0.73
+        - vertex0:
+            x: 100
+            "y": 0
+            z: 0
+          vertex1:
+            x: 0
+            "y": 0
+            z: 0
+          vertex2:
+            x: 100
+            "y": 0
+            z: 100
+          material:
+            name: White
+            type: lambert
+            lambert:
+                albedo:
+                    name: White
+                    type: constant
+                    constant:
+                        value:
+                            x: 0.73
+                            "y": 0.73
+                            z: 0.73
+        - vertex0:
+            x: 100
+            "y": 0
+            z: 100
+          vertex1:
+            x: 0
+            "y": 0
+            z: 0
+          vertex2:
+            x: 0
+            "y": 0
+            z: 100
+          material:
+            name: White
+            type: lambert
+            lambert:
+                albedo:
+                    name: White
+                    type: constant
+                    constant:
+                        value:
+                            x: 0.73
+                            "y": 0.73
+                            z: 0.73
+        - vertex0:
+            x: 0
+            "y": 100
+            z: 100
+          vertex1:
+            x: 0
+            "y": 0
+            z: 0
+          vertex2:
+            x: 0
+            "y": 100
+            z: 0
+          material:
+            name: Green
+            type: lambert
+            lambert:
+                albedo:
+                    name: Green
+                    type: constant
+                    constant:
+                        value:
+                            x: 0
+                            "y": 0.73
+                            z: 0
+        - vertex0:
+            x: 0
+            "y": 100
+            z: 100
+          vertex1:
+            x: 0
+            "y": 0
+            z: 100
+          vertex2:
+            x: 0
+            "y": 0
+            z: 0
+          material:
+            name: Green
+            type: lambert
+            lambert:
+                albedo:
+                    name: Green
+                    type: constant
+                    constant:
+                        value:
+                            x: 0
+                            "y": 0.73
+                            z: 0
+        - vertex0:
+            x: 100
+            "y": 0
+            z: 0
+          vertex1:
+            x: 100
+            "y": 100
+            z: 100
+          vertex2:
+            x: 100
+            "y": 100
+            z: 0
+          material:
+            name: Green
+            type: lambert
+            lambert:
+                albedo:
+                    name: Green
+                    type: constant
+                    constant:
+                        value:
+                            x: 0.73
+                            "y": 0
+                            z: 0
+        - vertex0:
+            x: 100
+            "y": 0
+            z: 100
+          vertex1:
+            x: 100
+            "y": 100
+            z: 100
+          vertex2:
+            x: 100
+            "y": 0
+            z: 0
+          material:
+            name: Green
+            type: lambert
+            lambert:
+                albedo:
+                    name: Green
+                    type: constant
+                    constant:
+                        value:
+                            x: 0.73
+                            "y": 0
+                            z: 0
+        - vertex0:
+            x: 33
+            "y": 99
+            z: 33
+          vertex1:
+            x: 66
+            "y": 99
+            z: 33
+          vertex2:
+            x: 66
+            "y": 99
+            z: 66
+          material:
+            name: White light
+            type: diffuse_light
+            diffuselight:
+                emit:
+                    name: White light
+                    type: constant
+                    constant:
+                        value:
+                            x: 15
+                            "y": 15
+                            z: 15
+        - vertex0:
+            x: 33
+            "y": 99
+            z: 33
+          vertex1:
+            x: 66
+            "y": 99
+            z: 66
+          vertex2:
+            x: 33
+            "y": 99
+            z: 66
+          material:
+            name: White light
+            type: diffuse_light
+            diffuselight:
+                emit:
+                    name: White light
+                    type: constant
+                    constant:
+                        value:
+                            x: 15
+                            "y": 15
+                            z: 15
+    spheres:
+        - center:
+            x: 30
+            "y": 15
+            z: 30
+          radius: 15
+          material:
+            name: Glass
+            type: dielectric
+            dielectric:
+                refidx: 1.5
+        - center:
+            x: 70
+            "y": 20
+            z: 60
+          radius: 20
+          material:
+            name: Marine Blue
+            type: lambert
+            lambert:
+                albedo:
+                    name: Marine Blue
+                    type: constant
+                    constant:
+                        value:
+                            x: 0
+                            "y": 0.26666666666666666
+                            z: 0.5058823529411764
