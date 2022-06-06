@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/flynn-nrg/izpi/pkg/displacement"
 	"github.com/flynn-nrg/izpi/pkg/hitable"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/texture"
@@ -240,6 +241,33 @@ func (wo *WavefrontObj) groupToTrianglesWithCustomMaterial(g *Group, mat materia
 	for _, face := range g.Faces {
 		tris := wo.triangulate(face, mat)
 		for _, tri := range tris {
+			hitables = append(hitables, tri)
+		}
+	}
+
+	return hitables, nil
+}
+
+// GroupToHitablesWithCustomMaterialAndDisplacement returns a slice of displaced hitables with the supplied material.
+func (wo *WavefrontObj) GroupToHitablesWithCustomMaterialAndDisplacement(index int, mat material.Material, displacementMap texture.Texture, min, max float64) ([]hitable.Hitable, error) {
+	g := wo.Groups[index]
+	switch g.FaceType {
+	case OBJ_FACE_TYPE_POLYGON:
+		return wo.groupToTrianglesWithCustomMaterialAndDisplacement(g, mat, displacementMap, min, max)
+	default:
+		return nil, ErrUnsupportedPolygonType
+	}
+}
+
+func (wo *WavefrontObj) groupToTrianglesWithCustomMaterialAndDisplacement(g *Group, mat material.Material, displacementMap texture.Texture, min, max float64) ([]hitable.Hitable, error) {
+	hitables := []hitable.Hitable{}
+	for _, face := range g.Faces {
+		tris := wo.triangulate(face, mat)
+		displaced, err := displacement.ApplyDisplacementMap(tris, displacementMap, min, max)
+		if err != nil {
+			return hitables, err
+		}
+		for _, tri := range displaced {
 			hitables = append(hitables, tri)
 		}
 	}
