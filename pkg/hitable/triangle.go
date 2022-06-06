@@ -22,6 +22,12 @@ type Triangle struct {
 	vertex0 *vec3.Vec3Impl
 	vertex1 *vec3.Vec3Impl
 	vertex2 *vec3.Vec3Impl
+	// Vertex normals
+	perVertexNormals bool
+	vn0              *vec3.Vec3Impl
+	vn1              *vec3.Vec3Impl
+	vn2              *vec3.Vec3Impl
+
 	// Edges
 	edge1 *vec3.Vec3Impl
 	edge2 *vec3.Vec3Impl
@@ -121,6 +127,67 @@ func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, 
 	}
 }
 
+// NewTriangleWithUVAndVertexNormals returns a new textured triangle with per vertex normals.
+func NewTriangleWithUVAndVertexNormals(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
+	vn0 *vec3.Vec3Impl, vn1 *vec3.Vec3Impl, vn2 *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64,
+	mat material.Material) *Triangle {
+
+	deltaU1 := u1 - u0
+	deltaU2 := u2 - u0
+	deltaV1 := v1 - v0
+	deltaV2 := v2 - v0
+
+	edge1 := vec3.Sub(vertex1, vertex0)
+	edge2 := vec3.Sub(vertex2, vertex0)
+
+	n := vec3.Cross(edge1, edge2)
+	area := n.Length() / 2.0
+
+	f := 1.0 / (deltaU1*deltaV2 - deltaU2*deltaV1)
+	tanget := &vec3.Vec3Impl{
+		X: f * (deltaV2*edge1.X - deltaV1*edge2.X),
+		Y: f * (deltaV2*edge1.Y - deltaV1*edge2.Y),
+		Z: f * (deltaV2*edge1.Z - deltaV1*edge2.Z),
+	}
+
+	tanget.MakeUnitVector()
+
+	bitangent := &vec3.Vec3Impl{
+		X: f * (-deltaU2*edge1.X + deltaU1*edge2.X),
+		Y: f * (-deltaU2*edge1.Y + deltaU1*edge2.Y),
+		Z: f * (-deltaU2*edge1.Z + deltaU1*edge2.Z),
+	}
+
+	bitangent.MakeUnitVector()
+
+	delta := &vec3.Vec3Impl{X: 0.0001, Y: 0.0001, Z: 0.0001}
+	min := vec3.Sub(vec3.Min3(vertex0, vertex1, vertex2), delta)
+	max := vec3.Add(vec3.Max3(vertex0, vertex1, vertex2), delta)
+
+	return &Triangle{
+		vertex0:          vertex0,
+		vertex1:          vertex1,
+		vertex2:          vertex2,
+		perVertexNormals: true,
+		vn0:              vec3.UnitVector(vn0),
+		vn1:              vec3.UnitVector(vn1),
+		vn2:              vec3.UnitVector(vn2),
+		edge1:            edge1,
+		edge2:            edge2,
+		tangent:          tanget,
+		bitangent:        bitangent,
+		area:             area,
+		material:         mat,
+		u0:               u0,
+		u1:               u1,
+		u2:               u2,
+		v0:               v0,
+		v1:               v1,
+		v2:               v2,
+		bb:               aabb.New(min, max),
+	}
+}
+
 func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
 	// https://en.wikipedia.org/wiki/Möller–Trumbore_intersection_algorithm
 	epsilon := math.Nextafter(1, 2) - 1
@@ -154,9 +221,19 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	uu := uv*tri.u0 + u*tri.u1 + v*tri.u2
 	vv := uv*tri.v0 + u*tri.v1 + v*tri.v2
 
+	var normal *vec3.Vec3Impl
+
+	if tri.perVertexNormals {
+		normal0 := vec3.ScalarMul(tri.vn0, u)
+		normal1 := vec3.ScalarMul(tri.vn1, v)
+		normal2 := vec3.ScalarDiv(tri.vn2, uv)
+		normal = vec3.UnitVector(vec3.Add(normal0, normal1, normal2))
+	} else {
+		normal = tri.normal
+	}
 	normalMap := tri.material.NormalMap()
 	if normalMap == nil {
-		return hitrecord.New(t, uu, vv, r.PointAtParameter(t), tri.normal), tri.material, true
+		return hitrecord.New(t, uu, vv, r.PointAtParameter(t), normal), tri.material, true
 	}
 
 	// We use OpenGL normal maps.
@@ -165,9 +242,9 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	normalTangentSpace.Y = 2*normalTangentSpace.Y - 1.0
 	normalTangentSpace.Z = 2*normalTangentSpace.Z - 1.0
 
-	tbn := mat3.NewTBN(tri.tangent, tri.bitangent, tri.normal)
-	normal := mat3.MatrixVectorMul(tbn, normalTangentSpace)
-	return hitrecord.New(t, uu, vv, r.PointAtParameter(t), normal), tri.material, true
+	tbn := mat3.NewTBN(tri.tangent, tri.bitangent, normal)
+	newNormal := mat3.MatrixVectorMul(tbn, normalTangentSpace)
+	return hitrecord.New(t, uu, vv, r.PointAtParameter(t), newNormal), tri.material, true
 }
 
 func (tri *Triangle) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
@@ -198,12 +275,8 @@ func (tri *Triangle) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.
 	}
 
 	c := rec.P()
-	//fmt.Printf("Triangle hit at c: %v\n", c)
-	//	fmt.Printf("Triangle hit: %v, %v, %v, %v\n", c, tri.vertex0, tri.vertex1, tri.vertex2)
 	for _, s := range segments {
-		//	fmt.Printf("Triangle hit edge: %v, %v, %v\n", c, s.A, s.B)
 		if segment.Belongs(s, c) {
-			//		fmt.Printf("exposito\n")
 			return rec, true, true
 		}
 	}
@@ -211,6 +284,7 @@ func (tri *Triangle) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.
 	return rec, true, false
 }
 
+/*
 func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 	r := rand.Float64()
 	randomPoint := &vec3.Vec3Impl{
@@ -218,6 +292,18 @@ func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 		Y: tri.vertex0.Y + r*(tri.vertex1.Y-tri.vertex0.Y) + (1-r)*(tri.vertex2.Y-tri.vertex0.Y),
 		Z: tri.vertex0.Z + r*(tri.vertex1.Z-tri.vertex0.Z) + (1-r)*(tri.vertex2.Z-tri.vertex0.Z),
 	}
+
+	return vec3.Sub(randomPoint, o)
+}
+*/
+
+func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+	t1 := rand.Float64()
+	randomPoint01 := vec3.Lerp(tri.vertex0, tri.vertex1, t1)
+	t2 := rand.Float64()
+	randomPoint02 := vec3.Lerp(tri.vertex0, tri.vertex2, t2)
+	t3 := rand.Float64()
+	randomPoint := vec3.Lerp(randomPoint01, randomPoint02, t3)
 
 	return vec3.Sub(randomPoint, o)
 }
