@@ -281,20 +281,30 @@ func (wo *WavefrontObj) triangulate(face *Face, mat material.Material) []*hitabl
 		vertex0 := wo.Vertices[face.Vertices[0].VIdx-1]
 		vertex1 := wo.Vertices[face.Vertices[1].VIdx-1]
 		vertex2 := wo.Vertices[face.Vertices[2].VIdx-1]
+		uv0 := &texture.UV{}
+		uv1 := &texture.UV{}
+		uv2 := &texture.UV{}
+
 		if wo.HasUV && !wo.IgnoreTextures {
-			uv0 := wo.VertexUV[face.Vertices[0].VtIdx-1]
-			uv1 := wo.VertexUV[face.Vertices[1].VtIdx-1]
-			uv2 := wo.VertexUV[face.Vertices[2].VtIdx-1]
-			if wo.IgnoreNormals {
-				return []*hitable.Triangle{hitable.NewTriangleWithUV(
-					vertex0, vertex1, vertex2, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat)}
-			} else {
-				normal := wo.VertexNormals[face.Vertices[0].VnIdx-1]
-				return []*hitable.Triangle{hitable.NewTriangleWithUVAndNormal(
-					vertex0, vertex1, vertex2, normal, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat)}
-			}
+			uv0 = wo.VertexUV[face.Vertices[0].VtIdx-1]
+			uv1 = wo.VertexUV[face.Vertices[1].VtIdx-1]
+			uv2 = wo.VertexUV[face.Vertices[2].VtIdx-1]
+		}
+		if wo.IgnoreNormals {
+			return []*hitable.Triangle{hitable.NewTriangleWithUV(
+				vertex0, vertex1, vertex2, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat)}
 		} else {
-			return []*hitable.Triangle{hitable.NewTriangle(vertex0, vertex1, vertex2, mat)}
+			if face.Vertices[0].VnIdx != face.Vertices[1].VnIdx || face.Vertices[0].VnIdx != face.Vertices[2].VnIdx {
+				vn0 := wo.VertexNormals[face.Vertices[0].VnIdx-1]
+				vn1 := wo.VertexNormals[face.Vertices[1].VnIdx-1]
+				vn2 := wo.VertexNormals[face.Vertices[2].VnIdx-1]
+				return []*hitable.Triangle{hitable.NewTriangleWithUVAndVertexNormals(
+					vertex0, vertex1, vertex2, vn0, vn1, vn2, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat)}
+			} else {
+				vn0 := wo.VertexNormals[face.Vertices[0].VnIdx-1]
+				return []*hitable.Triangle{hitable.NewTriangleWithUVAndNormal(
+					vertex0, vertex1, vertex2, vn0, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat)}
+			}
 		}
 
 	case 4:
@@ -306,7 +316,7 @@ func (wo *WavefrontObj) triangulate(face *Face, mat material.Material) []*hitabl
 			uv0 := wo.VertexUV[face.Vertices[0].VtIdx-1]
 			uv1 := wo.VertexUV[face.Vertices[1].VtIdx-1]
 			uv2 := wo.VertexUV[face.Vertices[2].VtIdx-1]
-			uv3 := wo.VertexUV[face.Vertices[2].VtIdx-1]
+			uv3 := wo.VertexUV[face.Vertices[3].VtIdx-1]
 			return []*hitable.Triangle{
 				hitable.NewTriangleWithUV(vertex0, vertex1, vertex2, uv0.U, uv0.V, uv1.U, uv1.V, uv2.U, uv2.V, mat),
 				hitable.NewTriangleWithUV(vertex0, vertex2, vertex3, uv0.U, uv0.V, uv2.U, uv2.V, uv3.U, uv3.V, mat),
