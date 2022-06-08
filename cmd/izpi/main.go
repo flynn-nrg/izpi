@@ -5,6 +5,7 @@ import (
 	"image"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -76,7 +77,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	scene, err := scene.FromYAML(sceneFile, 0)
+	scene, err := scene.FromYAML(sceneFile, filepath.Dir(flags.Scene), 0)
 	if err != nil {
 		log.Fatal(err)
 	}

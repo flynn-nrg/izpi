@@ -40,14 +40,14 @@ func New(world *hitable.HitableSlice, lights *hitable.HitableSlice, camera *came
 }
 
 // FromStruct returns the internal representation of a scene from YAML data.
-func FromYAML(r io.Reader, aspectOverride float64) (*Scene, error) {
+func FromYAML(r io.Reader, containerDirectory string, aspectOverride float64) (*Scene, error) {
 	y := &serde.Yaml{}
 	sceneStruct, err := y.Deserialise(r)
 	if err != nil {
 		return nil, err
 	}
 
-	s, err := FromStruct(sceneStruct, aspectOverride)
+	s, err := FromStruct(sceneStruct, containerDirectory, aspectOverride)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func FromYAML(r io.Reader, aspectOverride float64) (*Scene, error) {
 }
 
 // FromStruct returns the internal representation of a scene from struct data.
-func FromStruct(sceneStruct *serde.Scene, aspectOverride float64) (*Scene, error) {
-	hitables, err := objectsFromStruct(&sceneStruct.Objects)
+func FromStruct(sceneStruct *serde.Scene, containerDirectory string, aspectOverride float64) (*Scene, error) {
+	hitables, err := objectsFromStruct(&sceneStruct.Objects, containerDirectory)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func FromStruct(sceneStruct *serde.Scene, aspectOverride float64) (*Scene, error
 	}
 
 	return &Scene{
-		World:  hitable.NewSlice(hitables),
+		World:  hitable.NewSlice([]hitable.Hitable{hitable.NewBVH(hitables, 0, 1)}),
 		Lights: hitable.NewSlice(lights),
 		Camera: cameraFromStruct(&sceneStruct.Camera, aspectOverride),
 	}, nil
@@ -235,13 +235,14 @@ func triangleFromStruct(triangle *serde.Triangle) ([]hitable.Hitable, error) {
 	return hitables, nil
 }
 
-func meshFromStruct(mesh *serde.Mesh) ([]hitable.Hitable, error) {
-	r, err := os.Open(mesh.WavefrontData)
+func meshFromStruct(mesh *serde.Mesh, containerDirectory string) ([]hitable.Hitable, error) {
+	filePath := containerDirectory + string(os.PathSeparator) + mesh.WavefrontData
+	r, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
 	obj, err := wavefront.NewObjFromReader(r, filepath.Dir(mesh.WavefrontData),
-		wavefront.IGNORE_MATERIALS, wavefront.IGNORE_NORMALS)
+		wavefront.IGNORE_MATERIALS)
 	if err != nil {
 		return nil, err
 	}
@@ -275,14 +276,15 @@ func meshFromStruct(mesh *serde.Mesh) ([]hitable.Hitable, error) {
 	return hitables, nil
 }
 
-func objectsFromStruct(objects *serde.Objects) ([]hitable.Hitable, error) {
+func objectsFromStruct(objects *serde.Objects, containerDirectory string) ([]hitable.Hitable, error) {
 	hitables := []hitable.Hitable{}
 
 	for _, mesh := range objects.Meshes {
-		h, err := meshFromStruct(&mesh)
+		h, err := meshFromStruct(&mesh, containerDirectory)
 		if err != nil {
 			return nil, err
 		}
+
 		hitables = append(hitables, h...)
 	}
 
