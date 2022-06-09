@@ -226,7 +226,7 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	if tri.perVertexNormals {
 		normal0 := vec3.ScalarMul(tri.vn0, u)
 		normal1 := vec3.ScalarMul(tri.vn1, v)
-		normal2 := vec3.ScalarDiv(tri.vn2, uv)
+		normal2 := vec3.ScalarMul(tri.vn2, uv)
 		normal = vec3.UnitVector(vec3.Add(normal0, normal1, normal2))
 	} else {
 		normal = tri.normal
