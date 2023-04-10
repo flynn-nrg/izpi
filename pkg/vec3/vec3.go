@@ -3,7 +3,8 @@ package vec3
 
 import (
 	"math"
-	"math/rand"
+
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 )
 
 // Vec3Impl defines a vector with its position and colour.
@@ -124,9 +125,9 @@ func UnitVector(v *Vec3Impl) *Vec3Impl {
 }
 
 // RandomCosineDirection returns a vector with a random cosine direction.
-func RandomCosineDirection() *Vec3Impl {
-	r1 := rand.Float64()
-	r2 := rand.Float64()
+func RandomCosineDirection(random *fastrandom.LCG) *Vec3Impl {
+	r1 := random.Float64()
+	r2 := random.Float64()
 	z := math.Sqrt(1 - r2)
 	phi := 2 * math.Pi * r1
 	x := math.Cos(phi) * 2 * math.Sqrt(r2)
@@ -135,9 +136,9 @@ func RandomCosineDirection() *Vec3Impl {
 }
 
 // RandomToSphere returns a new random sphere of the given radius at the given distance.
-func RandomToSphere(radius float64, distanceSquared float64) *Vec3Impl {
-	r1 := rand.Float64()
-	r2 := rand.Float64()
+func RandomToSphere(radius float64, distanceSquared float64, random *fastrandom.LCG) *Vec3Impl {
+	r1 := random.Float64()
+	r2 := random.Float64()
 	z := 1 + r2*(math.Sqrt(1-radius*radius/distanceSquared)-1)
 	phi := 2 * math.Pi * r1
 	x := math.Cos(phi) * math.Sqrt(1-z*z)

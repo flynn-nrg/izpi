@@ -1,8 +1,7 @@
 package material
 
 import (
-	"math/rand"
-
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/ray"
 	"github.com/flynn-nrg/izpi/pkg/scatterrecord"
@@ -26,7 +25,7 @@ func NewDielectric(reIdx float64) *Dielectric {
 }
 
 // Scatter computes how the ray bounces off the surface of a dielectric material.
-func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	var niOverNt float64
 	var cosine float64
 	var reflectProb float64
@@ -54,7 +53,7 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, 
 		reflectProb = 1.0
 	}
 
-	if rand.Float64() < reflectProb {
+	if random.Float64() < reflectProb {
 		scattered = ray.New(hr.P(), reflected, r.Time())
 	} else {
 		scattered = ray.New(hr.P(), refracted, r.Time())

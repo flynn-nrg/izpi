@@ -2,6 +2,7 @@
 package material
 
 import (
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/ray"
 	"github.com/flynn-nrg/izpi/pkg/scatterrecord"
@@ -11,7 +12,7 @@ import (
 
 // Material defines the methods to handle materials.
 type Material interface {
-	Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool)
+	Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool)
 	NormalMap() texture.Texture
 	Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl
 	ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64

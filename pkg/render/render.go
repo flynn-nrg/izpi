@@ -9,6 +9,7 @@ import (
 
 	"github.com/flynn-nrg/izpi/pkg/colour"
 	"github.com/flynn-nrg/izpi/pkg/display"
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/floatimage"
 	"github.com/flynn-nrg/izpi/pkg/grid"
 	"github.com/flynn-nrg/izpi/pkg/sampler"
@@ -52,7 +53,7 @@ type workUnit struct {
 	y1          int
 }
 
-func renderRect(w workUnit) {
+func renderRect(w workUnit, random *fastrandom.LCG) {
 	var tile display.DisplayTile
 
 	nx := w.canvas.Bounds().Max.X
@@ -76,7 +77,7 @@ func renderRect(w workUnit) {
 				u := (float64(x) + rand.Float64()) / float64(nx)
 				v := (float64(y) + rand.Float64()) / float64(ny)
 				r := w.scene.Camera.GetRay(u, v)
-				col = vec3.Add(col, vec3.DeNAN(w.sampler.Sample(r, w.scene.World, w.scene.Lights, 0)))
+				col = vec3.Add(col, vec3.DeNAN(w.sampler.Sample(r, w.scene.World, w.scene.Lights, 0, random)))
 			}
 
 			// Linear colour space.
@@ -99,13 +100,13 @@ func renderRect(w workUnit) {
 	}
 }
 
-func worker(input chan workUnit, quit chan struct{}, wg *sync.WaitGroup) {
+func worker(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg *sync.WaitGroup) {
 	wg.Add(1)
 	defer wg.Done()
 	for {
 		select {
 		case w := <-input:
-			renderRect(w)
+			renderRect(w, random)
 		case <-quit:
 			return
 		}
@@ -165,7 +166,8 @@ func (r *Renderer) Render() image.Image {
 	}
 
 	for i := 0; i < r.numWorkers; i++ {
-		go worker(queue, quit, wg)
+		random := fastrandom.NewWithDefaults()
+		go worker(queue, quit, random, wg)
 	}
 
 	gridSizeX := r.sizeX / stepSizeX

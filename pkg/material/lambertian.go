@@ -3,6 +3,7 @@ package material
 import (
 	"math"
 
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/onb"
 	"github.com/flynn-nrg/izpi/pkg/pdf"
@@ -30,10 +31,10 @@ func NewLambertian(albedo texture.Texture) *Lambertian {
 }
 
 // Scatter computes how the ray bounces off the surface of a diffuse material.
-func (l *Lambertian) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (l *Lambertian) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	uvw := onb.New()
 	uvw.BuildFromW(hr.Normal())
-	direction := uvw.Local(vec3.RandomCosineDirection())
+	direction := uvw.Local(vec3.RandomCosineDirection(random))
 	scattered := ray.New(hr.P(), vec3.UnitVector(direction), r.Time())
 	albedo := l.albedo.Value(hr.U(), hr.V(), hr.P())
 	pdf := pdf.NewCosine(hr.Normal())

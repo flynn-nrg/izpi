@@ -2,9 +2,9 @@ package hitable
 
 import (
 	"math"
-	"math/rand"
 
 	"github.com/flynn-nrg/izpi/pkg/aabb"
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/ray"
@@ -104,9 +104,9 @@ func (hs *HitableSlice) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 	return sum
 }
 
-func (hs *HitableSlice) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
-	index := int(rand.Float64() * float64(len(hs.hitables)))
-	return hs.hitables[index].Random(o)
+func (hs *HitableSlice) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+	index := int(random.Float64() * float64(len(hs.hitables)))
+	return hs.hitables[index].Random(o, random)
 }
 
 func (hs *HitableSlice) IsEmitter() bool {

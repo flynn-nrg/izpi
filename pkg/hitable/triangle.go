@@ -2,9 +2,9 @@ package hitable
 
 import (
 	"math"
-	"math/rand"
 
 	"github.com/flynn-nrg/izpi/pkg/aabb"
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/mat3"
 	"github.com/flynn-nrg/izpi/pkg/material"
@@ -16,7 +16,7 @@ import (
 // Ensure interface compliance.
 var _ Hitable = (*Triangle)(nil)
 
-//Triangle represents a single triangle in the 3d world.
+// Triangle represents a single triangle in the 3d world.
 type Triangle struct {
 	// Vertices
 	vertex0 *vec3.Vec3Impl
@@ -297,12 +297,12 @@ func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 }
 */
 
-func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
-	t1 := rand.Float64()
+func (tri *Triangle) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+	t1 := random.Float64()
 	randomPoint01 := vec3.Lerp(tri.vertex0, tri.vertex1, t1)
-	t2 := rand.Float64()
+	t2 := random.Float64()
 	randomPoint02 := vec3.Lerp(tri.vertex0, tri.vertex2, t2)
-	t3 := rand.Float64()
+	t3 := random.Float64()
 	randomPoint := vec3.Lerp(randomPoint01, randomPoint02, t3)
 
 	return vec3.Sub(randomPoint, o)

@@ -4,6 +4,7 @@ import (
 	"math"
 	"sync/atomic"
 
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitable"
 	"github.com/flynn-nrg/izpi/pkg/ray"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
@@ -24,7 +25,7 @@ func NewAlbedo(numRays *uint64) *Albedo {
 	}
 }
 
-func (a *Albedo) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int) *vec3.Vec3Impl {
+func (a *Albedo) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) *vec3.Vec3Impl {
 	atomic.AddUint64(a.numRays, 1)
 	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
 		return mat.Albedo(rec.U(), rec.V(), rec.P())

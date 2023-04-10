@@ -2,6 +2,7 @@ package hitable
 
 import (
 	"github.com/flynn-nrg/izpi/pkg/aabb"
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/ray"
@@ -56,7 +57,7 @@ func (b *Box) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 	return 0.0
 }
 
-func (b *Box) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (b *Box) Random(o *vec3.Vec3Impl, _ *fastrandom.LCG) *vec3.Vec3Impl {
 	return &vec3.Vec3Impl{X: 1}
 }
 

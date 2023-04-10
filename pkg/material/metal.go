@@ -1,6 +1,7 @@
 package material
 
 import (
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/ray"
 	"github.com/flynn-nrg/izpi/pkg/scatterrecord"
@@ -27,9 +28,9 @@ func NewMetal(albedo *vec3.Vec3Impl, fuzz float64) *Metal {
 }
 
 // Scatter computes how the ray bounces off the surface of a metallic object.
-func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	reflected := reflect(vec3.UnitVector(r.Direction()), hr.Normal())
-	specular := ray.New(hr.P(), vec3.Add(reflected, vec3.ScalarMul(randomInUnitSphere(), m.fuzz)), r.Time())
+	specular := ray.New(hr.P(), vec3.Add(reflected, vec3.ScalarMul(randomInUnitSphere(random), m.fuzz)), r.Time())
 	attenuation := m.albedo
 	scatterRecord := scatterrecord.New(specular, true, attenuation, nil, nil, nil, nil)
 	return nil, scatterRecord, true

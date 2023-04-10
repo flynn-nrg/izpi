@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/flynn-nrg/izpi/pkg/aabb"
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/onb"
@@ -140,12 +141,12 @@ func (s *Sphere) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 	return 0.0
 }
 
-func (s *Sphere) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (s *Sphere) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
 	direction := vec3.Sub(s.center0, o)
 	distanceSquared := direction.SquaredLength()
 	uvw := onb.New()
 	uvw.BuildFromW(direction)
-	return uvw.Local(vec3.RandomToSphere(s.radius, distanceSquared))
+	return uvw.Local(vec3.RandomToSphere(s.radius, distanceSquared, random))
 }
 
 func (s *Sphere) IsEmitter() bool {

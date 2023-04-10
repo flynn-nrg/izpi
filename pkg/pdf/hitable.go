@@ -1,6 +1,7 @@
 package pdf
 
 import (
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitabletarget"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
@@ -26,6 +27,6 @@ func (h *Hitable) Value(direction *vec3.Vec3Impl) float64 {
 	return h.hitable.PDFValue(h.o, direction)
 }
 
-func (h *Hitable) Generate() *vec3.Vec3Impl {
-	return h.hitable.Random(h.o)
+func (h *Hitable) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
+	return h.hitable.Random(h.o, random)
 }
