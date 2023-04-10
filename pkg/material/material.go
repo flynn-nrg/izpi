@@ -2,14 +2,14 @@ package material
 
 import (
 	"math"
-	"math/rand"
 
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
 
-func randomInUnitSphere() *vec3.Vec3Impl {
+func randomInUnitSphere(random *fastrandom.LCG) *vec3.Vec3Impl {
 	for {
-		p := vec3.Sub(vec3.ScalarMul(&vec3.Vec3Impl{X: rand.Float64(), Y: rand.Float64(), Z: rand.Float64()}, 2.0),
+		p := vec3.Sub(vec3.ScalarMul(&vec3.Vec3Impl{X: random.Float64(), Y: random.Float64(), Z: random.Float64()}, 2.0),
 			&vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0})
 		if p.SquaredLength() < 1.0 {
 			return p

@@ -1,6 +1,7 @@
 package material
 
 import (
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/ray"
 	"github.com/flynn-nrg/izpi/pkg/scatterrecord"
@@ -25,7 +26,7 @@ func NewDiffuseLight(emit texture.Texture) *DiffuseLight {
 }
 
 // Scatter returns false for diffuse light materials.
-func (dl *DiffuseLight) Scatter(_ ray.Ray, _ *hitrecord.HitRecord) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (dl *DiffuseLight) Scatter(_ ray.Ray, _ *hitrecord.HitRecord, _ *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	return nil, nil, false
 }
 

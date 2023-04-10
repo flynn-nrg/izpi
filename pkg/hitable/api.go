@@ -3,6 +3,7 @@ package hitable
 
 import (
 	"github.com/flynn-nrg/izpi/pkg/aabb"
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/ray"
@@ -15,6 +16,6 @@ type Hitable interface {
 	HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool)
 	BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool)
 	PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64
-	Random(o *vec3.Vec3Impl) *vec3.Vec3Impl
+	Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl
 	IsEmitter() bool
 }

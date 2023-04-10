@@ -3,6 +3,7 @@ package pdf
 import (
 	"math"
 
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/onb"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
 )
@@ -32,6 +33,6 @@ func (c *Cosine) Value(direction *vec3.Vec3Impl) float64 {
 	return 0
 }
 
-func (c *Cosine) Generate() *vec3.Vec3Impl {
-	return c.uvw.Local(vec3.RandomCosineDirection())
+func (c *Cosine) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
+	return c.uvw.Local(vec3.RandomCosineDirection(random))
 }

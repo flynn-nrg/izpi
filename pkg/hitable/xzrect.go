@@ -2,9 +2,9 @@ package hitable
 
 import (
 	"math"
-	"math/rand"
 
 	"github.com/flynn-nrg/izpi/pkg/aabb"
+	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/hitrecord"
 	"github.com/flynn-nrg/izpi/pkg/material"
 	"github.com/flynn-nrg/izpi/pkg/ray"
@@ -115,11 +115,11 @@ func (xzr *XZRect) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 	return 0
 }
 
-func (xzr *XZRect) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (xzr *XZRect) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
 	randomPoint := &vec3.Vec3Impl{
-		X: xzr.x0 + rand.Float64()*(xzr.x1-xzr.x0),
+		X: xzr.x0 + random.Float64()*(xzr.x1-xzr.x0),
 		Y: xzr.k,
-		Z: xzr.z0 + rand.Float64()*(xzr.z1-xzr.z0),
+		Z: xzr.z0 + random.Float64()*(xzr.z1-xzr.z0),
 	}
 
 	return vec3.Sub(randomPoint, o)
