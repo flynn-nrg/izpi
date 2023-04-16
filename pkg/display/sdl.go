@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/flynn-nrg/izpi/pkg/common"
 	"github.com/veandco/go-sdl2/sdl"
 
 	log "github.com/sirupsen/logrus"
@@ -115,6 +116,9 @@ func (sd *SDLDisplay) Wait() {
 func (sd *SDLDisplay) busyLoop() {
 	sd.wg.Add(1)
 	defer sd.wg.Done()
+
+	sd.makeBackdrop()
+
 	for {
 		select {
 		case in := <-sd.input:
@@ -158,6 +162,60 @@ func (sd *SDLDisplay) poll() {
 			time.Sleep(100 * time.Millisecond)
 		}
 	})
+}
+
+func (sd *SDLDisplay) makeBackdrop() {
+	canvas := make([]byte, sd.height*sd.width*4)
+
+	cols := [][]byte{
+		{0, 0, 0, 255},
+		{128, 128, 128, 255},
+	}
+
+	chosen := 0
+	stepSizeX, stepSizeY := common.Tiles(int(sd.width), int(sd.height))
+	i := 0
+
+	for y := 0; y < int(sd.height); y++ {
+		for x := 0; x < int(sd.width); x++ {
+			if x%stepSizeX == 0 {
+				chosen ^= 1
+			}
+			// R
+			canvas[i] = cols[chosen][0]
+			i++
+			// G
+			canvas[i] = cols[chosen][1]
+			i++
+			// B
+			canvas[i] = cols[chosen][2]
+			i++
+			// A
+			canvas[i] = cols[chosen][3]
+			i++
+		}
+		if y%stepSizeY == 0 {
+			chosen ^= 1
+		}
+	}
+
+	rect := &sdl.Rect{
+		X: 0,
+		Y: 0,
+		W: sd.width,
+		H: sd.height,
+	}
+
+	err := sd.texture.Update(rect, canvas, int(sd.pitch))
+	if err != nil {
+		log.Error(err)
+	}
+	err = sd.renderer.Copy(sd.texture, nil, nil)
+	if err != nil {
+		log.Error(err)
+	}
+	sd.renderer.Present()
+
 }
 
 func floatToByte(in float64) byte {
