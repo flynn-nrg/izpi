@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/flynn-nrg/izpi/pkg/colour"
+	"github.com/flynn-nrg/izpi/pkg/common"
 	"github.com/flynn-nrg/izpi/pkg/display"
 	"github.com/flynn-nrg/izpi/pkg/fastrandom"
 	"github.com/flynn-nrg/izpi/pkg/floatimage"
@@ -137,28 +138,14 @@ func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, maxDepth int,
 // Render performs the rendering task spread across 1 or more worker goroutines.
 // It returns a FloatNRGBA image that can be further processed before output or fed to an output directly.
 func (r *Renderer) Render() image.Image {
-	stepSizes := []int{32, 25, 24, 20, 16, 12, 10, 8, 5, 4}
 
 	var bar *pb.ProgressBar
-	var stepSizeX, stepSizeY int
 
 	queue := make(chan workUnit)
 	quit := make(chan struct{})
 	wg := &sync.WaitGroup{}
 
-	for _, size := range stepSizes {
-		if r.sizeX%size == 0 {
-			stepSizeX = size
-			break
-		}
-	}
-
-	for _, size := range stepSizes {
-		if r.sizeY%size == 0 {
-			stepSizeY = size
-			break
-		}
-	}
+	stepSizeX, stepSizeY := common.Tiles(r.sizeX, r.sizeY)
 
 	numTiles := (r.sizeX / stepSizeX) * (r.sizeY / stepSizeY)
 	if r.verbose {
