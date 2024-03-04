@@ -1,6 +1,6 @@
 module github.com/flynn-nrg/izpi
 
-go 1.17
+go 1.22
 
 require (
 	github.com/alecthomas/kong v0.5.0
