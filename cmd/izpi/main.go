@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 	"image"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/pprof"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/flynn-nrg/izpi/pkg/colours"
 	"github.com/flynn-nrg/izpi/pkg/display"
@@ -48,6 +47,7 @@ var flags struct {
 	OutputFile string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
 	Verbose    bool   `name:"v" help:"Print rendering progress bar" default:"true"`
 	Preview    bool   `name:"p" help:"Display rendering progress in a window" default:"true"`
+	CpuProfile string `name:"cpu-profile" help:"Enable cpu profiling"`
 }
 
 func main() {
@@ -68,8 +68,6 @@ func main() {
 			"defaultSceneFile":  defaultSceneFile,
 		})
 
-	rand.Seed(time.Now().UnixNano())
-
 	setupLogging(flags.LogLevel)
 
 	sceneFile, err := os.Open(flags.Scene)
@@ -80,6 +78,15 @@ func main() {
 	scene, err := scene.FromYAML(sceneFile, filepath.Dir(flags.Scene), 0)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if flags.CpuProfile != "" {
+		f, err := os.Create(flags.CpuProfile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
 	}
 
 	previewChan := make(chan display.DisplayTile)
