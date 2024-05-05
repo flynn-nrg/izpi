@@ -102,7 +102,6 @@ func renderRect(w workUnit, random *fastrandom.LCG) {
 }
 
 func worker(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg *sync.WaitGroup) {
-	wg.Add(1)
 	defer wg.Done()
 	for {
 		select {
@@ -154,6 +153,7 @@ func (r *Renderer) Render() image.Image {
 
 	for i := 0; i < r.numWorkers; i++ {
 		random := fastrandom.NewWithDefaults()
+		wg.Add(1)
 		go worker(queue, quit, random, wg)
 	}
 
