@@ -31,18 +31,20 @@ type BVHNode struct {
 func NewBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
 	log.Infof("Building BVH with %v elements", len(hitables))
 	startTime := time.Now()
-	bvh := newBVH(hitables, time0, time1)
+	randomFunc := rand.Float64
+	bvh := newBVH(hitables, randomFunc, time0, time1)
 	log.Infof("Completed BVH construction in %v", time.Since(startTime))
 	return bvh
 }
 
-func newBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
+func newBVH(hitables []Hitable, randomFunc func() float64, time0 float64, time1 float64) *BVHNode {
 	bn := &BVHNode{
 		time0: time0,
 		time1: time1,
 	}
 
 	axis := int(3 * rand.Float64())
+
 	switch axis {
 	case 0:
 		sort.Slice(hitables, func(i, j int) bool {
@@ -96,8 +98,8 @@ func newBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
 		bn.left = hitables[0]
 		bn.right = hitables[1]
 	} else {
-		bn.left = newBVH(hitables[:len(hitables)/2], time0, time1)
-		bn.right = newBVH(hitables[len(hitables)/2:], time0, time1)
+		bn.left = newBVH(hitables[:len(hitables)/2], randomFunc, time0, time1)
+		bn.right = newBVH(hitables[len(hitables)/2:], randomFunc, time0, time1)
 	}
 
 	var leftBox, rightBox *aabb.AABB
