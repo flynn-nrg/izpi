@@ -3,6 +3,7 @@
 // how multithreading is managed. This will probably be replaced by something Vulkan-backed
 // in the future.
 // nolint
+// TODO: Reimplement this using fyne.
 package display
 
 import (
@@ -129,12 +130,12 @@ func (sd *SDLDisplay) busyLoop() {
 				H: int32(in.Height),
 			}
 
-			pixels := make([]byte, len(in.Pixels)*4)
-			for i := 0; i < len(in.Pixels); i++ {
-				pixels[i] = floatToByte(in.Pixels[i])
+			pixels := make([]uint32, len(in.Pixels)/4)
+			for i := 0; i < len(in.Pixels); i += 4 {
+				pixels[i/4] = floatToUint32(in.Pixels[i]) | (floatToUint32(in.Pixels[i+1]) << 8) | (floatToUint32(in.Pixels[i+2]) << 16) | (floatToUint32(in.Pixels[i+3]) << 24)
 			}
 
-			err := sd.texture.Update(rect, pixels, int(sd.pitch))
+			err := sd.texture.UpdateRGBA(rect, pixels, int(sd.pitch))
 			if err != nil {
 				log.Error(err)
 			}
@@ -165,33 +166,26 @@ func (sd *SDLDisplay) poll() {
 }
 
 func (sd *SDLDisplay) makeBackdrop() {
-	canvas := make([]byte, sd.height*sd.width*4)
+	canvas := make([]uint32, sd.height*4*sd.width)
 
-	cols := [][]byte{
-		{0, 0, 0, 255},
-		{128, 128, 128, 255},
+	cols := []uint32{
+		255 << 24,
+		(128) | (128 << 8) | (128 << 16) | (255 << 24),
 	}
 
 	chosen := 0
 	stepSizeX, stepSizeY := common.Tiles(int(sd.width), int(sd.height))
+	stepSizeY *= 4
+
 	i := 0
 
-	for y := 0; y < int(sd.height); y++ {
+	for y := 0; y < int(sd.height)*4; y++ {
 		for x := 0; x < int(sd.width); x++ {
 			if x%stepSizeX == 0 {
 				chosen ^= 1
 			}
-			// R
-			canvas[i] = cols[chosen][0]
-			i++
-			// G
-			canvas[i] = cols[chosen][1]
-			i++
-			// B
-			canvas[i] = cols[chosen][2]
-			i++
-			// A
-			canvas[i] = cols[chosen][3]
+			// RGBA
+			canvas[i] = cols[chosen]
 			i++
 		}
 		if y%stepSizeY == 0 {
@@ -206,7 +200,7 @@ func (sd *SDLDisplay) makeBackdrop() {
 		H: sd.height,
 	}
 
-	err := sd.texture.Update(rect, canvas, int(sd.pitch))
+	err := sd.texture.UpdateRGBA(rect, canvas, int(sd.pitch))
 	if err != nil {
 		log.Error(err)
 	}
@@ -218,7 +212,7 @@ func (sd *SDLDisplay) makeBackdrop() {
 
 }
 
-func floatToByte(in float64) byte {
+func floatToUint32(in float64) uint32 {
 	// Gamma 2.0
 	in = math.Sqrt(in)
 	p := int(in * 255)
@@ -226,5 +220,5 @@ func floatToByte(in float64) byte {
 		return 255
 	}
 
-	return byte(p)
+	return uint32(p)
 }
