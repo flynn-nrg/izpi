@@ -120,10 +120,11 @@ func TestNewBVH(t *testing.T) {
 		},
 	}
 
+	ramdonFunc := func() float64 { return 0 }
 	for _, test := range testData {
 		t.Run(test.name, func(t *testing.T) {
 
-			got := NewBVH(test.hitables, test.time0, test.time0)
+			got := newBVH(test.hitables, ramdonFunc, test.time0, test.time0)
 			if diff := cmp.Diff(test.want, got, cmp.AllowUnexported(BVHNode{}),
 				cmp.AllowUnexported(Sphere{}),
 				cmp.AllowUnexported(material.Lambertian{}),
