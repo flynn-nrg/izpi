@@ -104,7 +104,7 @@ func main() {
 	}()
 
 	if flags.Preview {
-		disp = display.NewSDLDisplay("Izpi Render Output", int(flags.XSize), int(flags.YSize), previewChan)
+		disp = display.NewFyneDisplay("Izpi Render Output", int(flags.XSize), int(flags.YSize), previewChan)
 		disp.Start()
 	}
 
