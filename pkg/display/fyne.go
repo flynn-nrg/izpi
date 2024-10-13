@@ -1,9 +1,4 @@
-// Package display implements an SDL-backed preview window.
-// The way SDL is shoehorned into Go makes for some intereasting limitations in regards to
-// how multithreading is managed. This will probably be replaced by something Vulkan-backed
-// in the future.
-// nolint
-// TODO: Reimplement this using fyne.
+// Package display implements an Fyne-backed preview window.
 package display
 
 import (
