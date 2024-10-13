@@ -115,24 +115,7 @@ func (fd *FyneDisplay) busyLoop() {
 	}
 }
 
-func (fd *FyneDisplay) poll() {
-	/*
-		sdl.Do(func() {
-			for {
-				for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-					switch event.(type) {
-					case *sdl.QuitEvent:
-						return
-					}
-				}
-				time.Sleep(100 * time.Millisecond)
-			}
-		})
-	*/
-}
-
 func (fd *FyneDisplay) makeBackdrop() {
-
 	cols := []color.Color{
 		color.RGBA{
 			R: 255,
