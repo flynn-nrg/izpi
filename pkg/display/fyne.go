@@ -15,7 +15,7 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/common"
 )
 
-var _ Display = (*SDLDisplay)(nil)
+var _ Display = (*FyneDisplay)(nil)
 
 type FyneDisplay struct {
 	name   string
