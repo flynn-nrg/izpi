@@ -118,9 +118,9 @@ func (fd *FyneDisplay) busyLoop() {
 func (fd *FyneDisplay) makeBackdrop() {
 	cols := []color.Color{
 		color.RGBA{
-			R: 255,
-			G: 255,
-			B: 255,
+			R: 0,
+			G: 0,
+			B: 0,
 			A: 255,
 		},
 		color.RGBA{
