@@ -43,18 +43,19 @@ func newBVH(hitables []Hitable, randomFunc func() float64, time0 float64, time1 
 		time1: time1,
 	}
 
-	axis := int(3 * rand.Float64())
+	// Select a random axis for splitting (0=x, 1=y, 2=z)
+	axis := int(3 * randomFunc())
 
 	switch axis {
 	case 0:
 		sort.Slice(hitables, func(i, j int) bool {
 			var box0, box1 *aabb.AABB
 			var ok bool
-			if box0, ok = hitables[i].BoundingBox(0, 0); !ok {
+			if box0, ok = hitables[i].BoundingBox(time0, time1); !ok {
 				log.Warning("no bounding box in BVH node")
 				return false
 			}
-			if box1, ok = hitables[j].BoundingBox(0, 0); !ok {
+			if box1, ok = hitables[j].BoundingBox(time0, time1); !ok {
 				log.Warning("no bounding box in BVH node")
 				return false
 			}
@@ -65,11 +66,11 @@ func newBVH(hitables []Hitable, randomFunc func() float64, time0 float64, time1 
 		sort.Slice(hitables, func(i, j int) bool {
 			var box0, box1 *aabb.AABB
 			var ok bool
-			if box0, ok = hitables[i].BoundingBox(0, 0); !ok {
+			if box0, ok = hitables[i].BoundingBox(time0, time1); !ok {
 				log.Warning("no bounding box in BVH node")
 				return false
 			}
-			if box1, ok = hitables[j].BoundingBox(0, 0); !ok {
+			if box1, ok = hitables[j].BoundingBox(time0, time1); !ok {
 				log.Warning("no bounding box in BVH node")
 				return false
 			}
@@ -80,39 +81,52 @@ func newBVH(hitables []Hitable, randomFunc func() float64, time0 float64, time1 
 		sort.Slice(hitables, func(i, j int) bool {
 			var box0, box1 *aabb.AABB
 			var ok bool
-			if box0, ok = hitables[i].BoundingBox(0, 0); !ok {
+			if box0, ok = hitables[i].BoundingBox(time0, time1); !ok {
+				log.Warning("no bounding box in BVH node")
 				return false
 			}
-			if box1, ok = hitables[j].BoundingBox(0, 0); !ok {
+			if box1, ok = hitables[j].BoundingBox(time0, time1); !ok {
+				log.Warning("no bounding box in BVH node")
 				return false
 			}
 			return aabb.BoxLessZ(box0, box1)
 		})
-
 	}
 
-	if len(hitables) == 1 {
+	switch len(hitables) {
+	case 0:
+		log.Error("Cannot create BVH node with no hitables")
+		return nil
+	case 1:
+		// For a single object, use it as both left and right child
+		// This is safe since we never modify the object
 		bn.left = hitables[0]
-		bn.right = bn.left
-	} else if len(hitables) == 2 {
+		bn.right = hitables[0]
+	case 2:
+		// For two objects, put one on each side
 		bn.left = hitables[0]
 		bn.right = hitables[1]
-	} else {
-		bn.left = newBVH(hitables[:len(hitables)/2], randomFunc, time0, time1)
-		bn.right = newBVH(hitables[len(hitables)/2:], randomFunc, time0, time1)
+	default:
+		// For more than two objects, recursively split the list
+		mid := len(hitables) / 2
+		bn.left = newBVH(hitables[:mid], randomFunc, time0, time1)
+		bn.right = newBVH(hitables[mid:], randomFunc, time0, time1)
 	}
 
+	// Compute the bounding box for this node
 	var leftBox, rightBox *aabb.AABB
 	var ok bool
+
 	if leftBox, ok = bn.left.BoundingBox(time0, time1); !ok {
-		log.Warning("no bounding box in BVH node")
+		log.Error("Left child has no bounding box in BVH node")
+		return nil
 	}
 	if rightBox, ok = bn.right.BoundingBox(time0, time1); !ok {
-		log.Warning("no bounding box in BVH node")
+		log.Error("Right child has no bounding box in BVH node")
+		return nil
 	}
 
 	bn.box = aabb.SurroundingBox(leftBox, rightBox)
-
 	return bn
 }
 
