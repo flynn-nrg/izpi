@@ -102,9 +102,20 @@ func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, 
 
 	bitangent.MakeUnitVector()
 
-	delta := &vec3.Vec3Impl{X: 0.0001, Y: 0.0001, Z: 0.0001}
-	min := vec3.Sub(vec3.Min3(vertex0, vertex1, vertex2), delta)
-	max := vec3.Add(vec3.Max3(vertex0, vertex1, vertex2), delta)
+	// Calculate bounding box with relative epsilon based on triangle size
+	min := vec3.Min3(vertex0, vertex1, vertex2)
+	max := vec3.Max3(vertex0, vertex1, vertex2)
+
+	// Calculate size of triangle
+	size := vec3.Sub(max, min)
+	maxDim := math.Max(size.X, math.Max(size.Y, size.Z))
+
+	// Use epsilon relative to triangle size, with a minimum value
+	epsilon := math.Max(maxDim*1e-4, 1e-6)
+	delta := &vec3.Vec3Impl{X: epsilon, Y: epsilon, Z: epsilon}
+
+	min = vec3.Sub(min, delta)
+	max = vec3.Add(max, delta)
 
 	return &Triangle{
 		vertex0:   vertex0,
@@ -190,12 +201,13 @@ func NewTriangleWithUVAndVertexNormals(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec
 
 func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
 	// https://en.wikipedia.org/wiki/Möller–Trumbore_intersection_algorithm
-	epsilon := math.Nextafter(1, 2) - 1
+	// Use a larger epsilon for better numerical stability
+	epsilon := 1e-8
 
 	h := vec3.Cross(r.Direction(), tri.edge2)
 	a := vec3.Dot(tri.edge1, h)
 
-	if a > -epsilon && a < epsilon {
+	if math.Abs(a) < epsilon {
 		// Ray is parallel to triangle.
 		return nil, nil, false
 	}
@@ -203,34 +215,47 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	f := 1.0 / a
 	s := vec3.Sub(r.Origin(), tri.vertex0)
 	u := f * vec3.Dot(s, h)
-	if u < 0.0 || u > 1.0 {
+	if u < -epsilon || u > 1.0+epsilon {
 		return nil, nil, false
 	}
 	q := vec3.Cross(s, tri.edge1)
 	v := f * vec3.Dot(r.Direction(), q)
-	if v < 0.0 || u+v > 1.0 {
+	if v < -epsilon || u+v > 1.0+epsilon {
 		return nil, nil, false
 	}
 
 	t := f * vec3.Dot(tri.edge2, q)
-	if t <= epsilon {
+	if t < tMin || t > tMax {
 		return nil, nil, false
 	}
 
-	uv := 1.0 - u - v
-	uu := uv*tri.u0 + u*tri.u1 + v*tri.u2
-	vv := uv*tri.v0 + u*tri.v1 + v*tri.v2
+	// Compute barycentric coordinates with better precision
+	w := 1.0 - u - v
+	// Normalize barycentric coordinates
+	sum := u + v + w
+	if math.Abs(sum-1.0) > epsilon {
+		u /= sum
+		v /= sum
+		w /= sum
+	}
+
+	// Interpolate UV coordinates
+	uu := w*tri.u0 + u*tri.u1 + v*tri.u2
+	vv := w*tri.v0 + u*tri.v1 + v*tri.v2
 
 	var normal *vec3.Vec3Impl
 
 	if tri.perVertexNormals {
-		normal0 := vec3.ScalarMul(tri.vn0, u)
-		normal1 := vec3.ScalarMul(tri.vn1, v)
-		normal2 := vec3.ScalarMul(tri.vn2, uv)
+		// Interpolate vertex normals
+		normal0 := vec3.ScalarMul(tri.vn0, w)
+		normal1 := vec3.ScalarMul(tri.vn1, u)
+		normal2 := vec3.ScalarMul(tri.vn2, v)
 		normal = vec3.UnitVector(vec3.Add(normal0, normal1, normal2))
 	} else {
 		normal = tri.normal
 	}
+
+	// Handle normal mapping
 	normalMap := tri.material.NormalMap()
 	if normalMap == nil {
 		return hitrecord.New(t, uu, vv, r.PointAtParameter(t), normal), tri.material, true
@@ -244,6 +269,7 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 
 	tbn := mat3.NewTBN(tri.tangent, tri.bitangent, normal)
 	newNormal := mat3.MatrixVectorMul(tbn, normalTangentSpace)
+	newNormal.MakeUnitVector() // Ensure the final normal is normalized
 	return hitrecord.New(t, uu, vv, r.PointAtParameter(t), newNormal), tri.material, true
 }
 
