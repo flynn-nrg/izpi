@@ -74,28 +74,28 @@ func TestNewBVH(t *testing.T) {
 						material: makeMaterial(),
 					},
 					right: &Sphere{
-						center0:  &vec3.Vec3Impl{X: 1},
-						center1:  &vec3.Vec3Impl{X: 1},
+						center0:  &vec3.Vec3Impl{Y: 1},
+						center1:  &vec3.Vec3Impl{Y: 1},
 						radius:   1,
 						material: makeMaterial(),
 					},
-					box: aabb.New(&vec3.Vec3Impl{X: -1, Y: -1, Z: -1}, &vec3.Vec3Impl{X: 2, Y: 1, Z: 1}),
+					box: aabb.New(&vec3.Vec3Impl{X: -1, Y: -1, Z: -1}, &vec3.Vec3Impl{X: 1, Y: 2, Z: 1}),
 				},
 				right: &BVHNode{
 					left: &BVHNode{
 						left: &Sphere{
-							center0:  &vec3.Vec3Impl{Y: 1},
-							center1:  &vec3.Vec3Impl{Y: 1},
+							center0:  &vec3.Vec3Impl{X: 1},
+							center1:  &vec3.Vec3Impl{X: 1},
 							radius:   1,
 							material: makeMaterial(),
 						},
 						right: &Sphere{
-							center0:  &vec3.Vec3Impl{Y: 1},
-							center1:  &vec3.Vec3Impl{Y: 1},
+							center0:  &vec3.Vec3Impl{X: 1},
+							center1:  &vec3.Vec3Impl{X: 1},
 							radius:   1,
 							material: makeMaterial(),
 						},
-						box: aabb.New(&vec3.Vec3Impl{X: -1, Y: 0, Z: -1}, &vec3.Vec3Impl{X: 1, Y: 2, Z: 1}),
+						box: aabb.New(&vec3.Vec3Impl{X: 0, Y: -1, Z: -1}, &vec3.Vec3Impl{X: 2, Y: 1, Z: 1}),
 					},
 					right: &BVHNode{
 						left: &Sphere{
@@ -112,7 +112,7 @@ func TestNewBVH(t *testing.T) {
 						},
 						box: aabb.New(&vec3.Vec3Impl{X: 0, Y: 0, Z: -1}, &vec3.Vec3Impl{X: 2, Y: 2, Z: 2}),
 					},
-					box: aabb.New(&vec3.Vec3Impl{X: -1, Y: 0, Z: -1}, &vec3.Vec3Impl{X: 2, Y: 2, Z: 2}),
+					box: aabb.New(&vec3.Vec3Impl{X: 0, Y: -1, Z: -1}, &vec3.Vec3Impl{X: 2, Y: 2, Z: 2}),
 				},
 
 				box: aabb.New(&vec3.Vec3Impl{X: -1, Y: -1, Z: -1}, &vec3.Vec3Impl{X: 2, Y: 2, Z: 2}),
