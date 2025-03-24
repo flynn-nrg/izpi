@@ -80,7 +80,7 @@ func main() {
 
 	scene, err := scene.FromYAML(sceneFile, filepath.Dir(flags.Scene), 0)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error loading scene: %v", err)
 	}
 
 	if flags.CpuProfile != "" {

@@ -54,12 +54,12 @@ func (sr *ScatterRecord) Normal() *vec3.Vec3Impl {
 
 // Roughness returns the roughness value for this material at this point.
 func (sr *ScatterRecord) Roughness() *vec3.Vec3Impl {
-	return sr.albedo
+	return sr.roughness
 }
 
 // Metalness returns the metalness value for this material at this point.
 func (sr *ScatterRecord) Metalness() *vec3.Vec3Impl {
-	return sr.albedo
+	return sr.metalness
 }
 
 // PDF returns the PDF associated with this material.

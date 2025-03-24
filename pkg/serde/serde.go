@@ -6,14 +6,24 @@ import (
 )
 
 const (
-	ConstantTexture      = "constant"
-	ImageTexture         = "image"
-	NoiseTexture         = "noise"
-	LambertMaterial      = "lambert"
+	// ConstantTexture represents a constant texture.
+	ConstantTexture = "constant"
+	// ImageTexture represents an image texture.
+	ImageTexture = "image"
+	// NoiseTexture represents a noise texture.
+	NoiseTexture = "noise"
+	// LambertMaterial represents a Lambertian material.
+	LambertMaterial = "lambert"
+	// DielectricMaterial represents a dielectric material.
+	DielectricMaterial = "dielectric"
+	// DiffuseLightMaterial represents a diffuse light material.
 	DiffuseLightMaterial = "diffuse_light"
-	IsotropicMaterial    = "isotropic"
-	MetalMaterial        = "metal"
-	DielectricMaterial   = "dielectric"
+	// IsotropicMaterial represents an isotropic material.
+	IsotropicMaterial = "isotropic"
+	// MetalMaterial represents a metallic material.
+	MetalMaterial = "metal"
+	// PBRMaterial represents a physically based rendering material.
+	PBRMaterial = "pbr"
 )
 
 // Serde defines the methods to seralise and deserialise scene data.
@@ -120,11 +130,27 @@ type Dielectric struct {
 	RefIdx float64
 }
 
+// PBR represents a physically based rendering material.
+type PBR struct {
+	// Albedo is the colour texture.
+	Albedo Texture `yaml:"albedo"`
+	// NormalMap is the normal map texture.
+	NormalMap *Texture `yaml:"normalMap,omitempty"`
+	// Roughness is the roughness texture.
+	Roughness Texture `yaml:"roughness"`
+	// Metalness is the metalness texture.
+	Metalness Texture `yaml:"metalness"`
+	// SSS is the subsurface scattering strength texture.
+	SSS Texture `yaml:"sss"`
+	// SSSRadius is the subsurface scattering radius.
+	SSSRadius float64 `yaml:"sssRadius"`
+}
+
 // Material represents a single material.
 type Material struct {
 	// Name is the name of the material.
 	Name string
-	// Type is the type of material: lambert, diffuse_light, isotropic, metal, dielectric.
+	// Type is the type of material: lambert, diffuse_light, isotropic, metal, dielectric, pbr.
 	Type string
 	// Lambert is a lambert material.
 	Lambert Lambert `yaml:"lambert,omitempty"`
@@ -136,6 +162,8 @@ type Material struct {
 	Metal Metal `yaml:"metal,omitempty"`
 	// Dielectric is a dielectric material.
 	Dielectric Dielectric `yaml:"dielectric,omitempty"`
+	// PBR is a physically based rendering material.
+	PBR PBR `yaml:"pbr,omitempty"`
 }
 
 // Displacement represents a displacement mapping operator.
