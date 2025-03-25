@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"os"
-	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"strings"
@@ -17,7 +16,7 @@ import (
 	"github.com/flynn-nrg/izpi/pkg/postprocess"
 	"github.com/flynn-nrg/izpi/pkg/render"
 	"github.com/flynn-nrg/izpi/pkg/sampler"
-	"github.com/flynn-nrg/izpi/pkg/scene"
+	"github.com/flynn-nrg/izpi/pkg/scenes"
 
 	"github.com/alecthomas/kong"
 
@@ -73,12 +72,19 @@ func main() {
 
 	setupLogging(flags.LogLevel)
 
-	sceneFile, err := os.Open(flags.Scene)
-	if err != nil {
-		log.Fatal(err)
-	}
+	/*
+		sceneFile, err := os.Open(flags.Scene)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	scene, err := scene.FromYAML(sceneFile, filepath.Dir(flags.Scene), 0)
+		scene, err := scene.FromYAML(sceneFile, filepath.Dir(flags.Scene), 0)
+		if err != nil {
+			log.Fatal(err)
+		}
+	*/
+
+	scene, err := scenes.Challenger(float64(flags.XSize) / float64(flags.YSize))
 	if err != nil {
 		log.Fatal(err)
 	}

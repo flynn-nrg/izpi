@@ -403,10 +403,10 @@ func TVSet(aspect float64) (*scene.Scene, error) {
 }
 
 func SWHangar(aspect float64) (*scene.Scene, error) {
-	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
-	glass := material.NewDielectric(1.5)
+	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.73}))
+	//	glass := material.NewDielectric(1.5)
 
-	objectName := "sw/hangar.obj"
+	objectName := "./sw/hangar.obj"
 	objFile, err := os.Open(objectName)
 	if err != nil {
 		return nil, err
@@ -417,11 +417,11 @@ func SWHangar(aspect float64) (*scene.Scene, error) {
 		return nil, err
 	}
 
-	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 10, Y: 10, Z: 10}))
+	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 70, Y: 70, Z: 70}))
 
 	hitables := []hitable.Hitable{
 		hitable.NewSphere(&vec3.Vec3Impl{X: 0, Y: 20, Z: -30}, &vec3.Vec3Impl{X: 0, Y: 20, Z: -30}, 0, 1, 20, light),
-		hitable.NewSphere(&vec3.Vec3Impl{X: -50, Y: 15, Z: 80}, &vec3.Vec3Impl{X: -50, Y: 15, Z: 80}, 0, 1, 20, glass),
+		//		hitable.NewSphere(&vec3.Vec3Impl{X: -50, Y: 15, Z: 80}, &vec3.Vec3Impl{X: -50, Y: 15, Z: 80}, 0, 1, 20, glass),
 	}
 
 	for i := range hangar.Groups {
@@ -598,7 +598,7 @@ func VWBeetle(aspect float64) (*scene.Scene, error) {
 func Challenger(aspect float64) (*scene.Scene, error) {
 	// https://www.cgtrader.com/free-3d-models/car/sport-car/dodge-challenger-87e47a62-3aaf-4d8f-84c9-6af70b9792b0
 
-	challengerFile, err := os.Open("ferreti_tri.obj")
+	challengerFile, err := os.Open("aston_martin_zagato_tri.obj")
 	if err != nil {
 		return nil, err
 	}
@@ -608,26 +608,26 @@ func Challenger(aspect float64) (*scene.Scene, error) {
 		return nil, err
 	}
 
-	challengerObj.Scale(&vec3.Vec3Impl{X: 6, Y: 6, Z: 6})
+	challengerObj.Scale(&vec3.Vec3Impl{X: 0.1, Y: 0.1, Z: 0.1})
 
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 15, Y: 15, Z: 15}))
-	//carMat := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.8, Y: 8, Z: 0.8}))
-	metal := material.NewMetal(&vec3.Vec3Impl{X: 0.8, Y: .6, Z: .6}, 0)
+	carMat := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.5}))
+	//metal := material.NewMetal(&vec3.Vec3Impl{X: 0.8, Y: .6, Z: .6}, 0)
 	//	glass := material.NewDielectric(1.5)
 	//	glassSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -9, Y: 0, Z: 3}, &vec3.Vec3Impl{X: -9, Y: 0, Z: 3}, 0, 1, 4, glass)
 	//	metal := material.NewMetal(&vec3.Vec3Impl{X: 0.5, Y: 1.0, Z: 1.0}, 0)
 	//	metalSphere := hitable.NewSphere(&vec3.Vec3Impl{X: -24, Y: -4, Z: 6}, &vec3.Vec3Impl{X: -24, Y: -4, Z: 6}, 0, 1, 3, metal)
 	hitables := []hitable.Hitable{
-		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: 50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: -50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: 50, Y: 0, Z: 50}, 1, 0, 0, 0, 1, 1, white),
-		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: -50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: -50, Y: 0, Z: 50}, &vec3.Vec3Impl{X: 50, Y: 0, Z: 50}, 0, 0, 0, 1, 1, 1, white),
-		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: 50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: -50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: 50, Y: 50, Z: 50}, 1, 0, 0, 0, 1, 1, metal),
-		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: -50, Y: -5, Z: -50}, &vec3.Vec3Impl{X: -50, Y: -5, Z: 50}, &vec3.Vec3Impl{X: -50, Y: 85, Z: -50}, 1, 0, 0, 0, 1, 1, metal),
-		hitable.NewSphere(&vec3.Vec3Impl{X: -0, Y: 40, Z: 40}, &vec3.Vec3Impl{X: 0, Y: 40, Z: 40}, 0, 1, 15, light),
+		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: 500, Y: 0, Z: -500}, &vec3.Vec3Impl{X: -500, Y: 0, Z: -500}, &vec3.Vec3Impl{X: 500, Y: 0, Z: 500}, 1, 0, 0, 0, 1, 1, white),
+		hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: -500, Y: 0, Z: -500}, &vec3.Vec3Impl{X: -500, Y: 0, Z: 500}, &vec3.Vec3Impl{X: 500, Y: 0, Z: 500}, 0, 0, 0, 1, 1, 1, white),
+		//	hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: 50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: -50, Y: 0, Z: -50}, &vec3.Vec3Impl{X: 50, Y: 50, Z: 50}, 1, 0, 0, 0, 1, 1, metal),
+		//	hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: -50, Y: -5, Z: -50}, &vec3.Vec3Impl{X: -50, Y: -5, Z: 50}, &vec3.Vec3Impl{X: -50, Y: 85, Z: -50}, 1, 0, 0, 0, 1, 1, metal),
+		hitable.NewSphere(&vec3.Vec3Impl{X: -0, Y: 100, Z: 100}, &vec3.Vec3Impl{X: 0, Y: 100, Z: 100}, 0, 1, 15, light),
 	}
 
 	for i := range challengerObj.Groups {
-		challengerHitables, err := challengerObj.GroupToHitablesWithCustomMaterial(i, white)
+		challengerHitables, err := challengerObj.GroupToHitablesWithCustomMaterial(i, carMat)
 		if err != nil {
 			return nil, err
 		}
@@ -642,8 +642,8 @@ func Challenger(aspect float64) (*scene.Scene, error) {
 		}
 	}
 
-	lookFrom := &vec3.Vec3Impl{X: 12.0, Y: 6, Z: 12.0}
-	lookAt := &vec3.Vec3Impl{X: -3, Y: .7, Z: 0}
+	lookFrom := &vec3.Vec3Impl{X: 21.5, Y: 13, Z: 20.0}
+	lookAt := &vec3.Vec3Impl{X: 9.3, Y: 6, Z: 5}
 	//lookFrom := &vec3.Vec3Impl{X: 2.0, Y: 0.6, Z: 2.0}
 	//lookAt := &vec3.Vec3Impl{X: .4, Y: 0, Z: 1}
 	vup := &vec3.Vec3Impl{Y: 1}
