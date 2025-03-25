@@ -114,6 +114,7 @@ func cameraFromStruct(cam *serde.Camera, aspectOverride float64) *camera.Camera 
 }
 
 func imageFromStruct(im *serde.Image) (texture.Texture, error) {
+	fmt.Printf("image: %+v\n", im)
 	f, err := os.Open(im.FileName)
 	if err != nil {
 		return nil, err

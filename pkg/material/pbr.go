@@ -43,12 +43,35 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	// Get material properties at hit point
 	albedo := pbr.albedo.Value(hr.U(), hr.V(), hr.P())
 
-	// Handle normal map - use surface normal if normal map is nil
-	var normalAtUV *vec3.Vec3Impl
+	// Handle normal map - convert from tangent space to world space
+	var normal *vec3.Vec3Impl
 	if pbr.normalMap != nil {
-		normalAtUV = pbr.normalMap.Value(hr.U(), hr.V(), hr.P())
+		normalAtUV := pbr.normalMap.Value(hr.U(), hr.V(), hr.P())
+		// Convert from [0,1] to [-1,1] range
+		tangentNormal := &vec3.Vec3Impl{
+			X: 2.0*normalAtUV.X - 1.0,
+			Y: 2.0*normalAtUV.Y - 1.0,
+			Z: normalAtUV.Z,
+		}
+		// Create TBN matrix
+		N := hr.Normal()
+		T := vec3.Cross(N, &vec3.Vec3Impl{X: 0, Y: 1, Z: 0})
+		if vec3.Dot(T, T) < 0.001 {
+			T = vec3.Cross(N, &vec3.Vec3Impl{X: 1, Y: 0, Z: 0})
+		}
+		T.MakeUnitVector()
+		B := vec3.Cross(N, T)
+		B.MakeUnitVector()
+
+		// Transform normal from tangent space to world space
+		normal = &vec3.Vec3Impl{
+			X: T.X*tangentNormal.X + B.X*tangentNormal.Y + N.X*tangentNormal.Z,
+			Y: T.Y*tangentNormal.X + B.Y*tangentNormal.Y + N.Y*tangentNormal.Z,
+			Z: T.Z*tangentNormal.X + B.Z*tangentNormal.Y + N.Z*tangentNormal.Z,
+		}
+		normal.MakeUnitVector()
 	} else {
-		normalAtUV = hr.Normal()
+		normal = hr.Normal()
 	}
 
 	// Handle roughness texture - use default value if nil
@@ -67,64 +90,53 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 		metalness = &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 0.0} // Default to non-metallic
 	}
 
-	// Handle subsurface scattering texture - use default value if nil
-	var sssStrength *vec3.Vec3Impl
-	if pbr.sss != nil {
-		sssStrength = pbr.sss.Value(hr.U(), hr.V(), hr.P())
-	} else {
-		sssStrength = &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 0.0} // Default to no subsurface scattering
-	}
-
 	// Calculate average values
 	roughnessValue := (roughness.X + roughness.Y + roughness.Z) / 3.0
 	metalnessValue := (metalness.X + metalness.Y + metalness.Z) / 3.0
-	sssValue := (sssStrength.X + sssStrength.Y + sssStrength.Z) / 3.0
+
+	// For brushed metal, roughness should affect the metallic appearance
+	// Higher roughness (brushed areas) should reduce the metallic reflection even more
+	adjustedMetalness := metalnessValue * (1.0 - roughnessValue*0.8) * 0.7 // Stronger roughness influence and overall reduction
 
 	// Create ONB for local space calculations
 	uvw := onb.New()
-	uvw.BuildFromW(hr.Normal())
+	uvw.BuildFromW(normal)
 
 	// Calculate reflection vector for specular component
-	reflected := reflect(vec3.UnitVector(r.Direction()), hr.Normal())
+	reflected := reflect(vec3.UnitVector(r.Direction()), normal)
+
+	// For brushed metal, we want more controlled roughness
+	roughnessFactor := math.Max(0.4, roughnessValue) // Even higher minimum roughness
+	randomDir := randomInUnitSphere(random)
+	specularDir := vec3.Add(reflected, vec3.ScalarMul(randomDir, roughnessFactor))
+	specularDir = vec3.UnitVector(specularDir)
 
 	// Calculate diffuse direction
 	diffuseDir := uvw.Local(vec3.RandomCosineDirection(random))
 	diffuseDir = vec3.UnitVector(diffuseDir)
 
-	// Calculate specular direction with roughness
-	roughnessFactor := roughnessValue * roughnessValue // Square roughness for more natural look
-	randomDir := randomInUnitSphere(random)
-	specularDir := vec3.Add(reflected, vec3.ScalarMul(randomDir, roughnessFactor))
-	specularDir = vec3.UnitVector(specularDir)
-
-	// Calculate subsurface scattering direction if enabled
-	var sssDir *vec3.Vec3Impl
-	if sssValue > 0 {
-		// Generate a random point within the subsurface radius
-		offset := vec3.ScalarMul(randomInUnitSphere(random), pbr.sssRadius)
-		sssDir = vec3.UnitVector(vec3.Add(hr.P(), offset))
+	// Blend between diffuse and specular based on adjusted metalness and roughness
+	var scatteredDir *vec3.Vec3Impl
+	if random.Float64() < adjustedMetalness {
+		// Metallic reflection with increased diffuse mixing
+		if random.Float64() < roughnessValue*0.5 { // Increased diffuse probability in rough areas
+			scatteredDir = diffuseDir
+		} else {
+			scatteredDir = specularDir
+		}
+	} else {
+		// Non-metallic parts heavily favor diffuse
+		if random.Float64() < 0.02+(1.0-roughnessValue)*0.15 { // Very low base specularity
+			scatteredDir = specularDir
+		} else {
+			scatteredDir = diffuseDir
+		}
 	}
 
-	// Blend between diffuse, specular, and subsurface based on material properties
-	t := smoothstep(0.0, 0.5, metalnessValue)
-	scatteredDir := vec3.Add(
-		vec3.ScalarMul(diffuseDir, 1.0-t),
-		vec3.ScalarMul(specularDir, t),
-	)
-
-	// Add subsurface scattering contribution
-	if sssValue > 0 {
-		sssBlend := smoothstep(0.0, 1.0, sssValue)
-		scatteredDir = vec3.Add(
-			vec3.ScalarMul(scatteredDir, 1.0-sssBlend),
-			vec3.ScalarMul(sssDir, sssBlend),
-		)
-	}
-
-	scatteredDir = vec3.UnitVector(scatteredDir)
 	scattered := ray.New(hr.P(), scatteredDir, r.Time())
-	pdf := pdf.NewCosine(hr.Normal())
-	scatterRecord := scatterrecord.New(scattered, t > 0.5, albedo, normalAtUV, roughness, metalness, pdf)
+	pdf := pdf.NewCosine(normal)
+
+	scatterRecord := scatterrecord.New(scattered, metalnessValue > 0.5, albedo, normal, roughness, metalness, pdf)
 	return scattered, scatterRecord, true
 }
 

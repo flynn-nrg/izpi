@@ -373,39 +373,35 @@ objects:
             z: 60
           radius: 20
           material:
-            name: "wax"
+            name: "used-stainless-steel"
             type: "pbr"
             pbr:
               albedo:
-                name: "wax_albedo"
-                type: "constant"
-                constant:
-                  value:
-                    x: 0.95
-                    y: 0.95
-                    z: 0.92
+                name: "used-stainless-steel_albedo"
+                type: "image"
+                image:
+                  filename: "textures/used-stainless-steel_albedo.png"
               roughness:
-                name: "wax_roughness"
-                type: "constant"
-                constant:
-                  value:
-                    x: 0.3
-                    y: 0.3
-                    z: 0.3
+                name: "used-stainless-steel_roughness"
+                type: "image"
+                image:
+                  filename: "textures/used-stainless-steel_roughness.png"
               metalness:
-                name: "wax_metalness"
+                name: "used-stainless-steel_metalness"
+                type: "image"
+                image:
+                  filename: "textures/used-stainless-steel_metalness.png"
+              NormalMap:
+                name: "used-stainless-steel_normal"
+                type: "image"
+                image:
+                  filename: "textures/used-stainless-steel_normal-ogl.png"
+              sss:
+                name: "used-stainless-steel_sss"
                 type: "constant"
                 constant:
                   value:
                     x: 0.0
                     y: 0.0
                     z: 0.0
-              sss:
-                name: "wax_sss"
-                type: "constant"
-                constant:
-                  value:
-                    x: 0.8
-                    y: 0.8
-                    z: 0.8
-              sssRadius: 0.5
+              sssRadius: 0.0
