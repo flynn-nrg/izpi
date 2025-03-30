@@ -9,7 +9,10 @@ import (
 var _ Serde = (*Yaml)(nil)
 
 // Yaml represents a struct representation of a scene that is seralised as YAML data.
-type Yaml struct {
+type Yaml struct{}
+
+func NewYaml() *Yaml {
+	return &Yaml{}
 }
 
 func (yml *Yaml) Serialise(scene *Scene, w io.Writer) error {

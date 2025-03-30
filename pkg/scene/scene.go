@@ -3,6 +3,7 @@ package scene
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -41,7 +42,7 @@ func New(world *hitable.HitableSlice, lights *hitable.HitableSlice, camera *came
 
 // FromStruct returns the internal representation of a scene from YAML data.
 func FromYAML(r io.Reader, containerDirectory string, aspectOverride float64) (*Scene, error) {
-	y := &serde.Yaml{}
+	y := serde.NewYaml()
 	sceneStruct, err := y.Deserialise(r)
 	if err != nil {
 		return nil, err
@@ -148,8 +149,7 @@ func textureFromStruct(tex *serde.Texture) (texture.Texture, error) {
 		return texture.NewNoise(tex.Noise.Scale), nil
 	}
 
-	return nil, ErrInvalidTextureType
-
+	return nil, fmt.Errorf("invalid texture type: %q. Valid types are: %q, %q, %q", tex.Type, serde.ConstantTexture, serde.ImageTexture, serde.NoiseTexture)
 }
 
 func materialFromStruct(mat *serde.Material) (material.Material, error) {
@@ -180,6 +180,31 @@ func materialFromStruct(mat *serde.Material) (material.Material, error) {
 			return nil, err
 		}
 		return material.NewIsotropic(albedo), nil
+	case serde.PBRMaterial:
+		albedo, err := textureFromStruct(&mat.PBR.Albedo)
+		if err != nil {
+			return nil, err
+		}
+		var normalMap texture.Texture
+		if mat.PBR.NormalMap != nil {
+			normalMap, err = textureFromStruct(mat.PBR.NormalMap)
+			if err != nil {
+				return nil, err
+			}
+		}
+		roughness, err := textureFromStruct(&mat.PBR.Roughness)
+		if err != nil {
+			return nil, err
+		}
+		metalness, err := textureFromStruct(&mat.PBR.Metalness)
+		if err != nil {
+			return nil, err
+		}
+		sss, err := textureFromStruct(&mat.PBR.SSS)
+		if err != nil {
+			return nil, err
+		}
+		return material.NewPBR(albedo, normalMap, roughness, metalness, sss, mat.PBR.SSSRadius), nil
 	}
 
 	return nil, ErrInvalidMaterialType
