@@ -366,42 +366,197 @@ objects:
             name: Glass
             type: dielectric
             dielectric:
-                refidx: 1.5
+                refidx: 1.40       
         - center:
-            x: 70
+            x: 65
             "y": 20
             z: 60
           radius: 20
           material:
-            name: "used-stainless-steel"
+            name: "rusty-metal"
             type: "pbr"
             pbr:
               albedo:
-                name: "used-stainless-steel_albedo"
+                name: "rusty-metal_albedo"
                 type: "image"
                 image:
-                  filename: "textures/used-stainless-steel_albedo.png"
+                  filename: "textures/rusty-metal_albedo.png"
               roughness:
-                name: "used-stainless-steel_roughness"
+                name: "rusty-metal_roughness"
                 type: "image"
                 image:
-                  filename: "textures/used-stainless-steel_roughness.png"
+                  filename: "textures/rusty-metal_roughness.png"
               metalness:
-                name: "used-stainless-steel_metalness"
+                name: "rusty-metal_metallic"
                 type: "image"
                 image:
-                  filename: "textures/used-stainless-steel_metalness.png"
+                  filename: "textures/rusty-metal_metallic.png"
               NormalMap:
-                name: "used-stainless-steel_normal"
+                name: "rusty-metal-normal"
                 type: "image"
                 image:
-                  filename: "textures/used-stainless-steel_normal-ogl.png"
+                  filename: "textures/rusty-metal-normal-ogl.png"
               sss:
-                name: "used-stainless-steel_sss"
+                name: "rusty-metal-sss"
                 type: "constant"
                 constant:
                   value:
-                    x: 0.0
-                    y: 0.0
-                    z: 0.0
+                    x: 0.00   
+                    y: 0.00
+                    z: 0.00
+              sssRadius: 0.0
+        - center:
+            x: 85
+            "y": 12
+            z: 20
+          radius: 12
+          material:
+            name: "grainy-concrete"
+            type: "pbr"
+            pbr:
+              albedo:
+                name: "grainy-concrete_albedo"
+                type: "image"
+                image:
+                  filename: "textures/grainy-concrete_albedo.png" 
+              roughness:
+                name: "grainy-concrete_roughness"
+                type: "image"
+                image:
+                  filename: "textures/grainy-concrete_roughness.png"
+              metalness:
+                name: "grainy-concrete_metallic"
+                type: "image"
+                image:
+                  filename: "textures/grainy-concrete_metallic.png"
+              NormalMap:
+                name: "grainy-concrete-normal"
+                type: "image"
+                image:
+                  filename: "textures/grainy-concrete-normal-ogl.png"
+              sss:
+                name: "grainy-concrete-sss"
+                type: "constant"
+                constant:
+                  value:
+                    x: 0.00   
+                    y: 0.00
+                    z: 0.00
+              sssRadius: 0.0
+        - center:
+            x: 58
+            "y": 10
+            z: 27
+          radius: 10
+          material:
+            name: "fleshy_granite1"
+            type: "pbr"
+            pbr:
+              albedo:
+                name: "fleshy_granite1_albedo"
+                type: "image"
+                image:
+                  filename: "textures/fleshy_granite1_albedo.png"
+              roughness:
+                name: "fleshy_granite1_roughness"
+                type: "constant"
+                constant:
+                  value:
+                    x: 0.00   
+                    y: 0.00
+                    z: 0.00
+              metalness:
+                name: "fleshy_granite1_metallic"
+                type: "image"
+                image:
+                  filename: "textures/fleshy_granite1_metallic.png"
+              NormalMap:
+                name: "fleshy_granite1_normal-ogl"
+                type: "image"
+                image:
+                  filename: "textures/fleshy_granite1_normal-ogl.png"
+              sss:
+                name: "fleshy_granite1-sss"
+                type: "constant"
+                constant:
+                  value:
+                    x: 0.1   
+                    y: 0.1 
+                    z: 0.1
+              sssRadius: 0.1
+        - center:
+            x: 65
+            "y": 6
+            z: 9
+          radius: 6
+          material:
+            name: "bamboo-wood-semigloss"
+            type: "pbr"
+            pbr:
+              albedo:
+                name: "bamboo-wood-semigloss-albedo"
+                type: "image"
+                image:
+                  filename: "textures/bamboo-wood-semigloss-albedo.png"
+              roughness:
+                name: "bamboo-wood-semigloss-roughness"
+                type: "image"
+                image:
+                  filename: "textures/bamboo-wood-semigloss-roughness.png"
+              metalness:
+                name: "bamboo-wood-semigloss-metal"
+                type: "image"
+                image:
+                  filename: "textures/bamboo-wood-semigloss-metal.png"
+              NormalMap:
+                name: "bamboo-wood-semigloss-normal"
+                type: "image"
+                image:
+                  filename: "textures/bamboo-wood-semigloss-normal.png"
+              sss:
+                name: "bamboo-wood-semigloss-sss"
+                type: "constant"
+                constant:
+                  value:
+                    x: 0.00   
+                    y: 0.00
+                    z: 0.00
+              sssRadius: 0.0
+        - center:
+            x: 45
+            "y": 5
+            z: 10
+          radius: 5
+          material:
+            name: "lightgold"
+            type: "pbr"
+            pbr:
+              albedo:
+                name: "lightgold_albedo"
+                type: "image"
+                image:
+                  filename: "textures/lightgold_albedo.png"
+              roughness:
+                name: "lightgold_roughness"
+                type: "image"
+                image:
+                  filename: "textures/lightgold_roughness.png"
+              metalness:
+                name: "lightgold_metallic"
+                type: "image"
+                image:
+                  filename: "textures/lightgold_metallic.png"
+              NormalMap:
+                name: "lightgold_normal"
+                type: "image"
+                image:
+                  filename: "textures/lightgold_normal-ogl.png"
+              sss:
+                name: "lightgold_sss"
+                type: "constant"
+                constant:
+                  value:
+                    x: 0.00   
+                    y: 0.00
+                    z: 0.00
               sssRadius: 0.0
