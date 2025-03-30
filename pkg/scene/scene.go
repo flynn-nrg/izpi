@@ -42,7 +42,7 @@ func New(world *hitable.HitableSlice, lights *hitable.HitableSlice, camera *came
 
 // FromStruct returns the internal representation of a scene from YAML data.
 func FromYAML(r io.Reader, containerDirectory string, aspectOverride float64) (*Scene, error) {
-	y := &serde.Yaml{}
+	y := serde.NewYaml()
 	sceneStruct, err := y.Deserialise(r)
 	if err != nil {
 		return nil, err
@@ -114,7 +114,6 @@ func cameraFromStruct(cam *serde.Camera, aspectOverride float64) *camera.Camera 
 }
 
 func imageFromStruct(im *serde.Image) (texture.Texture, error) {
-	fmt.Printf("image: %+v\n", im)
 	f, err := os.Open(im.FileName)
 	if err != nil {
 		return nil, err
@@ -137,7 +136,6 @@ func imageFromStruct(im *serde.Image) (texture.Texture, error) {
 }
 
 func textureFromStruct(tex *serde.Texture) (texture.Texture, error) {
-	fmt.Printf("texture: %+v\n", tex)
 	switch tex.Type {
 	case serde.ConstantTexture:
 		return texture.NewConstant(&vec3.Vec3Impl{
@@ -157,7 +155,6 @@ func textureFromStruct(tex *serde.Texture) (texture.Texture, error) {
 func materialFromStruct(mat *serde.Material) (material.Material, error) {
 	switch mat.Type {
 	case serde.LambertMaterial:
-		fmt.Printf("lambert: %+v\n", mat.Lambert)
 		albedo, err := textureFromStruct(&mat.Lambert.Albedo)
 		if err != nil {
 			return nil, err
@@ -166,54 +163,45 @@ func materialFromStruct(mat *serde.Material) (material.Material, error) {
 	case serde.DielectricMaterial:
 		return material.NewDielectric(mat.Dielectric.RefIdx), nil
 	case serde.DiffuseLightMaterial:
-		fmt.Printf("diffuselight: %+v\n", mat.DiffuseLight)
 		emit, err := textureFromStruct(&mat.DiffuseLight.Emit)
 		if err != nil {
 			return nil, err
 		}
 		return material.NewDiffuseLight(emit), nil
 	case serde.MetalMaterial:
-		fmt.Printf("metal: %+v\n", mat.Metal)
 		return material.NewMetal(&vec3.Vec3Impl{
 			X: mat.Metal.Albedo.X,
 			Y: mat.Metal.Albedo.Y,
 			Z: mat.Metal.Albedo.Z,
 		}, mat.Metal.Fuzz), nil
 	case serde.IsotropicMaterial:
-		fmt.Printf("isotropic: %+v\n", mat.Isotropic)
 		albedo, err := textureFromStruct(&mat.Isotropic.Albedo)
 		if err != nil {
 			return nil, err
 		}
 		return material.NewIsotropic(albedo), nil
 	case serde.PBRMaterial:
-		fmt.Printf("pbr: %+v\n", mat.PBR)
 		albedo, err := textureFromStruct(&mat.PBR.Albedo)
 		if err != nil {
-			fmt.Printf("albedo %v\n", mat.PBR.Albedo)
 			return nil, err
 		}
 		var normalMap texture.Texture
 		if mat.PBR.NormalMap != nil {
 			normalMap, err = textureFromStruct(mat.PBR.NormalMap)
 			if err != nil {
-				fmt.Printf("normalMap %v\n", mat.PBR.NormalMap)
 				return nil, err
 			}
 		}
 		roughness, err := textureFromStruct(&mat.PBR.Roughness)
 		if err != nil {
-			fmt.Printf("roughness %v\n", mat.PBR.Roughness)
 			return nil, err
 		}
 		metalness, err := textureFromStruct(&mat.PBR.Metalness)
 		if err != nil {
-			fmt.Printf("metalness %v\n", mat.PBR.Metalness)
 			return nil, err
 		}
 		sss, err := textureFromStruct(&mat.PBR.SSS)
 		if err != nil {
-			fmt.Printf("sss %v\n", mat.PBR.SSS)
 			return nil, err
 		}
 		return material.NewPBR(albedo, normalMap, roughness, metalness, sss, mat.PBR.SSSRadius), nil
