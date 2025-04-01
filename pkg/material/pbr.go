@@ -111,30 +111,36 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	diffuseDir := uvw.Local(vec3.RandomCosineDirection(random))
 	diffuseDir = vec3.UnitVector(diffuseDir)
 
+	isSpecular := false
+
 	// Blend between diffuse and specular based on adjusted metalness and roughness
 	var scatteredDir *vec3.Vec3Impl
 	if random.Float64() < adjustedMetalness {
 		if random.Float64() < roughnessValue*0.3 {
 			scatteredDir = diffuseDir
+			isSpecular = false
 		} else {
 			scatteredDir = specularDir
+			isSpecular = true
 		}
 	} else {
 		// Non-metallic parts with material-specific specularity
 		// Base specular probability increases with smoothness (1-roughness)
-		// Range from 5% to 40% specular probability for non-metallic materials
-		specularProb := 0.05 + (1.0-roughnessValue)*0.35
+		// Range from 5% to 15% specular probability for non-metallic materials
+		specularProb := 0.05 + (1.0-roughnessValue)*0.10
 		if random.Float64() < specularProb {
 			scatteredDir = specularDir
+			isSpecular = true
 		} else {
 			scatteredDir = diffuseDir
+			isSpecular = false
 		}
 	}
 
 	scattered := ray.New(hr.P(), scatteredDir, r.Time())
 	pdf := pdf.NewCosine(normal)
 
-	scatterRecord := scatterrecord.New(scattered, metalnessValue > 0.5, albedo, normal, roughness, metalness, pdf)
+	scatterRecord := scatterrecord.New(scattered, isSpecular, albedo, normal, roughness, metalness, pdf)
 	return scattered, scatterRecord, true
 }
 
