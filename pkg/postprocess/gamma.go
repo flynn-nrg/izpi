@@ -5,8 +5,8 @@ import (
 	"image"
 	"math"
 
-	"github.com/flynn-nrg/izpi/pkg/colour"
-	"github.com/flynn-nrg/izpi/pkg/floatimage"
+	"github.com/flynn-nrg/floatimage/colour"
+	"github.com/flynn-nrg/floatimage/floatimage"
 	"github.com/flynn-nrg/izpi/pkg/scene"
 )
 

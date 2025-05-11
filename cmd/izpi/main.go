@@ -12,7 +12,6 @@ import (
 
 	"github.com/flynn-nrg/izpi/pkg/colours"
 	"github.com/flynn-nrg/izpi/pkg/display"
-	"github.com/flynn-nrg/izpi/pkg/floatimage"
 	"github.com/flynn-nrg/izpi/pkg/output"
 	"github.com/flynn-nrg/izpi/pkg/postprocess"
 	"github.com/flynn-nrg/izpi/pkg/render"
@@ -45,7 +44,7 @@ var flags struct {
 	Samples     int64  `name:"samples" help:"Number of samples per ray" default:"${defaultSamples}"`
 	Sampler     string `name:"sampler-type" help:"Sampler function to use: colour, albedo, normal, wireframe" default:"colour"`
 	Depth       int64  `name:"max-depth" help:"Maximum depth" default:"${defaultMaxDepth}"`
-	OutputMode  string `name:"output-mode" help:"Output mode: png, hdr or pfm" default:"png"`
+	OutputMode  string `name:"output-mode" help:"Output mode: png, exr, hdr or pfm" default:"png"`
 	OutputFile  string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
 	Verbose     bool   `name:"v" help:"Print rendering progress bar" default:"true"`
 	Preview     bool   `name:"p" help:"Display rendering progress in a window" default:"true"`
@@ -142,49 +141,15 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-	case "hdr":
-		var hdrCanvas image.Image
-		var err error
 
-		if floatNRGBACanvas, ok := canvas.(*floatimage.FloatNRGBA); ok {
-			hdrCanvas, err = floatNRGBACanvas.ToHDR()
-			if err != nil {
-				log.Fatal(err)
-			}
-		} else {
-			log.Fatal("image format is not FloatNRGBA")
-		}
-
-		outFileName := strings.Replace(flags.OutputFile, "png", "hdr", 1)
-		out, err := output.NewHDR(outFileName)
+	case "exr":
+		outFileName := strings.Replace(flags.OutputFile, "png", "exr", 1)
+		out, err := output.NewOIIO(outFileName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err = out.Write(hdrCanvas)
-		if err != nil {
-			log.Fatal(err)
-		}
-	case "pfm":
-		var hdrCanvas image.Image
-		var err error
-
-		if floatNRGBACanvas, ok := canvas.(*floatimage.FloatNRGBA); ok {
-			hdrCanvas, err = floatNRGBACanvas.ToHDR()
-			if err != nil {
-				log.Fatal(err)
-			}
-		} else {
-			log.Fatal("image format is not FloatNRGBA")
-		}
-
-		outFileName := strings.Replace(flags.OutputFile, "png", "pfm", 1)
-		out, err := output.NewPFM(outFileName)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = out.Write(hdrCanvas)
+		err = out.Write(canvas)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -1,14 +1,17 @@
 module github.com/flynn-nrg/izpi
 
-go 1.24.1
+go 1.24.2
+
+toolchain go1.24.3
 
 require (
 	fyne.io/fyne/v2 v2.5.5
 	github.com/alecthomas/kong v1.9.0
 	github.com/cheggaaa/pb/v3 v3.1.7
+	github.com/flynn-nrg/floatimage v0.0.0-20250505155730-d5a716d7266a
+	github.com/flynn-nrg/go-oiio v0.0.0-20250506183759-6155d221a662
 	github.com/flynn-nrg/gube v1.0.3
 	github.com/google/go-cmp v0.5.7
-	github.com/mdouchement/hdr v0.2.4
 	github.com/sirupsen/logrus v1.9.3
 	github.com/veandco/go-sdl2 v0.4.40
 	gopkg.in/yaml.v3 v3.0.1
@@ -30,10 +33,9 @@ require (
 	github.com/go-text/render v0.2.0 // indirect
 	github.com/go-text/typesetting v0.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
-	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08 // indirect
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
-	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
@@ -51,4 +53,5 @@ require (
 	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 )

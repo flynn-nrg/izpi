@@ -1,16 +1,14 @@
 package texture
 
 import (
-	"errors"
 	"image"
 	"image/color"
 	"image/png"
 	"io"
 
+	"github.com/flynn-nrg/floatimage/floatimage"
+	"github.com/flynn-nrg/go-oiio/oiio"
 	"github.com/flynn-nrg/izpi/pkg/vec3"
-	"github.com/mdouchement/hdr"
-	_ "github.com/mdouchement/hdr/codec/rgbe"
-	"github.com/mdouchement/hdr/hdrcolor"
 )
 
 // Ensure interface compliance.
@@ -21,6 +19,20 @@ type ImageTxt struct {
 	sizeX int
 	sizeY int
 	data  image.Image
+}
+
+// NewFromFile returns a new ImageTxt instance by using the supplied file path.
+func NewFromFile(path string) (*ImageTxt, error) {
+	img, err := oiio.ReadImage(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ImageTxt{
+		sizeX: img.Bounds().Dx(),
+		sizeY: img.Bounds().Dy(),
+		data:  img,
+	}, nil
 }
 
 // NewFromPNG returns a new ImageTxt instance by using the supplied PNG data.
@@ -38,20 +50,18 @@ func NewFromPNG(r io.Reader) (*ImageTxt, error) {
 }
 
 // NewFromHDR returns a new ImageTxt instance by using the supplied HDR data.
-func NewFromHDR(r io.Reader) (*ImageTxt, error) {
-	m, _, err := image.Decode(r)
+func NewFromHDR(fileName string) (*ImageTxt, error) {
+	img, err := oiio.ReadImage(fileName)
 	if err != nil {
 		return nil, err
 	}
-	if img, ok := m.(hdr.Image); ok {
-		return &ImageTxt{
-			sizeX: img.Bounds().Dx(),
-			sizeY: img.Bounds().Dy(),
-			data:  img,
-		}, nil
-	}
 
-	return nil, errors.New("not an HDR image")
+	return &ImageTxt{
+		sizeX: img.Bounds().Dx(),
+		sizeY: img.Bounds().Dy(),
+		data:  img,
+	}, nil
+
 }
 
 func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
@@ -72,8 +82,8 @@ func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl
 		j = it.sizeY - 1
 	}
 
-	if img, ok := it.data.(hdr.Image); ok {
-		pixel := hdrcolor.RGBModel.Convert(img.At(i, j)).(hdrcolor.RGB)
+	if img, ok := it.data.(*floatimage.FloatNRGBA); ok {
+		pixel := img.FloatNRGBAAt(i, j)
 		return &vec3.Vec3Impl{X: pixel.R, Y: pixel.G, Z: pixel.B}
 	}
 
@@ -86,7 +96,7 @@ func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl
 
 // FlipY() flips the image upside down.
 func (it *ImageTxt) FlipY() {
-	im, ok := it.data.(hdr.ImageSet)
+	im, ok := it.data.(*floatimage.FloatNRGBA)
 	if !ok {
 		return
 	}
@@ -102,7 +112,7 @@ func (it *ImageTxt) FlipY() {
 
 // FlipX() flips the image from left to right.
 func (it *ImageTxt) FlipX() {
-	im, ok := it.data.(hdr.ImageSet)
+	im, ok := it.data.(*floatimage.FloatNRGBA)
 	if !ok {
 		return
 	}
