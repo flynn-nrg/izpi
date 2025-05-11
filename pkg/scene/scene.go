@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/flynn-nrg/izpi/pkg/camera"
 	"github.com/flynn-nrg/izpi/pkg/displacement"
@@ -114,25 +114,26 @@ func cameraFromStruct(cam *serde.Camera, aspectOverride float64) *camera.Camera 
 }
 
 func imageFromStruct(im *serde.Image) (texture.Texture, error) {
-	f, err := os.Open(im.FileName)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	if strings.HasSuffix(im.FileName, "png") {
+	if path.Ext(im.FileName) == "png" {
+		f, err := os.Open(im.FileName)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+
 		t, err := texture.NewFromPNG(f)
 		if err != nil {
 			return nil, err
 		}
 		return t, nil
-	} else if strings.HasSuffix(im.FileName, "hdr") {
-		t, err := texture.NewFromHDR(f)
+		// Let openimage.io handle all the other formats.
+	} else {
+		t, err := texture.NewFromHDR(im.FileName)
 		if err != nil {
 			return nil, err
 		}
 		return t, nil
 	}
-	return nil, ErrInvalidTextureType
 }
 
 func textureFromStruct(tex *serde.Texture) (texture.Texture, error) {

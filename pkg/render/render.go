@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/flynn-nrg/izpi/pkg/colour"
+	"github.com/flynn-nrg/floatimage/colour"
+	"github.com/flynn-nrg/floatimage/floatimage"
 	"github.com/flynn-nrg/izpi/pkg/common"
 	"github.com/flynn-nrg/izpi/pkg/display"
 	"github.com/flynn-nrg/izpi/pkg/fastrandom"
-	"github.com/flynn-nrg/izpi/pkg/floatimage"
 	"github.com/flynn-nrg/izpi/pkg/grid"
 	"github.com/flynn-nrg/izpi/pkg/sampler"
 	"github.com/flynn-nrg/izpi/pkg/scene"
@@ -119,7 +119,7 @@ func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, maxDepth int,
 	numWorkers int, verbose bool, previewChan chan display.DisplayTile, preview bool, samplerType sampler.SamplerType) *Renderer {
 	return &Renderer{
 		scene:       scene,
-		canvas:      floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY)),
+		canvas:      floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY), make([]float64, sizeX*sizeY*4)),
 		previewChan: previewChan,
 		maxDepth:    maxDepth,
 		background:  background,

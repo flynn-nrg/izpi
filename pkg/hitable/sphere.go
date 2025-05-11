@@ -2,7 +2,6 @@ package hitable
 
 import (
 	"math"
-	"os"
 
 	"github.com/flynn-nrg/izpi/pkg/aabb"
 	"github.com/flynn-nrg/izpi/pkg/fastrandom"
@@ -38,11 +37,7 @@ func getSphereUV(p *vec3.Vec3Impl) (float64, float64) {
 // SkyDome is a convenience function to construct a light emiting sphere with inverted normals.
 // For this to work correctly texture file needs to be in HDR (Radiance) format.
 func NewSkyDome(center *vec3.Vec3Impl, radius float64, fileName string) (*FlipNormals, error) {
-	r, err := os.Open(fileName)
-	if err != nil {
-		return nil, err
-	}
-	texture, err := texture.NewFromHDR(r)
+	texture, err := texture.NewFromHDR(fileName)
 	texture.FlipY()
 	texture.FlipX()
 	if err != nil {

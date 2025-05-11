@@ -16,6 +16,12 @@ jobs:
           libsdl2-dev \
           pkg-config \
           ${NULL+}
+    - name: Install OpenImageIO Dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libopenimageio-dev
+        sudo apt-get install -y libfmt-dev
     - name: Install Go
       uses: actions/setup-go@v2
       with:
