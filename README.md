@@ -2,7 +2,6 @@
 
 ![Unit Tests](https://github.com/flynn-nrg/izpi/actions/workflows/test.yml/badge.svg)
 
-
 A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) implemented in Golang built on top of [Peter Shirley's Raytracing books](https://raytracing.github.io).
 
 ## Features
@@ -13,7 +12,8 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) implemented in Golan
 * Wavefront OBJ import.
 * Built-in materials: Glass, metal, Lambert, Perlin noise.
 * Support for PBR flows with albedo, metalness, roughness, normal and displacement textures.
-* Textures: PNG (LDR) and Radiance (HDR).
+* Textures: PNG (LDR) and various HDR fromats (OpenEXR, HDR, PFM).
+* Resulting images can saved in any format supported by [OpenImageIO](https://openimageio.readthedocs.io).
 * Normal mapping.
 * Displacement mapping through sub-texel mesh tessellation.
 
