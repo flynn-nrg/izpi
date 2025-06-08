@@ -11,13 +11,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/flynn-nrg/izpi/pkg/colours"
-	"github.com/flynn-nrg/izpi/pkg/display"
-	"github.com/flynn-nrg/izpi/pkg/output"
-	"github.com/flynn-nrg/izpi/pkg/postprocess"
-	"github.com/flynn-nrg/izpi/pkg/render"
-	"github.com/flynn-nrg/izpi/pkg/sampler"
-	"github.com/flynn-nrg/izpi/pkg/scene"
+	"github.com/flynn-nrg/izpi/internal/colours"
+	"github.com/flynn-nrg/izpi/internal/display"
+	"github.com/flynn-nrg/izpi/internal/output"
+	"github.com/flynn-nrg/izpi/internal/postprocess"
+	"github.com/flynn-nrg/izpi/internal/render"
+	"github.com/flynn-nrg/izpi/internal/sampler"
+	"github.com/flynn-nrg/izpi/internal/scene"
 
 	"github.com/alecthomas/kong"
 
