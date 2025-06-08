@@ -193,3 +193,35 @@ message Scene {
   // Removed map<string, Texture> textures, as textures are now embedded within materials.
   SceneObjects objects = 5; // Field number updated
 }
+
+// --- Service Definition ---
+
+// Service for transporting scene data and associated resources.
+service SceneTransportService {
+  // A unary RPC to retrieve the entire scene graph.
+  // The request can include a scene identifier (e.g., name or ID).
+  rpc GetScene (GetSceneRequest) returns (Scene);
+
+  // A streaming RPC to retrieve the binary content of a texture file.
+  // The client requests the texture by its filename, and the server streams chunks of the file data.
+  rpc StreamTextureFile (StreamTextureFileRequest) returns (stream StreamTextureFileResponse);
+}
+
+// --- RPC Request/Response Messages ---
+
+// Request to retrieve a specific scene.
+message GetSceneRequest {
+  string scene_name = 1; // Identifier for the scene to retrieve.
+}
+
+// Request to stream the content of a texture file.
+message StreamTextureFileRequest {
+  string filename = 1; // The path/name of the texture file to stream.
+  // You could add fields like 'offset' and 'chunk_size' for more control over streaming,
+  // but for simplicity, a full file stream is usually assumed.
+}
+
+// A chunk of binary data for a streamed texture file.
+message StreamTextureFileResponse {
+  bytes chunk = 1; // A segment of the texture file's binary data.
+}
