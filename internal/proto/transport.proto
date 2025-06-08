@@ -1,0 +1,195 @@
+syntax = "proto3";
+
+option go_package = "github.com/flynn-nrg/izpi/internal/proto/transport;transport";
+
+package transport;
+
+// Specify the Protobuf edition. "2023" is the current recommended edition.
+edition = "2023";
+
+// Enums for various types
+
+enum TextureType {
+  TEXTURE_TYPE_UNSPECIFIED = 0; // Default zero value for enums
+  CONSTANT = 1;
+  CHECKER = 2;
+  IMAGE = 3;
+  NOISE = 4;
+}
+
+enum MaterialType {
+  MATERIAL_TYPE_UNSPECIFIED = 0; // Default zero value for enums
+  DIELECTRIC = 1;
+  DIFFUSE_LIGHT = 2;
+  ISOTROPIC = 3;
+  LAMBERT = 4;
+  METAL = 5;
+  PBR = 6;
+}
+
+
+// Core data structures
+
+// Represents a 3D vector or point with float components.
+message Vec3 {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+// Represents a 2D vector or UV coordinate with float components.
+message Vec2 {
+  float u = 1;
+  float v = 2;
+}
+
+// Represents the camera settings for the scene.
+message Camera {
+  Vec3 lookfrom = 1;
+  Vec3 lookat = 2;
+  Vec3 vup = 3;
+  float vfov = 4;
+  float aspect = 5;
+  float aperture = 6;
+  float focusdist = 7;
+  float time0 = 8;
+  float time1 = 9;
+}
+
+
+// Texture definitions (can be embedded directly)
+
+// Represents different types of textures.
+message Texture {
+  // Name is now primarily for debugging/identification within its immediate context,
+  // as it's not used for global lookup.
+  string name = 1;
+  TextureType type = 2;
+  oneof texture_properties {
+    ConstantTexture constant = 3;
+    CheckerTexture checker = 4;
+    ImageTexture image = 5;
+    NoiseTexture noise = 6;
+  }
+}
+
+// Represents a constant color texture.
+message ConstantTexture {
+  Vec3 value = 1;
+}
+
+// Represents a checkerboard texture.
+message CheckerTexture {
+  // These are embedded Texture messages, allowing for nested texture definitions.
+  Texture odd = 1;
+  Texture even = 2;
+}
+
+// Represents an image texture.
+message ImageTexture {
+  string filename = 1;
+}
+
+// Represents a noise texture.
+message NoiseTexture {
+  float scale = 1;
+}
+
+
+// Material definitions
+
+// Represents different types of materials.
+message Material {
+  string name = 1; // Material name, used as key in the scene's materials map
+  MaterialType type = 2;
+  oneof material_properties {
+    DielectricMaterial dielectric = 3;
+    DiffuseLightMaterial diffuselight = 4;
+    IsotropicMaterial isotropic = 5;
+    LambertMaterial lambert = 6;
+    MetalMaterial metal = 7;
+    PBRMaterial pbr = 8;
+  }
+}
+
+// Represents a Lambertian material.
+message LambertMaterial {
+  Texture albedo = 1; // Direct embedding of Texture
+}
+
+// Represents a Dielectric material.
+message DielectricMaterial {
+  float refidx = 1;
+}
+
+// Represents a Diffuse Light material.
+message DiffuseLightMaterial {
+  Texture emit = 1; // Direct embedding of Texture
+}
+
+// Represents an Isotropic material.
+message IsotropicMaterial {
+  Texture albedo = 1; // Direct embedding of Texture
+}
+
+// Represents a Metal material.
+message MetalMaterial {
+  Texture albedo = 1; // Direct embedding of Texture
+  float fuzz = 2;
+}
+
+// Represents a Physically Based Rendering (PBR) material.
+message PBRMaterial {
+  Texture albedo = 1;
+  Texture roughness = 2;
+  Texture metalness = 3;
+  Texture normal_map = 4;
+  Texture sss = 5; // Subsurface Scattering
+  float sss_radius = 6;
+}
+
+
+// Scene Objects
+
+// Represents a triangle object with per-vertex data.
+message Triangle {
+  Vec3 vertex0 = 1;
+  Vec3 vertex1 = 2;
+  Vec3 vertex2 = 3;
+  // UV coordinates for each vertex
+  Vec2 uv0 = 4;
+  Vec2 uv1 = 5;
+  Vec2 uv2 = 6;
+  // Per-vertex normal vectors for smooth shading
+  Vec3 normal0 = 7;
+  Vec3 normal1 = 8;
+  Vec3 normal2 = 9;
+  string material_name = 10; // Reference material by name
+}
+
+// Represents a sphere object.
+message Sphere {
+  Vec3 center = 1;
+  float radius = 2;
+  string material_name = 3; // Reference material by name
+}
+
+// Contains all the objects in the scene.
+message SceneObjects {
+  repeated Triangle triangles = 1;
+  repeated Sphere spheres = 2;
+  // Add other object types here as needed (e.g., meshes, cylinders)
+}
+
+
+// Scene Root
+
+// The root message describing the entire scene.
+message Scene {
+  string name = 1;
+  string version = 2;
+  Camera camera = 3;
+  map<string, Material> materials = 4; // Central registry for all materials
+  // Removed map<string, Texture> textures, as textures are now embedded within materials.
+  SceneObjects objects = 5; // Field number updated
+}
