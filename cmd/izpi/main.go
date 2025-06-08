@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
+	"runtime/trace"
 	"strings"
 	"sync"
 
@@ -50,6 +51,7 @@ var flags struct {
 	Preview     bool   `name:"p" help:"Display rendering progress in a window" default:"true"`
 	DisplayMode string `name:"display-mode" help:"Display mode: fyne or sdl" default:"fyne"`
 	CpuProfile  string `name:"cpu-profile" help:"Enable cpu profiling"`
+	Instrument  bool   `name:"instrument" help:"Enable instrumentation" default:"false"`
 }
 
 func main() {
@@ -93,6 +95,23 @@ func main() {
 
 	previewChan := make(chan display.DisplayTile)
 	defer close(previewChan)
+
+	if flags.Instrument {
+		f, err := os.Create("trace.out")
+		if err != nil {
+			log.Fatalf("failed to create trace file: %v", err)
+		}
+		defer func() {
+			if err := f.Close(); err != nil {
+				log.Fatalf("failed to close trace file: %v", err)
+			}
+		}()
+
+		if err := trace.Start(f); err != nil {
+			log.Fatalf("failed to start trace: %v", err)
+		}
+		defer trace.Stop()
+	}
 
 	r := render.New(scene, int(flags.XSize), int(flags.YSize), int(flags.Samples), int(flags.Depth),
 		colours.Black, colours.White, int(flags.NumWorkers), flags.Verbose, previewChan, flags.Preview, sampler.StringToType(flags.Sampler))
