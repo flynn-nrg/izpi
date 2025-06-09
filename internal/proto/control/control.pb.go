@@ -472,6 +472,59 @@ func (*RenderEndRequest) Descriptor() ([]byte, []int) {
 	return file_control_proto_rawDescGZIP(), []int{5}
 }
 
+// Response containing statistics after rendering is complete.
+type RenderEndResponse struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	TotalRenderTimeMs uint64                 `protobuf:"varint,1,opt,name=total_render_time_ms,json=totalRenderTimeMs,proto3" json:"total_render_time_ms,omitempty"` // Total time spent rendering in milliseconds.
+	TotalRaysTraced   uint64                 `protobuf:"varint,2,opt,name=total_rays_traced,json=totalRaysTraced,proto3" json:"total_rays_traced,omitempty"`         // Total number of rays traced during rendering.
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *RenderEndResponse) Reset() {
+	*x = RenderEndResponse{}
+	mi := &file_control_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RenderEndResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RenderEndResponse) ProtoMessage() {}
+
+func (x *RenderEndResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_control_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RenderEndResponse.ProtoReflect.Descriptor instead.
+func (*RenderEndResponse) Descriptor() ([]byte, []int) {
+	return file_control_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RenderEndResponse) GetTotalRenderTimeMs() uint64 {
+	if x != nil {
+		return x.TotalRenderTimeMs
+	}
+	return 0
+}
+
+func (x *RenderEndResponse) GetTotalRaysTraced() uint64 {
+	if x != nil {
+		return x.TotalRaysTraced
+	}
+	return 0
+}
+
 var File_control_proto protoreflect.FileDescriptor
 
 const file_control_proto_rawDesc = "" +
@@ -504,7 +557,10 @@ const file_control_proto_rawDesc = "" +
 	"\x05pos_x\x18\x03 \x01(\rR\x04posX\x12\x13\n" +
 	"\x05pos_y\x18\x04 \x01(\rR\x04posY\x12\x16\n" +
 	"\x06pixels\x18\x05 \x03(\x02R\x06pixels\"\x12\n" +
-	"\x10RenderEndRequest*_\n" +
+	"\x10RenderEndRequest\"p\n" +
+	"\x11RenderEndResponse\x12/\n" +
+	"\x14total_render_time_ms\x18\x01 \x01(\x04R\x11totalRenderTimeMs\x12*\n" +
+	"\x11total_rays_traced\x18\x02 \x01(\x04R\x0ftotalRaysTraced*_\n" +
 	"\vSamplerType\x12\x1c\n" +
 	"\x18SAMPLER_TYPE_UNSPECIFIED\x10\x00\x12\n" +
 	"\n" +
@@ -514,12 +570,12 @@ const file_control_proto_rawDesc = "" +
 	"\n" +
 	"WIRE_FRAME\x10\x03\x12\n" +
 	"\n" +
-	"\x06COLOUR\x10\x042\xf3\x01\n" +
+	"\x06COLOUR\x10\x042\xf7\x01\n" +
 	"\x14RenderControlService\x12R\n" +
 	"\x13RenderConfiguration\x12#.control.RenderConfigurationRequest\x1a\x16.google.protobuf.Empty\x12G\n" +
 	"\n" +
-	"RenderTile\x12\x1a.control.RenderTileRequest\x1a\x1b.control.RenderTileResponse0\x01\x12>\n" +
-	"\tRenderEnd\x12\x19.control.RenderEndRequest\x1a\x16.google.protobuf.EmptyB:Z8github.com/flynn-nrg/izpi/internal/proto/control;controlb\x06proto3"
+	"RenderTile\x12\x1a.control.RenderTileRequest\x1a\x1b.control.RenderTileResponse0\x01\x12B\n" +
+	"\tRenderEnd\x12\x19.control.RenderEndRequest\x1a\x1a.control.RenderEndResponseB:Z8github.com/flynn-nrg/izpi/internal/proto/control;controlb\x06proto3"
 
 var (
 	file_control_proto_rawDescOnce sync.Once
@@ -534,7 +590,7 @@ func file_control_proto_rawDescGZIP() []byte {
 }
 
 var file_control_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_control_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_control_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_control_proto_goTypes = []any{
 	(SamplerType)(0),                   // 0: control.SamplerType
 	(*Vec3)(nil),                       // 1: control.Vec3
@@ -543,7 +599,8 @@ var file_control_proto_goTypes = []any{
 	(*RenderTileRequest)(nil),          // 4: control.RenderTileRequest
 	(*RenderTileResponse)(nil),         // 5: control.RenderTileResponse
 	(*RenderEndRequest)(nil),           // 6: control.RenderEndRequest
-	(*emptypb.Empty)(nil),              // 7: google.protobuf.Empty
+	(*RenderEndResponse)(nil),          // 7: control.RenderEndResponse
+	(*emptypb.Empty)(nil),              // 8: google.protobuf.Empty
 }
 var file_control_proto_depIdxs = []int32{
 	0, // 0: control.RenderConfigurationRequest.sampler:type_name -> control.SamplerType
@@ -552,9 +609,9 @@ var file_control_proto_depIdxs = []int32{
 	3, // 3: control.RenderControlService.RenderConfiguration:input_type -> control.RenderConfigurationRequest
 	4, // 4: control.RenderControlService.RenderTile:input_type -> control.RenderTileRequest
 	6, // 5: control.RenderControlService.RenderEnd:input_type -> control.RenderEndRequest
-	7, // 6: control.RenderControlService.RenderConfiguration:output_type -> google.protobuf.Empty
+	8, // 6: control.RenderControlService.RenderConfiguration:output_type -> google.protobuf.Empty
 	5, // 7: control.RenderControlService.RenderTile:output_type -> control.RenderTileResponse
-	7, // 8: control.RenderControlService.RenderEnd:output_type -> google.protobuf.Empty
+	7, // 8: control.RenderControlService.RenderEnd:output_type -> control.RenderEndResponse
 	6, // [6:9] is the sub-list for method output_type
 	3, // [3:6] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
@@ -573,7 +630,7 @@ func file_control_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_control_proto_rawDesc), len(file_control_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

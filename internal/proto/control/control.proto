@@ -18,7 +18,7 @@ service RenderControlService {
 
   // Unary RPC to signal the worker node that the rendering process is complete.
   // The worker should clean up resources and can potentially exit.
-  rpc RenderEnd (RenderEndRequest) returns (google.protobuf.Empty);
+  rpc RenderEnd (RenderEndRequest) returns (RenderEndResponse);
 }
 
 // --- Imports ---
@@ -92,4 +92,10 @@ message RenderTileResponse {
 // This message can be empty if no specific data is needed.
 message RenderEndRequest {
   // string configuration_id = 1; // Optional: if you need to end a specific configuration
+}
+
+// Response containing statistics after rendering is complete.
+message RenderEndResponse {
+  uint64 total_render_time_ms = 1; // Total time spent rendering in milliseconds.
+  uint64 total_rays_traced = 2;    // Total number of rays traced during rendering.
 }

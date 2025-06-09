@@ -39,7 +39,7 @@ type RenderControlServiceClient interface {
 	RenderTile(ctx context.Context, in *RenderTileRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RenderTileResponse], error)
 	// Unary RPC to signal the worker node that the rendering process is complete.
 	// The worker should clean up resources and can potentially exit.
-	RenderEnd(ctx context.Context, in *RenderEndRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RenderEnd(ctx context.Context, in *RenderEndRequest, opts ...grpc.CallOption) (*RenderEndResponse, error)
 }
 
 type renderControlServiceClient struct {
@@ -79,9 +79,9 @@ func (c *renderControlServiceClient) RenderTile(ctx context.Context, in *RenderT
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type RenderControlService_RenderTileClient = grpc.ServerStreamingClient[RenderTileResponse]
 
-func (c *renderControlServiceClient) RenderEnd(ctx context.Context, in *RenderEndRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *renderControlServiceClient) RenderEnd(ctx context.Context, in *RenderEndRequest, opts ...grpc.CallOption) (*RenderEndResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
+	out := new(RenderEndResponse)
 	err := c.cc.Invoke(ctx, RenderControlService_RenderEnd_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ type RenderControlServiceServer interface {
 	RenderTile(*RenderTileRequest, grpc.ServerStreamingServer[RenderTileResponse]) error
 	// Unary RPC to signal the worker node that the rendering process is complete.
 	// The worker should clean up resources and can potentially exit.
-	RenderEnd(context.Context, *RenderEndRequest) (*emptypb.Empty, error)
+	RenderEnd(context.Context, *RenderEndRequest) (*RenderEndResponse, error)
 	mustEmbedUnimplementedRenderControlServiceServer()
 }
 
@@ -120,7 +120,7 @@ func (UnimplementedRenderControlServiceServer) RenderConfiguration(context.Conte
 func (UnimplementedRenderControlServiceServer) RenderTile(*RenderTileRequest, grpc.ServerStreamingServer[RenderTileResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method RenderTile not implemented")
 }
-func (UnimplementedRenderControlServiceServer) RenderEnd(context.Context, *RenderEndRequest) (*emptypb.Empty, error) {
+func (UnimplementedRenderControlServiceServer) RenderEnd(context.Context, *RenderEndRequest) (*RenderEndResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RenderEnd not implemented")
 }
 func (UnimplementedRenderControlServiceServer) mustEmbedUnimplementedRenderControlServiceServer() {}
