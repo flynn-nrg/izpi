@@ -194,7 +194,7 @@ func StartWorker(numCores uint32) {
 
 	// --- Zeroconf (mDNS/DNS-SD) Advertising ---
 	serviceType := "_izpi-worker._tcp"
-	serviceName := "Izpi-Worker"
+	serviceName := fmt.Sprintf("Izpi-Worker-%d", os.Getpid())
 
 	txtRecords := []string{
 		fmt.Sprintf("worker_id=%s", workerID), // worker_id is now the hostname
@@ -217,7 +217,7 @@ func StartWorker(numCores uint32) {
 		"local.",
 		assignedPort, // Use the assigned port here
 		txtRecords,
-		nil, //ifaces, // Pass the filtered interfaces here
+		nil, // Pass the filtered interfaces here
 	)
 	if err != nil {
 		logrus.Fatalf("Failed to register Zeroconf service: %v", err)
