@@ -34,6 +34,7 @@ type workerServer struct {
 	availableCores   uint32 // Number of CPU cores available to the worker (tunable via flag)
 	totalMemoryBytes uint64 // Total physical memory in bytes
 	freeMemoryBytes  uint64 // Available physical memory in bytes
+	status           pb_discovery.WorkerStatus
 }
 
 // NewWorkerServer creates and returns a new workerServer instance.
@@ -58,6 +59,7 @@ func NewWorkerServer(numCores uint32) *workerServer {
 		availableCores:   numCores,
 		totalMemoryBytes: totalMem,
 		freeMemoryBytes:  freeMem,
+		status:           pb_discovery.WorkerStatus_FREE,
 	}
 }
 
@@ -73,6 +75,7 @@ func (s *workerServer) QueryWorkerStatus(ctx context.Context, req *pb_discovery.
 		AvailableCores:   s.availableCores,
 		TotalMemoryBytes: s.totalMemoryBytes,
 		FreeMemoryBytes:  s.freeMemoryBytes,
+		Status:           s.status,
 	}, nil
 }
 
@@ -191,7 +194,7 @@ func StartWorker(numCores uint32) {
 
 	// --- Zeroconf (mDNS/DNS-SD) Advertising ---
 	serviceType := "_izpi-worker._tcp"
-	serviceName := fmt.Sprintf("Izpi-Worker-%s", workerID) // Use full hostname in service name
+	serviceName := "Izpi-Worker"
 
 	txtRecords := []string{
 		fmt.Sprintf("worker_id=%s", workerID), // worker_id is now the hostname
@@ -199,13 +202,22 @@ func StartWorker(numCores uint32) {
 		fmt.Sprintf("grpc_port=%d", assignedPort),
 	}
 
+	// Get interfaces suitable for mDNS advertising
+	ifaces, err := getMulticastInterfaces()
+	if err != nil {
+		logrus.Fatalf("Failed to get multicast interfaces: %v", err)
+	}
+	if len(ifaces) == 0 {
+		logrus.Warn("No suitable network interfaces found for mDNS advertising.")
+	}
+
 	server, err := zeroconf.Register(
 		serviceName,
 		serviceType,
 		"local.",
-		assignedPort,
+		assignedPort, // Use the assigned port here
 		txtRecords,
-		nil,
+		nil, //ifaces, // Pass the filtered interfaces here
 	)
 	if err != nil {
 		logrus.Fatalf("Failed to register Zeroconf service: %v", err)
@@ -223,4 +235,49 @@ func StartWorker(numCores uint32) {
 	grpcServer.GracefulStop()
 	logrus.Info("gRPC server stopped.")
 	logrus.Info("Izpi Worker shut down gracefully.")
+}
+
+// getMulticastInterfaces returns a slice of network interfaces suitable for mDNS.
+// It filters out loopback, down, or point-to-point interfaces.
+func getMulticastInterfaces() ([]net.Interface, error) {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network interfaces: %w", err)
+	}
+
+	var validIfaces []net.Interface
+	for _, iface := range ifaces {
+		// Skip loopback, down, and point-to-point interfaces
+		if iface.Flags&net.FlagLoopback != 0 ||
+			iface.Flags&net.FlagUp == 0 ||
+			iface.Flags&net.FlagPointToPoint != 0 {
+			logrus.Debugf("Skipping interface %s: Flags: %v", iface.Name, iface.Flags)
+			continue
+		}
+
+		// Check if the interface has a valid IP address (IPv4 or IPv6)
+		addrs, err := iface.Addrs()
+		if err != nil {
+			logrus.Warnf("Failed to get addresses for interface %s: %v", iface.Name, err)
+			continue
+		}
+		hasIP := false
+		for _, addr := range addrs {
+			if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
+				if ipNet.IP.To4() != nil || ipNet.IP.To16() != nil { // Check for valid IPv4 or IPv6
+					hasIP = true
+					break
+				}
+			}
+		}
+
+		if !hasIP {
+			logrus.Debugf("Skipping interface %s: No valid IP address found", iface.Name)
+			continue
+		}
+
+		logrus.Infof("Including interface %s for mDNS advertising (Flags: %v, Addrs: %v)", iface.Name, iface.Flags, addrs)
+		validIfaces = append(validIfaces, iface)
+	}
+	return validIfaces, nil
 }

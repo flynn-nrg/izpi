@@ -21,6 +21,62 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Enum to describe the current rendering status of a worker.
+type WorkerStatus int32
+
+const (
+	WorkerStatus_WORKER_STATUS_UNSPECIFIED WorkerStatus = 0 // Default zero value, should not be used
+	WorkerStatus_FREE                      WorkerStatus = 1 // Worker is idle and available for tasks
+	WorkerStatus_BUSY_RENDERING            WorkerStatus = 2 // Worker is currently rendering a task
+	WorkerStatus_BUSY_OTHER                WorkerStatus = 3 // Worker is busy with non-rendering tasks (e.g., texture streaming)
+	WorkerStatus_OFFLINE                   WorkerStatus = 4 // Worker is not responding (this state would be inferred by the leader)
+)
+
+// Enum value maps for WorkerStatus.
+var (
+	WorkerStatus_name = map[int32]string{
+		0: "WORKER_STATUS_UNSPECIFIED",
+		1: "FREE",
+		2: "BUSY_RENDERING",
+		3: "BUSY_OTHER",
+		4: "OFFLINE",
+	}
+	WorkerStatus_value = map[string]int32{
+		"WORKER_STATUS_UNSPECIFIED": 0,
+		"FREE":                      1,
+		"BUSY_RENDERING":            2,
+		"BUSY_OTHER":                3,
+		"OFFLINE":                   4,
+	}
+)
+
+func (x WorkerStatus) Enum() *WorkerStatus {
+	p := new(WorkerStatus)
+	*p = x
+	return p
+}
+
+func (x WorkerStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (WorkerStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_discovery_proto_enumTypes[0].Descriptor()
+}
+
+func (WorkerStatus) Type() protoreflect.EnumType {
+	return &file_discovery_proto_enumTypes[0]
+}
+
+func (x WorkerStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use WorkerStatus.Descriptor instead.
+func (WorkerStatus) EnumDescriptor() ([]byte, []int) {
+	return file_discovery_proto_rawDescGZIP(), []int{0}
+}
+
 type QueryWorkerStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -63,6 +119,7 @@ type QueryWorkerStatusResponse struct {
 	AvailableCores   uint32                 `protobuf:"varint,2,opt,name=available_cores,json=availableCores,proto3" json:"available_cores,omitempty"`         // Number of CPU cores available to the worker
 	TotalMemoryBytes uint64                 `protobuf:"varint,3,opt,name=total_memory_bytes,json=totalMemoryBytes,proto3" json:"total_memory_bytes,omitempty"` // Total physical memory in bytes
 	FreeMemoryBytes  uint64                 `protobuf:"varint,4,opt,name=free_memory_bytes,json=freeMemoryBytes,proto3" json:"free_memory_bytes,omitempty"`    // Available physical memory in bytes
+	Status           WorkerStatus           `protobuf:"varint,5,opt,name=status,proto3,enum=discovery.WorkerStatus" json:"status,omitempty"`                   // Current status of the worker (e.g., FREE, BUSY_RENDERING)
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -125,17 +182,32 @@ func (x *QueryWorkerStatusResponse) GetFreeMemoryBytes() uint64 {
 	return 0
 }
 
+func (x *QueryWorkerStatusResponse) GetStatus() WorkerStatus {
+	if x != nil {
+		return x.Status
+	}
+	return WorkerStatus_WORKER_STATUS_UNSPECIFIED
+}
+
 var File_discovery_proto protoreflect.FileDescriptor
 
 const file_discovery_proto_rawDesc = "" +
 	"\n" +
 	"\x0fdiscovery.proto\x12\tdiscovery\"\x1a\n" +
-	"\x18QueryWorkerStatusRequest\"\xbb\x01\n" +
+	"\x18QueryWorkerStatusRequest\"\xec\x01\n" +
 	"\x19QueryWorkerStatusResponse\x12\x1b\n" +
 	"\tnode_name\x18\x01 \x01(\tR\bnodeName\x12'\n" +
 	"\x0favailable_cores\x18\x02 \x01(\rR\x0eavailableCores\x12,\n" +
 	"\x12total_memory_bytes\x18\x03 \x01(\x04R\x10totalMemoryBytes\x12*\n" +
-	"\x11free_memory_bytes\x18\x04 \x01(\x04R\x0ffreeMemoryBytes2x\n" +
+	"\x11free_memory_bytes\x18\x04 \x01(\x04R\x0ffreeMemoryBytes\x12/\n" +
+	"\x06status\x18\x05 \x01(\x0e2\x17.discovery.WorkerStatusR\x06status*h\n" +
+	"\fWorkerStatus\x12\x1d\n" +
+	"\x19WORKER_STATUS_UNSPECIFIED\x10\x00\x12\b\n" +
+	"\x04FREE\x10\x01\x12\x12\n" +
+	"\x0eBUSY_RENDERING\x10\x02\x12\x0e\n" +
+	"\n" +
+	"BUSY_OTHER\x10\x03\x12\v\n" +
+	"\aOFFLINE\x10\x042x\n" +
 	"\x16WorkerDiscoveryService\x12^\n" +
 	"\x11QueryWorkerStatus\x12#.discovery.QueryWorkerStatusRequest\x1a$.discovery.QueryWorkerStatusResponseB>Z<github.com/flynn-nrg/izpi/internal/proto/discovery;discoveryb\x06proto3"
 
@@ -151,19 +223,22 @@ func file_discovery_proto_rawDescGZIP() []byte {
 	return file_discovery_proto_rawDescData
 }
 
+var file_discovery_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_discovery_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_discovery_proto_goTypes = []any{
-	(*QueryWorkerStatusRequest)(nil),  // 0: discovery.QueryWorkerStatusRequest
-	(*QueryWorkerStatusResponse)(nil), // 1: discovery.QueryWorkerStatusResponse
+	(WorkerStatus)(0),                 // 0: discovery.WorkerStatus
+	(*QueryWorkerStatusRequest)(nil),  // 1: discovery.QueryWorkerStatusRequest
+	(*QueryWorkerStatusResponse)(nil), // 2: discovery.QueryWorkerStatusResponse
 }
 var file_discovery_proto_depIdxs = []int32{
-	0, // 0: discovery.WorkerDiscoveryService.QueryWorkerStatus:input_type -> discovery.QueryWorkerStatusRequest
-	1, // 1: discovery.WorkerDiscoveryService.QueryWorkerStatus:output_type -> discovery.QueryWorkerStatusResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: discovery.QueryWorkerStatusResponse.status:type_name -> discovery.WorkerStatus
+	1, // 1: discovery.WorkerDiscoveryService.QueryWorkerStatus:input_type -> discovery.QueryWorkerStatusRequest
+	2, // 2: discovery.WorkerDiscoveryService.QueryWorkerStatus:output_type -> discovery.QueryWorkerStatusResponse
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_discovery_proto_init() }
@@ -176,13 +251,14 @@ func file_discovery_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_discovery_proto_rawDesc), len(file_discovery_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_discovery_proto_goTypes,
 		DependencyIndexes: file_discovery_proto_depIdxs,
+		EnumInfos:         file_discovery_proto_enumTypes,
 		MessageInfos:      file_discovery_proto_msgTypes,
 	}.Build()
 	File_discovery_proto = out.File
