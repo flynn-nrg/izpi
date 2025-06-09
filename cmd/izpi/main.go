@@ -52,12 +52,10 @@ var flags struct {
 	DisplayMode string `name:"display-mode" help:"Display mode: fyne or sdl" default:"fyne"`
 	CpuProfile  string `name:"cpu-profile" help:"Enable cpu profiling"`
 	Instrument  bool   `name:"instrument" help:"Enable instrumentation" default:"false"`
+	Role        string `name:"role" help:"Role: worker, leader or standalone" default:"standalone"`
 }
 
 func main() {
-	var disp display.Display
-	var err error
-	var canvas image.Image
 
 	kong.Parse(&flags,
 		kong.Name(programName),
@@ -79,6 +77,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	log.Infof("Running as %q", flags.Role)
+
 	scene, err := scene.FromYAML(sceneFile, filepath.Dir(flags.Scene), 0)
 	if err != nil {
 		log.Fatalf("Error loading scene: %v", err)
@@ -92,9 +92,6 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
-
-	previewChan := make(chan display.DisplayTile)
-	defer close(previewChan)
 
 	if flags.Instrument {
 		f, err := os.Create("trace.out")
@@ -112,6 +109,26 @@ func main() {
 		}
 		defer trace.Stop()
 	}
+
+	switch flags.Role {
+	case "leader":
+		run_as_leader(scene, false)
+	case "standalone":
+		run_as_leader(scene, true)
+	case "worker":
+		run_as_worker()
+	default:
+		log.Fatalf("unknown role %q", flags.Role)
+	}
+}
+
+func run_as_leader(scene *scene.Scene, standalone bool) {
+	var disp display.Display
+	var err error
+	var canvas image.Image
+
+	previewChan := make(chan display.DisplayTile)
+	defer close(previewChan)
 
 	r := render.New(scene, int(flags.XSize), int(flags.YSize), int(flags.Samples), int(flags.Depth),
 		colours.Black, colours.White, int(flags.NumWorkers), flags.Verbose, previewChan, flags.Preview, sampler.StringToType(flags.Sampler))
@@ -177,6 +194,9 @@ func main() {
 	if flags.Preview {
 		disp.Wait()
 	}
+}
+
+func run_as_worker() {
 }
 
 func setupLogging(level string) {
