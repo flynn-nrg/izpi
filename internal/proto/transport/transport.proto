@@ -4,13 +4,8 @@ option go_package = "github.com/flynn-nrg/izpi/internal/proto/transport;transpor
 
 package transport;
 
-// Specify the Protobuf edition. "2023" is the current recommended edition.
-edition = "2023";
-
-// Enums for various types
-
 enum TextureType {
-  TEXTURE_TYPE_UNSPECIFIED = 0; // Default zero value for enums
+  TEXTURE_TYPE_UNSPECIFIED = 0;
   CONSTANT = 1;
   CHECKER = 2;
   IMAGE = 3;
@@ -18,7 +13,7 @@ enum TextureType {
 }
 
 enum MaterialType {
-  MATERIAL_TYPE_UNSPECIFIED = 0; // Default zero value for enums
+  MATERIAL_TYPE_UNSPECIFIED = 0;
   DIELECTRIC = 1;
   DIFFUSE_LIGHT = 2;
   ISOTROPIC = 3;
@@ -27,8 +22,6 @@ enum MaterialType {
   PBR = 6;
 }
 
-
-// Core data structures
 
 // Represents a 3D vector or point with float components.
 message Vec3 {
@@ -61,8 +54,6 @@ message Camera {
 
 // Represents different types of textures.
 message Texture {
-  // Name is now primarily for debugging/identification within its immediate context,
-  // as it's not used for global lookup.
   string name = 1;
   TextureType type = 2;
   oneof texture_properties {
@@ -80,7 +71,6 @@ message ConstantTexture {
 
 // Represents a checkerboard texture.
 message CheckerTexture {
-  // These are embedded Texture messages, allowing for nested texture definitions.
   Texture odd = 1;
   Texture even = 2;
 }
@@ -114,7 +104,7 @@ message Material {
 
 // Represents a Lambertian material.
 message LambertMaterial {
-  Texture albedo = 1; // Direct embedding of Texture
+  Texture albedo = 1;
 }
 
 // Represents a Dielectric material.
@@ -178,7 +168,6 @@ message Sphere {
 message SceneObjects {
   repeated Triangle triangles = 1;
   repeated Sphere spheres = 2;
-  // Add other object types here as needed (e.g., meshes, cylinders)
 }
 
 
@@ -189,9 +178,8 @@ message Scene {
   string name = 1;
   string version = 2;
   Camera camera = 3;
-  map<string, Material> materials = 4; // Central registry for all materials
-  // Removed map<string, Texture> textures, as textures are now embedded within materials.
-  SceneObjects objects = 5; // Field number updated
+  map<string, Material> materials = 4;
+  SceneObjects objects = 5;
 }
 
 // --- Service Definition ---
@@ -217,8 +205,8 @@ message GetSceneRequest {
 // Request to stream the content of a texture file.
 message StreamTextureFileRequest {
   string filename = 1; // The path/name of the texture file to stream.
-  // You could add fields like 'offset' and 'chunk_size' for more control over streaming,
-  // but for simplicity, a full file stream is usually assumed.
+  uint64 offset = 2;   // The starting byte offset in the file to begin streaming from.
+  uint32 chunk_size = 3; // The maximum size of each chunk to stream in bytes.
 }
 
 // A chunk of binary data for a streamed texture file.

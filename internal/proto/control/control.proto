@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-// Your repository path for Go package generation.
-option go_package = "github.com/flynn-nrg/izpi/internal/proto;proto";
+import "google/protobuf/empty.proto";
 
-// Specify the Protobuf edition. "2023" is the current recommended edition.
-edition = "2023";
+option go_package = "github.com/flynn-nrg/izpi/internal/proto/control;control";
+
+package control;
 
 // Service for controlling render operations on worker nodes.
 service RenderControlService {
@@ -23,7 +23,7 @@ service RenderControlService {
 
 // --- Imports ---
 // This is needed for the google.protobuf.Empty message
-import "google/protobuf/empty.proto";
+
 
 // --- Enums ---
 

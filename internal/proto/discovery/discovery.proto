@@ -1,13 +1,8 @@
 syntax = "proto3";
 
-// Specify the Go package for the generated code.
-// The path "github.com/your-org/your-repo/pkg/discovery" is the import path,
-// and "discovery" after the semicolon is the desired package name within Go.
 option go_package = "github.com/flynn-nrg/izpi/internal/proto/discovery;discovery";
 
-// Specify the Protobuf edition. "2023" is the current recommended edition.
-edition = "2023";
-
+package discovery;
 
 message QueryWorkerStatusRequest {
 }
