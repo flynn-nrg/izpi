@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"runtime/trace"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/flynn-nrg/izpi/internal/colours"
 	"github.com/flynn-nrg/izpi/internal/display"
@@ -18,8 +20,10 @@ import (
 	"github.com/flynn-nrg/izpi/internal/render"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
+	"github.com/flynn-nrg/izpi/internal/worker"
 
 	"github.com/alecthomas/kong"
+	"github.com/grandcat/zeroconf"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -130,6 +134,35 @@ func run_as_leader(scene *scene.Scene, standalone bool) {
 	previewChan := make(chan display.DisplayTile)
 	defer close(previewChan)
 
+	if !standalone {
+		// Example leader-side browsing logic (conceptual)
+		resolver, err := zeroconf.NewResolver(nil)
+		if err != nil {
+			log.Fatalln("Failed to initialize resolver:", err.Error())
+		}
+
+		entries := make(chan *zeroconf.ServiceEntry)
+		go func(results <-chan *zeroconf.ServiceEntry) {
+			for entry := range results {
+				log.Println(entry)
+			}
+			log.Println("No more entries.")
+		}(entries)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
+		defer cancel()
+		err = resolver.Browse(ctx, "_izpi-worker._tcp", "local.", entries)
+		if err != nil {
+			log.Fatalln("Failed to browse:", err.Error())
+		}
+
+		for entry := range entries {
+			log.Printf("Discovered worker: %s, Hostname: %s, Addrs: %v, Port: %d, Text: %v",
+				entry.Instance, entry.HostName, entry.AddrIPv4, entry.Port, entry.Text)
+			// ... proceed to dial ...
+		}
+	}
+
 	r := render.New(scene, int(flags.XSize), int(flags.YSize), int(flags.Samples), int(flags.Depth),
 		colours.Black, colours.White, int(flags.NumWorkers), flags.Verbose, previewChan, flags.Preview, sampler.StringToType(flags.Sampler))
 
@@ -197,6 +230,8 @@ func run_as_leader(scene *scene.Scene, standalone bool) {
 }
 
 func run_as_worker() {
+	worker.StartWorker(uint32(flags.NumWorkers))
+
 }
 
 func setupLogging(level string) {
