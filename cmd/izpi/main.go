@@ -21,11 +21,16 @@ import (
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
 	"github.com/flynn-nrg/izpi/internal/worker"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/alecthomas/kong"
 	"github.com/grandcat/zeroconf"
 
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
+
+	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
 )
 
 const (
@@ -126,6 +131,11 @@ func main() {
 	}
 }
 
+type workerHost struct {
+	hostname string
+	port     uint16
+}
+
 func run_as_leader(scene *scene.Scene, standalone bool) {
 	var disp display.Display
 	var err error
@@ -133,6 +143,8 @@ func run_as_leader(scene *scene.Scene, standalone bool) {
 
 	previewChan := make(chan display.DisplayTile)
 	defer close(previewChan)
+
+	var workerHosts []workerHost
 
 	if !standalone {
 		// Example leader-side browsing logic (conceptual)
@@ -162,6 +174,52 @@ func run_as_leader(scene *scene.Scene, standalone bool) {
 			// ... proceed to dial ...
 		}
 	}
+
+	workerHosts = append(workerHosts, workerHost{
+		hostname: "vesper.local",
+		port:     58595,
+	})
+
+	for _, wh := range workerHosts {
+		target := fmt.Sprintf("%s:%d", wh.hostname, wh.port)
+		logrus.Infof("Attempting to connect to worker at %s", target)
+
+		// Set up a context with a timeout for the RPC call
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel() // Ensure the context is cancelled to release resources
+
+		// Create a gRPC client connection to the worker
+		// For production, you would use grpc.WithTransportCredentials for TLS
+		conn, err := grpc.NewClient(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			logrus.Errorf("Failed to connect to worker %s: %v", target, err)
+			continue // Move to the next worker if connection fails
+		}
+		defer conn.Close() // Close the connection when the loop iteration finishes
+
+		// Create a discovery service client
+		discoveryClient := pb_discovery.NewWorkerDiscoveryServiceClient(conn)
+
+		// Call QueryWorkerStatus RPC
+		logrus.Infof("Calling QueryWorkerStatus on %s...", target)
+		statusResp, err := discoveryClient.QueryWorkerStatus(ctx, &pb_discovery.QueryWorkerStatusRequest{})
+		if err != nil {
+			logrus.Errorf("Failed to query status from worker %s: %v", target, err)
+			continue // Move to the next worker if RPC call fails
+		}
+
+		// Print the response from the worker
+		log.Infof("--- Status from Worker %s (at %s) ---", statusResp.GetNodeName(), target)
+		log.Infof("  Node Name: %s", statusResp.GetNodeName())
+		log.Infof("  Available Cores: %d", statusResp.GetAvailableCores())
+		log.Infof("  Total Memory: %d bytes", statusResp.GetTotalMemoryBytes())
+		log.Infof("  Free Memory: %d bytes", statusResp.GetFreeMemoryBytes())
+		log.Infof("  Status: %s", statusResp.GetStatus().String()) // Convert enum to string
+		log.Info("--------------------------------------")
+	}
+
+	log.Info("Finished querying all specified workers.")
+	// In a real leader, you'd likely keep track of these workers and their status
 
 	r := render.New(scene, int(flags.XSize), int(flags.YSize), int(flags.Samples), int(flags.Depth),
 		colours.Black, colours.White, int(flags.NumWorkers), flags.Verbose, previewChan, flags.Preview, sampler.StringToType(flags.Sampler))
