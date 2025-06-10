@@ -111,7 +111,7 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	return nil
 }
 
-func (s *workerServer) RenderEnd(ctx context.Context, req *pb_empty.Empty) (*pb_control.RenderEndResponse, error) {
+func (s *workerServer) RenderEnd(ctx context.Context, req *pb_control.RenderEndRequest) (*pb_control.RenderEndResponse, error) {
 	logrus.Printf("RenderControlService: RenderEnd called by %s", s.workerID)
 	stats := &pb_control.RenderEndResponse{
 		TotalRenderTimeMs: 12345,
