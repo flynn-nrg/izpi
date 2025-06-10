@@ -165,12 +165,14 @@ func StartWorker(numCores uint32) {
 	logrus.Infof("Worker ID (Hostname): %s", workerID)
 
 	// --- gRPC Server Setup ---
-	lis, err := net.Listen("tcp", ":0")
+	// Listen on both IPv4 and IPv6
+	lis, err := net.Listen("tcp", "0.0.0.0:0")
 	if err != nil {
 		logrus.Fatalf("Failed to listen: %v", err)
 	}
 
 	assignedPort := lis.Addr().(*net.TCPAddr).Port
+	logrus.Infof("Worker listening on port %d (both IPv4 and IPv6)", assignedPort)
 
 	grpcServer := grpc.NewServer()
 
