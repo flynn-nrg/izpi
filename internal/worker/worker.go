@@ -163,7 +163,7 @@ func getMulticastInterfaces() ([]net.Interface, error) {
 }
 
 // StartWorker initializes and runs the Izpi worker services.
-func StartWorker(port int, numCores uint32) {
+func StartWorker(numCores uint32) {
 	logrus.Infof("Starting Izpi Worker")
 	logrus.Infof("Configured cores: %d", numCores)
 
