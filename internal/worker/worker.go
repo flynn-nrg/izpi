@@ -179,7 +179,7 @@ func StartWorker(numCores uint32) {
 	var assignedPort int
 
 	// Listen on IPv4
-	lis4, err4 := net.Listen("tcp4", fmt.Sprintf(":%d", port))
+	lis4, err4 := net.Listen("tcp4", ":0")
 	if err4 != nil {
 		logrus.Warnf("Failed to listen on IPv4 (will try IPv6): %v", err4)
 	} else {
@@ -191,7 +191,7 @@ func StartWorker(numCores uint32) {
 	// Listen on IPv6 (even if IPv4 succeeded, as it's typically dual-stack aware on macOS)
 	// We'll create a separate listener if IPv4 was explicitly bound, or fall back if IPv4 failed.
 	var lis6 net.Listener
-	lis6, err6 := net.Listen("tcp6", fmt.Sprintf(":%d", port))
+	lis6, err6 := net.Listen("tcp6", ":0")
 	if err6 != nil {
 		logrus.Warnf("Failed to listen on IPv6: %v", err6)
 	} else {
