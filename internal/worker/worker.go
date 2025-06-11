@@ -120,48 +120,6 @@ func (s *workerServer) RenderEnd(ctx context.Context, req *pb_control.RenderEndR
 	return stats, nil
 }
 
-// getMulticastInterfaces returns a slice of network interfaces suitable for mDNS.
-func getMulticastInterfaces() ([]net.Interface, error) {
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get network interfaces: %w", err)
-	}
-
-	var validIfaces []net.Interface
-	for _, iface := range ifaces {
-		if iface.Flags&net.FlagLoopback != 0 ||
-			iface.Flags&net.FlagUp == 0 ||
-			iface.Flags&net.FlagPointToPoint != 0 {
-			logrus.Debugf("Skipping interface %s: Flags: %v", iface.Name, iface.Flags)
-			continue
-		}
-
-		addrs, err := iface.Addrs()
-		if err != nil {
-			logrus.Warnf("Failed to get addresses for interface %s: %v", iface.Name, err)
-			continue
-		}
-		hasIP := false
-		for _, addr := range addrs {
-			if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
-				if ipNet.IP.To4() != nil || ipNet.IP.To16() != nil {
-					hasIP = true
-					break
-				}
-			}
-		}
-
-		if !hasIP {
-			logrus.Debugf("Skipping interface %s: No valid IP address found", iface.Name)
-			continue
-		}
-
-		logrus.Infof("Including interface %s for mDNS advertising (Flags: %v, Addrs: %v)", iface.Name, iface.Flags, addrs)
-		validIfaces = append(validIfaces, iface)
-	}
-	return validIfaces, nil
-}
-
 // StartWorker initializes and runs the Izpi worker services.
 func StartWorker(numCores uint32) {
 	logrus.Infof("Starting Izpi Worker")
@@ -174,41 +132,15 @@ func StartWorker(numCores uint32) {
 	workerID := hostname
 	logrus.Infof("Worker ID (Hostname): %s", workerID)
 
-	// --- gRPC Server Setup: Explicitly listen on both IPv4 and IPv6 ---
-	var lis net.Listener
 	var assignedPort int
 
-	// Listen on IPv4
-	lis4, err4 := net.Listen("tcp4", ":0")
-	if err4 != nil {
-		logrus.Warnf("Failed to listen on IPv4 (will try IPv6): %v", err4)
-	} else {
-		assignedPort = lis4.Addr().(*net.TCPAddr).Port
-		logrus.Infof("gRPC server listening on IPv4: %s (port %d)", lis4.Addr().String(), assignedPort)
-		lis = lis4 // Set the primary listener to IPv4
+	lis, err := net.Listen("tcp", ":0")
+	if err != nil {
+		logrus.Fatalf("Failed to listen: %v", err)
 	}
 
-	// Listen on IPv6 (even if IPv4 succeeded, as it's typically dual-stack aware on macOS)
-	// We'll create a separate listener if IPv4 was explicitly bound, or fall back if IPv4 failed.
-	var lis6 net.Listener
-	lis6, err6 := net.Listen("tcp6", ":0")
-	if err6 != nil {
-		logrus.Warnf("Failed to listen on IPv6: %v", err6)
-	} else {
-		// If IPv4 didn't succeed, use this as the primary listener and set the port
-		if lis == nil {
-			assignedPort = lis6.Addr().(*net.TCPAddr).Port
-			logrus.Infof("gRPC server listening on IPv6: %s (port %d)", lis6.Addr().String(), assignedPort)
-			lis = lis6
-		} else {
-			// If both IPv4 and IPv6 listeners are created, ensure they are on the same port (which Listen will handle)
-			logrus.Infof("gRPC server also listening on IPv6: %s (port %d)", lis6.Addr().String(), lis6.Addr().(*net.TCPAddr).Port)
-		}
-	}
-
-	if lis == nil {
-		logrus.Fatalf("Failed to start gRPC server: Could not listen on either IPv4 or IPv6.")
-	}
+	assignedPort = lis.Addr().(*net.TCPAddr).Port
+	logrus.Infof("gRPC server listening on all interfaces: %s (port %d)", lis.Addr().String(), assignedPort)
 
 	grpcServer := grpc.NewServer()
 	workerSrv := NewWorkerServer(numCores)
@@ -218,20 +150,10 @@ func StartWorker(numCores uint32) {
 	reflection.Register(grpcServer)
 
 	go func() {
-		// Start serving on the primary listener
 		if err := grpcServer.Serve(lis); err != nil {
-			logrus.Fatalf("Failed to serve gRPC on primary listener: %v", err)
+			logrus.Fatalf("Failed to serve gRPC: %v", err)
 		}
 	}()
-
-	// If a separate IPv6 listener was created, start serving it too
-	if lis6 != nil && lis6 != lis {
-		go func() {
-			if err := grpcServer.Serve(lis6); err != nil {
-				logrus.Errorf("Failed to serve gRPC on secondary IPv6 listener: %v", err)
-			}
-		}()
-	}
 
 	// --- Zeroconf (mDNS/DNS-SD) Advertising ---
 	serviceType := "_izpi-worker._tcp"
