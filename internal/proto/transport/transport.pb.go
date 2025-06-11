@@ -593,6 +593,7 @@ func (x *CheckerTexture) GetEven() *Texture {
 type ImageTexture struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Filename      string                 `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
+	Size          uint64                 `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"` // NEW: Size of the image file in bytes (for pre-allocation)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -632,6 +633,13 @@ func (x *ImageTexture) GetFilename() string {
 		return x.Filename
 	}
 	return ""
+}
+
+func (x *ImageTexture) GetSize() uint64 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
 }
 
 // Represents a noise texture.
@@ -1395,14 +1403,16 @@ func (x *SceneObjects) GetSpheres() []*Sphere {
 
 // The root message describing the entire scene.
 type Scene struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Version       string                 `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	Camera        *Camera                `protobuf:"bytes,3,opt,name=camera,proto3" json:"camera,omitempty"`
-	Materials     map[string]*Material   `protobuf:"bytes,4,rep,name=materials,proto3" json:"materials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Objects       *SceneObjects          `protobuf:"bytes,5,opt,name=objects,proto3" json:"objects,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Name            string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Version         string                 `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
+	Camera          *Camera                `protobuf:"bytes,3,opt,name=camera,proto3" json:"camera,omitempty"`
+	Materials       map[string]*Material   `protobuf:"bytes,4,rep,name=materials,proto3" json:"materials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Objects         *SceneObjects          `protobuf:"bytes,5,opt,name=objects,proto3" json:"objects,omitempty"`
+	StreamTriangles bool                   `protobuf:"varint,6,opt,name=stream_triangles,json=streamTriangles,proto3" json:"stream_triangles,omitempty"` // Changed from string to boolean
+	TotalTriangles  uint64                 `protobuf:"varint,7,opt,name=total_triangles,json=totalTriangles,proto3" json:"total_triangles,omitempty"`    // NEW: Total number of triangles in the scene.
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Scene) Reset() {
@@ -1468,6 +1478,20 @@ func (x *Scene) GetObjects() *SceneObjects {
 		return x.Objects
 	}
 	return nil
+}
+
+func (x *Scene) GetStreamTriangles() bool {
+	if x != nil {
+		return x.StreamTriangles
+	}
+	return false
+}
+
+func (x *Scene) GetTotalTriangles() uint64 {
+	if x != nil {
+		return x.TotalTriangles
+	}
+	return 0
 }
 
 // Request to retrieve a specific scene.
@@ -1621,6 +1645,112 @@ func (x *StreamTextureFileResponse) GetChunk() []byte {
 	return nil
 }
 
+// Request to stream triangle data.
+type StreamTrianglesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SceneName     string                 `protobuf:"bytes,1,opt,name=scene_name,json=sceneName,proto3" json:"scene_name,omitempty"`  // The name of the scene the triangles belong to.
+	BatchSize     uint32                 `protobuf:"varint,2,opt,name=batch_size,json=batchSize,proto3" json:"batch_size,omitempty"` // The number of triangles to return in each batch.
+	Offset        uint64                 `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`                        // Renamed from offset_bytes. This is the starting triangle index.
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamTrianglesRequest) Reset() {
+	*x = StreamTrianglesRequest{}
+	mi := &file_transport_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamTrianglesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamTrianglesRequest) ProtoMessage() {}
+
+func (x *StreamTrianglesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamTrianglesRequest.ProtoReflect.Descriptor instead.
+func (*StreamTrianglesRequest) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *StreamTrianglesRequest) GetSceneName() string {
+	if x != nil {
+		return x.SceneName
+	}
+	return ""
+}
+
+func (x *StreamTrianglesRequest) GetBatchSize() uint32 {
+	if x != nil {
+		return x.BatchSize
+	}
+	return 0
+}
+
+func (x *StreamTrianglesRequest) GetOffset() uint64 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+// Response containing a batch of triangles.
+type StreamTrianglesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Triangles     []*Triangle            `protobuf:"bytes,1,rep,name=triangles,proto3" json:"triangles,omitempty"` // A batch of Triangle objects.
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamTrianglesResponse) Reset() {
+	*x = StreamTrianglesResponse{}
+	mi := &file_transport_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamTrianglesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamTrianglesResponse) ProtoMessage() {}
+
+func (x *StreamTrianglesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamTrianglesResponse.ProtoReflect.Descriptor instead.
+func (*StreamTrianglesResponse) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *StreamTrianglesResponse) GetTriangles() []*Triangle {
+	if x != nil {
+		return x.Triangles
+	}
+	return nil
+}
+
 var File_transport_proto protoreflect.FileDescriptor
 
 const file_transport_proto_rawDesc = "" +
@@ -1655,9 +1785,10 @@ const file_transport_proto_rawDesc = "" +
 	"\x05value\x18\x01 \x01(\v2\x0f.transport.Vec3R\x05value\"^\n" +
 	"\x0eCheckerTexture\x12$\n" +
 	"\x03odd\x18\x01 \x01(\v2\x12.transport.TextureR\x03odd\x12&\n" +
-	"\x04even\x18\x02 \x01(\v2\x12.transport.TextureR\x04even\"*\n" +
+	"\x04even\x18\x02 \x01(\v2\x12.transport.TextureR\x04even\">\n" +
 	"\fImageTexture\x12\x1a\n" +
-	"\bfilename\x18\x01 \x01(\tR\bfilename\"$\n" +
+	"\bfilename\x18\x01 \x01(\tR\bfilename\x12\x12\n" +
+	"\x04size\x18\x02 \x01(\x04R\x04size\"$\n" +
 	"\fNoiseTexture\x12\x14\n" +
 	"\x05scale\x18\x01 \x01(\x02R\x05scale\"\xbe\x03\n" +
 	"\bMaterial\x12\x12\n" +
@@ -1710,13 +1841,15 @@ const file_transport_proto_rawDesc = "" +
 	"\rmaterial_name\x18\x03 \x01(\tR\fmaterialName\"n\n" +
 	"\fSceneObjects\x121\n" +
 	"\ttriangles\x18\x01 \x03(\v2\x13.transport.TriangleR\ttriangles\x12+\n" +
-	"\aspheres\x18\x02 \x03(\v2\x11.transport.SphereR\aspheres\"\xa5\x02\n" +
+	"\aspheres\x18\x02 \x03(\v2\x11.transport.SphereR\aspheres\"\xf9\x02\n" +
 	"\x05Scene\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\tR\aversion\x12)\n" +
 	"\x06camera\x18\x03 \x01(\v2\x11.transport.CameraR\x06camera\x12=\n" +
 	"\tmaterials\x18\x04 \x03(\v2\x1f.transport.Scene.MaterialsEntryR\tmaterials\x121\n" +
-	"\aobjects\x18\x05 \x01(\v2\x17.transport.SceneObjectsR\aobjects\x1aQ\n" +
+	"\aobjects\x18\x05 \x01(\v2\x17.transport.SceneObjectsR\aobjects\x12)\n" +
+	"\x10stream_triangles\x18\x06 \x01(\bR\x0fstreamTriangles\x12'\n" +
+	"\x0ftotal_triangles\x18\a \x01(\x04R\x0etotalTriangles\x1aQ\n" +
 	"\x0eMaterialsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12)\n" +
 	"\x05value\x18\x02 \x01(\v2\x13.transport.MaterialR\x05value:\x028\x01\"0\n" +
@@ -1729,7 +1862,15 @@ const file_transport_proto_rawDesc = "" +
 	"\n" +
 	"chunk_size\x18\x03 \x01(\rR\tchunkSize\"1\n" +
 	"\x19StreamTextureFileResponse\x12\x14\n" +
-	"\x05chunk\x18\x01 \x01(\fR\x05chunk*\\\n" +
+	"\x05chunk\x18\x01 \x01(\fR\x05chunk\"n\n" +
+	"\x16StreamTrianglesRequest\x12\x1d\n" +
+	"\n" +
+	"scene_name\x18\x01 \x01(\tR\tsceneName\x12\x1d\n" +
+	"\n" +
+	"batch_size\x18\x02 \x01(\rR\tbatchSize\x12\x16\n" +
+	"\x06offset\x18\x03 \x01(\x04R\x06offset\"L\n" +
+	"\x17StreamTrianglesResponse\x121\n" +
+	"\ttriangles\x18\x01 \x03(\v2\x13.transport.TriangleR\ttriangles*\\\n" +
 	"\vTextureType\x12\x1c\n" +
 	"\x18TEXTURE_TYPE_UNSPECIFIED\x10\x00\x12\f\n" +
 	"\bCONSTANT\x10\x01\x12\v\n" +
@@ -1744,10 +1885,11 @@ const file_transport_proto_rawDesc = "" +
 	"\tISOTROPIC\x10\x03\x12\v\n" +
 	"\aLAMBERT\x10\x04\x12\t\n" +
 	"\x05METAL\x10\x05\x12\a\n" +
-	"\x03PBR\x10\x062\xb3\x01\n" +
+	"\x03PBR\x10\x062\x8f\x02\n" +
 	"\x15SceneTransportService\x128\n" +
 	"\bGetScene\x12\x1a.transport.GetSceneRequest\x1a\x10.transport.Scene\x12`\n" +
-	"\x11StreamTextureFile\x12#.transport.StreamTextureFileRequest\x1a$.transport.StreamTextureFileResponse0\x01B>Z<github.com/flynn-nrg/izpi/internal/proto/transport;transportb\x06proto3"
+	"\x11StreamTextureFile\x12#.transport.StreamTextureFileRequest\x1a$.transport.StreamTextureFileResponse0\x01\x12Z\n" +
+	"\x0fStreamTriangles\x12!.transport.StreamTrianglesRequest\x1a\".transport.StreamTrianglesResponse0\x01B>Z<github.com/flynn-nrg/izpi/internal/proto/transport;transportb\x06proto3"
 
 var (
 	file_transport_proto_rawDescOnce sync.Once
@@ -1762,7 +1904,7 @@ func file_transport_proto_rawDescGZIP() []byte {
 }
 
 var file_transport_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_transport_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_transport_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_transport_proto_goTypes = []any{
 	(TextureType)(0),                  // 0: transport.TextureType
 	(MaterialType)(0),                 // 1: transport.MaterialType
@@ -1788,7 +1930,9 @@ var file_transport_proto_goTypes = []any{
 	(*GetSceneRequest)(nil),           // 21: transport.GetSceneRequest
 	(*StreamTextureFileRequest)(nil),  // 22: transport.StreamTextureFileRequest
 	(*StreamTextureFileResponse)(nil), // 23: transport.StreamTextureFileResponse
-	nil,                               // 24: transport.Scene.MaterialsEntry
+	(*StreamTrianglesRequest)(nil),    // 24: transport.StreamTrianglesRequest
+	(*StreamTrianglesResponse)(nil),   // 25: transport.StreamTrianglesResponse
+	nil,                               // 26: transport.Scene.MaterialsEntry
 }
 var file_transport_proto_depIdxs = []int32{
 	2,  // 0: transport.Camera.lookfrom:type_name -> transport.Vec3
@@ -1831,18 +1975,21 @@ var file_transport_proto_depIdxs = []int32{
 	17, // 37: transport.SceneObjects.triangles:type_name -> transport.Triangle
 	18, // 38: transport.SceneObjects.spheres:type_name -> transport.Sphere
 	4,  // 39: transport.Scene.camera:type_name -> transport.Camera
-	24, // 40: transport.Scene.materials:type_name -> transport.Scene.MaterialsEntry
+	26, // 40: transport.Scene.materials:type_name -> transport.Scene.MaterialsEntry
 	19, // 41: transport.Scene.objects:type_name -> transport.SceneObjects
-	10, // 42: transport.Scene.MaterialsEntry.value:type_name -> transport.Material
-	21, // 43: transport.SceneTransportService.GetScene:input_type -> transport.GetSceneRequest
-	22, // 44: transport.SceneTransportService.StreamTextureFile:input_type -> transport.StreamTextureFileRequest
-	20, // 45: transport.SceneTransportService.GetScene:output_type -> transport.Scene
-	23, // 46: transport.SceneTransportService.StreamTextureFile:output_type -> transport.StreamTextureFileResponse
-	45, // [45:47] is the sub-list for method output_type
-	43, // [43:45] is the sub-list for method input_type
-	43, // [43:43] is the sub-list for extension type_name
-	43, // [43:43] is the sub-list for extension extendee
-	0,  // [0:43] is the sub-list for field type_name
+	17, // 42: transport.StreamTrianglesResponse.triangles:type_name -> transport.Triangle
+	10, // 43: transport.Scene.MaterialsEntry.value:type_name -> transport.Material
+	21, // 44: transport.SceneTransportService.GetScene:input_type -> transport.GetSceneRequest
+	22, // 45: transport.SceneTransportService.StreamTextureFile:input_type -> transport.StreamTextureFileRequest
+	24, // 46: transport.SceneTransportService.StreamTriangles:input_type -> transport.StreamTrianglesRequest
+	20, // 47: transport.SceneTransportService.GetScene:output_type -> transport.Scene
+	23, // 48: transport.SceneTransportService.StreamTextureFile:output_type -> transport.StreamTextureFileResponse
+	25, // 49: transport.SceneTransportService.StreamTriangles:output_type -> transport.StreamTrianglesResponse
+	47, // [47:50] is the sub-list for method output_type
+	44, // [44:47] is the sub-list for method input_type
+	44, // [44:44] is the sub-list for extension type_name
+	44, // [44:44] is the sub-list for extension extendee
+	0,  // [0:44] is the sub-list for field type_name
 }
 
 func init() { file_transport_proto_init() }
@@ -1870,7 +2017,7 @@ func file_transport_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_transport_proto_rawDesc), len(file_transport_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   23,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

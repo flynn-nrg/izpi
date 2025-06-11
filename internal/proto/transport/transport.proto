@@ -78,6 +78,7 @@ message CheckerTexture {
 // Represents an image texture.
 message ImageTexture {
   string filename = 1;
+  uint64 size = 2; // NEW: Size of the image file in bytes (for pre-allocation)
 }
 
 // Represents a noise texture.
@@ -180,6 +181,8 @@ message Scene {
   Camera camera = 3;
   map<string, Material> materials = 4;
   SceneObjects objects = 5;
+  bool stream_triangles = 6; // Changed from string to boolean
+  uint64 total_triangles = 7; // NEW: Total number of triangles in the scene.
 }
 
 // --- Service Definition ---
@@ -193,6 +196,9 @@ service SceneTransportService {
   // A streaming RPC to retrieve the binary content of a texture file.
   // The client requests the texture by its filename, and the server streams chunks of the file data.
   rpc StreamTextureFile (StreamTextureFileRequest) returns (stream StreamTextureFileResponse);
+
+  // Streaming RPC to retrieve triangle data in batches.
+  rpc StreamTriangles (StreamTrianglesRequest) returns (stream StreamTrianglesResponse);
 }
 
 // --- RPC Request/Response Messages ---
@@ -212,4 +218,17 @@ message StreamTextureFileRequest {
 // A chunk of binary data for a streamed texture file.
 message StreamTextureFileResponse {
   bytes chunk = 1; // A segment of the texture file's binary data.
+}
+
+// Request to stream triangle data.
+message StreamTrianglesRequest {
+  string scene_name = 1; // The name of the scene the triangles belong to.
+  uint32 batch_size = 2; // The number of triangles to return in each batch.
+  uint64 offset = 3;     // Renamed from offset_bytes. This is the starting triangle index.
+}
+
+// Response containing a batch of triangles.
+message StreamTrianglesResponse {
+  repeated Triangle triangles = 1; // A batch of Triangle objects.
+  // uint64 total_triangles = 2; // Moved to Scene message
 }

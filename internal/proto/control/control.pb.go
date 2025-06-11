@@ -352,6 +352,7 @@ func (x *RenderSetupRequest) GetAssetProvider() string {
 type RenderSetupResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        RenderSetupStatus      `protobuf:"varint,1,opt,name=status,proto3,enum=control.RenderSetupStatus" json:"status,omitempty"` // Current status of the configuration process. // Updated field type
+	ErrorMessage  string                 `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"` // Error message if status is FAILED.
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -391,6 +392,13 @@ func (x *RenderSetupResponse) GetStatus() RenderSetupStatus {
 		return x.Status
 	}
 	return RenderSetupStatus_RENDER_SETUP_STATUS_UNKNOWN
+}
+
+func (x *RenderSetupResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
 }
 
 // Request to render a specific tile of the image.
@@ -654,9 +662,10 @@ const file_control_proto_rawDesc = "" +
 	"\x10image_resolution\x18\x05 \x01(\v2\x18.control.ImageResolutionR\x0fimageResolution\x12\x1b\n" +
 	"\tmax_depth\x18\x06 \x01(\rR\bmaxDepth\x128\n" +
 	"\x10background_color\x18\a \x01(\v2\r.control.Vec3R\x0fbackgroundColor\x12%\n" +
-	"\x0easset_provider\x18\b \x01(\tR\rassetProvider\"I\n" +
+	"\x0easset_provider\x18\b \x01(\tR\rassetProvider\"n\n" +
 	"\x13RenderSetupResponse\x122\n" +
-	"\x06status\x18\x01 \x01(\x0e2\x1a.control.RenderSetupStatusR\x06status\"S\n" +
+	"\x06status\x18\x01 \x01(\x0e2\x1a.control.RenderSetupStatusR\x06status\x12#\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"S\n" +
 	"\x11RenderTileRequest\x12\x0e\n" +
 	"\x02x0\x18\x01 \x01(\rR\x02x0\x12\x0e\n" +
 	"\x02y0\x18\x02 \x01(\rR\x02y0\x12\x0e\n" +

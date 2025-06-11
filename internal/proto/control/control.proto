@@ -76,6 +76,7 @@ message RenderSetupRequest { // Renamed message
 // Response containing status updates during the RenderConfiguration process.
 message RenderSetupResponse { // Renamed message
   RenderSetupStatus status = 1; // Current status of the configuration process. // Updated field type
+  string error_message = 2; // Error message if status is FAILED.
 }
 
 

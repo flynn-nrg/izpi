@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	SceneTransportService_GetScene_FullMethodName          = "/transport.SceneTransportService/GetScene"
 	SceneTransportService_StreamTextureFile_FullMethodName = "/transport.SceneTransportService/StreamTextureFile"
+	SceneTransportService_StreamTriangles_FullMethodName   = "/transport.SceneTransportService/StreamTriangles"
 )
 
 // SceneTransportServiceClient is the client API for SceneTransportService service.
@@ -35,6 +36,8 @@ type SceneTransportServiceClient interface {
 	// A streaming RPC to retrieve the binary content of a texture file.
 	// The client requests the texture by its filename, and the server streams chunks of the file data.
 	StreamTextureFile(ctx context.Context, in *StreamTextureFileRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamTextureFileResponse], error)
+	// Streaming RPC to retrieve triangle data in batches.
+	StreamTriangles(ctx context.Context, in *StreamTrianglesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamTrianglesResponse], error)
 }
 
 type sceneTransportServiceClient struct {
@@ -74,6 +77,25 @@ func (c *sceneTransportServiceClient) StreamTextureFile(ctx context.Context, in 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type SceneTransportService_StreamTextureFileClient = grpc.ServerStreamingClient[StreamTextureFileResponse]
 
+func (c *sceneTransportServiceClient) StreamTriangles(ctx context.Context, in *StreamTrianglesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamTrianglesResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &SceneTransportService_ServiceDesc.Streams[1], SceneTransportService_StreamTriangles_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[StreamTrianglesRequest, StreamTrianglesResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type SceneTransportService_StreamTrianglesClient = grpc.ServerStreamingClient[StreamTrianglesResponse]
+
 // SceneTransportServiceServer is the server API for SceneTransportService service.
 // All implementations must embed UnimplementedSceneTransportServiceServer
 // for forward compatibility.
@@ -86,6 +108,8 @@ type SceneTransportServiceServer interface {
 	// A streaming RPC to retrieve the binary content of a texture file.
 	// The client requests the texture by its filename, and the server streams chunks of the file data.
 	StreamTextureFile(*StreamTextureFileRequest, grpc.ServerStreamingServer[StreamTextureFileResponse]) error
+	// Streaming RPC to retrieve triangle data in batches.
+	StreamTriangles(*StreamTrianglesRequest, grpc.ServerStreamingServer[StreamTrianglesResponse]) error
 	mustEmbedUnimplementedSceneTransportServiceServer()
 }
 
@@ -101,6 +125,9 @@ func (UnimplementedSceneTransportServiceServer) GetScene(context.Context, *GetSc
 }
 func (UnimplementedSceneTransportServiceServer) StreamTextureFile(*StreamTextureFileRequest, grpc.ServerStreamingServer[StreamTextureFileResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method StreamTextureFile not implemented")
+}
+func (UnimplementedSceneTransportServiceServer) StreamTriangles(*StreamTrianglesRequest, grpc.ServerStreamingServer[StreamTrianglesResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method StreamTriangles not implemented")
 }
 func (UnimplementedSceneTransportServiceServer) mustEmbedUnimplementedSceneTransportServiceServer() {}
 func (UnimplementedSceneTransportServiceServer) testEmbeddedByValue()                               {}
@@ -152,6 +179,17 @@ func _SceneTransportService_StreamTextureFile_Handler(srv interface{}, stream gr
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type SceneTransportService_StreamTextureFileServer = grpc.ServerStreamingServer[StreamTextureFileResponse]
 
+func _SceneTransportService_StreamTriangles_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StreamTrianglesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(SceneTransportServiceServer).StreamTriangles(m, &grpc.GenericServerStream[StreamTrianglesRequest, StreamTrianglesResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type SceneTransportService_StreamTrianglesServer = grpc.ServerStreamingServer[StreamTrianglesResponse]
+
 // SceneTransportService_ServiceDesc is the grpc.ServiceDesc for SceneTransportService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -168,6 +206,11 @@ var SceneTransportService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "StreamTextureFile",
 			Handler:       _SceneTransportService_StreamTextureFile_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "StreamTriangles",
+			Handler:       _SceneTransportService_StreamTriangles_Handler,
 			ServerStreams: true,
 		},
 	},
