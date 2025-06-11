@@ -8,7 +8,7 @@ package control;
 service RenderControlService {
   // Streaming RPC to send render configuration to a worker node and receive status updates.
   // The worker should configure itself based on these parameters and stream back its progress.
-  rpc RenderConfiguration (RenderConfigurationRequest) returns (stream RenderConfigurationResponse);
+  rpc RenderSetup (RenderSetupRequest) returns (stream RenderSetupResponse); // Updated RPC signature
 
   // Streaming RPC to request a worker node to render a specific tile of the image.
   // The server streams back chunks of pixel data as they are rendered.
@@ -36,8 +36,8 @@ enum SamplerType {
 }
 
 // Defines the status of the RenderConfiguration process on the worker.
-enum RenderConfigurationStatus {
-  RENDER_CONFIGURATION_STATUS_UNKNOWN = 0; // Default zero value for enums
+enum RenderSetupStatus { // Renamed enum
+  RENDER_SETUP_STATUS_UNKNOWN = 0; // Default zero value for enums
   LOADING_SCENE = 1;
   STREAMING_TEXTURES = 2;
   READY = 3;
@@ -59,10 +59,10 @@ message ImageResolution {
   uint32 height = 2;
 }
 
-// --- RenderConfiguration RPC Messages ---
+// --- RenderSetup RPC Messages --- // Updated comment
 
 // Request to configure a worker node for rendering.
-message RenderConfigurationRequest {
+message RenderSetupRequest { // Renamed message
   string scene_name = 1;           // The name of the scene to be rendered.
   uint32 num_cores = 2;            // Number of CPU cores the worker should use for rendering.
   uint32 samples_per_pixel = 3;    // Number of samples to take per pixel.
@@ -74,9 +74,8 @@ message RenderConfigurationRequest {
 }
 
 // Response containing status updates during the RenderConfiguration process.
-message RenderConfigurationResponse {
-  RenderConfigurationStatus status = 1; // Current status of the configuration process.
-  string error_message = 2; // Error message if status is FAILED.
+message RenderSetupResponse { // Renamed message
+  RenderSetupStatus status = 1; // Current status of the configuration process. // Updated field type
 }
 
 

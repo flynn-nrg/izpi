@@ -78,58 +78,58 @@ func (SamplerType) EnumDescriptor() ([]byte, []int) {
 }
 
 // Defines the status of the RenderConfiguration process on the worker.
-type RenderConfigurationStatus int32
+type RenderSetupStatus int32
 
 const (
-	RenderConfigurationStatus_RENDER_CONFIGURATION_STATUS_UNKNOWN RenderConfigurationStatus = 0 // Default zero value for enums
-	RenderConfigurationStatus_LOADING_SCENE                       RenderConfigurationStatus = 1
-	RenderConfigurationStatus_STREAMING_TEXTURES                  RenderConfigurationStatus = 2
-	RenderConfigurationStatus_READY                               RenderConfigurationStatus = 3
-	RenderConfigurationStatus_FAILED                              RenderConfigurationStatus = 4 // Indicates an error occurred during configuration.
+	RenderSetupStatus_RENDER_SETUP_STATUS_UNKNOWN RenderSetupStatus = 0 // Default zero value for enums
+	RenderSetupStatus_LOADING_SCENE               RenderSetupStatus = 1
+	RenderSetupStatus_STREAMING_TEXTURES          RenderSetupStatus = 2
+	RenderSetupStatus_READY                       RenderSetupStatus = 3
+	RenderSetupStatus_FAILED                      RenderSetupStatus = 4 // Indicates an error occurred during configuration.
 )
 
-// Enum value maps for RenderConfigurationStatus.
+// Enum value maps for RenderSetupStatus.
 var (
-	RenderConfigurationStatus_name = map[int32]string{
-		0: "RENDER_CONFIGURATION_STATUS_UNKNOWN",
+	RenderSetupStatus_name = map[int32]string{
+		0: "RENDER_SETUP_STATUS_UNKNOWN",
 		1: "LOADING_SCENE",
 		2: "STREAMING_TEXTURES",
 		3: "READY",
 		4: "FAILED",
 	}
-	RenderConfigurationStatus_value = map[string]int32{
-		"RENDER_CONFIGURATION_STATUS_UNKNOWN": 0,
-		"LOADING_SCENE":                       1,
-		"STREAMING_TEXTURES":                  2,
-		"READY":                               3,
-		"FAILED":                              4,
+	RenderSetupStatus_value = map[string]int32{
+		"RENDER_SETUP_STATUS_UNKNOWN": 0,
+		"LOADING_SCENE":               1,
+		"STREAMING_TEXTURES":          2,
+		"READY":                       3,
+		"FAILED":                      4,
 	}
 )
 
-func (x RenderConfigurationStatus) Enum() *RenderConfigurationStatus {
-	p := new(RenderConfigurationStatus)
+func (x RenderSetupStatus) Enum() *RenderSetupStatus {
+	p := new(RenderSetupStatus)
 	*p = x
 	return p
 }
 
-func (x RenderConfigurationStatus) String() string {
+func (x RenderSetupStatus) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (RenderConfigurationStatus) Descriptor() protoreflect.EnumDescriptor {
+func (RenderSetupStatus) Descriptor() protoreflect.EnumDescriptor {
 	return file_control_proto_enumTypes[1].Descriptor()
 }
 
-func (RenderConfigurationStatus) Type() protoreflect.EnumType {
+func (RenderSetupStatus) Type() protoreflect.EnumType {
 	return &file_control_proto_enumTypes[1]
 }
 
-func (x RenderConfigurationStatus) Number() protoreflect.EnumNumber {
+func (x RenderSetupStatus) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use RenderConfigurationStatus.Descriptor instead.
-func (RenderConfigurationStatus) EnumDescriptor() ([]byte, []int) {
+// Deprecated: Use RenderSetupStatus.Descriptor instead.
+func (RenderSetupStatus) EnumDescriptor() ([]byte, []int) {
 	return file_control_proto_rawDescGZIP(), []int{1}
 }
 
@@ -248,7 +248,7 @@ func (x *ImageResolution) GetHeight() uint32 {
 }
 
 // Request to configure a worker node for rendering.
-type RenderConfigurationRequest struct {
+type RenderSetupRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	SceneName       string                 `protobuf:"bytes,1,opt,name=scene_name,json=sceneName,proto3" json:"scene_name,omitempty"`                      // The name of the scene to be rendered.
 	NumCores        uint32                 `protobuf:"varint,2,opt,name=num_cores,json=numCores,proto3" json:"num_cores,omitempty"`                        // Number of CPU cores the worker should use for rendering.
@@ -262,20 +262,20 @@ type RenderConfigurationRequest struct {
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *RenderConfigurationRequest) Reset() {
-	*x = RenderConfigurationRequest{}
+func (x *RenderSetupRequest) Reset() {
+	*x = RenderSetupRequest{}
 	mi := &file_control_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RenderConfigurationRequest) String() string {
+func (x *RenderSetupRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RenderConfigurationRequest) ProtoMessage() {}
+func (*RenderSetupRequest) ProtoMessage() {}
 
-func (x *RenderConfigurationRequest) ProtoReflect() protoreflect.Message {
+func (x *RenderSetupRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_control_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -287,61 +287,61 @@ func (x *RenderConfigurationRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RenderConfigurationRequest.ProtoReflect.Descriptor instead.
-func (*RenderConfigurationRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use RenderSetupRequest.ProtoReflect.Descriptor instead.
+func (*RenderSetupRequest) Descriptor() ([]byte, []int) {
 	return file_control_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *RenderConfigurationRequest) GetSceneName() string {
+func (x *RenderSetupRequest) GetSceneName() string {
 	if x != nil {
 		return x.SceneName
 	}
 	return ""
 }
 
-func (x *RenderConfigurationRequest) GetNumCores() uint32 {
+func (x *RenderSetupRequest) GetNumCores() uint32 {
 	if x != nil {
 		return x.NumCores
 	}
 	return 0
 }
 
-func (x *RenderConfigurationRequest) GetSamplesPerPixel() uint32 {
+func (x *RenderSetupRequest) GetSamplesPerPixel() uint32 {
 	if x != nil {
 		return x.SamplesPerPixel
 	}
 	return 0
 }
 
-func (x *RenderConfigurationRequest) GetSampler() SamplerType {
+func (x *RenderSetupRequest) GetSampler() SamplerType {
 	if x != nil {
 		return x.Sampler
 	}
 	return SamplerType_SAMPLER_TYPE_UNSPECIFIED
 }
 
-func (x *RenderConfigurationRequest) GetImageResolution() *ImageResolution {
+func (x *RenderSetupRequest) GetImageResolution() *ImageResolution {
 	if x != nil {
 		return x.ImageResolution
 	}
 	return nil
 }
 
-func (x *RenderConfigurationRequest) GetMaxDepth() uint32 {
+func (x *RenderSetupRequest) GetMaxDepth() uint32 {
 	if x != nil {
 		return x.MaxDepth
 	}
 	return 0
 }
 
-func (x *RenderConfigurationRequest) GetBackgroundColor() *Vec3 {
+func (x *RenderSetupRequest) GetBackgroundColor() *Vec3 {
 	if x != nil {
 		return x.BackgroundColor
 	}
 	return nil
 }
 
-func (x *RenderConfigurationRequest) GetAssetProvider() string {
+func (x *RenderSetupRequest) GetAssetProvider() string {
 	if x != nil {
 		return x.AssetProvider
 	}
@@ -349,28 +349,27 @@ func (x *RenderConfigurationRequest) GetAssetProvider() string {
 }
 
 // Response containing status updates during the RenderConfiguration process.
-type RenderConfigurationResponse struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Status        RenderConfigurationStatus `protobuf:"varint,1,opt,name=status,proto3,enum=control.RenderConfigurationStatus" json:"status,omitempty"` // Current status of the configuration process.
-	ErrorMessage  string                    `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`         // Error message if status is FAILED.
+type RenderSetupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Status        RenderSetupStatus      `protobuf:"varint,1,opt,name=status,proto3,enum=control.RenderSetupStatus" json:"status,omitempty"` // Current status of the configuration process. // Updated field type
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *RenderConfigurationResponse) Reset() {
-	*x = RenderConfigurationResponse{}
+func (x *RenderSetupResponse) Reset() {
+	*x = RenderSetupResponse{}
 	mi := &file_control_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RenderConfigurationResponse) String() string {
+func (x *RenderSetupResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RenderConfigurationResponse) ProtoMessage() {}
+func (*RenderSetupResponse) ProtoMessage() {}
 
-func (x *RenderConfigurationResponse) ProtoReflect() protoreflect.Message {
+func (x *RenderSetupResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_control_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -382,23 +381,16 @@ func (x *RenderConfigurationResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RenderConfigurationResponse.ProtoReflect.Descriptor instead.
-func (*RenderConfigurationResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use RenderSetupResponse.ProtoReflect.Descriptor instead.
+func (*RenderSetupResponse) Descriptor() ([]byte, []int) {
 	return file_control_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *RenderConfigurationResponse) GetStatus() RenderConfigurationStatus {
+func (x *RenderSetupResponse) GetStatus() RenderSetupStatus {
 	if x != nil {
 		return x.Status
 	}
-	return RenderConfigurationStatus_RENDER_CONFIGURATION_STATUS_UNKNOWN
-}
-
-func (x *RenderConfigurationResponse) GetErrorMessage() string {
-	if x != nil {
-		return x.ErrorMessage
-	}
-	return ""
+	return RenderSetupStatus_RENDER_SETUP_STATUS_UNKNOWN
 }
 
 // Request to render a specific tile of the image.
@@ -652,8 +644,8 @@ const file_control_proto_rawDesc = "" +
 	"\x01z\x18\x03 \x01(\x02R\x01z\"?\n" +
 	"\x0fImageResolution\x12\x14\n" +
 	"\x05width\x18\x01 \x01(\rR\x05width\x12\x16\n" +
-	"\x06height\x18\x02 \x01(\rR\x06height\"\xf7\x02\n" +
-	"\x1aRenderConfigurationRequest\x12\x1d\n" +
+	"\x06height\x18\x02 \x01(\rR\x06height\"\xef\x02\n" +
+	"\x12RenderSetupRequest\x12\x1d\n" +
 	"\n" +
 	"scene_name\x18\x01 \x01(\tR\tsceneName\x12\x1b\n" +
 	"\tnum_cores\x18\x02 \x01(\rR\bnumCores\x12*\n" +
@@ -662,10 +654,9 @@ const file_control_proto_rawDesc = "" +
 	"\x10image_resolution\x18\x05 \x01(\v2\x18.control.ImageResolutionR\x0fimageResolution\x12\x1b\n" +
 	"\tmax_depth\x18\x06 \x01(\rR\bmaxDepth\x128\n" +
 	"\x10background_color\x18\a \x01(\v2\r.control.Vec3R\x0fbackgroundColor\x12%\n" +
-	"\x0easset_provider\x18\b \x01(\tR\rassetProvider\"~\n" +
-	"\x1bRenderConfigurationResponse\x12:\n" +
-	"\x06status\x18\x01 \x01(\x0e2\".control.RenderConfigurationStatusR\x06status\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"S\n" +
+	"\x0easset_provider\x18\b \x01(\tR\rassetProvider\"I\n" +
+	"\x13RenderSetupResponse\x122\n" +
+	"\x06status\x18\x01 \x01(\x0e2\x1a.control.RenderSetupStatusR\x06status\"S\n" +
 	"\x11RenderTileRequest\x12\x0e\n" +
 	"\x02x0\x18\x01 \x01(\rR\x02x0\x12\x0e\n" +
 	"\x02y0\x18\x02 \x01(\rR\x02y0\x12\x0e\n" +
@@ -690,16 +681,16 @@ const file_control_proto_rawDesc = "" +
 	"\n" +
 	"WIRE_FRAME\x10\x03\x12\n" +
 	"\n" +
-	"\x06COLOUR\x10\x04*\x86\x01\n" +
-	"\x19RenderConfigurationStatus\x12'\n" +
-	"#RENDER_CONFIGURATION_STATUS_UNKNOWN\x10\x00\x12\x11\n" +
+	"\x06COLOUR\x10\x04*v\n" +
+	"\x11RenderSetupStatus\x12\x1f\n" +
+	"\x1bRENDER_SETUP_STATUS_UNKNOWN\x10\x00\x12\x11\n" +
 	"\rLOADING_SCENE\x10\x01\x12\x16\n" +
 	"\x12STREAMING_TEXTURES\x10\x02\x12\t\n" +
 	"\x05READY\x10\x03\x12\n" +
 	"\n" +
-	"\x06FAILED\x10\x042\x87\x02\n" +
-	"\x14RenderControlService\x12b\n" +
-	"\x13RenderConfiguration\x12#.control.RenderConfigurationRequest\x1a$.control.RenderConfigurationResponse0\x01\x12G\n" +
+	"\x06FAILED\x10\x042\xef\x01\n" +
+	"\x14RenderControlService\x12J\n" +
+	"\vRenderSetup\x12\x1b.control.RenderSetupRequest\x1a\x1c.control.RenderSetupResponse0\x01\x12G\n" +
 	"\n" +
 	"RenderTile\x12\x1a.control.RenderTileRequest\x1a\x1b.control.RenderTileResponse0\x01\x12B\n" +
 	"\tRenderEnd\x12\x19.control.RenderEndRequest\x1a\x1a.control.RenderEndResponseB:Z8github.com/flynn-nrg/izpi/internal/proto/control;controlb\x06proto3"
@@ -719,26 +710,26 @@ func file_control_proto_rawDescGZIP() []byte {
 var file_control_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_control_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_control_proto_goTypes = []any{
-	(SamplerType)(0),                    // 0: control.SamplerType
-	(RenderConfigurationStatus)(0),      // 1: control.RenderConfigurationStatus
-	(*Vec3)(nil),                        // 2: control.Vec3
-	(*ImageResolution)(nil),             // 3: control.ImageResolution
-	(*RenderConfigurationRequest)(nil),  // 4: control.RenderConfigurationRequest
-	(*RenderConfigurationResponse)(nil), // 5: control.RenderConfigurationResponse
-	(*RenderTileRequest)(nil),           // 6: control.RenderTileRequest
-	(*RenderTileResponse)(nil),          // 7: control.RenderTileResponse
-	(*RenderEndRequest)(nil),            // 8: control.RenderEndRequest
-	(*RenderEndResponse)(nil),           // 9: control.RenderEndResponse
+	(SamplerType)(0),            // 0: control.SamplerType
+	(RenderSetupStatus)(0),      // 1: control.RenderSetupStatus
+	(*Vec3)(nil),                // 2: control.Vec3
+	(*ImageResolution)(nil),     // 3: control.ImageResolution
+	(*RenderSetupRequest)(nil),  // 4: control.RenderSetupRequest
+	(*RenderSetupResponse)(nil), // 5: control.RenderSetupResponse
+	(*RenderTileRequest)(nil),   // 6: control.RenderTileRequest
+	(*RenderTileResponse)(nil),  // 7: control.RenderTileResponse
+	(*RenderEndRequest)(nil),    // 8: control.RenderEndRequest
+	(*RenderEndResponse)(nil),   // 9: control.RenderEndResponse
 }
 var file_control_proto_depIdxs = []int32{
-	0, // 0: control.RenderConfigurationRequest.sampler:type_name -> control.SamplerType
-	3, // 1: control.RenderConfigurationRequest.image_resolution:type_name -> control.ImageResolution
-	2, // 2: control.RenderConfigurationRequest.background_color:type_name -> control.Vec3
-	1, // 3: control.RenderConfigurationResponse.status:type_name -> control.RenderConfigurationStatus
-	4, // 4: control.RenderControlService.RenderConfiguration:input_type -> control.RenderConfigurationRequest
+	0, // 0: control.RenderSetupRequest.sampler:type_name -> control.SamplerType
+	3, // 1: control.RenderSetupRequest.image_resolution:type_name -> control.ImageResolution
+	2, // 2: control.RenderSetupRequest.background_color:type_name -> control.Vec3
+	1, // 3: control.RenderSetupResponse.status:type_name -> control.RenderSetupStatus
+	4, // 4: control.RenderControlService.RenderSetup:input_type -> control.RenderSetupRequest
 	6, // 5: control.RenderControlService.RenderTile:input_type -> control.RenderTileRequest
 	8, // 6: control.RenderControlService.RenderEnd:input_type -> control.RenderEndRequest
-	5, // 7: control.RenderControlService.RenderConfiguration:output_type -> control.RenderConfigurationResponse
+	5, // 7: control.RenderControlService.RenderSetup:output_type -> control.RenderSetupResponse
 	7, // 8: control.RenderControlService.RenderTile:output_type -> control.RenderTileResponse
 	9, // 9: control.RenderControlService.RenderEnd:output_type -> control.RenderEndResponse
 	7, // [7:10] is the sub-list for method output_type
