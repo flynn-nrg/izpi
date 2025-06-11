@@ -9,7 +9,6 @@ package control
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -76,6 +75,62 @@ func (x SamplerType) Number() protoreflect.EnumNumber {
 // Deprecated: Use SamplerType.Descriptor instead.
 func (SamplerType) EnumDescriptor() ([]byte, []int) {
 	return file_control_proto_rawDescGZIP(), []int{0}
+}
+
+// Defines the status of the RenderConfiguration process on the worker.
+type RenderConfigurationStatus int32
+
+const (
+	RenderConfigurationStatus_RENDER_CONFIGURATION_STATUS_UNKNOWN RenderConfigurationStatus = 0 // Default zero value for enums
+	RenderConfigurationStatus_LOADING_SCENE                       RenderConfigurationStatus = 1
+	RenderConfigurationStatus_STREAMING_TEXTURES                  RenderConfigurationStatus = 2
+	RenderConfigurationStatus_READY                               RenderConfigurationStatus = 3
+	RenderConfigurationStatus_FAILED                              RenderConfigurationStatus = 4 // Indicates an error occurred during configuration.
+)
+
+// Enum value maps for RenderConfigurationStatus.
+var (
+	RenderConfigurationStatus_name = map[int32]string{
+		0: "RENDER_CONFIGURATION_STATUS_UNKNOWN",
+		1: "LOADING_SCENE",
+		2: "STREAMING_TEXTURES",
+		3: "READY",
+		4: "FAILED",
+	}
+	RenderConfigurationStatus_value = map[string]int32{
+		"RENDER_CONFIGURATION_STATUS_UNKNOWN": 0,
+		"LOADING_SCENE":                       1,
+		"STREAMING_TEXTURES":                  2,
+		"READY":                               3,
+		"FAILED":                              4,
+	}
+)
+
+func (x RenderConfigurationStatus) Enum() *RenderConfigurationStatus {
+	p := new(RenderConfigurationStatus)
+	*p = x
+	return p
+}
+
+func (x RenderConfigurationStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RenderConfigurationStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_control_proto_enumTypes[1].Descriptor()
+}
+
+func (RenderConfigurationStatus) Type() protoreflect.EnumType {
+	return &file_control_proto_enumTypes[1]
+}
+
+func (x RenderConfigurationStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RenderConfigurationStatus.Descriptor instead.
+func (RenderConfigurationStatus) EnumDescriptor() ([]byte, []int) {
+	return file_control_proto_rawDescGZIP(), []int{1}
 }
 
 // Represents a 3D vector or point with float components, also used for colors.
@@ -202,6 +257,7 @@ type RenderConfigurationRequest struct {
 	ImageResolution *ImageResolution       `protobuf:"bytes,5,opt,name=image_resolution,json=imageResolution,proto3" json:"image_resolution,omitempty"`    // The overall image resolution.
 	MaxDepth        uint32                 `protobuf:"varint,6,opt,name=max_depth,json=maxDepth,proto3" json:"max_depth,omitempty"`                        // Maximum recursion depth for path tracing.
 	BackgroundColor *Vec3                  `protobuf:"bytes,7,opt,name=background_color,json=backgroundColor,proto3" json:"background_color,omitempty"`    // The background color of the scene.
+	AssetProvider   string                 `protobuf:"bytes,8,opt,name=asset_provider,json=assetProvider,proto3" json:"asset_provider,omitempty"`          // NEW: The network address (host:port) of the asset transport server (e.g., leader).
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -285,6 +341,66 @@ func (x *RenderConfigurationRequest) GetBackgroundColor() *Vec3 {
 	return nil
 }
 
+func (x *RenderConfigurationRequest) GetAssetProvider() string {
+	if x != nil {
+		return x.AssetProvider
+	}
+	return ""
+}
+
+// Response containing status updates during the RenderConfiguration process.
+type RenderConfigurationResponse struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Status        RenderConfigurationStatus `protobuf:"varint,1,opt,name=status,proto3,enum=control.RenderConfigurationStatus" json:"status,omitempty"` // Current status of the configuration process.
+	ErrorMessage  string                    `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`         // Error message if status is FAILED.
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RenderConfigurationResponse) Reset() {
+	*x = RenderConfigurationResponse{}
+	mi := &file_control_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RenderConfigurationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RenderConfigurationResponse) ProtoMessage() {}
+
+func (x *RenderConfigurationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_control_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RenderConfigurationResponse.ProtoReflect.Descriptor instead.
+func (*RenderConfigurationResponse) Descriptor() ([]byte, []int) {
+	return file_control_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *RenderConfigurationResponse) GetStatus() RenderConfigurationStatus {
+	if x != nil {
+		return x.Status
+	}
+	return RenderConfigurationStatus_RENDER_CONFIGURATION_STATUS_UNKNOWN
+}
+
+func (x *RenderConfigurationResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
 // Request to render a specific tile of the image.
 // The worker should render the region defined by [x0, y0] to [x1, y1) (exclusive).
 type RenderTileRequest struct {
@@ -299,7 +415,7 @@ type RenderTileRequest struct {
 
 func (x *RenderTileRequest) Reset() {
 	*x = RenderTileRequest{}
-	mi := &file_control_proto_msgTypes[3]
+	mi := &file_control_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -311,7 +427,7 @@ func (x *RenderTileRequest) String() string {
 func (*RenderTileRequest) ProtoMessage() {}
 
 func (x *RenderTileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[3]
+	mi := &file_control_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -324,7 +440,7 @@ func (x *RenderTileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderTileRequest.ProtoReflect.Descriptor instead.
 func (*RenderTileRequest) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{3}
+	return file_control_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *RenderTileRequest) GetX0() uint32 {
@@ -371,7 +487,7 @@ type RenderTileResponse struct {
 
 func (x *RenderTileResponse) Reset() {
 	*x = RenderTileResponse{}
-	mi := &file_control_proto_msgTypes[4]
+	mi := &file_control_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -383,7 +499,7 @@ func (x *RenderTileResponse) String() string {
 func (*RenderTileResponse) ProtoMessage() {}
 
 func (x *RenderTileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[4]
+	mi := &file_control_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -396,7 +512,7 @@ func (x *RenderTileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderTileResponse.ProtoReflect.Descriptor instead.
 func (*RenderTileResponse) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{4}
+	return file_control_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *RenderTileResponse) GetWidth() uint32 {
@@ -444,7 +560,7 @@ type RenderEndRequest struct {
 
 func (x *RenderEndRequest) Reset() {
 	*x = RenderEndRequest{}
-	mi := &file_control_proto_msgTypes[5]
+	mi := &file_control_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -456,7 +572,7 @@ func (x *RenderEndRequest) String() string {
 func (*RenderEndRequest) ProtoMessage() {}
 
 func (x *RenderEndRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[5]
+	mi := &file_control_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -469,7 +585,7 @@ func (x *RenderEndRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderEndRequest.ProtoReflect.Descriptor instead.
 func (*RenderEndRequest) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{5}
+	return file_control_proto_rawDescGZIP(), []int{6}
 }
 
 // Response containing statistics after rendering is complete.
@@ -483,7 +599,7 @@ type RenderEndResponse struct {
 
 func (x *RenderEndResponse) Reset() {
 	*x = RenderEndResponse{}
-	mi := &file_control_proto_msgTypes[6]
+	mi := &file_control_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -495,7 +611,7 @@ func (x *RenderEndResponse) String() string {
 func (*RenderEndResponse) ProtoMessage() {}
 
 func (x *RenderEndResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[6]
+	mi := &file_control_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -508,7 +624,7 @@ func (x *RenderEndResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderEndResponse.ProtoReflect.Descriptor instead.
 func (*RenderEndResponse) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{6}
+	return file_control_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *RenderEndResponse) GetTotalRenderTimeMs() uint64 {
@@ -529,14 +645,14 @@ var File_control_proto protoreflect.FileDescriptor
 
 const file_control_proto_rawDesc = "" +
 	"\n" +
-	"\rcontrol.proto\x12\acontrol\x1a\x1bgoogle/protobuf/empty.proto\"0\n" +
+	"\rcontrol.proto\x12\acontrol\"0\n" +
 	"\x04Vec3\x12\f\n" +
 	"\x01x\x18\x01 \x01(\x02R\x01x\x12\f\n" +
 	"\x01y\x18\x02 \x01(\x02R\x01y\x12\f\n" +
 	"\x01z\x18\x03 \x01(\x02R\x01z\"?\n" +
 	"\x0fImageResolution\x12\x14\n" +
 	"\x05width\x18\x01 \x01(\rR\x05width\x12\x16\n" +
-	"\x06height\x18\x02 \x01(\rR\x06height\"\xd0\x02\n" +
+	"\x06height\x18\x02 \x01(\rR\x06height\"\xf7\x02\n" +
 	"\x1aRenderConfigurationRequest\x12\x1d\n" +
 	"\n" +
 	"scene_name\x18\x01 \x01(\tR\tsceneName\x12\x1b\n" +
@@ -545,7 +661,11 @@ const file_control_proto_rawDesc = "" +
 	"\asampler\x18\x04 \x01(\x0e2\x14.control.SamplerTypeR\asampler\x12C\n" +
 	"\x10image_resolution\x18\x05 \x01(\v2\x18.control.ImageResolutionR\x0fimageResolution\x12\x1b\n" +
 	"\tmax_depth\x18\x06 \x01(\rR\bmaxDepth\x128\n" +
-	"\x10background_color\x18\a \x01(\v2\r.control.Vec3R\x0fbackgroundColor\"S\n" +
+	"\x10background_color\x18\a \x01(\v2\r.control.Vec3R\x0fbackgroundColor\x12%\n" +
+	"\x0easset_provider\x18\b \x01(\tR\rassetProvider\"~\n" +
+	"\x1bRenderConfigurationResponse\x12:\n" +
+	"\x06status\x18\x01 \x01(\x0e2\".control.RenderConfigurationStatusR\x06status\x12#\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"S\n" +
 	"\x11RenderTileRequest\x12\x0e\n" +
 	"\x02x0\x18\x01 \x01(\rR\x02x0\x12\x0e\n" +
 	"\x02y0\x18\x02 \x01(\rR\x02y0\x12\x0e\n" +
@@ -570,9 +690,16 @@ const file_control_proto_rawDesc = "" +
 	"\n" +
 	"WIRE_FRAME\x10\x03\x12\n" +
 	"\n" +
-	"\x06COLOUR\x10\x042\xf7\x01\n" +
-	"\x14RenderControlService\x12R\n" +
-	"\x13RenderConfiguration\x12#.control.RenderConfigurationRequest\x1a\x16.google.protobuf.Empty\x12G\n" +
+	"\x06COLOUR\x10\x04*\x86\x01\n" +
+	"\x19RenderConfigurationStatus\x12'\n" +
+	"#RENDER_CONFIGURATION_STATUS_UNKNOWN\x10\x00\x12\x11\n" +
+	"\rLOADING_SCENE\x10\x01\x12\x16\n" +
+	"\x12STREAMING_TEXTURES\x10\x02\x12\t\n" +
+	"\x05READY\x10\x03\x12\n" +
+	"\n" +
+	"\x06FAILED\x10\x042\x87\x02\n" +
+	"\x14RenderControlService\x12b\n" +
+	"\x13RenderConfiguration\x12#.control.RenderConfigurationRequest\x1a$.control.RenderConfigurationResponse0\x01\x12G\n" +
 	"\n" +
 	"RenderTile\x12\x1a.control.RenderTileRequest\x1a\x1b.control.RenderTileResponse0\x01\x12B\n" +
 	"\tRenderEnd\x12\x19.control.RenderEndRequest\x1a\x1a.control.RenderEndResponseB:Z8github.com/flynn-nrg/izpi/internal/proto/control;controlb\x06proto3"
@@ -589,34 +716,36 @@ func file_control_proto_rawDescGZIP() []byte {
 	return file_control_proto_rawDescData
 }
 
-var file_control_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_control_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_control_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_control_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_control_proto_goTypes = []any{
-	(SamplerType)(0),                   // 0: control.SamplerType
-	(*Vec3)(nil),                       // 1: control.Vec3
-	(*ImageResolution)(nil),            // 2: control.ImageResolution
-	(*RenderConfigurationRequest)(nil), // 3: control.RenderConfigurationRequest
-	(*RenderTileRequest)(nil),          // 4: control.RenderTileRequest
-	(*RenderTileResponse)(nil),         // 5: control.RenderTileResponse
-	(*RenderEndRequest)(nil),           // 6: control.RenderEndRequest
-	(*RenderEndResponse)(nil),          // 7: control.RenderEndResponse
-	(*emptypb.Empty)(nil),              // 8: google.protobuf.Empty
+	(SamplerType)(0),                    // 0: control.SamplerType
+	(RenderConfigurationStatus)(0),      // 1: control.RenderConfigurationStatus
+	(*Vec3)(nil),                        // 2: control.Vec3
+	(*ImageResolution)(nil),             // 3: control.ImageResolution
+	(*RenderConfigurationRequest)(nil),  // 4: control.RenderConfigurationRequest
+	(*RenderConfigurationResponse)(nil), // 5: control.RenderConfigurationResponse
+	(*RenderTileRequest)(nil),           // 6: control.RenderTileRequest
+	(*RenderTileResponse)(nil),          // 7: control.RenderTileResponse
+	(*RenderEndRequest)(nil),            // 8: control.RenderEndRequest
+	(*RenderEndResponse)(nil),           // 9: control.RenderEndResponse
 }
 var file_control_proto_depIdxs = []int32{
 	0, // 0: control.RenderConfigurationRequest.sampler:type_name -> control.SamplerType
-	2, // 1: control.RenderConfigurationRequest.image_resolution:type_name -> control.ImageResolution
-	1, // 2: control.RenderConfigurationRequest.background_color:type_name -> control.Vec3
-	3, // 3: control.RenderControlService.RenderConfiguration:input_type -> control.RenderConfigurationRequest
-	4, // 4: control.RenderControlService.RenderTile:input_type -> control.RenderTileRequest
-	6, // 5: control.RenderControlService.RenderEnd:input_type -> control.RenderEndRequest
-	8, // 6: control.RenderControlService.RenderConfiguration:output_type -> google.protobuf.Empty
-	5, // 7: control.RenderControlService.RenderTile:output_type -> control.RenderTileResponse
-	7, // 8: control.RenderControlService.RenderEnd:output_type -> control.RenderEndResponse
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	3, // 1: control.RenderConfigurationRequest.image_resolution:type_name -> control.ImageResolution
+	2, // 2: control.RenderConfigurationRequest.background_color:type_name -> control.Vec3
+	1, // 3: control.RenderConfigurationResponse.status:type_name -> control.RenderConfigurationStatus
+	4, // 4: control.RenderControlService.RenderConfiguration:input_type -> control.RenderConfigurationRequest
+	6, // 5: control.RenderControlService.RenderTile:input_type -> control.RenderTileRequest
+	8, // 6: control.RenderControlService.RenderEnd:input_type -> control.RenderEndRequest
+	5, // 7: control.RenderControlService.RenderConfiguration:output_type -> control.RenderConfigurationResponse
+	7, // 8: control.RenderControlService.RenderTile:output_type -> control.RenderTileResponse
+	9, // 9: control.RenderControlService.RenderEnd:output_type -> control.RenderEndResponse
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_control_proto_init() }
@@ -629,8 +758,8 @@ func file_control_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_control_proto_rawDesc), len(file_control_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   7,
+			NumEnums:      2,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

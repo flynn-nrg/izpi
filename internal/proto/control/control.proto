@@ -1,16 +1,14 @@
 syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-
 option go_package = "github.com/flynn-nrg/izpi/internal/proto/control;control";
 
 package control;
 
 // Service for controlling render operations on worker nodes.
 service RenderControlService {
-  // Unary RPC to send render configuration to a worker node.
-  // The worker should configure itself based on these parameters.
-  rpc RenderConfiguration (RenderConfigurationRequest) returns (google.protobuf.Empty);
+  // Streaming RPC to send render configuration to a worker node and receive status updates.
+  // The worker should configure itself based on these parameters and stream back its progress.
+  rpc RenderConfiguration (RenderConfigurationRequest) returns (stream RenderConfigurationResponse);
 
   // Streaming RPC to request a worker node to render a specific tile of the image.
   // The server streams back chunks of pixel data as they are rendered.
@@ -23,6 +21,7 @@ service RenderControlService {
 
 // --- Imports ---
 // This is needed for the google.protobuf.Empty message
+// This is needed for the google.rpc.Status message, which can provide detailed error info.
 
 
 // --- Enums ---
@@ -34,6 +33,15 @@ enum SamplerType {
   NORMAL = 2;
   WIRE_FRAME = 3; // Using snake_case for enum value
   COLOUR = 4;
+}
+
+// Defines the status of the RenderConfiguration process on the worker.
+enum RenderConfigurationStatus {
+  RENDER_CONFIGURATION_STATUS_UNKNOWN = 0; // Default zero value for enums
+  LOADING_SCENE = 1;
+  STREAMING_TEXTURES = 2;
+  READY = 3;
+  FAILED = 4; // Indicates an error occurred during configuration.
 }
 
 // --- Core Data Structures ---
@@ -62,7 +70,15 @@ message RenderConfigurationRequest {
   ImageResolution image_resolution = 5; // The overall image resolution.
   uint32 max_depth = 6;            // Maximum recursion depth for path tracing.
   Vec3 background_color = 7;       // The background color of the scene.
+  string asset_provider = 8;       // NEW: The network address (host:port) of the asset transport server (e.g., leader).
 }
+
+// Response containing status updates during the RenderConfiguration process.
+message RenderConfigurationResponse {
+  RenderConfigurationStatus status = 1; // Current status of the configuration process.
+  string error_message = 2; // Error message if status is FAILED.
+}
+
 
 // --- RenderTile RPC Messages ---
 

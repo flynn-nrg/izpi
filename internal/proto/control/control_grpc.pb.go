@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -31,9 +30,9 @@ const (
 //
 // Service for controlling render operations on worker nodes.
 type RenderControlServiceClient interface {
-	// Unary RPC to send render configuration to a worker node.
-	// The worker should configure itself based on these parameters.
-	RenderConfiguration(ctx context.Context, in *RenderConfigurationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Streaming RPC to send render configuration to a worker node and receive status updates.
+	// The worker should configure itself based on these parameters and stream back its progress.
+	RenderConfiguration(ctx context.Context, in *RenderConfigurationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RenderConfigurationResponse], error)
 	// Streaming RPC to request a worker node to render a specific tile of the image.
 	// The server streams back chunks of pixel data as they are rendered.
 	RenderTile(ctx context.Context, in *RenderTileRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RenderTileResponse], error)
@@ -50,19 +49,28 @@ func NewRenderControlServiceClient(cc grpc.ClientConnInterface) RenderControlSer
 	return &renderControlServiceClient{cc}
 }
 
-func (c *renderControlServiceClient) RenderConfiguration(ctx context.Context, in *RenderConfigurationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *renderControlServiceClient) RenderConfiguration(ctx context.Context, in *RenderConfigurationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RenderConfigurationResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, RenderControlService_RenderConfiguration_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &RenderControlService_ServiceDesc.Streams[0], RenderControlService_RenderConfiguration_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[RenderConfigurationRequest, RenderConfigurationResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type RenderControlService_RenderConfigurationClient = grpc.ServerStreamingClient[RenderConfigurationResponse]
 
 func (c *renderControlServiceClient) RenderTile(ctx context.Context, in *RenderTileRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RenderTileResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &RenderControlService_ServiceDesc.Streams[0], RenderControlService_RenderTile_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &RenderControlService_ServiceDesc.Streams[1], RenderControlService_RenderTile_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,9 +103,9 @@ func (c *renderControlServiceClient) RenderEnd(ctx context.Context, in *RenderEn
 //
 // Service for controlling render operations on worker nodes.
 type RenderControlServiceServer interface {
-	// Unary RPC to send render configuration to a worker node.
-	// The worker should configure itself based on these parameters.
-	RenderConfiguration(context.Context, *RenderConfigurationRequest) (*emptypb.Empty, error)
+	// Streaming RPC to send render configuration to a worker node and receive status updates.
+	// The worker should configure itself based on these parameters and stream back its progress.
+	RenderConfiguration(*RenderConfigurationRequest, grpc.ServerStreamingServer[RenderConfigurationResponse]) error
 	// Streaming RPC to request a worker node to render a specific tile of the image.
 	// The server streams back chunks of pixel data as they are rendered.
 	RenderTile(*RenderTileRequest, grpc.ServerStreamingServer[RenderTileResponse]) error
@@ -114,8 +122,8 @@ type RenderControlServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRenderControlServiceServer struct{}
 
-func (UnimplementedRenderControlServiceServer) RenderConfiguration(context.Context, *RenderConfigurationRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RenderConfiguration not implemented")
+func (UnimplementedRenderControlServiceServer) RenderConfiguration(*RenderConfigurationRequest, grpc.ServerStreamingServer[RenderConfigurationResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method RenderConfiguration not implemented")
 }
 func (UnimplementedRenderControlServiceServer) RenderTile(*RenderTileRequest, grpc.ServerStreamingServer[RenderTileResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method RenderTile not implemented")
@@ -144,23 +152,16 @@ func RegisterRenderControlServiceServer(s grpc.ServiceRegistrar, srv RenderContr
 	s.RegisterService(&RenderControlService_ServiceDesc, srv)
 }
 
-func _RenderControlService_RenderConfiguration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RenderConfigurationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _RenderControlService_RenderConfiguration_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RenderConfigurationRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(RenderControlServiceServer).RenderConfiguration(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RenderControlService_RenderConfiguration_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RenderControlServiceServer).RenderConfiguration(ctx, req.(*RenderConfigurationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(RenderControlServiceServer).RenderConfiguration(m, &grpc.GenericServerStream[RenderConfigurationRequest, RenderConfigurationResponse]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type RenderControlService_RenderConfigurationServer = grpc.ServerStreamingServer[RenderConfigurationResponse]
 
 func _RenderControlService_RenderTile_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(RenderTileRequest)
@@ -199,15 +200,16 @@ var RenderControlService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*RenderControlServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "RenderConfiguration",
-			Handler:    _RenderControlService_RenderConfiguration_Handler,
-		},
-		{
 			MethodName: "RenderEnd",
 			Handler:    _RenderControlService_RenderEnd_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "RenderConfiguration",
+			Handler:       _RenderControlService_RenderConfiguration_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "RenderTile",
 			Handler:       _RenderControlService_RenderTile_Handler,
