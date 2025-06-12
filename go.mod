@@ -12,6 +12,7 @@ require (
 	github.com/flynn-nrg/go-oiio v0.0.0-20250506183759-6155d221a662
 	github.com/flynn-nrg/gube v1.0.3
 	github.com/google/go-cmp v0.7.0
+	github.com/google/uuid v1.6.0
 	github.com/grandcat/zeroconf v1.0.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/sirupsen/logrus v1.9.3

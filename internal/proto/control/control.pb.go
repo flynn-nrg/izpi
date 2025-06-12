@@ -84,8 +84,10 @@ const (
 	RenderSetupStatus_RENDER_SETUP_STATUS_UNKNOWN RenderSetupStatus = 0 // Default zero value for enums
 	RenderSetupStatus_LOADING_SCENE               RenderSetupStatus = 1
 	RenderSetupStatus_STREAMING_TEXTURES          RenderSetupStatus = 2
-	RenderSetupStatus_READY                       RenderSetupStatus = 3
-	RenderSetupStatus_FAILED                      RenderSetupStatus = 4 // Indicates an error occurred during configuration.
+	RenderSetupStatus_TRANSFORMING_MATERIALS      RenderSetupStatus = 3
+	RenderSetupStatus_TRANSFORMING_TRIANGLES      RenderSetupStatus = 4
+	RenderSetupStatus_READY                       RenderSetupStatus = 5
+	RenderSetupStatus_FAILED                      RenderSetupStatus = 6 // Indicates an error occurred during configuration.
 )
 
 // Enum value maps for RenderSetupStatus.
@@ -94,15 +96,19 @@ var (
 		0: "RENDER_SETUP_STATUS_UNKNOWN",
 		1: "LOADING_SCENE",
 		2: "STREAMING_TEXTURES",
-		3: "READY",
-		4: "FAILED",
+		3: "TRANSFORMING_MATERIALS",
+		4: "TRANSFORMING_TRIANGLES",
+		5: "READY",
+		6: "FAILED",
 	}
 	RenderSetupStatus_value = map[string]int32{
 		"RENDER_SETUP_STATUS_UNKNOWN": 0,
 		"LOADING_SCENE":               1,
 		"STREAMING_TEXTURES":          2,
-		"READY":                       3,
-		"FAILED":                      4,
+		"TRANSFORMING_MATERIALS":      3,
+		"TRANSFORMING_TRIANGLES":      4,
+		"READY":                       5,
+		"FAILED":                      6,
 	}
 )
 
@@ -251,13 +257,14 @@ func (x *ImageResolution) GetHeight() uint32 {
 type RenderSetupRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	SceneName       string                 `protobuf:"bytes,1,opt,name=scene_name,json=sceneName,proto3" json:"scene_name,omitempty"`                      // The name of the scene to be rendered.
-	NumCores        uint32                 `protobuf:"varint,2,opt,name=num_cores,json=numCores,proto3" json:"num_cores,omitempty"`                        // Number of CPU cores the worker should use for rendering.
-	SamplesPerPixel uint32                 `protobuf:"varint,3,opt,name=samples_per_pixel,json=samplesPerPixel,proto3" json:"samples_per_pixel,omitempty"` // Number of samples to take per pixel.
-	Sampler         SamplerType            `protobuf:"varint,4,opt,name=sampler,proto3,enum=control.SamplerType" json:"sampler,omitempty"`                 // The type of sampler (render mode) to use.
-	ImageResolution *ImageResolution       `protobuf:"bytes,5,opt,name=image_resolution,json=imageResolution,proto3" json:"image_resolution,omitempty"`    // The overall image resolution.
-	MaxDepth        uint32                 `protobuf:"varint,6,opt,name=max_depth,json=maxDepth,proto3" json:"max_depth,omitempty"`                        // Maximum recursion depth for path tracing.
-	BackgroundColor *Vec3                  `protobuf:"bytes,7,opt,name=background_color,json=backgroundColor,proto3" json:"background_color,omitempty"`    // The background color of the scene.
-	AssetProvider   string                 `protobuf:"bytes,8,opt,name=asset_provider,json=assetProvider,proto3" json:"asset_provider,omitempty"`          // NEW: The network address (host:port) of the asset transport server (e.g., leader).
+	JobId           string                 `protobuf:"bytes,2,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`                                  // The ID of the job to be rendered.
+	NumCores        uint32                 `protobuf:"varint,3,opt,name=num_cores,json=numCores,proto3" json:"num_cores,omitempty"`                        // Number of CPU cores the worker should use for rendering.
+	SamplesPerPixel uint32                 `protobuf:"varint,4,opt,name=samples_per_pixel,json=samplesPerPixel,proto3" json:"samples_per_pixel,omitempty"` // Number of samples to take per pixel.
+	Sampler         SamplerType            `protobuf:"varint,5,opt,name=sampler,proto3,enum=control.SamplerType" json:"sampler,omitempty"`                 // The type of sampler (render mode) to use.
+	ImageResolution *ImageResolution       `protobuf:"bytes,6,opt,name=image_resolution,json=imageResolution,proto3" json:"image_resolution,omitempty"`    // The overall image resolution.
+	MaxDepth        uint32                 `protobuf:"varint,7,opt,name=max_depth,json=maxDepth,proto3" json:"max_depth,omitempty"`                        // Maximum recursion depth for path tracing.
+	BackgroundColor *Vec3                  `protobuf:"bytes,8,opt,name=background_color,json=backgroundColor,proto3" json:"background_color,omitempty"`    // The background color of the scene.
+	AssetProvider   string                 `protobuf:"bytes,9,opt,name=asset_provider,json=assetProvider,proto3" json:"asset_provider,omitempty"`          // NEW: The network address (host:port) of the asset transport server (e.g., leader).
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -295,6 +302,13 @@ func (*RenderSetupRequest) Descriptor() ([]byte, []int) {
 func (x *RenderSetupRequest) GetSceneName() string {
 	if x != nil {
 		return x.SceneName
+	}
+	return ""
+}
+
+func (x *RenderSetupRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
 	}
 	return ""
 }
@@ -652,17 +666,18 @@ const file_control_proto_rawDesc = "" +
 	"\x01z\x18\x03 \x01(\x02R\x01z\"?\n" +
 	"\x0fImageResolution\x12\x14\n" +
 	"\x05width\x18\x01 \x01(\rR\x05width\x12\x16\n" +
-	"\x06height\x18\x02 \x01(\rR\x06height\"\xef\x02\n" +
+	"\x06height\x18\x02 \x01(\rR\x06height\"\x86\x03\n" +
 	"\x12RenderSetupRequest\x12\x1d\n" +
 	"\n" +
-	"scene_name\x18\x01 \x01(\tR\tsceneName\x12\x1b\n" +
-	"\tnum_cores\x18\x02 \x01(\rR\bnumCores\x12*\n" +
-	"\x11samples_per_pixel\x18\x03 \x01(\rR\x0fsamplesPerPixel\x12.\n" +
-	"\asampler\x18\x04 \x01(\x0e2\x14.control.SamplerTypeR\asampler\x12C\n" +
-	"\x10image_resolution\x18\x05 \x01(\v2\x18.control.ImageResolutionR\x0fimageResolution\x12\x1b\n" +
-	"\tmax_depth\x18\x06 \x01(\rR\bmaxDepth\x128\n" +
-	"\x10background_color\x18\a \x01(\v2\r.control.Vec3R\x0fbackgroundColor\x12%\n" +
-	"\x0easset_provider\x18\b \x01(\tR\rassetProvider\"n\n" +
+	"scene_name\x18\x01 \x01(\tR\tsceneName\x12\x15\n" +
+	"\x06job_id\x18\x02 \x01(\tR\x05jobId\x12\x1b\n" +
+	"\tnum_cores\x18\x03 \x01(\rR\bnumCores\x12*\n" +
+	"\x11samples_per_pixel\x18\x04 \x01(\rR\x0fsamplesPerPixel\x12.\n" +
+	"\asampler\x18\x05 \x01(\x0e2\x14.control.SamplerTypeR\asampler\x12C\n" +
+	"\x10image_resolution\x18\x06 \x01(\v2\x18.control.ImageResolutionR\x0fimageResolution\x12\x1b\n" +
+	"\tmax_depth\x18\a \x01(\rR\bmaxDepth\x128\n" +
+	"\x10background_color\x18\b \x01(\v2\r.control.Vec3R\x0fbackgroundColor\x12%\n" +
+	"\x0easset_provider\x18\t \x01(\tR\rassetProvider\"n\n" +
 	"\x13RenderSetupResponse\x122\n" +
 	"\x06status\x18\x01 \x01(\x0e2\x1a.control.RenderSetupStatusR\x06status\x12#\n" +
 	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"S\n" +
@@ -690,14 +705,16 @@ const file_control_proto_rawDesc = "" +
 	"\n" +
 	"WIRE_FRAME\x10\x03\x12\n" +
 	"\n" +
-	"\x06COLOUR\x10\x04*v\n" +
+	"\x06COLOUR\x10\x04*\xae\x01\n" +
 	"\x11RenderSetupStatus\x12\x1f\n" +
 	"\x1bRENDER_SETUP_STATUS_UNKNOWN\x10\x00\x12\x11\n" +
 	"\rLOADING_SCENE\x10\x01\x12\x16\n" +
-	"\x12STREAMING_TEXTURES\x10\x02\x12\t\n" +
-	"\x05READY\x10\x03\x12\n" +
+	"\x12STREAMING_TEXTURES\x10\x02\x12\x1a\n" +
+	"\x16TRANSFORMING_MATERIALS\x10\x03\x12\x1a\n" +
+	"\x16TRANSFORMING_TRIANGLES\x10\x04\x12\t\n" +
+	"\x05READY\x10\x05\x12\n" +
 	"\n" +
-	"\x06FAILED\x10\x042\xef\x01\n" +
+	"\x06FAILED\x10\x062\xef\x01\n" +
 	"\x14RenderControlService\x12J\n" +
 	"\vRenderSetup\x12\x1b.control.RenderSetupRequest\x1a\x1c.control.RenderSetupResponse0\x01\x12G\n" +
 	"\n" +

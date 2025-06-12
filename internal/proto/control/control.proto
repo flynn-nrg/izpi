@@ -40,8 +40,10 @@ enum RenderSetupStatus { // Renamed enum
   RENDER_SETUP_STATUS_UNKNOWN = 0; // Default zero value for enums
   LOADING_SCENE = 1;
   STREAMING_TEXTURES = 2;
-  READY = 3;
-  FAILED = 4; // Indicates an error occurred during configuration.
+  TRANSFORMING_MATERIALS = 3;
+  TRANSFORMING_TRIANGLES = 4;
+  READY = 5;
+  FAILED = 6; // Indicates an error occurred during configuration.
 }
 
 // --- Core Data Structures ---
@@ -64,13 +66,14 @@ message ImageResolution {
 // Request to configure a worker node for rendering.
 message RenderSetupRequest { // Renamed message
   string scene_name = 1;           // The name of the scene to be rendered.
-  uint32 num_cores = 2;            // Number of CPU cores the worker should use for rendering.
-  uint32 samples_per_pixel = 3;    // Number of samples to take per pixel.
-  SamplerType sampler = 4;         // The type of sampler (render mode) to use.
-  ImageResolution image_resolution = 5; // The overall image resolution.
-  uint32 max_depth = 6;            // Maximum recursion depth for path tracing.
-  Vec3 background_color = 7;       // The background color of the scene.
-  string asset_provider = 8;       // NEW: The network address (host:port) of the asset transport server (e.g., leader).
+  string job_id = 2;               // The ID of the job to be rendered.
+  uint32 num_cores = 3;            // Number of CPU cores the worker should use for rendering.
+  uint32 samples_per_pixel = 4;    // Number of samples to take per pixel.
+  SamplerType sampler = 5;         // The type of sampler (render mode) to use.
+  ImageResolution image_resolution = 6; // The overall image resolution.
+  uint32 max_depth = 7;            // Maximum recursion depth for path tracing.
+  Vec3 background_color = 8;       // The background color of the scene.
+  string asset_provider = 9;       // NEW: The network address (host:port) of the asset transport server (e.g., leader).
 }
 
 // Response containing status updates during the RenderConfiguration process.

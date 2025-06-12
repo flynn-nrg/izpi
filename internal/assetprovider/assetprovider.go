@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os" // Added to get hostname
 	"sync"
 
 	// For simulating delays
@@ -64,17 +65,26 @@ func New(scene *pb_transport.Scene, textures map[string][]byte, triangles []*pb_
 	pb_transport.RegisterSceneTransportServiceServer(grpcServer, serverImpl)
 	reflection.Register(grpcServer) // Enable reflection for gRPCurl/debugging
 
+	// Get the hostname and the dynamically assigned port
+	hostname, err := os.Hostname()
+	if err != nil {
+		lis.Close() // Close the listener if we can't get the hostname
+		return nil, "", fmt.Errorf("failed to get hostname for asset provider address: %w", err)
+	}
+	port := lis.Addr().(*net.TCPAddr).Port
+	targetAddress := fmt.Sprintf("%s:%d", hostname, port) // Format as hostname:port
+
 	ap := &AssetProvider{
 		grpcServer: grpcServer,
 		listener:   lis,
-		address:    lis.Addr().String(),
+		address:    targetAddress, // Use the new hostname:port address
 		serverImpl: serverImpl,
 	}
 
 	ap.wg.Add(1)
 	go func() {
 		defer ap.wg.Done()
-		logrus.Infof("AssetProvider gRPC server listening on %s", ap.address)
+		logrus.Infof("AssetProvider gRPC server listening on %s (reported as %s)", lis.Addr().String(), ap.address)
 		if err := grpcServer.Serve(lis); err != nil {
 			logrus.Errorf("AssetProvider gRPC server failed to serve: %v", err)
 		}
@@ -213,8 +223,6 @@ func (s *assetProviderServer) StreamTriangles(req *pb_transport.StreamTrianglesR
 
 		resp := &pb_transport.StreamTrianglesResponse{
 			Triangles: batch,
-			// total_triangles is now part of the Scene message, not the response.
-			// The client would have fetched this from GetScene() already.
 		}
 
 		if err := stream.Send(resp); err != nil {

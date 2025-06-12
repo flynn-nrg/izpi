@@ -222,8 +222,8 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	s.currentStatus = pb_discovery.WorkerStatus_ALLOCATED
 
 	logrus.Printf("RenderControlService: RenderSetup called by %s", s.workerID)
-	logrus.Printf("RenderSetup Configuration: Scene='%s', Sampler='%s', AssetProvider='%s'",
-		req.GetSceneName(), req.GetSampler().String(), req.GetAssetProvider())
+	logrus.Printf("RenderSetup Configuration: Scene='%s', Sampler='%s', AssetProvider='%s', JobID='%s'",
+		req.GetSceneName(), req.GetSampler().String(), req.GetAssetProvider(), req.GetJobId())
 
 	assetProviderAddr := req.GetAssetProvider()
 	if assetProviderAddr == "" {

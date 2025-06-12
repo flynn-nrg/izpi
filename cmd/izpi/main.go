@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"image"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -24,6 +25,7 @@ import (
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
 	"github.com/flynn-nrg/izpi/internal/worker"
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -146,6 +148,8 @@ func run_as_leader(ctx context.Context, scene *scene.Scene, standalone bool) {
 	defer close(previewChan)
 
 	if !standalone {
+		jobID := uuid.New().String()
+
 		discovery, err := discovery.New(time.Second * time.Duration(flags.DiscoveryTimeout))
 		if err != nil {
 			log.Fatalln("Failed to initialize discovery:", err.Error())
@@ -159,7 +163,8 @@ func run_as_leader(ctx context.Context, scene *scene.Scene, standalone bool) {
 		log.Infof("Found %d worker(s)", len(workerHosts))
 
 		protoScene := &pb_transport.Scene{
-			Name: "Test Scene",
+			Name:    "Test Scene",
+			Version: "1.0.0",
 			Camera: &pb_transport.Camera{
 				Lookfrom: &pb_transport.Vec3{
 					X: 0,
@@ -197,8 +202,9 @@ func run_as_leader(ctx context.Context, scene *scene.Scene, standalone bool) {
 				continue
 			}
 
-			controlClient.RenderSetup(ctx, &pb_control.RenderSetupRequest{
+			stream, err := controlClient.RenderSetup(ctx, &pb_control.RenderSetupRequest{
 				SceneName:       protoScene.GetName(),
+				JobId:           jobID,
 				NumCores:        uint32(workerHost.GetAvailableCores()),
 				SamplesPerPixel: uint32(flags.Samples),
 				Sampler:         stringToSamplerType(flags.Sampler),
@@ -214,6 +220,25 @@ func run_as_leader(ctx context.Context, scene *scene.Scene, standalone bool) {
 				},
 				AssetProvider: assetProviderAddress,
 			})
+			if err != nil {
+				log.Errorf("failed to create render setup stream for worker %s: %v", target, err)
+				continue
+			}
+
+			for {
+				msg, err := stream.Recv()
+				if err != nil {
+					if err == io.EOF {
+						log.Infof("Worker %s finished render setup", target)
+						break
+					}
+
+					log.Errorf("failed to receive message from worker %s: %v", target, err)
+					break
+				}
+
+				log.Infof("Worker %s status: %s", target, msg.GetStatus().String())
+			}
 		}
 
 	}
