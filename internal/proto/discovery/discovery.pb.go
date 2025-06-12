@@ -27,9 +27,11 @@ type WorkerStatus int32
 const (
 	WorkerStatus_WORKER_STATUS_UNSPECIFIED WorkerStatus = 0 // Default zero value, should not be used
 	WorkerStatus_FREE                      WorkerStatus = 1 // Worker is idle and available for tasks
-	WorkerStatus_BUSY_RENDERING            WorkerStatus = 2 // Worker is currently rendering a task
-	WorkerStatus_BUSY_OTHER                WorkerStatus = 3 // Worker is busy with non-rendering tasks (e.g., texture streaming)
-	WorkerStatus_OFFLINE                   WorkerStatus = 4 // Worker is not responding (this state would be inferred by the leader)
+	WorkerStatus_ALLOCATED                 WorkerStatus = 2 // Worker is allocated to a task
+	WorkerStatus_BUSY_RENDER_SETUP         WorkerStatus = 3 // Worker is busy with render setup
+	WorkerStatus_BUSY_RENDERING            WorkerStatus = 4 // Worker is currently rendering a task
+	WorkerStatus_BUSY_OTHER                WorkerStatus = 5 // Worker is busy with non-rendering tasks (e.g., texture streaming)
+	WorkerStatus_OFFLINE                   WorkerStatus = 6 // Worker is not responding (this state would be inferred by the leader)
 )
 
 // Enum value maps for WorkerStatus.
@@ -37,16 +39,20 @@ var (
 	WorkerStatus_name = map[int32]string{
 		0: "WORKER_STATUS_UNSPECIFIED",
 		1: "FREE",
-		2: "BUSY_RENDERING",
-		3: "BUSY_OTHER",
-		4: "OFFLINE",
+		2: "ALLOCATED",
+		3: "BUSY_RENDER_SETUP",
+		4: "BUSY_RENDERING",
+		5: "BUSY_OTHER",
+		6: "OFFLINE",
 	}
 	WorkerStatus_value = map[string]int32{
 		"WORKER_STATUS_UNSPECIFIED": 0,
 		"FREE":                      1,
-		"BUSY_RENDERING":            2,
-		"BUSY_OTHER":                3,
-		"OFFLINE":                   4,
+		"ALLOCATED":                 2,
+		"BUSY_RENDER_SETUP":         3,
+		"BUSY_RENDERING":            4,
+		"BUSY_OTHER":                5,
+		"OFFLINE":                   6,
 	}
 )
 
@@ -200,14 +206,16 @@ const file_discovery_proto_rawDesc = "" +
 	"\x0favailable_cores\x18\x02 \x01(\rR\x0eavailableCores\x12,\n" +
 	"\x12total_memory_bytes\x18\x03 \x01(\x04R\x10totalMemoryBytes\x12*\n" +
 	"\x11free_memory_bytes\x18\x04 \x01(\x04R\x0ffreeMemoryBytes\x12/\n" +
-	"\x06status\x18\x05 \x01(\x0e2\x17.discovery.WorkerStatusR\x06status*h\n" +
+	"\x06status\x18\x05 \x01(\x0e2\x17.discovery.WorkerStatusR\x06status*\x8e\x01\n" +
 	"\fWorkerStatus\x12\x1d\n" +
 	"\x19WORKER_STATUS_UNSPECIFIED\x10\x00\x12\b\n" +
-	"\x04FREE\x10\x01\x12\x12\n" +
-	"\x0eBUSY_RENDERING\x10\x02\x12\x0e\n" +
+	"\x04FREE\x10\x01\x12\r\n" +
+	"\tALLOCATED\x10\x02\x12\x15\n" +
+	"\x11BUSY_RENDER_SETUP\x10\x03\x12\x12\n" +
+	"\x0eBUSY_RENDERING\x10\x04\x12\x0e\n" +
 	"\n" +
-	"BUSY_OTHER\x10\x03\x12\v\n" +
-	"\aOFFLINE\x10\x042x\n" +
+	"BUSY_OTHER\x10\x05\x12\v\n" +
+	"\aOFFLINE\x10\x062x\n" +
 	"\x16WorkerDiscoveryService\x12^\n" +
 	"\x11QueryWorkerStatus\x12#.discovery.QueryWorkerStatusRequest\x1a$.discovery.QueryWorkerStatusResponseB>Z<github.com/flynn-nrg/izpi/internal/proto/discovery;discoveryb\x06proto3"
 

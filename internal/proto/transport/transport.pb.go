@@ -1604,6 +1604,7 @@ func (x *StreamTextureFileRequest) GetChunkSize() uint32 {
 type StreamTextureFileResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Chunk         []byte                 `protobuf:"bytes,1,opt,name=chunk,proto3" json:"chunk,omitempty"` // A segment of the texture file's binary data.
+	Size          uint64                 `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"`  // The size of the returned chunk.
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1643,6 +1644,13 @@ func (x *StreamTextureFileResponse) GetChunk() []byte {
 		return x.Chunk
 	}
 	return nil
+}
+
+func (x *StreamTextureFileResponse) GetSize() uint64 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
 }
 
 // Request to stream triangle data.
@@ -1860,9 +1868,10 @@ const file_transport_proto_rawDesc = "" +
 	"\bfilename\x18\x01 \x01(\tR\bfilename\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\x04R\x06offset\x12\x1d\n" +
 	"\n" +
-	"chunk_size\x18\x03 \x01(\rR\tchunkSize\"1\n" +
+	"chunk_size\x18\x03 \x01(\rR\tchunkSize\"E\n" +
 	"\x19StreamTextureFileResponse\x12\x14\n" +
-	"\x05chunk\x18\x01 \x01(\fR\x05chunk\"n\n" +
+	"\x05chunk\x18\x01 \x01(\fR\x05chunk\x12\x12\n" +
+	"\x04size\x18\x02 \x01(\x04R\x04size\"n\n" +
 	"\x16StreamTrianglesRequest\x12\x1d\n" +
 	"\n" +
 	"scene_name\x18\x01 \x01(\tR\tsceneName\x12\x1d\n" +

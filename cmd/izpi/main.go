@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"net"
@@ -13,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/flynn-nrg/izpi/internal/assetprovider"
 	"github.com/flynn-nrg/izpi/internal/colours"
 	"github.com/flynn-nrg/izpi/internal/discovery"
 	"github.com/flynn-nrg/izpi/internal/display"
@@ -22,6 +24,11 @@ import (
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
 	"github.com/flynn-nrg/izpi/internal/worker"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
+	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
 
 	"github.com/alecthomas/kong"
 
@@ -62,6 +69,7 @@ var flags struct {
 }
 
 func main() {
+	ctx := context.Background()
 
 	kong.Parse(&flags,
 		kong.Name(programName),
@@ -119,9 +127,9 @@ func main() {
 
 	switch flags.Role {
 	case "leader":
-		run_as_leader(scene, false)
+		run_as_leader(ctx, scene, false)
 	case "standalone":
-		run_as_leader(scene, true)
+		run_as_leader(ctx, scene, true)
 	case "worker":
 		run_as_worker()
 	default:
@@ -129,7 +137,7 @@ func main() {
 	}
 }
 
-func run_as_leader(scene *scene.Scene, standalone bool) {
+func run_as_leader(ctx context.Context, scene *scene.Scene, standalone bool) {
 	var disp display.Display
 	var err error
 	var canvas image.Image
@@ -149,9 +157,65 @@ func run_as_leader(scene *scene.Scene, standalone bool) {
 		}
 
 		log.Infof("Found %d worker(s)", len(workerHosts))
-		for _, workerHost := range workerHosts {
-			log.Infof("Worker: %s", workerHost.GetNodeName())
+
+		protoScene := &pb_transport.Scene{
+			Name: "Test Scene",
+			Camera: &pb_transport.Camera{
+				Lookfrom: &pb_transport.Vec3{
+					X: 0,
+					Y: 0,
+					Z: 0,
+				},
+				Lookat: &pb_transport.Vec3{
+					X: 0,
+					Y: 0,
+					Z: 0,
+				},
+				Vup: &pb_transport.Vec3{
+					X: 0,
+					Y: 0,
+					Z: 0,
+				},
+				Vfov:   90,
+				Aspect: 1,
+			},
 		}
+
+		assetProvider, assetProviderAddress, err := assetprovider.New(protoScene, nil, nil)
+		if err != nil {
+			log.Fatalln("Failed to create asset provider:", err.Error())
+		}
+
+		defer assetProvider.Stop()
+
+		for target, workerHost := range workerHosts {
+			log.Infof("Setting up worker: %s", workerHost.GetNodeName())
+			conn, err := grpc.NewClient(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			controlClient := pb_control.NewRenderControlServiceClient(conn)
+			if err != nil {
+				log.Errorf("failed to create control client for worker %s: %v", target, err)
+				continue
+			}
+
+			controlClient.RenderSetup(ctx, &pb_control.RenderSetupRequest{
+				SceneName:       protoScene.GetName(),
+				NumCores:        uint32(workerHost.GetAvailableCores()),
+				SamplesPerPixel: uint32(flags.Samples),
+				Sampler:         stringToSamplerType(flags.Sampler),
+				ImageResolution: &pb_control.ImageResolution{
+					Width:  uint32(flags.XSize),
+					Height: uint32(flags.YSize),
+				},
+				MaxDepth: uint32(flags.Depth),
+				BackgroundColor: &pb_control.Vec3{
+					X: 0,
+					Y: 0,
+					Z: 0,
+				},
+				AssetProvider: assetProviderAddress,
+			})
+		}
+
 	}
 
 	log.Info("Finished querying all specified workers.")
@@ -270,4 +334,21 @@ func getLocalIPv4Addr(ifaceName string) (net.IP, error) {
 		}
 	}
 	return nil, fmt.Errorf("no IPv4 address found for interface %s", ifaceName)
+}
+
+func stringToSamplerType(s string) pb_control.SamplerType {
+	switch s {
+	case "colour":
+		return pb_control.SamplerType_COLOUR
+	case "albedo":
+		return pb_control.SamplerType_ALBEDO
+	case "normal":
+		return pb_control.SamplerType_NORMAL
+	case "wireframe":
+		return pb_control.SamplerType_WIRE_FRAME
+	default:
+		log.Fatalf("unknown sampler type %q", s)
+	}
+
+	return pb_control.SamplerType_SAMPLER_TYPE_UNSPECIFIED
 }

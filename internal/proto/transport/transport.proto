@@ -218,6 +218,7 @@ message StreamTextureFileRequest {
 // A chunk of binary data for a streamed texture file.
 message StreamTextureFileResponse {
   bytes chunk = 1; // A segment of the texture file's binary data.
+  uint64 size = 2; // The size of the returned chunk.
 }
 
 // Request to stream triangle data.

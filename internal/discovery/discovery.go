@@ -32,8 +32,8 @@ func New(timeout time.Duration) (*Discovery, error) {
 	return &Discovery{resolver: resolver, timeout: timeout}, nil
 }
 
-func (d *Discovery) FindWorkers() ([]*pb_discovery.QueryWorkerStatusResponse, error) {
-	workerHosts := []*pb_discovery.QueryWorkerStatusResponse{}
+func (d *Discovery) FindWorkers() (map[string]*pb_discovery.QueryWorkerStatusResponse, error) {
+	workerHosts := make(map[string]*pb_discovery.QueryWorkerStatusResponse)
 
 	entries := make(chan *zeroconf.ServiceEntry)
 
@@ -54,7 +54,7 @@ func (d *Discovery) FindWorkers() ([]*pb_discovery.QueryWorkerStatusResponse, er
 
 		// Only add workers that are free
 		if statusResp.GetStatus() == pb_discovery.WorkerStatus_FREE {
-			workerHosts = append(workerHosts, statusResp)
+			workerHosts[target] = statusResp
 		}
 	}
 

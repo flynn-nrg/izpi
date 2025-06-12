@@ -8,9 +8,11 @@ package discovery;
 enum WorkerStatus {
   WORKER_STATUS_UNSPECIFIED = 0; // Default zero value, should not be used
   FREE = 1;                     // Worker is idle and available for tasks
-  BUSY_RENDERING = 2;           // Worker is currently rendering a task
-  BUSY_OTHER = 3;               // Worker is busy with non-rendering tasks (e.g., texture streaming)
-  OFFLINE = 4;                  // Worker is not responding (this state would be inferred by the leader)
+  ALLOCATED = 2;                // Worker is allocated to a task
+  BUSY_RENDER_SETUP = 3;        // Worker is busy with render setup
+  BUSY_RENDERING = 4;           // Worker is currently rendering a task
+  BUSY_OTHER = 5;               // Worker is busy with non-rendering tasks (e.g., texture streaming)
+  OFFLINE = 6;                  // Worker is not responding (this state would be inferred by the leader)
 }
 
 message QueryWorkerStatusRequest {
