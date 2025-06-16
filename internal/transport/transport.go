@@ -24,7 +24,7 @@ func NewTransport(aspectOverride float64, protoScene *pb_transport.Scene, triang
 }
 
 func (t *Transport) ToScene() (*scene.Scene, error) {
-	camera := t.toSceneCamera(t.protoScene.GetCamera(), t.aspectOverride)
+	camera := t.toSceneCamera(t.aspectOverride)
 
 	hitables, err := t.toSceneObjects()
 	if err != nil {
@@ -45,7 +45,9 @@ func (t *Transport) ToScene() (*scene.Scene, error) {
 	}, nil
 }
 
-func (t *Transport) toSceneCamera(protoCamera *pb_transport.Camera, aspectOverride float64) *camera.Camera {
+func (t *Transport) toSceneCamera(aspectOverride float64) *camera.Camera {
+	protoCamera := t.protoScene.GetCamera()
+
 	lookFrom := &vec3.Vec3Impl{
 		X: float64(protoCamera.GetLookfrom().GetX()),
 		Y: float64(protoCamera.GetLookfrom().GetY()),
