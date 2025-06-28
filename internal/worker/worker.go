@@ -15,6 +15,7 @@ import (
 	"github.com/holoplot/go-avahi"
 	"github.com/pbnjay/memory"
 	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes" // Added for gRPC status codes
 	"google.golang.org/grpc/credentials/insecure"
@@ -87,10 +88,10 @@ func (s *workerServer) sendStatus(stream pb_control.RenderControlService_RenderS
 		ErrorMessage: errMsg,
 	}
 	if err := stream.Send(resp); err != nil {
-		logrus.Errorf("Failed to send RenderSetupResponse status %s (error: %s): %v", cfgStatus.String(), errMsg, err)
+		log.Errorf("Failed to send RenderSetupResponse status %s (error: %s): %v", cfgStatus.String(), errMsg, err)
 		return err
 	}
-	logrus.Infof("RenderSetup: Sent status: %s %s", cfgStatus.String(), errMsg)
+	log.Infof("RenderSetup: Sent status: %s %s", cfgStatus.String(), errMsg)
 	return nil
 }
 
@@ -131,12 +132,12 @@ func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb
 					return nil, fmt.Errorf("texture '%s' not found on provider", filename)
 				}
 				if s.Code() == codes.Unavailable {
-					logrus.Warnf("Texture stream for %s closed by server gracefully (Unavailable). Received %d of %d bytes.", filename, receivedBytes, expectedTotalSize)
+					log.Warnf("Texture stream for %s closed by server gracefully (Unavailable). Received %d of %d bytes.", filename, receivedBytes, expectedTotalSize)
 					break // Server closed stream, assume end.
 				}
 			}
 			if err.Error() == "EOF" { // gRPC stream end
-				logrus.Infof("Finished streaming texture '%s'. Received %d of %d bytes.", filename, receivedBytes, expectedTotalSize)
+				log.Infof("Finished streaming texture '%s'. Received %d of %d bytes.", filename, receivedBytes, expectedTotalSize)
 				break
 			}
 			return nil, fmt.Errorf("failed to receive texture chunk for %s: %w", filename, err)
@@ -183,13 +184,13 @@ func (s *workerServer) streamTriangles(ctx context.Context, transportClient pb_t
 						return nil, fmt.Errorf("triangles for scene '%s' not found on provider", sceneName)
 					}
 					if s.Code() == codes.Unavailable {
-						logrus.Warnf("Triangles stream for scene '%s' closed by server gracefully (Unavailable). Received %d of %d triangles.", sceneName, fetchedCount, totalTriangles)
+						log.Warnf("Triangles stream for scene '%s' closed by server gracefully (Unavailable). Received %d of %d triangles.", sceneName, fetchedCount, totalTriangles)
 						// This might happen if the server decides to close the stream early
 						break // Assume end of stream for this batch
 					}
 				}
 				if err.Error() == "EOF" { // gRPC stream end
-					logrus.Infof("Finished streaming triangles for scene '%s'. Fetched %d of %d total triangles.", sceneName, fetchedCount, totalTriangles)
+					log.Infof("Finished streaming triangles for scene '%s'. Fetched %d of %d total triangles.", sceneName, fetchedCount, totalTriangles)
 					break
 				}
 				return nil, fmt.Errorf("failed to receive triangle batch for scene '%s': %w", sceneName, err)
@@ -200,7 +201,7 @@ func (s *workerServer) streamTriangles(ctx context.Context, transportClient pb_t
 
 			// If the batch returned fewer than requested (and we haven't hit total), it means we're at the end
 			if uint64(len(resp.GetTriangles())) < uint64(batchSize) {
-				logrus.Infof("Received partial triangle batch. Assuming end of stream for scene '%s'. Fetched %d of %d total triangles.", sceneName, fetchedCount, totalTriangles)
+				log.Infof("Received partial triangle batch. Assuming end of stream for scene '%s'. Fetched %d of %d total triangles.", sceneName, fetchedCount, totalTriangles)
 				break
 			}
 		}
@@ -224,8 +225,8 @@ func (s *workerServer) streamTriangles(ctx context.Context, transportClient pb_t
 func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb_control.RenderControlService_RenderSetupServer) error {
 	s.currentStatus = pb_discovery.WorkerStatus_ALLOCATED
 
-	logrus.Printf("RenderControlService: RenderSetup called by %s", s.workerID)
-	logrus.Printf("RenderSetup Configuration: Scene='%s', Sampler='%s', AssetProvider='%s', JobID='%s'",
+	log.Printf("RenderControlService: RenderSetup called by %s", s.workerID)
+	log.Printf("RenderSetup Configuration: Scene='%s', Sampler='%s', AssetProvider='%s', JobID='%s'",
 		req.GetSceneName(), req.GetSampler().String(), req.GetAssetProvider(), req.GetJobId())
 
 	assetProviderAddr := req.GetAssetProvider()
@@ -254,7 +255,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_LOADING_SCENE, ""); err != nil {
 		return status.Errorf(codes.Internal, "failed to send LOADING_SCENE status: %v", err)
 	}
-	logrus.Infof("RenderSetup: Attempting to fetch scene '%s' from '%s'...", req.GetSceneName(), assetProviderAddr)
+	log.Infof("RenderSetup: Attempting to fetch scene '%s' from '%s'...", req.GetSceneName(), assetProviderAddr)
 
 	scene, err := s.getScene(ctx, transportClient, req.GetSceneName())
 	if err != nil {
@@ -263,11 +264,11 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		return status.Error(codes.NotFound, errMsg) // Use NotFound for scene not found
 	}
 	s.loadedScene = scene // Store the loaded scene
-	logrus.Infof("RenderSetup: Successfully loaded scene '%s' (version: %s). Contains %d materials, %d spheres.",
+	log.Infof("RenderSetup: Successfully loaded scene '%s' (version: %s). Contains %d materials, %d spheres.",
 		scene.GetName(), scene.GetVersion(), len(scene.GetMaterials()), len(scene.GetObjects().GetSpheres()))
 
 	if scene.GetStreamTriangles() {
-		logrus.Infof("RenderSetup: Scene indicates triangles need to be streamed. Total triangles: %d", scene.GetTotalTriangles())
+		log.Infof("RenderSetup: Scene indicates triangles need to be streamed. Total triangles: %d", scene.GetTotalTriangles())
 		triangles, err := s.streamTriangles(ctx, transportClient, scene.GetName(), scene.GetTotalTriangles(), 1000) // Fetch in batches of 1000
 		if err != nil {
 			errMsg := fmt.Sprintf("Failed to stream triangles for scene '%s': %v", scene.GetName(), err)
@@ -275,20 +276,20 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 			return status.Error(codes.Internal, errMsg)
 		}
 		s.loadedTriangles = triangles // Store the loaded triangles
-		logrus.Infof("RenderSetup: Successfully streamed %d triangles for scene '%s'.", len(triangles), scene.GetName())
+		log.Infof("RenderSetup: Successfully streamed %d triangles for scene '%s'.", len(triangles), scene.GetName())
 	} else {
-		logrus.Infof("RenderSetup: Scene indicates triangles are embedded or not streamed.")
+		log.Infof("RenderSetup: Scene indicates triangles are embedded or not streamed.")
 		// If triangles are embedded, they would be in scene.GetObjects().GetTriangles()
 		// You might want to copy them or process them here.
 		s.loadedTriangles = scene.GetObjects().GetTriangles()
-		logrus.Infof("RenderSetup: Using %d embedded triangles from scene.", len(s.loadedTriangles))
+		log.Infof("RenderSetup: Using %d embedded triangles from scene.", len(s.loadedTriangles))
 	}
 
 	// Step 2: Send STREAMING_TEXTURES status and fetch textures
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_STREAMING_TEXTURES, ""); err != nil {
 		return status.Error(codes.Internal, fmt.Sprintf("failed to send STREAMING_TEXTURES status: %v", err))
 	}
-	logrus.Infof("RenderSetup: Streaming textures from '%s'...", assetProviderAddr)
+	log.Infof("RenderSetup: Streaming textures from '%s'...", assetProviderAddr)
 
 	// Collect all unique ImageTexture filenames from materials
 	texturesToFetch := make(map[string]*pb_transport.ImageTexture)
@@ -334,7 +335,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	}
 
 	for filename, imgTex := range texturesToFetch {
-		logrus.Infof("RenderSetup: Fetching texture '%s' (expected size: %d bytes)...", filename, imgTex.GetSize())
+		log.Infof("RenderSetup: Fetching texture '%s' (expected size: %d bytes)...", filename, imgTex.GetSize())
 		texData, err := s.streamTextureFile(ctx, transportClient, filename, imgTex.GetSize())
 		if err != nil {
 			errMsg := fmt.Sprintf("Failed to load texture '%s': %v", filename, err)
@@ -342,15 +343,15 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 			return status.Error(codes.Internal, errMsg)
 		}
 		s.loadedTextures[filename] = texData // Store the fetched texture data
-		logrus.Infof("RenderSetup: Successfully loaded texture '%s'. Actual size: %d bytes.", filename, len(texData))
+		log.Infof("RenderSetup: Successfully loaded texture '%s'. Actual size: %d bytes.", filename, len(texData))
 	}
-	logrus.Infof("RenderSetup: Finished streaming %d unique textures.", len(s.loadedTextures))
+	log.Infof("RenderSetup: Finished streaming %d unique textures.", len(s.loadedTextures))
 
 	// Step 3: Send READY status
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_READY, ""); err != nil {
 		return status.Errorf(codes.Internal, "failed to send READY status: %v", err)
 	}
-	logrus.Infof("RenderSetup: Worker is READY for rendering with scene '%s', %d triangles, and %d textures.",
+	log.Infof("RenderSetup: Worker is READY for rendering with scene '%s', %d triangles, and %d textures.",
 		req.GetSceneName(), len(s.loadedTriangles), len(s.loadedTextures))
 
 	s.currentStatus = pb_discovery.WorkerStatus_BUSY_RENDERING
@@ -359,7 +360,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 }
 
 func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_control.RenderControlService_RenderTileServer) error {
-	logrus.Printf("RenderControlService: RenderTile called by %s - Tile: [%d,%d] to [%d,%d)",
+	log.Printf("RenderControlService: RenderTile called by %s - Tile: [%d,%d] to [%d,%d)",
 		s.workerID, req.GetX0(), req.GetY0(), req.GetX1(), req.GetY1())
 
 	chunkWidth := uint32(16)
@@ -370,7 +371,7 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 		for x := req.GetX0(); x < req.X1; x += chunkWidth {
 			select {
 			case <-stream.Context().Done():
-				logrus.Printf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
+				log.Printf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
 				return stream.Context().Err()
 			default:
 			}
@@ -385,13 +386,13 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 				Pixels: pixels,
 			}
 			if err := stream.Send(resp); err != nil {
-				logrus.Printf("Failed to send RenderTileResponse chunk for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), err)
+				log.Printf("Failed to send RenderTileResponse chunk for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), err)
 				return fmt.Errorf("failed to send stream chunk: %w", err)
 			}
 		}
 	}
 
-	logrus.Printf("RenderControlService: Finished streaming tile [%d,%d] to [%d,%d) by %s",
+	log.Printf("RenderControlService: Finished streaming tile [%d,%d] to [%d,%d) by %s",
 		req.GetX0(), req.GetY0(), req.GetX1(), req.GetY1(), s.workerID)
 	return nil
 }
@@ -399,7 +400,7 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 func (s *workerServer) RenderEnd(ctx context.Context, req *pb_control.RenderEndRequest) (*pb_control.RenderEndResponse, error) {
 	s.currentStatus = pb_discovery.WorkerStatus_FREE
 
-	logrus.Printf("RenderControlService: RenderEnd called by %s", s.workerID)
+	log.Printf("RenderControlService: RenderEnd called by %s", s.workerID)
 	stats := &pb_control.RenderEndResponse{
 		TotalRenderTimeMs: 12345,
 		TotalRaysTraced:   987654321,
@@ -409,15 +410,15 @@ func (s *workerServer) RenderEnd(ctx context.Context, req *pb_control.RenderEndR
 
 // StartWorker initializes and runs the Izpi worker services.
 func StartWorker(numCores uint32) {
-	logrus.Infof("Starting Izpi Worker")
-	logrus.Infof("Configured cores: %d", numCores)
+	log.Infof("Starting Izpi Worker")
+	log.Infof("Configured cores: %d", numCores)
 
 	hostname, err := os.Hostname()
 	if err != nil {
-		logrus.Fatalf("Failed to get hostname for worker ID: %v", err)
+		log.Fatalf("Failed to get hostname for worker ID: %v", err)
 	}
 	workerID := hostname
-	logrus.Infof("Worker ID (Hostname): %s", workerID)
+	log.Infof("Worker ID (Hostname): %s", workerID)
 
 	var assignedPort int
 
@@ -425,11 +426,11 @@ func StartWorker(numCores uint32) {
 	// The leader will get this port via mDNS.
 	lis, err := net.Listen("tcp", ":0")
 	if err != nil {
-		logrus.Fatalf("Failed to listen: %v", err)
+		log.Fatalf("Failed to listen: %v", err)
 	}
 
 	assignedPort = lis.Addr().(*net.TCPAddr).Port
-	logrus.Infof("gRPC server listening on all interfaces: %s (port %d)", lis.Addr().String(), assignedPort)
+	log.Infof("gRPC server listening on all interfaces: %s (port %d)", lis.Addr().String(), assignedPort)
 
 	grpcServer := grpc.NewServer()
 	workerSrv := NewWorkerServer(numCores) // Assuming NewWorkerServer is defined elsewhere
@@ -440,7 +441,7 @@ func StartWorker(numCores uint32) {
 
 	go func() {
 		if err := grpcServer.Serve(lis); err != nil {
-			logrus.Fatalf("Failed to serve gRPC: %v", err)
+			log.Fatalf("Failed to serve gRPC: %v", err)
 		}
 	}()
 
@@ -459,31 +460,28 @@ func StartWorker(numCores uint32) {
 	var mDNSServerCloser func() // Function to call to stop mDNS advertisement
 
 	currentOS := runtime.GOOS
-	logrus.Infof("Detected operating system: %s", currentOS)
+	log.Infof("Operating environment: %s", currentOS)
 
 	switch currentOS {
 	case "linux", "freebsd":
 		// Use go-avahi for Linux and FreeBSD
 		conn, err := dbus.SystemBus()
 		if err != nil {
-			logrus.Fatalf("Failed to connect to D-Bus system bus for Avahi: %v", err)
+			log.Fatalf("Failed to connect to D-Bus system bus for Avahi: %v", err)
 		}
-		// conn.Close() will be deferred within mDNSServerCloser
 
 		server, err := avahi.ServerNew(conn)
 		if err != nil {
 			conn.Close() // Close D-Bus connection on Avahi server creation failure
-			logrus.Fatalf("Failed to create Avahi server client: %v", err)
+			log.Fatalf("Failed to create Avahi server client: %v", err)
 		}
-		// server.Close() will be deferred within mDNSServerCloser
 
 		entryGroup, err := server.EntryGroupNew()
 		if err != nil {
 			server.Close() // Close Avahi server client on entry group creation failure
 			conn.Close()   // Close D-Bus connection
-			logrus.Fatalf("Failed to create new Avahi entry group: %v", err)
+			log.Fatalf("Failed to create new Avahi entry group: %v", err)
 		}
-		// entryGroup.Reset() will be deferred within mDNSServerCloser
 
 		fqdnHostname := hostname + ".local"
 
@@ -493,7 +491,6 @@ func StartWorker(numCores uint32) {
 			avahiTxtRecords[i] = []byte(t)
 		}
 
-		fmt.Printf("hostname: %s\n", hostname)
 		err = entryGroup.AddService(
 			avahi.InterfaceUnspec,
 			avahi.ProtoUnspec,
@@ -509,7 +506,7 @@ func StartWorker(numCores uint32) {
 			entryGroup.Reset() // Try to clean up
 			server.Close()
 			conn.Close()
-			logrus.Fatalf("Failed to add service to Avahi entry group: %v", err)
+			log.Fatalf("Failed to add service to Avahi entry group: %v", err)
 		}
 
 		err = entryGroup.Commit()
@@ -517,20 +514,20 @@ func StartWorker(numCores uint32) {
 			entryGroup.Reset() // Try to clean up
 			server.Close()
 			conn.Close()
-			logrus.Fatalf("Failed to commit Avahi entry group: %v", err)
+			log.Fatalf("Failed to commit Avahi entry group: %v", err)
 		}
-		logrus.Infof("Avahi service '%s.%s' registered successfully on port %d with TXT: %v", serviceName, serviceType, assignedPort, txtRecords)
+		log.Infof("Avahi service '%s.%s' registered successfully on port %d with TXT: %v", serviceName, serviceType, assignedPort, txtRecords)
 
 		// Define the closer for Avahi
 		mDNSServerCloser = func() {
-			logrus.Info("Unpublishing Avahi service...")
+			log.Info("Unpublishing Avahi service...")
 			if err := entryGroup.Reset(); err != nil {
-				logrus.Errorf("Error resetting Avahi entry group: %v", err)
+				log.Errorf("Error resetting Avahi entry group: %v", err)
 			}
 			server.Close()
 
 			if err := conn.Close(); err != nil {
-				logrus.Errorf("Error closing D-Bus connection: %v", err)
+				log.Errorf("Error closing D-Bus connection: %v", err)
 			}
 		}
 
@@ -545,21 +542,21 @@ func StartWorker(numCores uint32) {
 			nil, // interfaces: nil means all suitable interfaces
 		)
 		if err != nil {
-			logrus.Fatalf("Failed to register Zeroconf service: %v", err)
+			log.Fatalf("Failed to register Zeroconf service: %v", err)
 		}
-		logrus.Infof("Zeroconf service '%s' advertising on port %d with TXT: %v", serviceName, assignedPort, txtRecords)
+		log.Infof("Zeroconf service '%s' advertising on port %d with TXT: %v", serviceName, assignedPort, txtRecords)
 
 		// Define the closer for grandcat/zeroconf
 		mDNSServerCloser = func() {
-			logrus.Info("Shutting down grandcat/zeroconf service...")
+			log.Info("Shutting down grandcat/zeroconf service...")
 			server.Shutdown()
 		}
 
 	default:
-		logrus.Warnf("Unsupported operating system for mDNS advertising: %s. mDNS will not be advertised.", currentOS)
+		log.Warnf("Unsupported operating system for mDNS advertising: %s. mDNS will not be advertised.", currentOS)
 		// Provide a no-op closer if mDNS isn't supported
 		mDNSServerCloser = func() {
-			logrus.Info("No mDNS service to shut down on this OS.")
+			log.Info("No mDNS service to shut down on this OS.")
 		}
 	}
 
@@ -571,8 +568,8 @@ func StartWorker(numCores uint32) {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	<-sigChan // Blocks until a signal is received
 
-	logrus.Info("Shutting down Izpi Worker...")
+	log.Info("Shutting down Izpi Worker...")
 	grpcServer.GracefulStop()
-	logrus.Info("gRPC server stopped.")
-	logrus.Info("Izpi Worker shut down gracefully.")
+	log.Info("gRPC server stopped.")
+	log.Info("Izpi Worker shut down gracefully.")
 }
