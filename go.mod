@@ -11,9 +11,11 @@ require (
 	github.com/flynn-nrg/floatimage v0.0.0-20250505155730-d5a716d7266a
 	github.com/flynn-nrg/go-oiio v0.0.0-20250506183759-6155d221a662
 	github.com/flynn-nrg/gube v1.0.3
+	github.com/godbus/dbus/v5 v5.1.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/grandcat/zeroconf v1.0.0
+	github.com/holoplot/go-avahi v1.0.1
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/sirupsen/logrus v1.9.3
 	github.com/veandco/go-sdl2 v0.4.40
@@ -38,7 +40,6 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20250301202403-da16c1255728 // indirect
 	github.com/go-text/render v0.2.0 // indirect
 	github.com/go-text/typesetting v0.3.0 // indirect
-	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08 // indirect
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/kr/text v0.2.0 // indirect
