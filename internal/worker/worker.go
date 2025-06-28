@@ -491,6 +491,7 @@ func StartWorker(numCores uint32) {
 			avahiTxtRecords[i] = []byte(t)
 		}
 
+		fmt.Printf("hostname: %s\n", hostname)
 		err = entryGroup.AddService(
 			avahi.InterfaceUnspec,
 			avahi.ProtoUnspec,
