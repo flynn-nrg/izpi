@@ -25,6 +25,8 @@ import (
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport" // Import for transport service
+	"github.com/flynn-nrg/izpi/internal/scene"
+	"github.com/flynn-nrg/izpi/internal/transport"
 )
 
 // workerServer implements pb_discovery.WorkerDiscoveryServiceServer and pb_control.RenderControlServiceServer.
@@ -39,10 +41,7 @@ type workerServer struct {
 	freeMemoryBytes  uint64
 	currentStatus    pb_discovery.WorkerStatus
 
-	// Stored assets for mocking purposes (in a real app, these would be loaded into memory or GPU)
-	loadedScene     *pb_transport.Scene
-	loadedTextures  map[string][]byte
-	loadedTriangles []*pb_transport.Triangle
+	scene *scene.Scene
 }
 
 // NewWorkerServer creates and returns a new workerServer instance.
@@ -62,7 +61,6 @@ func NewWorkerServer(numCores uint32) *workerServer {
 		totalMemoryBytes: totalMem,
 		freeMemoryBytes:  freeMem,
 		currentStatus:    pb_discovery.WorkerStatus_FREE,
-		loadedTextures:   make(map[string][]byte), // Initialize the map
 	}
 }
 
@@ -257,32 +255,30 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	}
 	log.Infof("RenderSetup: Attempting to fetch scene '%s' from '%s'...", req.GetSceneName(), assetProviderAddr)
 
-	scene, err := s.getScene(ctx, transportClient, req.GetSceneName())
+	protoScene, err := s.getScene(ctx, transportClient, req.GetSceneName())
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to load scene '%s': %v", req.GetSceneName(), err)
 		s.sendStatus(stream, pb_control.RenderSetupStatus_FAILED, errMsg)
 		return status.Error(codes.NotFound, errMsg) // Use NotFound for scene not found
 	}
-	s.loadedScene = scene // Store the loaded scene
-	log.Infof("RenderSetup: Successfully loaded scene '%s' (version: %s). Contains %d materials, %d spheres.",
-		scene.GetName(), scene.GetVersion(), len(scene.GetMaterials()), len(scene.GetObjects().GetSpheres()))
 
-	if scene.GetStreamTriangles() {
-		log.Infof("RenderSetup: Scene indicates triangles need to be streamed. Total triangles: %d", scene.GetTotalTriangles())
-		triangles, err := s.streamTriangles(ctx, transportClient, scene.GetName(), scene.GetTotalTriangles(), 1000) // Fetch in batches of 1000
+	log.Infof("RenderSetup: Successfully loaded scene '%s' (version: %s). Contains %d materials, %d spheres.",
+		protoScene.GetName(), protoScene.GetVersion(), len(protoScene.GetMaterials()), len(protoScene.GetObjects().GetSpheres()))
+
+	triangles := make([]*pb_transport.Triangle, 0)
+
+	if protoScene.GetStreamTriangles() {
+		log.Infof("RenderSetup: Scene indicates triangles need to be streamed. Total triangles: %d", protoScene.GetTotalTriangles())
+		trianglesChunk, err := s.streamTriangles(ctx, transportClient, protoScene.GetName(), protoScene.GetTotalTriangles(), 1000) // Fetch in batches of 1000
 		if err != nil {
-			errMsg := fmt.Sprintf("Failed to stream triangles for scene '%s': %v", scene.GetName(), err)
+			errMsg := fmt.Sprintf("Failed to stream triangles for scene '%s': %v", protoScene.GetName(), err)
 			s.sendStatus(stream, pb_control.RenderSetupStatus_FAILED, errMsg)
 			return status.Error(codes.Internal, errMsg)
 		}
-		s.loadedTriangles = triangles // Store the loaded triangles
-		log.Infof("RenderSetup: Successfully streamed %d triangles for scene '%s'.", len(triangles), scene.GetName())
-	} else {
-		log.Infof("RenderSetup: Scene indicates triangles are embedded or not streamed.")
-		// If triangles are embedded, they would be in scene.GetObjects().GetTriangles()
-		// You might want to copy them or process them here.
-		s.loadedTriangles = scene.GetObjects().GetTriangles()
-		log.Infof("RenderSetup: Using %d embedded triangles from scene.", len(s.loadedTriangles))
+
+		triangles = append(triangles, trianglesChunk...)
+
+		log.Infof("RenderSetup: Successfully streamed %d triangles for scene '%s'.", len(triangles), protoScene.GetName())
 	}
 
 	// Step 2: Send STREAMING_TEXTURES status and fetch textures
@@ -293,7 +289,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 	// Collect all unique ImageTexture filenames from materials
 	texturesToFetch := make(map[string]*pb_transport.ImageTexture)
-	for _, mat := range scene.GetMaterials() {
+	for _, mat := range protoScene.GetMaterials() {
 		if mat.GetLambert() != nil && mat.GetLambert().GetAlbedo() != nil {
 			if imgTex := mat.GetLambert().GetAlbedo().GetImage(); imgTex != nil {
 				texturesToFetch[imgTex.GetFilename()] = imgTex
@@ -334,6 +330,8 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		}
 	}
 
+	textures := make(map[string][]byte)
+
 	for filename, imgTex := range texturesToFetch {
 		log.Infof("RenderSetup: Fetching texture '%s' (expected size: %d bytes)...", filename, imgTex.GetSize())
 		texData, err := s.streamTextureFile(ctx, transportClient, filename, imgTex.GetSize())
@@ -342,17 +340,33 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 			s.sendStatus(stream, pb_control.RenderSetupStatus_FAILED, errMsg)
 			return status.Error(codes.Internal, errMsg)
 		}
-		s.loadedTextures[filename] = texData // Store the fetched texture data
+
+		textures[filename] = texData
+
 		log.Infof("RenderSetup: Successfully loaded texture '%s'. Actual size: %d bytes.", filename, len(texData))
 	}
-	log.Infof("RenderSetup: Finished streaming %d unique textures.", len(s.loadedTextures))
 
-	// Step 3: Send READY status
+	log.Infof("RenderSetup: Finished streaming %d unique textures.", len(textures))
+
+	// Step 3: Transform the scene to its internal representation
+	cameraAspectRatio := float64(req.GetImageResolution().GetWidth()) / float64(req.GetImageResolution().GetHeight())
+	t := transport.NewTransport(cameraAspectRatio, protoScene, triangles, textures)
+
+	scene, err := t.ToScene()
+	if err != nil {
+		errMsg := fmt.Sprintf("Failed to convert scene to internal representation: %v", err)
+		s.sendStatus(stream, pb_control.RenderSetupStatus_FAILED, errMsg)
+		return status.Error(codes.Internal, errMsg)
+	}
+
+	s.scene = scene
+
+	// Step 4: Send READY status
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_READY, ""); err != nil {
 		return status.Errorf(codes.Internal, "failed to send READY status: %v", err)
 	}
 	log.Infof("RenderSetup: Worker is READY for rendering with scene '%s', %d triangles, and %d textures.",
-		req.GetSceneName(), len(s.loadedTriangles), len(s.loadedTextures))
+		req.GetSceneName(), len(protoScene.GetObjects().GetTriangles()), len(textures))
 
 	s.currentStatus = pb_discovery.WorkerStatus_BUSY_RENDERING
 
