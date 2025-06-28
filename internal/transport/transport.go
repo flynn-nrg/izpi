@@ -8,6 +8,7 @@ import (
 	"github.com/flynn-nrg/izpi/internal/material"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
 	"github.com/flynn-nrg/izpi/internal/scene"
+	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
@@ -26,6 +27,12 @@ func NewTransport(aspectOverride float64, protoScene *pb_transport.Scene, triang
 func (t *Transport) ToScene() (*scene.Scene, error) {
 	camera := t.toSceneCamera(t.aspectOverride)
 
+	materials, err := t.toSceneMaterials()
+	if err != nil {
+		return nil, err
+	}
+	t.materials = materials
+
 	hitables, err := t.toSceneObjects()
 	if err != nil {
 		return nil, err
@@ -43,6 +50,84 @@ func (t *Transport) ToScene() (*scene.Scene, error) {
 		Lights: hitable.NewSlice(lights),
 		Camera: camera,
 	}, nil
+}
+
+func (t *Transport) toSceneMaterials() (map[string]material.Material, error) {
+	materials := make(map[string]material.Material)
+
+	for _, material := range t.protoScene.GetMaterials() {
+		switch material.GetType() {
+		case pb_transport.MaterialType_LAMBERT:
+			lambert, err := t.toSceneLambertMaterial(material)
+			if err != nil {
+				return nil, err
+			}
+			materials[material.GetName()] = lambert
+		case pb_transport.MaterialType_DIELECTRIC:
+			dielectric, err := t.toSceneDielectricMaterial(material)
+			if err != nil {
+				return nil, err
+			}
+			materials[material.GetName()] = dielectric
+		case pb_transport.MaterialType_DIFFUSE_LIGHT:
+			diffuselight, err := t.toSceneDiffuseLightMaterial(material)
+			if err != nil {
+				return nil, err
+			}
+			materials[material.GetName()] = diffuselight
+		}
+	}
+
+	return materials, nil
+}
+
+func (t *Transport) toSceneLambertMaterial(mat *pb_transport.Material) (material.Material, error) {
+	lambert := mat.GetLambert()
+
+	albedo, err := t.toSceneTexture(lambert.GetAlbedo())
+	if err != nil {
+		return nil, err
+	}
+
+	return material.NewLambertian(albedo), nil
+}
+
+func (t *Transport) toSceneDielectricMaterial(mat *pb_transport.Material) (material.Material, error) {
+	dielectric := mat.GetDielectric()
+
+	refidx := float64(dielectric.GetRefidx())
+
+	return material.NewDielectric(refidx), nil
+}
+
+func (t *Transport) toSceneDiffuseLightMaterial(mat *pb_transport.Material) (material.Material, error) {
+	diffuselight := mat.GetDiffuselight()
+
+	emit, err := t.toSceneTexture(diffuselight.GetEmit())
+	if err != nil {
+		return nil, err
+	}
+
+	return material.NewDiffuseLight(emit), nil
+}
+
+func (t *Transport) toSceneTexture(text *pb_transport.Texture) (texture.Texture, error) {
+	switch text.GetTextureProperties().(type) {
+	case *pb_transport.Texture_Constant:
+		return t.toSceneConstantTexture(text)
+	}
+
+	return nil, fmt.Errorf("unknown texture type: %T", text.GetTextureProperties())
+}
+
+func (t *Transport) toSceneConstantTexture(text *pb_transport.Texture) (texture.Texture, error) {
+	constant := text.GetConstant()
+
+	return texture.NewConstant(&vec3.Vec3Impl{
+		X: float64(constant.GetValue().GetX()),
+		Y: float64(constant.GetValue().GetY()),
+		Z: float64(constant.GetValue().GetZ()),
+	}), nil
 }
 
 func (t *Transport) toSceneCamera(aspectOverride float64) *camera.Camera {

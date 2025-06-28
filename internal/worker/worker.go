@@ -485,6 +485,8 @@ func StartWorker(numCores uint32) {
 		}
 		// entryGroup.Reset() will be deferred within mDNSServerCloser
 
+		fqdnHostname := hostname + ".local"
+
 		// Convert TXT records to []byte slice of slices for Avahi
 		avahiTxtRecords := make([][]byte, len(txtRecords))
 		for i, t := range txtRecords {
@@ -498,8 +500,8 @@ func StartWorker(numCores uint32) {
 			0, // Flags
 			serviceName,
 			serviceType,
-			"local",  // Domain
-			hostname, // Hostname
+			"local",      // Domain
+			fqdnHostname, // Hostname
 			uint16(assignedPort),
 			avahiTxtRecords,
 		)
