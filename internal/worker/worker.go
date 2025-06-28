@@ -6,10 +6,13 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	// Added for simulating delays
+	"github.com/godbus/dbus/v5"
 	"github.com/grandcat/zeroconf"
+	"github.com/holoplot/go-avahi"
 	"github.com/pbnjay/memory"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -429,7 +432,7 @@ func StartWorker(numCores uint32) {
 	logrus.Infof("gRPC server listening on all interfaces: %s (port %d)", lis.Addr().String(), assignedPort)
 
 	grpcServer := grpc.NewServer()
-	workerSrv := NewWorkerServer(numCores)
+	workerSrv := NewWorkerServer(numCores) // Assuming NewWorkerServer is defined elsewhere
 
 	pb_discovery.RegisterWorkerDiscoveryServiceServer(grpcServer, workerSrv)
 	pb_control.RegisterRenderControlServiceServer(grpcServer, workerSrv)
@@ -451,24 +454,120 @@ func StartWorker(numCores uint32) {
 		fmt.Sprintf("grpc_port=%d", assignedPort),
 	}
 
-	server, err := zeroconf.Register(
-		serviceName,
-		serviceType,
-		"local.",
-		assignedPort,
-		txtRecords,
-		nil,
-	)
-	if err != nil {
-		logrus.Fatalf("Failed to register Zeroconf service: %v", err)
+	// Create a channel to signal when mDNS advertising should stop
+	// This is important for both zeroconf.Register and avahi.EntryGroup
+	var mDNSServerCloser func() // Function to call to stop mDNS advertisement
+
+	currentOS := runtime.GOOS
+	logrus.Infof("Detected operating system: %s", currentOS)
+
+	switch currentOS {
+	case "linux", "freebsd":
+		// Use go-avahi for Linux and FreeBSD
+		conn, err := dbus.SystemBus()
+		if err != nil {
+			logrus.Fatalf("Failed to connect to D-Bus system bus for Avahi: %v", err)
+		}
+		// conn.Close() will be deferred within mDNSServerCloser
+
+		server, err := avahi.ServerNew(conn)
+		if err != nil {
+			conn.Close() // Close D-Bus connection on Avahi server creation failure
+			logrus.Fatalf("Failed to create Avahi server client: %v", err)
+		}
+		// server.Close() will be deferred within mDNSServerCloser
+
+		entryGroup, err := server.EntryGroupNew()
+		if err != nil {
+			server.Close() // Close Avahi server client on entry group creation failure
+			conn.Close()   // Close D-Bus connection
+			logrus.Fatalf("Failed to create new Avahi entry group: %v", err)
+		}
+		// entryGroup.Reset() will be deferred within mDNSServerCloser
+
+		// Convert TXT records to []byte slice of slices for Avahi
+		avahiTxtRecords := make([][]byte, len(txtRecords))
+		for i, t := range txtRecords {
+			avahiTxtRecords[i] = []byte(t)
+		}
+
+		err = entryGroup.AddService(
+			avahi.InterfaceUnspec,
+			avahi.ProtoUnspec,
+			0, // Flags
+			serviceName,
+			serviceType,
+			"local",  // Domain
+			hostname, // Hostname
+			uint16(assignedPort),
+			avahiTxtRecords,
+		)
+		if err != nil {
+			entryGroup.Reset() // Try to clean up
+			server.Close()
+			conn.Close()
+			logrus.Fatalf("Failed to add service to Avahi entry group: %v", err)
+		}
+
+		err = entryGroup.Commit()
+		if err != nil {
+			entryGroup.Reset() // Try to clean up
+			server.Close()
+			conn.Close()
+			logrus.Fatalf("Failed to commit Avahi entry group: %v", err)
+		}
+		logrus.Infof("Avahi service '%s.%s' registered successfully on port %d with TXT: %v", serviceName, serviceType, assignedPort, txtRecords)
+
+		// Define the closer for Avahi
+		mDNSServerCloser = func() {
+			logrus.Info("Unpublishing Avahi service...")
+			if err := entryGroup.Reset(); err != nil {
+				logrus.Errorf("Error resetting Avahi entry group: %v", err)
+			}
+			server.Close()
+
+			if err := conn.Close(); err != nil {
+				logrus.Errorf("Error closing D-Bus connection: %v", err)
+			}
+		}
+
+	case "darwin":
+		// Use grandcat/zeroconf for macOS
+		server, err := zeroconf.Register(
+			serviceName,
+			serviceType,
+			"local.",
+			assignedPort,
+			txtRecords,
+			nil, // interfaces: nil means all suitable interfaces
+		)
+		if err != nil {
+			logrus.Fatalf("Failed to register Zeroconf service: %v", err)
+		}
+		logrus.Infof("Zeroconf service '%s' advertising on port %d with TXT: %v", serviceName, assignedPort, txtRecords)
+
+		// Define the closer for grandcat/zeroconf
+		mDNSServerCloser = func() {
+			logrus.Info("Shutting down grandcat/zeroconf service...")
+			server.Shutdown()
+		}
+
+	default:
+		logrus.Warnf("Unsupported operating system for mDNS advertising: %s. mDNS will not be advertised.", currentOS)
+		// Provide a no-op closer if mDNS isn't supported
+		mDNSServerCloser = func() {
+			logrus.Info("No mDNS service to shut down on this OS.")
+		}
 	}
-	defer server.Shutdown()
-	logrus.Infof("Zeroconf service '%s' advertising on port %d with TXT: %v", serviceName, assignedPort, txtRecords)
+
+	// Ensure the mDNS service is shut down gracefully on exit
+	defer mDNSServerCloser()
 
 	// --- Graceful Shutdown ---
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	<-sigChan
+	<-sigChan // Blocks until a signal is received
+
 	logrus.Info("Shutting down Izpi Worker...")
 	grpcServer.GracefulStop()
 	logrus.Info("gRPC server stopped.")
