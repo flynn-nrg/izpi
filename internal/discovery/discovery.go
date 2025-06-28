@@ -45,7 +45,22 @@ func (d *Discovery) FindWorkers() (map[string]*pb_discovery.QueryWorkerStatusRes
 	}
 
 	for entry := range entries {
-		target := fmt.Sprintf("%s:%d", entry.HostName, entry.Port)
+		log.Infof("Discovered service: HostName='%s', Port=%d, Addrs=%v", entry.HostName, entry.Port, entry.AddrIPv4) // Add this line
+
+		var ipToDial string
+		// Prefer IPv4 from the discovered addresses
+		if len(entry.AddrIPv4) > 0 {
+			ipToDial = entry.AddrIPv4[0].String()
+		} else if len(entry.AddrIPv6) > 0 {
+			// For IPv6, ensure it's in brackets for net.Dial/grpc.NewClient
+			ipToDial = fmt.Sprintf("[%s]", entry.AddrIPv6[0].String())
+		} else {
+			log.Warnf("No IP addresses found for service entry: %s", entry.HostName)
+			continue
+		}
+
+		target := fmt.Sprintf("%s:%d", ipToDial, entry.Port)
+
 		statusResp, err := d.discoverWorker(target)
 		if err != nil {
 			log.Errorf("failed to discover worker %s: %v", target, err)
@@ -65,12 +80,14 @@ func (d *Discovery) discoverWorker(target string) (*pb_discovery.QueryWorkerStat
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	log.Infof("Leader: Attempting gRPC dial to %s", target)
 	conn, err := grpc.NewClient(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Errorf("failed to connect to worker %s: %v", target, err)
 		return nil, err
 	}
 
+	log.Infof("remote connection address: %s", conn.Target())
 	defer conn.Close()
 
 	discoveryClient := pb_discovery.NewWorkerDiscoveryServiceClient(conn)

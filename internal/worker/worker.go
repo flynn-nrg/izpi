@@ -446,7 +446,7 @@ func StartWorker(numCores uint32) {
 
 	// --- Zeroconf (mDNS/DNS-SD) Advertising ---
 	serviceType := "_izpi-worker._tcp"
-	serviceName := "Izpi-Worker"
+	serviceName := fmt.Sprintf("Izpi-Worker-%s", workerID)
 
 	txtRecords := []string{
 		fmt.Sprintf("worker_id=%s", workerID),
