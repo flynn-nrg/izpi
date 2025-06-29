@@ -3,7 +3,6 @@ package render
 
 import (
 	"context"
-	"fmt"
 	"image"
 	"io"
 	"math/rand"
@@ -58,6 +57,7 @@ type workUnit struct {
 	previewChan chan display.DisplayTile
 	preview     bool
 	verbose     bool
+	stripHeight int
 	numSamples  int
 	x0          int
 	x1          int
@@ -128,8 +128,8 @@ func worker(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg 
 func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderControlServiceClient) {
 	var tile display.DisplayTile
 
-	fmt.Printf("Requesting tile %v\n", w)
-	//nx := w.canvas.Bounds().Max.X
+	log.Debugf("Requesting tile %v", w)
+
 	ny := w.canvas.Bounds().Max.Y
 
 	if w.preview {
@@ -142,10 +142,11 @@ func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderC
 	}
 
 	request := &pb_control.RenderTileRequest{
-		X0: uint32(w.x0),
-		Y0: uint32(w.y0),
-		X1: uint32(w.x1),
-		Y1: uint32(w.y1),
+		StripHeight: 1,
+		X0:          uint32(w.x0),
+		Y0:          uint32(w.y0),
+		X1:          uint32(w.x1),
+		Y1:          uint32(w.y1),
 	}
 
 	stream, err := client.RenderTile(ctx, request)
@@ -175,15 +176,14 @@ func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderC
 
 		i := 0
 		for x := posX; x < posX+width; x++ {
-			w.canvas.Set(x, ny-posY, colour.FloatNRGBA{R: float64(pixels[i]), G: float64(pixels[i+1]), B: float64(pixels[i+2]), A: float64(pixels[i+3])})
+			w.canvas.Set(x, ny-posY, colour.FloatNRGBA{R: pixels[i], G: pixels[i+1], B: pixels[i+2], A: pixels[i+3]})
 			if w.preview {
-				tile.Pixels[i] = float64(pixels[i])
-				tile.Pixels[i+1] = float64(pixels[i+1])
-				tile.Pixels[i+2] = float64(pixels[i+2])
-				tile.Pixels[i+3] = float64(pixels[i+3])
+				tile.Pixels[i] = pixels[i]
+				tile.Pixels[i+1] = pixels[i+1]
+				tile.Pixels[i+2] = pixels[i+2]
+				tile.Pixels[i+3] = pixels[i+3]
 				i += 4
 			}
-			i += 4
 		}
 
 		if w.preview {
@@ -203,6 +203,7 @@ func remoteWorker(ctx context.Context, input chan workUnit, quit chan struct{}, 
 		case w := <-input:
 			renderRectRemote(ctx, w, config.Client)
 		case <-quit:
+			log.Debug("Remote worker exiting")
 			return
 		}
 	}
@@ -299,6 +300,7 @@ func (r *Renderer) Render(ctx context.Context) image.Image {
 			previewChan: r.previewChan,
 			preview:     r.preview,
 			verbose:     r.verbose,
+			stripHeight: 1,
 			numSamples:  r.numSamples,
 			x0:          t.X * stepSizeX,
 			x1:          t.X*stepSizeX + (stepSizeX - 1),
@@ -309,6 +311,8 @@ func (r *Renderer) Render(ctx context.Context) image.Image {
 	for i := 0; i < r.numWorkers; i++ {
 		quit <- struct{}{}
 	}
+
+	log.Debugf("Rendering done. Waiting for workers threads to exit")
 
 	wg.Wait()
 

@@ -145,9 +145,9 @@ func (RenderSetupStatus) EnumDescriptor() ([]byte, []int) {
 // Represents a 3D vector or point with float components, also used for colors.
 type Vec3 struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	X             float32                `protobuf:"fixed32,1,opt,name=x,proto3" json:"x,omitempty"`
-	Y             float32                `protobuf:"fixed32,2,opt,name=y,proto3" json:"y,omitempty"`
-	Z             float32                `protobuf:"fixed32,3,opt,name=z,proto3" json:"z,omitempty"`
+	X             float64                `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y             float64                `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
+	Z             float64                `protobuf:"fixed64,3,opt,name=z,proto3" json:"z,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -182,21 +182,21 @@ func (*Vec3) Descriptor() ([]byte, []int) {
 	return file_control_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Vec3) GetX() float32 {
+func (x *Vec3) GetX() float64 {
 	if x != nil {
 		return x.X
 	}
 	return 0
 }
 
-func (x *Vec3) GetY() float32 {
+func (x *Vec3) GetY() float64 {
 	if x != nil {
 		return x.Y
 	}
 	return 0
 }
 
-func (x *Vec3) GetZ() float32 {
+func (x *Vec3) GetZ() float64 {
 	if x != nil {
 		return x.Z
 	}
@@ -422,10 +422,11 @@ func (x *RenderSetupResponse) GetErrorMessage() string {
 // The worker should render the region defined by [x0, y0] to [x1, y1) (exclusive).
 type RenderTileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	X0            uint32                 `protobuf:"varint,1,opt,name=x0,proto3" json:"x0,omitempty"` // Start X coordinate (inclusive) of the overall tile in image space.
-	Y0            uint32                 `protobuf:"varint,2,opt,name=y0,proto3" json:"y0,omitempty"` // Start Y coordinate (inclusive) of the overall tile in image space.
-	X1            uint32                 `protobuf:"varint,3,opt,name=x1,proto3" json:"x1,omitempty"` // End X coordinate (exclusive) of the overall tile in image space.
-	Y1            uint32                 `protobuf:"varint,4,opt,name=y1,proto3" json:"y1,omitempty"` // End Y coordinate (exclusive) of the overall tile in image space.
+	StripHeight   uint32                 `protobuf:"varint,1,opt,name=strip_height,json=stripHeight,proto3" json:"strip_height,omitempty"` // Height of the strip to render.
+	X0            uint32                 `protobuf:"varint,2,opt,name=x0,proto3" json:"x0,omitempty"`                                      // Start X coordinate (inclusive) of the overall tile in image space.
+	Y0            uint32                 `protobuf:"varint,3,opt,name=y0,proto3" json:"y0,omitempty"`                                      // Start Y coordinate (inclusive) of the overall tile in image space.
+	X1            uint32                 `protobuf:"varint,4,opt,name=x1,proto3" json:"x1,omitempty"`                                      // End X coordinate (exclusive) of the overall tile in image space.
+	Y1            uint32                 `protobuf:"varint,5,opt,name=y1,proto3" json:"y1,omitempty"`                                      // End Y coordinate (exclusive) of the overall tile in image space.
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -458,6 +459,13 @@ func (x *RenderTileRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RenderTileRequest.ProtoReflect.Descriptor instead.
 func (*RenderTileRequest) Descriptor() ([]byte, []int) {
 	return file_control_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *RenderTileRequest) GetStripHeight() uint32 {
+	if x != nil {
+		return x.StripHeight
+	}
+	return 0
 }
 
 func (x *RenderTileRequest) GetX0() uint32 {
@@ -497,7 +505,7 @@ type RenderTileResponse struct {
 	Height        uint32                 `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`         // Height of this specific pixel chunk (sub-tile).
 	PosX          uint32                 `protobuf:"varint,3,opt,name=pos_x,json=posX,proto3" json:"pos_x,omitempty"` // X-coordinate of the top-left pixel of this chunk (relative to overall image origin).
 	PosY          uint32                 `protobuf:"varint,4,opt,name=pos_y,json=posY,proto3" json:"pos_y,omitempty"` // Y-coordinate of the top-left pixel of this chunk (relative to overall image origin).
-	Pixels        []float32              `protobuf:"fixed32,5,rep,packed,name=pixels,proto3" json:"pixels,omitempty"` // Flat array of pixel values (e.g., RGB as [R1, G1, B1, R2, G2, B2...])
+	Pixels        []float64              `protobuf:"fixed64,5,rep,packed,name=pixels,proto3" json:"pixels,omitempty"` // Flat array of pixel values (e.g., RGBA as [R1, G1, B1, A1, R2, G2, B2, A2...])
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -560,7 +568,7 @@ func (x *RenderTileResponse) GetPosY() uint32 {
 	return 0
 }
 
-func (x *RenderTileResponse) GetPixels() []float32 {
+func (x *RenderTileResponse) GetPixels() []float64 {
 	if x != nil {
 		return x.Pixels
 	}
@@ -664,9 +672,9 @@ const file_control_proto_rawDesc = "" +
 	"\n" +
 	"\rcontrol.proto\x12\acontrol\"0\n" +
 	"\x04Vec3\x12\f\n" +
-	"\x01x\x18\x01 \x01(\x02R\x01x\x12\f\n" +
-	"\x01y\x18\x02 \x01(\x02R\x01y\x12\f\n" +
-	"\x01z\x18\x03 \x01(\x02R\x01z\"?\n" +
+	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
+	"\x01y\x18\x02 \x01(\x01R\x01y\x12\f\n" +
+	"\x01z\x18\x03 \x01(\x01R\x01z\"?\n" +
 	"\x0fImageResolution\x12\x14\n" +
 	"\x05width\x18\x01 \x01(\rR\x05width\x12\x16\n" +
 	"\x06height\x18\x02 \x01(\rR\x06height\"\x86\x03\n" +
@@ -683,18 +691,19 @@ const file_control_proto_rawDesc = "" +
 	"\x0easset_provider\x18\t \x01(\tR\rassetProvider\"n\n" +
 	"\x13RenderSetupResponse\x122\n" +
 	"\x06status\x18\x01 \x01(\x0e2\x1a.control.RenderSetupStatusR\x06status\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"S\n" +
-	"\x11RenderTileRequest\x12\x0e\n" +
-	"\x02x0\x18\x01 \x01(\rR\x02x0\x12\x0e\n" +
-	"\x02y0\x18\x02 \x01(\rR\x02y0\x12\x0e\n" +
-	"\x02x1\x18\x03 \x01(\rR\x02x1\x12\x0e\n" +
-	"\x02y1\x18\x04 \x01(\rR\x02y1\"\x84\x01\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"v\n" +
+	"\x11RenderTileRequest\x12!\n" +
+	"\fstrip_height\x18\x01 \x01(\rR\vstripHeight\x12\x0e\n" +
+	"\x02x0\x18\x02 \x01(\rR\x02x0\x12\x0e\n" +
+	"\x02y0\x18\x03 \x01(\rR\x02y0\x12\x0e\n" +
+	"\x02x1\x18\x04 \x01(\rR\x02x1\x12\x0e\n" +
+	"\x02y1\x18\x05 \x01(\rR\x02y1\"\x84\x01\n" +
 	"\x12RenderTileResponse\x12\x14\n" +
 	"\x05width\x18\x01 \x01(\rR\x05width\x12\x16\n" +
 	"\x06height\x18\x02 \x01(\rR\x06height\x12\x13\n" +
 	"\x05pos_x\x18\x03 \x01(\rR\x04posX\x12\x13\n" +
 	"\x05pos_y\x18\x04 \x01(\rR\x04posY\x12\x16\n" +
-	"\x06pixels\x18\x05 \x03(\x02R\x06pixels\"\x12\n" +
+	"\x06pixels\x18\x05 \x03(\x01R\x06pixels\"\x12\n" +
 	"\x10RenderEndRequest\"p\n" +
 	"\x11RenderEndResponse\x12/\n" +
 	"\x14total_render_time_ms\x18\x01 \x01(\x04R\x11totalRenderTimeMs\x12*\n" +

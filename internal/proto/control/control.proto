@@ -51,9 +51,9 @@ enum RenderSetupStatus { // Renamed enum
 
 // Represents a 3D vector or point with float components, also used for colors.
 message Vec3 {
-  float x = 1;
-  float y = 2;
-  float z = 3;
+  double x = 1;
+  double y = 2;
+  double z = 3;
 }
 
 // Represents the width and height of an image or tile.
@@ -89,10 +89,11 @@ message RenderSetupResponse { // Renamed message
 // Request to render a specific tile of the image.
 // The worker should render the region defined by [x0, y0] to [x1, y1) (exclusive).
 message RenderTileRequest {
-  uint32 x0 = 1; // Start X coordinate (inclusive) of the overall tile in image space.
-  uint32 y0 = 2; // Start Y coordinate (inclusive) of the overall tile in image space.
-  uint32 x1 = 3; // End X coordinate (exclusive) of the overall tile in image space.
-  uint32 y1 = 4; // End Y coordinate (exclusive) of the overall tile in image space.
+  uint32 strip_height = 1; // Height of the strip to render.
+  uint32 x0 = 2; // Start X coordinate (inclusive) of the overall tile in image space.
+  uint32 y0 = 3; // Start Y coordinate (inclusive) of the overall tile in image space.
+  uint32 x1 = 4; // End X coordinate (exclusive) of the overall tile in image space.
+  uint32 y1 = 5; // End Y coordinate (exclusive) of the overall tile in image space.
 }
 
 // Response containing a rendered chunk of pixel data for a sub-region within the requested tile.
@@ -103,7 +104,7 @@ message RenderTileResponse {
   uint32 height = 2; // Height of this specific pixel chunk (sub-tile).
   uint32 pos_x = 3;  // X-coordinate of the top-left pixel of this chunk (relative to overall image origin).
   uint32 pos_y = 4;  // Y-coordinate of the top-left pixel of this chunk (relative to overall image origin).
-  repeated float pixels = 5; // Flat array of pixel values (e.g., RGB as [R1, G1, B1, R2, G2, B2...])
+  repeated double pixels = 5; // Flat array of pixel values (e.g., RGBA as [R1, G1, B1, A1, R2, G2, B2, A2...])
 }
 
 // --- RenderEnd RPC Messages ---

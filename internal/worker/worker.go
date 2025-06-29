@@ -376,7 +376,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 const stripHeight = 1
 
 func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_control.RenderControlService_RenderTileServer) error {
-	log.Printf("RenderControlService: RenderTile called by %s - Tile: [%d,%d] to [%d,%d)",
+	log.Debugf("RenderControlService: RenderTile called by %s - Tile: [%d,%d] to [%d,%d)",
 		s.workerID, req.GetX0(), req.GetY0(), req.GetX1(), req.GetY1())
 
 	x0 := req.GetX0()
@@ -384,17 +384,18 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	x1 := req.GetX1()
 	y1 := req.GetY1()
 
-	stripSize := (x1 - x0) * stripHeight * 4
+	stripSize := req.GetStripHeight() * 4
+
 	responseWidth := x1 - x0
 
 	for y := y0; y < y1; y++ {
-		pixels := make([]float32, stripSize)
+		pixels := make([]float64, stripSize)
 
-		log.Printf("Rendering strip x0 %d, x1 %d, y %d", x0, x1, y)
+		log.Debugf("Rendering strip x0 %d, x1 %d, y %d", x0, x1, y)
 		for x := x0; x < x1; x++ {
 			select {
 			case <-stream.Context().Done():
-				log.Printf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
+				log.Debugf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
 				return stream.Context().Err()
 			default:
 			}
@@ -413,12 +414,12 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 		}
 
 		if err := stream.Send(resp); err != nil {
-			log.Printf("Failed to send RenderTileResponse chunk for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), err)
+			log.Errorf("Failed to send RenderTileResponse chunk for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), err)
 			return fmt.Errorf("failed to send stream chunk: %w", err)
 		}
 	}
 
-	log.Printf("RenderControlService: Finished streaming tile [%d,%d] to [%d,%d) by %s",
+	log.Debugf("RenderControlService: Finished streaming tile [%d,%d] to [%d,%d) by %s",
 		req.GetX0(), req.GetY0(), req.GetX1(), req.GetY1(), s.workerID)
 	return nil
 }
