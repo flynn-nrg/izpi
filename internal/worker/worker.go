@@ -384,7 +384,7 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	x1 := req.GetX1()
 	y1 := req.GetY1()
 
-	stripSize := req.GetStripHeight() * 4
+	stripSize := req.GetStripHeight() * 4 * (x1 - x0)
 
 	responseWidth := x1 - x0
 
