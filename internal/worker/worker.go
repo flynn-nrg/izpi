@@ -382,7 +382,7 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	x1 := req.GetX1()
 	y1 := req.GetY1()
 
-	totalPixelsInChunk := (x1 - x0) * (y1 - y0) * 3
+	totalPixelsInChunk := (x1 - x0) * (y1 - y0) * 4
 	responseWidth := x1 - x0
 
 	for y := y0; y < y1; y++ {
