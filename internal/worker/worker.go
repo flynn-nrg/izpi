@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
-	"sync"
 	"syscall"
 
 	// Added for simulating delays
@@ -54,12 +53,7 @@ type workerServer struct {
 	imageResolutionY int
 	background       *vec3.Vec3Impl
 	ink              *vec3.Vec3Impl
-
-	renderPixelResponseChan chan renderPixelResponse
-	renderPixelWorkChan     chan renderPixelWorkUnit
-	renderPixelQuitChan     chan struct{}
-
-	wg sync.WaitGroup
+	rand             *fastrandom.LCG
 }
 
 // NewWorkerServer creates and returns a new workerServer instance.
@@ -383,6 +377,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	s.maxDepth = int(req.GetMaxDepth())
 	s.background = &vec3.Vec3Impl{X: req.GetBackgroundColor().GetX(), Y: req.GetBackgroundColor().GetY(), Z: req.GetBackgroundColor().GetZ()}
 	s.ink = &vec3.Vec3Impl{X: req.GetInkColor().GetX(), Y: req.GetInkColor().GetY(), Z: req.GetInkColor().GetZ()}
+	s.rand = fastrandom.NewWithDefaults()
 	s.samplesPerPixel = int(req.GetSamplesPerPixel())
 	s.imageResolutionX = int(req.GetImageResolution().GetWidth())
 	s.imageResolutionY = int(req.GetImageResolution().GetHeight())
@@ -402,17 +397,6 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 	log.Debugf("Render parameters: Max depth: %d, Background: %v, Ink: %v, Sampler: %s", s.maxDepth, s.background, s.ink, req.GetSampler().String())
 
-	s.renderPixelResponseChan = make(chan renderPixelResponse)
-	s.renderPixelWorkChan = make(chan renderPixelWorkUnit)
-	s.renderPixelQuitChan = make(chan struct{})
-
-	log.Debugf("RenderSetup: Starting %d render strips", s.availableCores)
-	for i := 0; i < int(s.availableCores); i++ {
-		rand := fastrandom.NewWithDefaults()
-		s.wg.Add(1)
-		go s.renderPixel(s.renderPixelWorkChan, s.renderPixelQuitChan, &s.wg, rand)
-	}
-
 	// Step 5: Send READY status
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_READY, ""); err != nil {
 		return status.Errorf(codes.Internal, "failed to send READY status: %v", err)
@@ -425,53 +409,21 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	return nil // Successfully configured
 }
 
-type renderPixelWorkUnit struct {
-	x int
-	y int
-}
-
-type renderPixelResponse struct {
-	pixel *vec3.Vec3Impl
-}
-
-func (s *workerServer) renderPixel(input chan renderPixelWorkUnit, quit chan struct{}, wg *sync.WaitGroup, rand *fastrandom.LCG) {
-	defer wg.Done()
-
-	for {
-		select {
-		case w := <-input:
-			nx := float64(s.imageResolutionX)
-			ny := float64(s.imageResolutionY)
-
-			col := &vec3.Vec3Impl{}
-			for sample := 0; sample < s.samplesPerPixel; sample++ {
-				u := (float64(w.x) + rand.Float64()) / nx
-				v := (float64(w.y) + rand.Float64()) / ny
-				r := s.scene.Camera.GetRay(u, v)
-				col = vec3.Add(col, vec3.DeNAN(s.sampler.Sample(r, s.scene.World, s.scene.Lights, 0, rand)))
-			}
-
-			col = vec3.ScalarDiv(col, float64(s.samplesPerPixel))
-
-			s.renderPixelResponseChan <- renderPixelResponse{pixel: col}
-		case <-quit:
-			return
-		}
-	}
-}
-
 func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_control.RenderControlService_RenderTileServer) error {
 	log.Debugf("RenderControlService: RenderTile called by %s - Tile: [%d,%d] to [%d,%d)",
 		s.workerID, req.GetX0(), req.GetY0(), req.GetX1(), req.GetY1())
 
-	x0 := int(req.GetX0())
-	y0 := int(req.GetY0())
-	x1 := int(req.GetX1())
-	y1 := int(req.GetY1())
+	x0 := req.GetX0()
+	y0 := req.GetY0()
+	x1 := req.GetX1()
+	y1 := req.GetY1()
 
-	stripSize := int(req.GetStripHeight()) * 4 * (x1 - x0 + 1)
+	stripSize := req.GetStripHeight() * 4 * (x1 - x0 + 1)
 
 	responseWidth := x1 - x0 + 1
+
+	nx := float64(s.imageResolutionX)
+	ny := float64(s.imageResolutionY)
 
 	for y := y0; y <= y1; y++ {
 		pixels := make([]float64, stripSize)
@@ -484,11 +436,18 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 				log.Debugf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
 				return stream.Context().Err()
 			default:
-				s.renderPixelWorkChan <- renderPixelWorkUnit{x: x, y: y}
-				col := <-s.renderPixelResponseChan
-				pixels[i] = col.pixel.Z
-				pixels[i+1] = col.pixel.Y
-				pixels[i+2] = col.pixel.X
+				col := &vec3.Vec3Impl{}
+				for sample := 0; sample < s.samplesPerPixel; sample++ {
+					u := (float64(x) + s.rand.Float64()) / nx
+					v := (float64(y) + s.rand.Float64()) / ny
+					r := s.scene.Camera.GetRay(u, v)
+					col = vec3.Add(col, vec3.DeNAN(s.sampler.Sample(r, s.scene.World, s.scene.Lights, 0, s.rand)))
+				}
+
+				col = vec3.ScalarDiv(col, float64(s.samplesPerPixel))
+				pixels[i] = col.Z
+				pixels[i+1] = col.Y
+				pixels[i+2] = col.X
 				pixels[i+3] = 1.0
 				i += 4
 			}
@@ -496,10 +455,10 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 		}
 
 		resp := &pb_control.RenderTileResponse{
-			Width:  uint32(responseWidth),
+			Width:  responseWidth,
 			Height: 1,
-			PosX:   uint32(x0),
-			PosY:   uint32(y),
+			PosX:   x0,
+			PosY:   y,
 			Pixels: pixels,
 		}
 

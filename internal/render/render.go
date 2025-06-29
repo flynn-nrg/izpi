@@ -3,7 +3,6 @@ package render
 
 import (
 	"context"
-	"fmt"
 	"image"
 	"io"
 	"math/rand"
@@ -177,7 +176,6 @@ func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderC
 
 		i := 0
 		for x := posX; x < posX+width; x++ {
-			fmt.Printf("Setting pixel %d, %d to %v\n", x, ny-posY, colour.FloatNRGBA{R: pixels[i], G: pixels[i+1], B: pixels[i+2], A: pixels[i+3]})
 			w.canvas.Set(x, ny-posY, colour.FloatNRGBA{R: pixels[i], G: pixels[i+1], B: pixels[i+2], A: pixels[i+3]})
 			if w.preview {
 				tile.Pixels[i] = pixels[i]
@@ -203,6 +201,7 @@ func remoteWorker(ctx context.Context, input chan workUnit, quit chan struct{}, 
 	for {
 		select {
 		case w := <-input:
+			log.Debugf("Rendering tile %v", w)
 			renderRectRemote(ctx, w, config.Client)
 		case <-quit:
 			log.Debug("Remote worker exiting")
@@ -259,8 +258,11 @@ func (r *Renderer) Render(ctx context.Context) image.Image {
 		bar = pb.StartNew(numTiles)
 	}
 
+	totalWorkers := 0
+
 	// Local workers
 	for i := 0; i < r.numWorkers; i++ {
+		totalWorkers++
 		random := fastrandom.NewWithDefaults()
 		wg.Add(1)
 		go worker(queue, quit, random, wg)
@@ -268,8 +270,11 @@ func (r *Renderer) Render(ctx context.Context) image.Image {
 
 	// Remote workers
 	for _, worker := range r.remoteWorkers {
-		wg.Add(1)
-		go remoteWorker(ctx, queue, quit, wg, worker)
+		for i := 0; i < worker.NumCores; i++ {
+			totalWorkers++
+			wg.Add(1)
+			go remoteWorker(ctx, queue, quit, wg, worker)
+		}
 	}
 
 	gridSizeX := r.sizeX / stepSizeX
@@ -290,7 +295,7 @@ func (r *Renderer) Render(ctx context.Context) image.Image {
 		log.Fatalf("invalid sampler type %v", r.samplerType)
 	}
 
-	log.Infof("Begin rendering using %v local worker threads and %v remote worker threads", r.numWorkers, len(r.remoteWorkers))
+	log.Infof("Begin rendering using %v worker threads: %v local, %v remote", totalWorkers, r.numWorkers, totalWorkers-r.numWorkers)
 	startTime := time.Now()
 
 	for _, t := range path {
@@ -311,7 +316,7 @@ func (r *Renderer) Render(ctx context.Context) image.Image {
 		}
 	}
 
-	for range r.numWorkers + len(r.remoteWorkers) {
+	for range totalWorkers {
 		quit <- struct{}{}
 	}
 
