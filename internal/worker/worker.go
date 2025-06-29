@@ -475,9 +475,9 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 				}
 
 				col = vec3.ScalarDiv(col, float64(s.samplesPerPixel))
-				pixels[i] = col.X
+				pixels[i] = col.Z
 				pixels[i+1] = col.Y
-				pixels[i+2] = col.Z
+				pixels[i+2] = col.X
 				pixels[i+3] = 1.0
 				i += 4
 			}
