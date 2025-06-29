@@ -2,7 +2,6 @@ package fastrandom
 
 import (
 	"math/rand"
-	"sync"
 )
 
 const (
@@ -16,8 +15,6 @@ type LCG struct {
 	m     uint64
 	a     uint64
 	c     uint64
-
-	mu sync.Mutex
 }
 
 func New(seed, m, a, c uint64) *LCG {
@@ -44,8 +41,6 @@ func NewWithDefaults() *LCG {
 func (l *LCG) Float64() float64 {
 
 	/* Update the LCG state using the formula Xn+1 = (A*Xn + C) mod M */
-	l.mu.Lock()
-	defer l.mu.Unlock()
 	l.state = (l.a*l.state + l.c) % l.m
 	/* Convert the LCG state to a floating point number between 0 and 1 */
 	return float64(l.state) / float64(l.m)

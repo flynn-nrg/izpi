@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"sync"
 	"syscall"
 
 	// Added for simulating delays
@@ -54,6 +55,12 @@ type workerServer struct {
 	background       *vec3.Vec3Impl
 	ink              *vec3.Vec3Impl
 	rand             *fastrandom.LCG
+
+	randomRequestChan  chan struct{}
+	randomResponseChan chan float64
+	randomQuitChan     chan struct{}
+
+	wg sync.WaitGroup
 }
 
 // NewWorkerServer creates and returns a new workerServer instance.
@@ -395,6 +402,17 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		return status.Errorf(codes.InvalidArgument, "invalid sampler type: %s", req.GetSampler().String())
 	}
 
+	// Random generator pool
+	s.randomRequestChan = make(chan struct{})
+	s.randomResponseChan = make(chan float64)
+	s.randomQuitChan = make(chan struct{})
+
+	for i := 0; i < int(s.availableCores); i++ {
+		s.wg.Add(1)
+		rand := fastrandom.NewWithDefaults()
+		go s.randomGenerator(s.randomRequestChan, s.randomQuitChan, &s.wg, rand)
+	}
+
 	log.Debugf("Render parameters: Max depth: %d, Background: %v, Ink: %v, Sampler: %s", s.maxDepth, s.background, s.ink, req.GetSampler().String())
 
 	// Step 5: Send READY status
@@ -407,6 +425,19 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	s.currentStatus = pb_discovery.WorkerStatus_BUSY_RENDERING
 
 	return nil // Successfully configured
+}
+
+func (s *workerServer) randomGenerator(input chan struct{}, quit chan struct{}, wg *sync.WaitGroup, random *fastrandom.LCG) {
+	defer wg.Done()
+
+	for {
+		select {
+		case <-input:
+			random.Float64()
+		case <-quit:
+			return
+		}
+	}
 }
 
 func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_control.RenderControlService_RenderTileServer) error {
@@ -444,9 +475,9 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 				}
 
 				col = vec3.ScalarDiv(col, float64(s.samplesPerPixel))
-				pixels[i] = col.Z
+				pixels[i] = col.X
 				pixels[i+1] = col.Y
-				pixels[i+2] = col.X
+				pixels[i+2] = col.Z
 				pixels[i+3] = 1.0
 				i += 4
 			}
