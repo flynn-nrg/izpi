@@ -427,12 +427,12 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	nx := float64(s.imageResolutionX)
 	ny := float64(s.imageResolutionY)
 
-	for y := y0; y < y1; y++ {
+	for y := y0; y <= y1; y++ {
 		pixels := make([]float64, stripSize)
 
 		log.Debugf("Rendering strip x0 %d, x1 %d, y %d", x0, x1, y)
 		i := 0
-		for x := x0; x < x1; x++ {
+		for x := x0; x <= x1; x++ {
 			select {
 			case <-stream.Context().Done():
 				log.Debugf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())

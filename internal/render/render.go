@@ -3,6 +3,7 @@ package render
 
 import (
 	"context"
+	"fmt"
 	"image"
 	"io"
 	"math/rand"
@@ -176,6 +177,7 @@ func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderC
 
 		i := 0
 		for x := posX; x < posX+width; x++ {
+			fmt.Printf("Setting pixel %d, %d to %v\n", x, ny-posY, colour.FloatNRGBA{R: pixels[i], G: pixels[i+1], B: pixels[i+2], A: pixels[i+3]})
 			w.canvas.Set(x, ny-posY, colour.FloatNRGBA{R: pixels[i], G: pixels[i+1], B: pixels[i+2], A: pixels[i+3]})
 			if w.preview {
 				tile.Pixels[i] = pixels[i]
