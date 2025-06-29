@@ -467,6 +467,8 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	previewChan := make(chan display.DisplayTile)
 	defer close(previewChan)
 
+	remoteWorkers := make([]*render.RemoteWorkerConfig, 0)
+
 	if !standalone {
 		jobID := uuid.New().String()
 
@@ -535,6 +537,11 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 
 				log.Infof("Worker %s status: %s", target, msg.GetStatus().String())
 			}
+
+			remoteWorkers = append(remoteWorkers, &render.RemoteWorkerConfig{
+				Client:   controlClient,
+				NumCores: int(workerHost.GetAvailableCores()),
+			})
 		}
 
 	}
@@ -543,13 +550,13 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	// In a real leader, you'd likely keep track of these workers and their status
 
 	r := render.New(scene, int(cfg.XSize), int(cfg.YSize), int(cfg.Samples), int(cfg.Depth),
-		colours.Black, colours.White, int(cfg.NumWorkers), cfg.Verbose, previewChan, cfg.Preview, sampler.StringToType(cfg.Sampler))
+		colours.Black, colours.White, int(cfg.NumWorkers), remoteWorkers, cfg.Verbose, previewChan, cfg.Preview, sampler.StringToType(cfg.Sampler))
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	// Detach the renderer as SDL needs to use the main thread for everything.
 	go func() {
-		canvas = r.Render()
+		canvas = r.Render(ctx)
 		wg.Done()
 	}()
 

@@ -2,7 +2,10 @@
 package render
 
 import (
+	"context"
+	"fmt"
 	"image"
+	"io"
 	"math/rand"
 	"sync"
 	"time"
@@ -17,26 +20,34 @@ import (
 	"github.com/flynn-nrg/izpi/internal/scene"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 
+	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
+
 	pb "github.com/cheggaaa/pb/v3"
 	log "github.com/sirupsen/logrus"
 )
 
 // Renderer represents a renderer config.
 type Renderer struct {
-	scene       *scene.Scene
-	numRays     uint64
-	canvas      *floatimage.FloatNRGBA
-	previewChan chan display.DisplayTile
-	maxDepth    int
-	background  *vec3.Vec3Impl
-	ink         *vec3.Vec3Impl
-	preview     bool
-	samplerType sampler.SamplerType
-	sizeX       int
-	sizeY       int
-	numSamples  int
-	numWorkers  int
-	verbose     bool
+	scene         *scene.Scene
+	numRays       uint64
+	remoteWorkers []*RemoteWorkerConfig
+	canvas        *floatimage.FloatNRGBA
+	previewChan   chan display.DisplayTile
+	maxDepth      int
+	background    *vec3.Vec3Impl
+	ink           *vec3.Vec3Impl
+	preview       bool
+	samplerType   sampler.SamplerType
+	sizeX         int
+	sizeY         int
+	numSamples    int
+	numWorkers    int
+	verbose       bool
+}
+
+type RemoteWorkerConfig struct {
+	Client   pb_control.RenderControlServiceClient
+	NumCores int
 }
 
 type workUnit struct {
@@ -114,29 +125,123 @@ func worker(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg 
 
 }
 
+func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderControlServiceClient) {
+	var tile display.DisplayTile
+
+	fmt.Printf("Requesting tile %v\n", w)
+	//nx := w.canvas.Bounds().Max.X
+	ny := w.canvas.Bounds().Max.Y
+
+	if w.preview {
+		tile = display.DisplayTile{
+			Width:  w.x1 - w.x0 + 1,
+			Height: 1,
+			PosX:   w.x0,
+			Pixels: make([]float64, (w.x1-w.x0+1)*4),
+		}
+	}
+
+	request := &pb_control.RenderTileRequest{
+		X0: uint32(w.x0),
+		Y0: uint32(w.y0),
+		X1: uint32(w.x1),
+		Y1: uint32(w.y1),
+	}
+
+	stream, err := client.RenderTile(ctx, request)
+	if err != nil {
+		log.Errorf("Failed to render tile: %v", err)
+		return
+	}
+	defer stream.CloseSend()
+
+	for {
+		reply, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+
+			log.Errorf("Failed to receive tile: %v", err)
+			return
+		}
+
+		posX := int(reply.GetPosX())
+		posY := int(reply.GetPosY())
+		width := int(reply.GetWidth())
+		pixels := reply.GetPixels()
+
+		tile.PosY = ny - posY
+
+		i := 0
+		for x := posX; x < posX+width; x++ {
+			w.canvas.Set(x, ny-posY, colour.FloatNRGBA{R: float64(pixels[i]), G: float64(pixels[i+1]), B: float64(pixels[i+2]), A: 1.0})
+			if w.preview {
+				tile.Pixels[i] = float64(pixels[i])
+				tile.Pixels[i+1] = float64(pixels[i+1])
+				tile.Pixels[i+2] = float64(pixels[i+2])
+				tile.Pixels[i+3] = 1.0
+				i += 4
+			}
+			i += 4
+		}
+
+		if w.preview {
+			w.previewChan <- tile
+		}
+	}
+
+	if w.verbose {
+		w.bar.Increment()
+	}
+}
+
+func remoteWorker(ctx context.Context, input chan workUnit, quit chan struct{}, wg *sync.WaitGroup, config *RemoteWorkerConfig) {
+	defer wg.Done()
+	for {
+		select {
+		case w := <-input:
+			renderRectRemote(ctx, w, config.Client)
+		case <-quit:
+			return
+		}
+	}
+}
+
 // New returns a new instance of a renderer.
-func New(scene *scene.Scene, sizeX int, sizeY int, numSamples int, maxDepth int, background *vec3.Vec3Impl, ink *vec3.Vec3Impl,
-	numWorkers int, verbose bool, previewChan chan display.DisplayTile, preview bool, samplerType sampler.SamplerType) *Renderer {
+func New(
+	scene *scene.Scene,
+	sizeX int, sizeY int,
+	numSamples int, maxDepth int,
+	background *vec3.Vec3Impl, ink *vec3.Vec3Impl,
+	numLocalWorkers int,
+	remoteWorkers []*RemoteWorkerConfig,
+	verbose bool,
+	previewChan chan display.DisplayTile,
+	preview bool,
+	samplerType sampler.SamplerType,
+) *Renderer {
 	return &Renderer{
-		scene:       scene,
-		canvas:      floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY), make([]float64, sizeX*sizeY*4)),
-		previewChan: previewChan,
-		maxDepth:    maxDepth,
-		background:  background,
-		ink:         ink,
-		preview:     preview,
-		samplerType: samplerType,
-		sizeX:       sizeX,
-		sizeY:       sizeY,
-		numSamples:  numSamples,
-		numWorkers:  numWorkers,
-		verbose:     verbose,
+		scene:         scene,
+		remoteWorkers: remoteWorkers,
+		canvas:        floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY), make([]float64, sizeX*sizeY*4)),
+		previewChan:   previewChan,
+		maxDepth:      maxDepth,
+		background:    background,
+		ink:           ink,
+		preview:       preview,
+		samplerType:   samplerType,
+		sizeX:         sizeX,
+		sizeY:         sizeY,
+		numSamples:    numSamples,
+		numWorkers:    numLocalWorkers,
+		verbose:       verbose,
 	}
 }
 
 // Render performs the rendering task spread across 1 or more worker goroutines.
 // It returns a FloatNRGBA image that can be further processed before output or fed to an output directly.
-func (r *Renderer) Render() image.Image {
+func (r *Renderer) Render(ctx context.Context) image.Image {
 
 	var bar *pb.ProgressBar
 
@@ -151,10 +256,17 @@ func (r *Renderer) Render() image.Image {
 		bar = pb.StartNew(numTiles)
 	}
 
+	// Local workers
 	for i := 0; i < r.numWorkers; i++ {
 		random := fastrandom.NewWithDefaults()
 		wg.Add(1)
 		go worker(queue, quit, random, wg)
+	}
+
+	// Remote workers
+	for _, worker := range r.remoteWorkers {
+		wg.Add(1)
+		go remoteWorker(ctx, queue, quit, wg, worker)
 	}
 
 	gridSizeX := r.sizeX / stepSizeX
@@ -175,7 +287,7 @@ func (r *Renderer) Render() image.Image {
 		log.Fatalf("invalid sampler type %v", r.samplerType)
 	}
 
-	log.Infof("Begin rendering using %v worker threads", r.numWorkers)
+	log.Infof("Begin rendering using %v local worker threads and %v remote worker threads", r.numWorkers, len(r.remoteWorkers))
 	startTime := time.Now()
 
 	for _, t := range path {

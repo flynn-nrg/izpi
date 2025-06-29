@@ -377,12 +377,18 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	log.Printf("RenderControlService: RenderTile called by %s - Tile: [%d,%d] to [%d,%d)",
 		s.workerID, req.GetX0(), req.GetY0(), req.GetX1(), req.GetY1())
 
-	chunkWidth := uint32(16)
-	chunkHeight := uint32(16)
-	totalPixelsInChunk := int(chunkWidth * chunkHeight * 3)
+	x0 := req.GetX0()
+	y0 := req.GetY0()
+	x1 := req.GetX1()
+	y1 := req.GetY1()
 
-	for y := req.GetY0(); y < req.GetY1(); y += chunkHeight {
-		for x := req.GetX0(); x < req.X1; x += chunkWidth {
+	totalPixelsInChunk := (x1 - x0) * (y1 - y0) * 3
+	responseWidth := x1 - x0
+
+	for y := y0; y < y1; y++ {
+		pixels := make([]float32, totalPixelsInChunk)
+
+		for x := x0; x < x1; x++ {
 			select {
 			case <-stream.Context().Done():
 				log.Printf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
@@ -390,19 +396,22 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 			default:
 			}
 
-			pixels := make([]float32, totalPixelsInChunk)
+			for p := range pixels {
+				pixels[p] = 0.8
+			}
+		}
 
-			resp := &pb_control.RenderTileResponse{
-				Width:  chunkWidth,
-				Height: chunkHeight,
-				PosX:   x,
-				PosY:   y,
-				Pixels: pixels,
-			}
-			if err := stream.Send(resp); err != nil {
-				log.Printf("Failed to send RenderTileResponse chunk for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), err)
-				return fmt.Errorf("failed to send stream chunk: %w", err)
-			}
+		resp := &pb_control.RenderTileResponse{
+			Width:  responseWidth,
+			Height: 1,
+			PosX:   x0,
+			PosY:   y,
+			Pixels: pixels,
+		}
+
+		if err := stream.Send(resp); err != nil {
+			log.Printf("Failed to send RenderTileResponse chunk for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), err)
+			return fmt.Errorf("failed to send stream chunk: %w", err)
 		}
 	}
 
