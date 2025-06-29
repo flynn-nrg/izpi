@@ -74,7 +74,8 @@ message RenderSetupRequest { // Renamed message
   ImageResolution image_resolution = 6; // The overall image resolution.
   uint32 max_depth = 7;            // Maximum recursion depth for path tracing.
   Vec3 background_color = 8;       // The background color of the scene.
-  string asset_provider = 9;       // NEW: The network address (host:port) of the asset transport server (e.g., leader).
+  Vec3 ink_color = 9;              // The ink color of the scene.
+  string asset_provider = 10;       // NEW: The network address (host:port) of the asset transport server (e.g., leader).
 }
 
 // Response containing status updates during the RenderConfiguration process.

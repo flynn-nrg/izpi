@@ -267,7 +267,8 @@ type RenderSetupRequest struct {
 	ImageResolution *ImageResolution       `protobuf:"bytes,6,opt,name=image_resolution,json=imageResolution,proto3" json:"image_resolution,omitempty"`    // The overall image resolution.
 	MaxDepth        uint32                 `protobuf:"varint,7,opt,name=max_depth,json=maxDepth,proto3" json:"max_depth,omitempty"`                        // Maximum recursion depth for path tracing.
 	BackgroundColor *Vec3                  `protobuf:"bytes,8,opt,name=background_color,json=backgroundColor,proto3" json:"background_color,omitempty"`    // The background color of the scene.
-	AssetProvider   string                 `protobuf:"bytes,9,opt,name=asset_provider,json=assetProvider,proto3" json:"asset_provider,omitempty"`          // NEW: The network address (host:port) of the asset transport server (e.g., leader).
+	InkColor        *Vec3                  `protobuf:"bytes,9,opt,name=ink_color,json=inkColor,proto3" json:"ink_color,omitempty"`                         // The ink color of the scene.
+	AssetProvider   string                 `protobuf:"bytes,10,opt,name=asset_provider,json=assetProvider,proto3" json:"asset_provider,omitempty"`         // NEW: The network address (host:port) of the asset transport server (e.g., leader).
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -354,6 +355,13 @@ func (x *RenderSetupRequest) GetMaxDepth() uint32 {
 func (x *RenderSetupRequest) GetBackgroundColor() *Vec3 {
 	if x != nil {
 		return x.BackgroundColor
+	}
+	return nil
+}
+
+func (x *RenderSetupRequest) GetInkColor() *Vec3 {
+	if x != nil {
+		return x.InkColor
 	}
 	return nil
 }
@@ -677,7 +685,7 @@ const file_control_proto_rawDesc = "" +
 	"\x01z\x18\x03 \x01(\x01R\x01z\"?\n" +
 	"\x0fImageResolution\x12\x14\n" +
 	"\x05width\x18\x01 \x01(\rR\x05width\x12\x16\n" +
-	"\x06height\x18\x02 \x01(\rR\x06height\"\x86\x03\n" +
+	"\x06height\x18\x02 \x01(\rR\x06height\"\xb2\x03\n" +
 	"\x12RenderSetupRequest\x12\x1d\n" +
 	"\n" +
 	"scene_name\x18\x01 \x01(\tR\tsceneName\x12\x15\n" +
@@ -687,8 +695,10 @@ const file_control_proto_rawDesc = "" +
 	"\asampler\x18\x05 \x01(\x0e2\x14.control.SamplerTypeR\asampler\x12C\n" +
 	"\x10image_resolution\x18\x06 \x01(\v2\x18.control.ImageResolutionR\x0fimageResolution\x12\x1b\n" +
 	"\tmax_depth\x18\a \x01(\rR\bmaxDepth\x128\n" +
-	"\x10background_color\x18\b \x01(\v2\r.control.Vec3R\x0fbackgroundColor\x12%\n" +
-	"\x0easset_provider\x18\t \x01(\tR\rassetProvider\"n\n" +
+	"\x10background_color\x18\b \x01(\v2\r.control.Vec3R\x0fbackgroundColor\x12*\n" +
+	"\tink_color\x18\t \x01(\v2\r.control.Vec3R\binkColor\x12%\n" +
+	"\x0easset_provider\x18\n" +
+	" \x01(\tR\rassetProvider\"n\n" +
 	"\x13RenderSetupResponse\x122\n" +
 	"\x06status\x18\x01 \x01(\x0e2\x1a.control.RenderSetupStatusR\x06status\x12#\n" +
 	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"v\n" +
@@ -764,18 +774,19 @@ var file_control_proto_depIdxs = []int32{
 	0, // 0: control.RenderSetupRequest.sampler:type_name -> control.SamplerType
 	3, // 1: control.RenderSetupRequest.image_resolution:type_name -> control.ImageResolution
 	2, // 2: control.RenderSetupRequest.background_color:type_name -> control.Vec3
-	1, // 3: control.RenderSetupResponse.status:type_name -> control.RenderSetupStatus
-	4, // 4: control.RenderControlService.RenderSetup:input_type -> control.RenderSetupRequest
-	6, // 5: control.RenderControlService.RenderTile:input_type -> control.RenderTileRequest
-	8, // 6: control.RenderControlService.RenderEnd:input_type -> control.RenderEndRequest
-	5, // 7: control.RenderControlService.RenderSetup:output_type -> control.RenderSetupResponse
-	7, // 8: control.RenderControlService.RenderTile:output_type -> control.RenderTileResponse
-	9, // 9: control.RenderControlService.RenderEnd:output_type -> control.RenderEndResponse
-	7, // [7:10] is the sub-list for method output_type
-	4, // [4:7] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	2, // 3: control.RenderSetupRequest.ink_color:type_name -> control.Vec3
+	1, // 4: control.RenderSetupResponse.status:type_name -> control.RenderSetupStatus
+	4, // 5: control.RenderControlService.RenderSetup:input_type -> control.RenderSetupRequest
+	6, // 6: control.RenderControlService.RenderTile:input_type -> control.RenderTileRequest
+	8, // 7: control.RenderControlService.RenderEnd:input_type -> control.RenderEndRequest
+	5, // 8: control.RenderControlService.RenderSetup:output_type -> control.RenderSetupResponse
+	7, // 9: control.RenderControlService.RenderTile:output_type -> control.RenderTileResponse
+	9, // 10: control.RenderControlService.RenderEnd:output_type -> control.RenderEndResponse
+	8, // [8:11] is the sub-list for method output_type
+	5, // [5:8] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_control_proto_init() }

@@ -22,11 +22,14 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status" // Added for gRPC status package
 
+	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport" // Import for transport service
+	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
 	"github.com/flynn-nrg/izpi/internal/transport"
+	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // workerServer implements pb_discovery.WorkerDiscoveryServiceServer and pb_control.RenderControlServiceServer.
@@ -41,7 +44,16 @@ type workerServer struct {
 	freeMemoryBytes  uint64
 	currentStatus    pb_discovery.WorkerStatus
 
-	scene *scene.Scene
+	scene            *scene.Scene
+	sampler          sampler.Sampler
+	samplesPerPixel  int
+	numRays          uint64
+	maxDepth         int
+	imageResolutionX int
+	imageResolutionY int
+	background       *vec3.Vec3Impl
+	ink              *vec3.Vec3Impl
+	rand             *fastrandom.LCG
 }
 
 // NewWorkerServer creates and returns a new workerServer instance.
@@ -361,7 +373,31 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 	s.scene = scene
 
-	// Step 4: Send READY status
+	// Step 4: Setup render parameters
+	s.maxDepth = int(req.GetMaxDepth())
+	s.background = &vec3.Vec3Impl{X: req.GetBackgroundColor().GetX(), Y: req.GetBackgroundColor().GetY(), Z: req.GetBackgroundColor().GetZ()}
+	s.ink = &vec3.Vec3Impl{X: req.GetInkColor().GetX(), Y: req.GetInkColor().GetY(), Z: req.GetInkColor().GetZ()}
+	s.rand = fastrandom.NewWithDefaults()
+	s.samplesPerPixel = int(req.GetSamplesPerPixel())
+	s.imageResolutionX = int(req.GetImageResolution().GetWidth())
+	s.imageResolutionY = int(req.GetImageResolution().GetHeight())
+
+	switch req.GetSampler() {
+	case pb_control.SamplerType_ALBEDO:
+		s.sampler = sampler.NewAlbedo(&s.numRays)
+	case pb_control.SamplerType_COLOUR:
+		s.sampler = sampler.NewColour(s.maxDepth, s.background, &s.numRays)
+	case pb_control.SamplerType_NORMAL:
+		s.sampler = sampler.NewNormal(&s.numRays)
+	case pb_control.SamplerType_WIRE_FRAME:
+		s.sampler = sampler.NewWireFrame(s.background, s.ink, &s.numRays)
+	default:
+		return status.Errorf(codes.InvalidArgument, "invalid sampler type: %s", req.GetSampler().String())
+	}
+
+	log.Debugf("Render parameters: Max depth: %d, Background: %v, Ink: %v, Sampler: %s", s.maxDepth, s.background, s.ink, req.GetSampler().String())
+
+	// Step 5: Send READY status
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_READY, ""); err != nil {
 		return status.Errorf(codes.Internal, "failed to send READY status: %v", err)
 	}
@@ -388,21 +424,36 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 
 	responseWidth := x1 - x0
 
+	nx := float64(s.imageResolutionX)
+	ny := float64(s.imageResolutionY)
+
 	for y := y0; y < y1; y++ {
 		pixels := make([]float64, stripSize)
 
 		log.Debugf("Rendering strip x0 %d, x1 %d, y %d", x0, x1, y)
+		i := 0
 		for x := x0; x < x1; x++ {
 			select {
 			case <-stream.Context().Done():
 				log.Debugf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
 				return stream.Context().Err()
 			default:
+				col := &vec3.Vec3Impl{}
+				for sample := 0; sample < s.samplesPerPixel; sample++ {
+					u := (float64(x) + s.rand.Float64()) / nx
+					v := (float64(y) + s.rand.Float64()) / ny
+					r := s.scene.Camera.GetRay(u, v)
+					col = vec3.Add(col, vec3.DeNAN(s.sampler.Sample(r, s.scene.World, s.scene.Lights, 0, s.rand)))
+				}
+
+				col = vec3.ScalarDiv(col, float64(s.samplesPerPixel))
+				pixels[i] = col.Z
+				pixels[i+1] = col.Y
+				pixels[i+2] = col.X
+				pixels[i+3] = 1.0
+				i += 4
 			}
 
-			for p := range pixels {
-				pixels[p] = 0.8
-			}
 		}
 
 		resp := &pb_control.RenderTileResponse{

@@ -516,6 +516,11 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 					Y: 0,
 					Z: 0,
 				},
+				InkColor: &pb_control.Vec3{
+					X: 1,
+					Y: 1,
+					Z: 1,
+				},
 				AssetProvider: assetProviderAddress,
 			})
 			if err != nil {

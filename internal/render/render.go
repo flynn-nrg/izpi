@@ -308,7 +308,8 @@ func (r *Renderer) Render(ctx context.Context) image.Image {
 			y1:          t.Y*stepSizeY + (stepSizeY - 1),
 		}
 	}
-	for i := 0; i < r.numWorkers; i++ {
+
+	for range r.numWorkers + len(r.remoteWorkers) {
 		quit <- struct{}{}
 	}
 
