@@ -373,6 +373,8 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	return nil // Successfully configured
 }
 
+const stripHeight = 1
+
 func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_control.RenderControlService_RenderTileServer) error {
 	log.Printf("RenderControlService: RenderTile called by %s - Tile: [%d,%d] to [%d,%d)",
 		s.workerID, req.GetX0(), req.GetY0(), req.GetX1(), req.GetY1())
@@ -382,12 +384,13 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	x1 := req.GetX1()
 	y1 := req.GetY1()
 
-	totalPixelsInChunk := (x1 - x0) * (y1 - y0) * 4
+	stripSize := (x1 - x0) * stripHeight * 4
 	responseWidth := x1 - x0
 
 	for y := y0; y < y1; y++ {
-		pixels := make([]float32, totalPixelsInChunk)
+		pixels := make([]float32, stripSize)
 
+		log.Printf("Rendering strip x0 %d, x1 %d, y %d", x0, x1, y)
 		for x := x0; x < x1; x++ {
 			select {
 			case <-stream.Context().Done():
