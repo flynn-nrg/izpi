@@ -428,7 +428,6 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	for y := y0; y <= y1; y++ {
 		pixels := make([]float64, stripSize)
 
-		log.Debugf("Rendering strip x0 %d, x1 %d, y %d", x0, x1, y)
 		i := 0
 		for x := x0; x <= x1; x++ {
 			select {
@@ -468,8 +467,6 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 		}
 	}
 
-	log.Debugf("RenderControlService: Finished streaming tile [%d,%d] to [%d,%d) by %s",
-		req.GetX0(), req.GetY0(), req.GetX1(), req.GetY1(), s.workerID)
 	return nil
 }
 

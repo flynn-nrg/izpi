@@ -128,8 +128,6 @@ func worker(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg 
 func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderControlServiceClient) {
 	var tile display.DisplayTile
 
-	log.Debugf("Requesting tile %v", w)
-
 	ny := w.canvas.Bounds().Max.Y
 
 	if w.preview {
@@ -201,7 +199,6 @@ func remoteWorker(ctx context.Context, input chan workUnit, quit chan struct{}, 
 	for {
 		select {
 		case w := <-input:
-			log.Debugf("Rendering tile %v", w)
 			renderRectRemote(ctx, w, config.Client)
 		case <-quit:
 			log.Debug("Remote worker exiting")
