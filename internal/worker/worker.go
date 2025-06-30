@@ -54,11 +54,8 @@ type workerServer struct {
 	imageResolutionY int
 	background       *vec3.Vec3Impl
 	ink              *vec3.Vec3Impl
-	rand             *fastrandom.LCG
 
-	randomRequestChan  chan struct{}
-	randomResponseChan chan float64
-	randomQuitChan     chan struct{}
+	randPool sync.Pool
 
 	wg sync.WaitGroup
 }
@@ -80,6 +77,7 @@ func NewWorkerServer(numCores uint32) *workerServer {
 		totalMemoryBytes: totalMem,
 		freeMemoryBytes:  freeMem,
 		currentStatus:    pb_discovery.WorkerStatus_FREE,
+		randPool:         sync.Pool{New: func() interface{} { return fastrandom.NewWithDefaults() }},
 	}
 }
 
@@ -384,7 +382,6 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	s.maxDepth = int(req.GetMaxDepth())
 	s.background = &vec3.Vec3Impl{X: req.GetBackgroundColor().GetX(), Y: req.GetBackgroundColor().GetY(), Z: req.GetBackgroundColor().GetZ()}
 	s.ink = &vec3.Vec3Impl{X: req.GetInkColor().GetX(), Y: req.GetInkColor().GetY(), Z: req.GetInkColor().GetZ()}
-	s.rand = fastrandom.NewWithDefaults()
 	s.samplesPerPixel = int(req.GetSamplesPerPixel())
 	s.imageResolutionX = int(req.GetImageResolution().GetWidth())
 	s.imageResolutionY = int(req.GetImageResolution().GetHeight())
@@ -402,17 +399,6 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		return status.Errorf(codes.InvalidArgument, "invalid sampler type: %s", req.GetSampler().String())
 	}
 
-	// Random generator pool
-	s.randomRequestChan = make(chan struct{})
-	s.randomResponseChan = make(chan float64)
-	s.randomQuitChan = make(chan struct{})
-
-	for i := 0; i < int(s.availableCores); i++ {
-		s.wg.Add(1)
-		rand := fastrandom.NewWithDefaults()
-		go s.randomGenerator(s.randomRequestChan, s.randomQuitChan, &s.wg, rand)
-	}
-
 	log.Debugf("Render parameters: Max depth: %d, Background: %v, Ink: %v, Sampler: %s", s.maxDepth, s.background, s.ink, req.GetSampler().String())
 
 	// Step 5: Send READY status
@@ -427,19 +413,6 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	return nil // Successfully configured
 }
 
-func (s *workerServer) randomGenerator(input chan struct{}, quit chan struct{}, wg *sync.WaitGroup, random *fastrandom.LCG) {
-	defer wg.Done()
-
-	for {
-		select {
-		case <-input:
-			random.Float64()
-		case <-quit:
-			return
-		}
-	}
-}
-
 func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_control.RenderControlService_RenderTileServer) error {
 	log.Debugf("RenderControlService: RenderTile called by %s - Tile: [%d,%d] to [%d,%d)",
 		s.workerID, req.GetX0(), req.GetY0(), req.GetX1(), req.GetY1())
@@ -448,6 +421,9 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	y0 := req.GetY0()
 	x1 := req.GetX1()
 	y1 := req.GetY1()
+
+	rand := s.randPool.Get().(*fastrandom.LCG)
+	defer s.randPool.Put(rand)
 
 	stripSize := req.GetStripHeight() * 4 * (x1 - x0 + 1)
 
@@ -468,10 +444,10 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 			default:
 				col := &vec3.Vec3Impl{}
 				for sample := 0; sample < s.samplesPerPixel; sample++ {
-					u := (float64(x) + s.rand.Float64()) / nx
-					v := (float64(y) + s.rand.Float64()) / ny
+					u := (float64(x) + rand.Float64()) / nx
+					v := (float64(y) + rand.Float64()) / ny
 					r := s.scene.Camera.GetRay(u, v)
-					col = vec3.Add(col, vec3.DeNAN(s.sampler.Sample(r, s.scene.World, s.scene.Lights, 0, s.rand)))
+					col = vec3.Add(col, vec3.DeNAN(s.sampler.Sample(r, s.scene.World, s.scene.Lights, 0, rand)))
 				}
 
 				col = vec3.ScalarDiv(col, float64(s.samplesPerPixel))
