@@ -3,11 +3,13 @@ package worker
 import (
 	"context"
 	"fmt"
+	"runtime"
 
 	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
 	"github.com/flynn-nrg/izpi/internal/vec3"
+	"github.com/pbnjay/memory"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -84,5 +86,27 @@ func (s *workerServer) RenderEnd(ctx context.Context, req *pb_control.RenderEndR
 	stats := &pb_control.RenderEndResponse{
 		TotalRaysTraced: s.numRays,
 	}
+
+	// Free up resources
+	s.scene = nil
+	s.sampler = nil
+	s.currentStatus = pb_discovery.WorkerStatus_FREE
+	s.numRays = 0
+	s.imageResolutionX = 0
+	s.imageResolutionY = 0
+	s.background = nil
+	s.ink = nil
+	s.samplesPerPixel = 0
+	s.maxDepth = 0
+
+	// Hint GC to collect any remaining resources
+	runtime.GC()
+
+	// Refresh memory stats
+	totalMem := memory.TotalMemory()
+	freeMem := memory.FreeMemory()
+	s.totalMemoryBytes = totalMem
+	s.freeMemoryBytes = freeMem
+
 	return stats, nil
 }
