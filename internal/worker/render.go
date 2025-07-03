@@ -87,6 +87,8 @@ func (s *workerServer) RenderEnd(ctx context.Context, req *pb_control.RenderEndR
 		TotalRaysTraced: s.numRays,
 	}
 
+	memBefore := memory.FreeMemory()
+
 	// Free up resources
 	s.scene = nil
 	s.sampler = nil
@@ -101,6 +103,11 @@ func (s *workerServer) RenderEnd(ctx context.Context, req *pb_control.RenderEndR
 
 	// Hint GC to collect any remaining resources
 	runtime.GC()
+
+	memAfter := memory.FreeMemory()
+
+	log.Infof("Freed %d bytes of memory", memAfter-memBefore)
+	log.Infof("Server is now in free state")
 
 	// Refresh memory stats
 	totalMem := memory.TotalMemory()
