@@ -118,6 +118,5 @@ message RenderEndRequest {
 
 // Response containing statistics after rendering is complete.
 message RenderEndResponse {
-  uint64 total_render_time_ms = 1; // Total time spent rendering in milliseconds.
-  uint64 total_rays_traced = 2;    // Total number of rays traced during rendering.
+  uint64 total_rays_traced = 1;    // Total number of rays traced during rendering.
 }

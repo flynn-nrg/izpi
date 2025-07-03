@@ -623,11 +623,10 @@ func (*RenderEndRequest) Descriptor() ([]byte, []int) {
 
 // Response containing statistics after rendering is complete.
 type RenderEndResponse struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	TotalRenderTimeMs uint64                 `protobuf:"varint,1,opt,name=total_render_time_ms,json=totalRenderTimeMs,proto3" json:"total_render_time_ms,omitempty"` // Total time spent rendering in milliseconds.
-	TotalRaysTraced   uint64                 `protobuf:"varint,2,opt,name=total_rays_traced,json=totalRaysTraced,proto3" json:"total_rays_traced,omitempty"`         // Total number of rays traced during rendering.
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	TotalRaysTraced uint64                 `protobuf:"varint,1,opt,name=total_rays_traced,json=totalRaysTraced,proto3" json:"total_rays_traced,omitempty"` // Total number of rays traced during rendering.
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *RenderEndResponse) Reset() {
@@ -658,13 +657,6 @@ func (x *RenderEndResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RenderEndResponse.ProtoReflect.Descriptor instead.
 func (*RenderEndResponse) Descriptor() ([]byte, []int) {
 	return file_control_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *RenderEndResponse) GetTotalRenderTimeMs() uint64 {
-	if x != nil {
-		return x.TotalRenderTimeMs
-	}
-	return 0
 }
 
 func (x *RenderEndResponse) GetTotalRaysTraced() uint64 {
@@ -714,10 +706,9 @@ const file_control_proto_rawDesc = "" +
 	"\x05pos_x\x18\x03 \x01(\rR\x04posX\x12\x13\n" +
 	"\x05pos_y\x18\x04 \x01(\rR\x04posY\x12\x16\n" +
 	"\x06pixels\x18\x05 \x03(\x01R\x06pixels\"\x12\n" +
-	"\x10RenderEndRequest\"p\n" +
-	"\x11RenderEndResponse\x12/\n" +
-	"\x14total_render_time_ms\x18\x01 \x01(\x04R\x11totalRenderTimeMs\x12*\n" +
-	"\x11total_rays_traced\x18\x02 \x01(\x04R\x0ftotalRaysTraced*_\n" +
+	"\x10RenderEndRequest\"?\n" +
+	"\x11RenderEndResponse\x12*\n" +
+	"\x11total_rays_traced\x18\x01 \x01(\x04R\x0ftotalRaysTraced*_\n" +
 	"\vSamplerType\x12\x1c\n" +
 	"\x18SAMPLER_TYPE_UNSPECIFIED\x10\x00\x12\n" +
 	"\n" +
