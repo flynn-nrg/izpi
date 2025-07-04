@@ -24,7 +24,7 @@ const (
 	defaultSamples          = "1000"
 	defaultMaxDepth         = "50"
 	defaultOutputFile       = "output.png"
-	defaultSceneFile        = "examples/cornell_box.yaml"
+	defaultSceneFile        = "examples/cornell_box.izpi"
 	defaultDiscoveryTimeout = "3"
 )
 
