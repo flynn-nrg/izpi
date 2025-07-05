@@ -2,10 +2,9 @@ package leader
 
 import (
 	"context"
+	"fmt"
 	"image"
 	"io"
-	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -21,6 +20,7 @@ import (
 	"github.com/flynn-nrg/izpi/internal/render"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
+	"github.com/flynn-nrg/izpi/internal/scenes"
 	"github.com/flynn-nrg/izpi/internal/transport"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -33,6 +33,8 @@ import (
 
 const (
 	displayWindowTitle = "Izpi Render Output"
+
+	triangleStreamThreshold = 10000
 )
 
 func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
@@ -42,35 +44,57 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	var sceneData *scene.Scene
 	var protoScene *pb_transport.Scene
 
-	sceneFile, err := os.Open(cfg.Scene)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer sceneFile.Close()
-
 	aspectRatio := float64(cfg.XSize) / float64(cfg.YSize)
 
-	switch filepath.Ext(cfg.Scene) {
-	case ".izpi":
-		payload, err := io.ReadAll(sceneFile)
+	/*
+		sceneFile, err := os.Open(cfg.Scene)
 		if err != nil {
-			log.Fatalf("Error reading scene file: %v", err)
+			log.Fatal(err)
 		}
-		protoScene = &pb_transport.Scene{}
-		err = proto.Unmarshal(payload, protoScene)
-		if err != nil {
-			log.Fatalf("Error unmarshalling scene: %v", err)
+
+		defer sceneFile.Close()
+
+		aspectRatio := float64(cfg.XSize) / float64(cfg.YSize)
+
+		switch filepath.Ext(cfg.Scene) {
+		case ".izpi":
+			payload, err := io.ReadAll(sceneFile)
+			if err != nil {
+				log.Fatalf("Error reading scene file: %v", err)
+			}
+			protoScene = &pb_transport.Scene{}
+			err = proto.Unmarshal(payload, protoScene)
+			if err != nil {
+				log.Fatalf("Error unmarshalling scene: %v", err)
+			}
+			t := transport.NewTransport(aspectRatio, protoScene, nil, nil)
+			sceneData, err = t.ToScene()
+			if err != nil {
+				log.Fatalf("Error loading scene: %v", err)
+			}
+		case ".yaml":
+			log.Fatalf("YAML scenes are not supported in leader mode")
+		default:
+			log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
 		}
-		t := transport.NewTransport(aspectRatio, protoScene, nil, nil)
-		sceneData, err = t.ToScene()
-		if err != nil {
-			log.Fatalf("Error loading scene: %v", err)
-		}
-	case ".yaml":
-		log.Fatalf("YAML scenes are not supported in leader mode")
-	default:
-		log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
+	*/
+
+	payload, err := scenes.Challenger(aspectRatio)
+	if err != nil {
+		log.Fatalf("Error loading scene: %v", err)
+	}
+
+	protoScene = &pb_transport.Scene{}
+	err = proto.Unmarshal(payload, protoScene)
+	if err != nil {
+		log.Fatalf("Error unmarshalling scene: %v", err)
+	}
+
+	fmt.Println(protoScene.GetMaterials())
+	t := transport.NewTransport(aspectRatio, protoScene, nil, nil)
+	sceneData, err = t.ToScene()
+	if err != nil {
+		log.Fatalf("Error loading scene: %v", err)
 	}
 
 	/*
@@ -490,6 +514,10 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 
 	remoteWorkers := make([]*render.RemoteWorkerConfig, 0)
 
+	if len(protoScene.Objects.Triangles) > triangleStreamThreshold {
+		protoScene.StreamTriangles = true
+	}
+
 	if !standalone {
 		jobID := uuid.New().String()
 
@@ -505,7 +533,16 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 
 		log.Infof("Found %d worker(s)", len(workerHosts))
 
-		assetProvider, assetProviderAddress, err := assetprovider.New(protoScene, nil, nil)
+		var trianglesToStream []*pb_transport.Triangle
+
+		if len(protoScene.Objects.Triangles) > triangleStreamThreshold {
+			protoScene.StreamTriangles = true
+			trianglesToStream = protoScene.Objects.Triangles
+			protoScene.TotalTriangles = uint64(len(trianglesToStream))
+			protoScene.Objects.Triangles = nil
+		}
+
+		assetProvider, assetProviderAddress, err := assetprovider.New(protoScene, nil, trianglesToStream)
 		if err != nil {
 			log.Fatalln("Failed to create asset provider:", err.Error())
 		}

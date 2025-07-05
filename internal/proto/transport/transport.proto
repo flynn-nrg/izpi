@@ -125,7 +125,7 @@ message IsotropicMaterial {
 
 // Represents a Metal material.
 message MetalMaterial {
-  Texture albedo = 1; // Direct embedding of Texture
+  Vec3 albedo = 1; // Direct embedding of Texture
   float fuzz = 2;
 }
 

@@ -244,11 +244,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 				texturesToFetch[imgTex.GetFilename()] = imgTex
 			}
 		}
-		if mat.GetMetal() != nil && mat.GetMetal().GetAlbedo() != nil {
-			if imgTex := mat.GetMetal().GetAlbedo().GetImage(); imgTex != nil {
-				texturesToFetch[imgTex.GetFilename()] = imgTex
-			}
-		}
+
 		if mat.GetPbr() != nil {
 			if imgTex := mat.GetPbr().GetAlbedo().GetImage(); imgTex != nil {
 				texturesToFetch[imgTex.GetFilename()] = imgTex

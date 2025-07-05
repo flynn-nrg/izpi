@@ -19,6 +19,8 @@ import (
 	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 
+	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -223,6 +225,58 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 
 func (wo *WavefrontObj) NumGroups() int {
 	return len(wo.Groups)
+}
+
+func (wo *WavefrontObj) GroupToTransportTrianglesWithMaterial(index int, materialName string) ([]*pb_transport.Triangle, error) {
+	g := wo.Groups[index]
+	switch g.FaceType {
+	case OBJ_FACE_TYPE_POLYGON:
+		triangles := []*pb_transport.Triangle{}
+		for _, face := range g.Faces {
+			triangles = append(triangles, wo.faceToTransportTriangle(face, materialName))
+		}
+		return triangles, nil
+	default:
+		return nil, ErrUnsupportedPolygonType
+	}
+}
+
+func (wo *WavefrontObj) faceToTransportTriangle(face *Face, materialName string) *pb_transport.Triangle {
+
+	vertex0 := wo.Vertices[face.Vertices[0].VIdx-1]
+	vertex1 := wo.Vertices[face.Vertices[1].VIdx-1]
+	vertex2 := wo.Vertices[face.Vertices[2].VIdx-1]
+
+	return &pb_transport.Triangle{
+		MaterialName: materialName,
+		Vertex0: &pb_transport.Vec3{
+			X: float32(vertex0.X),
+			Y: float32(vertex0.Y),
+			Z: float32(vertex0.Z),
+		},
+		Vertex1: &pb_transport.Vec3{
+			X: float32(vertex1.X),
+			Y: float32(vertex1.Y),
+			Z: float32(vertex1.Z),
+		},
+		Vertex2: &pb_transport.Vec3{
+			X: float32(vertex2.X),
+			Y: float32(vertex2.Y),
+			Z: float32(vertex2.Z),
+		},
+		Uv0: &pb_transport.Vec2{
+			U: float32(wo.VertexUV[face.Vertices[0].VtIdx-1].U),
+			V: float32(wo.VertexUV[face.Vertices[0].VtIdx-1].V),
+		},
+		Uv1: &pb_transport.Vec2{
+			U: float32(wo.VertexUV[face.Vertices[1].VtIdx-1].U),
+			V: float32(wo.VertexUV[face.Vertices[1].VtIdx-1].V),
+		},
+		Uv2: &pb_transport.Vec2{
+			U: float32(wo.VertexUV[face.Vertices[2].VtIdx-1].U),
+			V: float32(wo.VertexUV[face.Vertices[2].VtIdx-1].V),
+		},
+	}
 }
 
 // GroupToHitablesWithCustomMaterial returns a slice of hitables with the supplied material.

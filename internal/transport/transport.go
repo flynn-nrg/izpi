@@ -33,6 +33,8 @@ func (t *Transport) ToScene() (*scene.Scene, error) {
 	}
 	t.materials = materials
 
+	fmt.Println(t.materials)
+
 	hitables, err := t.toSceneObjects()
 	if err != nil {
 		return nil, err
@@ -75,10 +77,30 @@ func (t *Transport) toSceneMaterials() (map[string]material.Material, error) {
 				return nil, err
 			}
 			materials[material.GetName()] = diffuselight
+		case pb_transport.MaterialType_METAL:
+			metal, err := t.toSceneMetalMaterial(material)
+			if err != nil {
+				return nil, err
+			}
+			materials[material.GetName()] = metal
 		}
 	}
 
 	return materials, nil
+}
+
+func (t *Transport) toSceneMetalMaterial(mat *pb_transport.Material) (material.Material, error) {
+	metal := mat.GetMetal()
+
+	albedo := &vec3.Vec3Impl{
+		X: float64(metal.GetAlbedo().GetX()),
+		Y: float64(metal.GetAlbedo().GetY()),
+		Z: float64(metal.GetAlbedo().GetZ()),
+	}
+
+	fuzz := float64(metal.GetFuzz())
+
+	return material.NewMetal(albedo, fuzz), nil
 }
 
 func (t *Transport) toSceneLambertMaterial(mat *pb_transport.Material) (material.Material, error) {

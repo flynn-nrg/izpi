@@ -1033,7 +1033,7 @@ func (x *IsotropicMaterial) GetAlbedo() *Texture {
 // Represents a Metal material.
 type MetalMaterial struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Albedo        *Texture               `protobuf:"bytes,1,opt,name=albedo,proto3" json:"albedo,omitempty"` // Direct embedding of Texture
+	Albedo        *Vec3                  `protobuf:"bytes,1,opt,name=albedo,proto3" json:"albedo,omitempty"` // Direct embedding of Texture
 	Fuzz          float32                `protobuf:"fixed32,2,opt,name=fuzz,proto3" json:"fuzz,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1069,7 +1069,7 @@ func (*MetalMaterial) Descriptor() ([]byte, []int) {
 	return file_transport_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *MetalMaterial) GetAlbedo() *Texture {
+func (x *MetalMaterial) GetAlbedo() *Vec3 {
 	if x != nil {
 		return x.Albedo
 	}
@@ -1818,9 +1818,9 @@ const file_transport_proto_rawDesc = "" +
 	"\x14DiffuseLightMaterial\x12&\n" +
 	"\x04emit\x18\x01 \x01(\v2\x12.transport.TextureR\x04emit\"?\n" +
 	"\x11IsotropicMaterial\x12*\n" +
-	"\x06albedo\x18\x01 \x01(\v2\x12.transport.TextureR\x06albedo\"O\n" +
-	"\rMetalMaterial\x12*\n" +
-	"\x06albedo\x18\x01 \x01(\v2\x12.transport.TextureR\x06albedo\x12\x12\n" +
+	"\x06albedo\x18\x01 \x01(\v2\x12.transport.TextureR\x06albedo\"L\n" +
+	"\rMetalMaterial\x12'\n" +
+	"\x06albedo\x18\x01 \x01(\v2\x0f.transport.Vec3R\x06albedo\x12\x12\n" +
 	"\x04fuzz\x18\x02 \x01(\x02R\x04fuzz\"\x95\x02\n" +
 	"\vPBRMaterial\x12*\n" +
 	"\x06albedo\x18\x01 \x01(\v2\x12.transport.TextureR\x06albedo\x120\n" +
@@ -1965,7 +1965,7 @@ var file_transport_proto_depIdxs = []int32{
 	5,  // 18: transport.LambertMaterial.albedo:type_name -> transport.Texture
 	5,  // 19: transport.DiffuseLightMaterial.emit:type_name -> transport.Texture
 	5,  // 20: transport.IsotropicMaterial.albedo:type_name -> transport.Texture
-	5,  // 21: transport.MetalMaterial.albedo:type_name -> transport.Texture
+	2,  // 21: transport.MetalMaterial.albedo:type_name -> transport.Vec3
 	5,  // 22: transport.PBRMaterial.albedo:type_name -> transport.Texture
 	5,  // 23: transport.PBRMaterial.roughness:type_name -> transport.Texture
 	5,  // 24: transport.PBRMaterial.metalness:type_name -> transport.Texture
