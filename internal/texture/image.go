@@ -21,6 +21,12 @@ type ImageTxt struct {
 	data  image.Image
 }
 
+func NewFromRawData(width int, height int, data []float64) *ImageTxt {
+	img := floatimage.NewFloatNRGBA(image.Rect(0, 0, width, height), data)
+
+	return &ImageTxt{sizeX: width, sizeY: height, data: img}
+}
+
 // NewFromFile returns a new ImageTxt instance by using the supplied file path.
 func NewFromFile(path string) (*ImageTxt, error) {
 	img, err := oiio.ReadImage(path)
@@ -134,4 +140,9 @@ func (it *ImageTxt) SizeX() int {
 // SizeX returns the height of the underlying image.
 func (it *ImageTxt) SizeY() int {
 	return it.sizeY
+}
+
+// GetData returns the underlying image data.
+func (it *ImageTxt) GetData() image.Image {
+	return it.data
 }

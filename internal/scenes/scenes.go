@@ -697,13 +697,41 @@ func Challenger(aspect float64) ([]byte, error) {
 			},
 			"car": {
 				Name: "car",
-				Type: pb_transport.MaterialType_LAMBERT,
-				MaterialProperties: &pb_transport.Material_Lambert{
-					Lambert: &pb_transport.LambertMaterial{
+				Type: pb_transport.MaterialType_PBR,
+				MaterialProperties: &pb_transport.Material_Pbr{
+					Pbr: &pb_transport.PBRMaterial{
 						Albedo: &pb_transport.Texture{
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal_albedo.png",
+								},
+							},
+						},
+						Roughness: &pb_transport.Texture{
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal_roughness.png",
+								},
+							},
+						},
+						Metalness: &pb_transport.Texture{
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal_metallic.png",
+								},
+							},
+						},
+						NormalMap: &pb_transport.Texture{
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal-normal-ogl.png",
+								},
+							},
+						},
+						Sss: &pb_transport.Texture{
 							TextureProperties: &pb_transport.Texture_Constant{
 								Constant: &pb_transport.ConstantTexture{
-									Value: &pb_transport.Vec3{X: 0.8, Y: 0.4, Z: 0.4},
+									Value: &pb_transport.Vec3{X: 0.0, Y: 0.0, Z: 0.0},
 								},
 							},
 						},

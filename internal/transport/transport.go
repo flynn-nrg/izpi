@@ -16,11 +16,11 @@ type Transport struct {
 	aspectOverride float64
 	protoScene     *pb_transport.Scene
 	triangles      []*pb_transport.Triangle
-	textures       map[string][]byte
+	textures       map[string]*texture.ImageTxt
 	materials      map[string]material.Material
 }
 
-func NewTransport(aspectOverride float64, protoScene *pb_transport.Scene, triangles []*pb_transport.Triangle, textures map[string][]byte) *Transport {
+func NewTransport(aspectOverride float64, protoScene *pb_transport.Scene, triangles []*pb_transport.Triangle, textures map[string]*texture.ImageTxt) *Transport {
 	return &Transport{aspectOverride: aspectOverride, protoScene: protoScene, triangles: triangles, textures: textures}
 }
 
@@ -83,10 +83,49 @@ func (t *Transport) toSceneMaterials() (map[string]material.Material, error) {
 				return nil, err
 			}
 			materials[material.GetName()] = metal
+		case pb_transport.MaterialType_PBR:
+			pbr, err := t.toScenePBRMaterial(material)
+			if err != nil {
+				return nil, err
+			}
+			materials[material.GetName()] = pbr
 		}
 	}
 
 	return materials, nil
+}
+
+func (t *Transport) toScenePBRMaterial(mat *pb_transport.Material) (material.Material, error) {
+	pbr := mat.GetPbr()
+
+	albedo, err := t.toSceneTexture(pbr.GetAlbedo())
+	if err != nil {
+		return nil, err
+	}
+
+	roughness, err := t.toSceneTexture(pbr.GetRoughness())
+	if err != nil {
+		return nil, err
+	}
+
+	metalness, err := t.toSceneTexture(pbr.GetMetalness())
+	if err != nil {
+		return nil, err
+	}
+
+	normalMap, err := t.toSceneTexture(pbr.GetNormalMap())
+	if err != nil {
+		return nil, err
+	}
+
+	sss, err := t.toSceneTexture(pbr.GetSss())
+	if err != nil {
+		return nil, err
+	}
+
+	sssRadius := float64(pbr.GetSssRadius())
+
+	return material.NewPBR(albedo, roughness, metalness, normalMap, sss, sssRadius), nil
 }
 
 func (t *Transport) toSceneMetalMaterial(mat *pb_transport.Material) (material.Material, error) {
@@ -137,6 +176,8 @@ func (t *Transport) toSceneTexture(text *pb_transport.Texture) (texture.Texture,
 	switch text.GetTextureProperties().(type) {
 	case *pb_transport.Texture_Constant:
 		return t.toSceneConstantTexture(text)
+	case *pb_transport.Texture_Image:
+		return t.toSceneImageTexture(text)
 	}
 
 	return nil, fmt.Errorf("unknown texture type: %T", text.GetTextureProperties())
@@ -150,6 +191,17 @@ func (t *Transport) toSceneConstantTexture(text *pb_transport.Texture) (texture.
 		Y: float64(constant.GetValue().GetY()),
 		Z: float64(constant.GetValue().GetZ()),
 	}), nil
+}
+
+func (t *Transport) toSceneImageTexture(text *pb_transport.Texture) (texture.Texture, error) {
+	image := text.GetImage()
+
+	imageText, ok := t.textures[image.GetFilename()]
+	if !ok {
+		return nil, fmt.Errorf("texture %s not found", image.GetFilename())
+	}
+
+	return imageText, nil
 }
 
 func (t *Transport) toSceneCamera(aspectOverride float64) *camera.Camera {

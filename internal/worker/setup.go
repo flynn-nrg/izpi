@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"unsafe"
 
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
 	"github.com/flynn-nrg/izpi/internal/sampler"
+	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/transport"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 	log "github.com/sirupsen/logrus"
@@ -44,7 +46,7 @@ func (s *workerServer) getScene(ctx context.Context, transportClient pb_transpor
 
 // streamTextureFile streams a texture file from the asset provider.
 // `expectedTotalSize` is used for pre-allocation, obtained from ImageTexture.size.
-func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb_transport.SceneTransportServiceClient, filename string, expectedTotalSize uint64) ([]byte, error) {
+func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb_transport.SceneTransportServiceClient, filename string, expectedTotalSize uint64) ([]float64, error) {
 	req := &pb_transport.StreamTextureFileRequest{
 		Filename:  filename,
 		Offset:    0,         // Start from beginning
@@ -90,7 +92,9 @@ func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb
 		return nil, fmt.Errorf("texture '%s' stream ended prematurely. Expected %d bytes, got %d", filename, expectedTotalSize, receivedBytes)
 	}
 
-	return textureData, nil
+	float64Data := *(*[]float64)(unsafe.Pointer(&textureData))
+
+	return float64Data, nil
 }
 
 // streamTriangles streams triangles from the asset provider.
@@ -233,56 +237,29 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	log.Infof("RenderSetup: Streaming textures from '%s'...", assetProviderAddr)
 
 	// Collect all unique ImageTexture filenames from materials
-	texturesToFetch := make(map[string]*pb_transport.ImageTexture)
-	for _, mat := range protoScene.GetMaterials() {
-		if mat.GetLambert() != nil && mat.GetLambert().GetAlbedo() != nil {
-			if imgTex := mat.GetLambert().GetAlbedo().GetImage(); imgTex != nil {
-				texturesToFetch[imgTex.GetFilename()] = imgTex
-			}
-		}
-		// Add similar logic for other material types and their textures (e.g., DiffuseLight, Metal, PBR)
-		if mat.GetDiffuselight() != nil && mat.GetDiffuselight().GetEmit() != nil {
-			if imgTex := mat.GetDiffuselight().GetEmit().GetImage(); imgTex != nil {
-				texturesToFetch[imgTex.GetFilename()] = imgTex
-			}
-		}
-		if mat.GetIsotropic() != nil && mat.GetIsotropic().GetAlbedo() != nil {
-			if imgTex := mat.GetIsotropic().GetAlbedo().GetImage(); imgTex != nil {
-				texturesToFetch[imgTex.GetFilename()] = imgTex
-			}
-		}
+	texturesToFetch := protoScene.GetImageTextures()
 
-		if mat.GetPbr() != nil {
-			if imgTex := mat.GetPbr().GetAlbedo().GetImage(); imgTex != nil {
-				texturesToFetch[imgTex.GetFilename()] = imgTex
-			}
-			if imgTex := mat.GetPbr().GetRoughness().GetImage(); imgTex != nil {
-				texturesToFetch[imgTex.GetFilename()] = imgTex
-			}
-			if imgTex := mat.GetPbr().GetMetalness().GetImage(); imgTex != nil {
-				texturesToFetch[imgTex.GetFilename()] = imgTex
-			}
-			if imgTex := mat.GetPbr().GetNormalMap().GetImage(); imgTex != nil {
-				texturesToFetch[imgTex.GetFilename()] = imgTex
-			}
-			if imgTex := mat.GetPbr().GetSss().GetImage(); imgTex != nil {
-				texturesToFetch[imgTex.GetFilename()] = imgTex
-			}
-		}
-	}
-
-	textures := make(map[string][]byte)
+	textures := make(map[string]*texture.ImageTxt)
 
 	for filename, imgTex := range texturesToFetch {
-		log.Infof("RenderSetup: Fetching texture '%s' (expected size: %d bytes)...", filename, imgTex.GetSize())
-		texData, err := s.streamTextureFile(ctx, transportClient, filename, imgTex.GetSize())
+		var pixelSize uint32
+		switch imgTex.GetPixelFormat() {
+		case pb_transport.TexturePixelFormat_FLOAT64:
+			pixelSize = 8
+		default:
+			return status.Errorf(codes.InvalidArgument, "unsupported texture pixel format: %s", imgTex.GetPixelFormat().String())
+		}
+
+		textureSize := uint64(imgTex.GetWidth() * imgTex.GetHeight() * pixelSize)
+		log.Infof("RenderSetup: Fetching texture '%s' (expected size: %d bytes)...", filename, textureSize)
+		texData, err := s.streamTextureFile(ctx, transportClient, filename, textureSize)
 		if err != nil {
 			errMsg := fmt.Sprintf("Failed to load texture '%s': %v", filename, err)
 			s.sendStatus(stream, pb_control.RenderSetupStatus_FAILED, errMsg)
 			return status.Error(codes.Internal, errMsg)
 		}
 
-		textures[filename] = texData
+		textures[filename] = texture.NewFromRawData(int(imgTex.GetWidth()), int(imgTex.GetHeight()), texData)
 
 		log.Infof("RenderSetup: Successfully loaded texture '%s'. Actual size: %d bytes.", filename, len(texData))
 	}
