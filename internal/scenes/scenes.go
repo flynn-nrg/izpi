@@ -724,7 +724,7 @@ func Challenger(aspect float64) ([]byte, error) {
 						NormalMap: &pb_transport.Texture{
 							TextureProperties: &pb_transport.Texture_Image{
 								Image: &pb_transport.ImageTexture{
-									Filename: "rusty-metal-normal-ogl.png",
+									Filename: "rusty-metal_normal-ogl.png",
 								},
 							},
 						},
@@ -762,6 +762,20 @@ func Challenger(aspect float64) ([]byte, error) {
 						Fuzz:   0.0,
 					},
 				},
+			},
+		},
+		ImageTextures: map[string]*pb_transport.ImageTextureMetadata{
+			"rusty-metal_albedo.png": {
+				Filename: "rusty-metal_albedo.png",
+			},
+			"rusty-metal_roughness.png": {
+				Filename: "rusty-metal_roughness.png",
+			},
+			"rusty-metal_metallic.png": {
+				Filename: "rusty-metal_metallic.png",
+			},
+			"rusty-metal_normal-ogl.png": {
+				Filename: "rusty-metal_normal-ogl.png",
 			},
 		},
 		Objects: &pb_transport.SceneObjects{
