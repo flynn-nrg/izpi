@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"fmt"
+	"time"
 
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
@@ -206,7 +207,13 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	triangles := make([]*pb_transport.Triangle, 0)
 
 	if protoScene.GetStreamTriangles() {
-		log.Infof("RenderSetup: Scene indicates triangles need to be streamed. Total triangles: %d", protoScene.GetTotalTriangles())
+		if err := s.sendStatus(stream, pb_control.RenderSetupStatus_STREAMING_GEOMETRY, ""); err != nil {
+			return status.Error(codes.Internal, fmt.Sprintf("failed to send STREAMING_GEOMETRY status: %v", err))
+		}
+
+		streamingStart := time.Now()
+
+		log.Infof("RenderSetup: Streaming %d triangles", protoScene.GetTotalTriangles())
 		trianglesChunk, err := s.streamTriangles(ctx, transportClient, protoScene.GetName(), protoScene.GetTotalTriangles(), 1000) // Fetch in batches of 1000
 		if err != nil {
 			errMsg := fmt.Sprintf("Failed to stream triangles for scene '%s': %v", protoScene.GetName(), err)
@@ -216,7 +223,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 		triangles = append(triangles, trianglesChunk...)
 
-		log.Infof("RenderSetup: Successfully streamed %d triangles for scene '%s'.", len(triangles), protoScene.GetName())
+		log.Infof("RenderSetup: Successfully streamed %d triangles in %s.", len(triangles), time.Since(streamingStart))
 	}
 
 	// Step 2: Send STREAMING_TEXTURES status and fetch textures
@@ -283,6 +290,10 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	log.Infof("RenderSetup: Finished streaming %d unique textures.", len(textures))
 
 	// Step 3: Transform the scene to its internal representation
+	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_BUILDING_ACCELERATION_STRUCTURE, ""); err != nil {
+		return status.Error(codes.Internal, fmt.Sprintf("failed to send BUILDING_ACCELERATION_STRUCTURE status: %v", err))
+	}
+
 	cameraAspectRatio := float64(req.GetImageResolution().GetWidth()) / float64(req.GetImageResolution().GetHeight())
 	t := transport.NewTransport(cameraAspectRatio, protoScene, triangles, textures)
 
@@ -322,8 +333,11 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_READY, ""); err != nil {
 		return status.Errorf(codes.Internal, "failed to send READY status: %v", err)
 	}
-	log.Infof("RenderSetup: Worker is READY for rendering with scene '%s', %d triangles, and %d textures.",
-		req.GetSceneName(), len(protoScene.GetObjects().GetTriangles()), len(textures))
+
+	totalTriangles := len(protoScene.GetObjects().GetTriangles()) + len(triangles)
+
+	log.Infof("RenderSetup: Worker is READY for rendering scene '%s' with %d triangles, %d spheres, and %d textures.",
+		req.GetSceneName(), totalTriangles, len(protoScene.GetObjects().GetSpheres()), len(textures))
 
 	s.currentStatus = pb_discovery.WorkerStatus_BUSY_RENDERING
 

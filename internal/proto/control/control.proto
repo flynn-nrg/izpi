@@ -39,12 +39,11 @@ enum SamplerType {
 enum RenderSetupStatus { // Renamed enum
   RENDER_SETUP_STATUS_UNKNOWN = 0; // Default zero value for enums
   LOADING_SCENE = 1;
-  STREAMING_TEXTURES = 2;
-  TRANSFORMING_MATERIALS = 3;
-  TRANSFORMING_TRIANGLES = 4;
-  BUILDING_ACCELERATION_STRUCTURE = 5;
-  READY = 6;
-  FAILED = 7; // Indicates an error occurred during configuration.
+  STREAMING_GEOMETRY = 2;
+  STREAMING_TEXTURES = 3;
+  BUILDING_ACCELERATION_STRUCTURE = 4;
+  READY = 5;
+  FAILED = 6; // Indicates an error occurred during configuration.
 }
 
 // --- Core Data Structures ---

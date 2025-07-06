@@ -83,12 +83,11 @@ type RenderSetupStatus int32
 const (
 	RenderSetupStatus_RENDER_SETUP_STATUS_UNKNOWN     RenderSetupStatus = 0 // Default zero value for enums
 	RenderSetupStatus_LOADING_SCENE                   RenderSetupStatus = 1
-	RenderSetupStatus_STREAMING_TEXTURES              RenderSetupStatus = 2
-	RenderSetupStatus_TRANSFORMING_MATERIALS          RenderSetupStatus = 3
-	RenderSetupStatus_TRANSFORMING_TRIANGLES          RenderSetupStatus = 4
-	RenderSetupStatus_BUILDING_ACCELERATION_STRUCTURE RenderSetupStatus = 5
-	RenderSetupStatus_READY                           RenderSetupStatus = 6
-	RenderSetupStatus_FAILED                          RenderSetupStatus = 7 // Indicates an error occurred during configuration.
+	RenderSetupStatus_STREAMING_GEOMETRY              RenderSetupStatus = 2
+	RenderSetupStatus_STREAMING_TEXTURES              RenderSetupStatus = 3
+	RenderSetupStatus_BUILDING_ACCELERATION_STRUCTURE RenderSetupStatus = 4
+	RenderSetupStatus_READY                           RenderSetupStatus = 5
+	RenderSetupStatus_FAILED                          RenderSetupStatus = 6 // Indicates an error occurred during configuration.
 )
 
 // Enum value maps for RenderSetupStatus.
@@ -96,22 +95,20 @@ var (
 	RenderSetupStatus_name = map[int32]string{
 		0: "RENDER_SETUP_STATUS_UNKNOWN",
 		1: "LOADING_SCENE",
-		2: "STREAMING_TEXTURES",
-		3: "TRANSFORMING_MATERIALS",
-		4: "TRANSFORMING_TRIANGLES",
-		5: "BUILDING_ACCELERATION_STRUCTURE",
-		6: "READY",
-		7: "FAILED",
+		2: "STREAMING_GEOMETRY",
+		3: "STREAMING_TEXTURES",
+		4: "BUILDING_ACCELERATION_STRUCTURE",
+		5: "READY",
+		6: "FAILED",
 	}
 	RenderSetupStatus_value = map[string]int32{
 		"RENDER_SETUP_STATUS_UNKNOWN":     0,
 		"LOADING_SCENE":                   1,
-		"STREAMING_TEXTURES":              2,
-		"TRANSFORMING_MATERIALS":          3,
-		"TRANSFORMING_TRIANGLES":          4,
-		"BUILDING_ACCELERATION_STRUCTURE": 5,
-		"READY":                           6,
-		"FAILED":                          7,
+		"STREAMING_GEOMETRY":              2,
+		"STREAMING_TEXTURES":              3,
+		"BUILDING_ACCELERATION_STRUCTURE": 4,
+		"READY":                           5,
+		"FAILED":                          6,
 	}
 )
 
@@ -718,17 +715,16 @@ const file_control_proto_rawDesc = "" +
 	"\n" +
 	"WIRE_FRAME\x10\x03\x12\n" +
 	"\n" +
-	"\x06COLOUR\x10\x04*\xd3\x01\n" +
+	"\x06COLOUR\x10\x04*\xb3\x01\n" +
 	"\x11RenderSetupStatus\x12\x1f\n" +
 	"\x1bRENDER_SETUP_STATUS_UNKNOWN\x10\x00\x12\x11\n" +
 	"\rLOADING_SCENE\x10\x01\x12\x16\n" +
-	"\x12STREAMING_TEXTURES\x10\x02\x12\x1a\n" +
-	"\x16TRANSFORMING_MATERIALS\x10\x03\x12\x1a\n" +
-	"\x16TRANSFORMING_TRIANGLES\x10\x04\x12#\n" +
-	"\x1fBUILDING_ACCELERATION_STRUCTURE\x10\x05\x12\t\n" +
-	"\x05READY\x10\x06\x12\n" +
+	"\x12STREAMING_GEOMETRY\x10\x02\x12\x16\n" +
+	"\x12STREAMING_TEXTURES\x10\x03\x12#\n" +
+	"\x1fBUILDING_ACCELERATION_STRUCTURE\x10\x04\x12\t\n" +
+	"\x05READY\x10\x05\x12\n" +
 	"\n" +
-	"\x06FAILED\x10\a2\xef\x01\n" +
+	"\x06FAILED\x10\x062\xef\x01\n" +
 	"\x14RenderControlService\x12J\n" +
 	"\vRenderSetup\x12\x1b.control.RenderSetupRequest\x1a\x1c.control.RenderSetupResponse0\x01\x12G\n" +
 	"\n" +
