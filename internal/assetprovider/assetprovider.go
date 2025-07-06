@@ -6,6 +6,7 @@ import (
 	"net"
 	"os" // Added to get hostname
 	"sync"
+	"unsafe"
 
 	// For simulating delays
 	"github.com/sirupsen/logrus"
@@ -14,7 +15,9 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
+	"github.com/flynn-nrg/floatimage/floatimage"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport" // Your generated transport proto
+	"github.com/flynn-nrg/izpi/internal/texture"
 )
 
 const (
@@ -29,10 +32,10 @@ const (
 type assetProviderServer struct {
 	pb_transport.UnimplementedSceneTransportServiceServer
 
-	scene       *pb_transport.Scene      // The main scene graph
-	textures    map[string][]byte        // Map of filename to texture data
-	triangles   []*pb_transport.Triangle // Slice of all triangles for streaming
-	trianglesMu sync.RWMutex             // Mutex for triangles access if concurrency is needed (not strictly for this simple server)
+	scene       *pb_transport.Scene          // The main scene graph
+	textures    map[string]*texture.ImageTxt // Map of filename to texture data
+	triangles   []*pb_transport.Triangle     // Slice of all triangles for streaming
+	trianglesMu sync.RWMutex                 // Mutex for triangles access if concurrency is needed (not strictly for this simple server)
 }
 
 // AssetProvider manages the gRPC server for serving assets.
@@ -47,7 +50,7 @@ type AssetProvider struct {
 // New creates a new AssetProvider, initializes its gRPC server,
 // and starts serving assets in a new goroutine.
 // It returns the listener address (target) and an error if initialization fails.
-func New(scene *pb_transport.Scene, textures map[string][]byte, triangles []*pb_transport.Triangle) (*AssetProvider, string, error) {
+func New(scene *pb_transport.Scene, textures map[string]*texture.ImageTxt, triangles []*pb_transport.Triangle) (*AssetProvider, string, error) {
 	// If no port is specified, gRPC will pick a random available port.
 	// We listen on "0.0.0.0:0" to bind to all available interfaces on a random port.
 	lis, err := net.Listen("tcp", "0.0.0.0:0")
@@ -118,13 +121,32 @@ func (s *assetProviderServer) StreamTextureFile(req *pb_transport.StreamTextureF
 	logrus.Printf("AssetProvider: StreamTextureFile called for '%s' (offset: %d, chunk_size: %d)",
 		req.GetFilename(), req.GetOffset(), req.GetChunkSize())
 
-	textureData, ok := s.textures[req.GetFilename()]
+	imageText, ok := s.textures[req.GetFilename()]
 	if !ok {
 		return status.Errorf(codes.NotFound, "texture file '%s' not found", req.GetFilename())
 	}
 
-	// Determine total size of the texture file
-	totalSize := uint64(len(textureData))
+	var totalSize uint64
+	var rawData []float64
+
+	if textureData, ok := imageText.GetData().(*floatimage.FloatNRGBA); ok {
+		rawData = textureData.Pix
+		totalSize = uint64(imageText.GetData().Bounds().Dx() * imageText.GetData().Bounds().Dy() * 4 * int(unsafe.Sizeof(float64(0))))
+	} else {
+		return status.Errorf(codes.Internal, "texture data is not a floatimage.FloatNRGBA")
+	}
+
+	logrus.Infof("Total size: %d", totalSize)
+	logrus.Infof("Raw data length: %d", len(rawData))
+
+	// rawData is []float64
+	// Convert []float64 to []byte using unsafe.Slice
+	byteData := unsafe.Slice((*byte)(unsafe.Pointer(&rawData[0])), len(rawData)*int(unsafe.Sizeof(float64(0))))
+
+	logrus.Infof("Total size (calculated): %d", totalSize)
+	logrus.Infof("Raw data length (float64s): %d", len(rawData))
+	logrus.Infof("Byte data length (bytes after unsafe cast): %d", len(byteData))
+	logrus.Infof("Byte data capacity (bytes after unsafe cast): %d", cap(byteData))
 
 	// Ensure offset is within bounds
 	if req.GetOffset() >= totalSize && totalSize > 0 {
@@ -153,7 +175,9 @@ func (s *assetProviderServer) StreamTextureFile(req *pb_transport.StreamTextureF
 			endOffset = totalSize
 		}
 
-		chunk := textureData[currentOffset:endOffset]
+		chunk := byteData[currentOffset:endOffset]
+
+		// convert chunk to []byte
 		resp := &pb_transport.StreamTextureFileResponse{
 			Chunk: chunk,
 			Size:  totalSize, // Send total size with every chunk for robustness

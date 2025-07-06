@@ -245,7 +245,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		var pixelSize uint32
 		switch imgTex.GetPixelFormat() {
 		case pb_transport.TexturePixelFormat_FLOAT64:
-			pixelSize = 8
+			pixelSize = 8 * imgTex.GetChannels()
 		default:
 			return status.Errorf(codes.InvalidArgument, "unsupported texture pixel format: %s", imgTex.GetPixelFormat().String())
 		}

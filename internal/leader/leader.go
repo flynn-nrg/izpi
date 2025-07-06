@@ -548,6 +548,14 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 			log.Fatalf("Error loading texture %s: %v", t.GetFilename(), err)
 		}
 		textures[t.GetFilename()] = imageText
+
+		// Update metadata
+		t.Width = uint32(imageText.GetData().Bounds().Dx())
+		t.Height = uint32(imageText.GetData().Bounds().Dy())
+		t.PixelFormat = pb_transport.TexturePixelFormat_FLOAT64
+		t.Channels = 4
+
+		log.Infof("Texture size: %d x %d", t.Width, t.Height)
 	}
 
 	log.Infof("Textures loaded: %v", textures)
@@ -591,7 +599,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 			protoScene.Objects.Triangles = nil
 		}
 
-		assetProvider, assetProviderAddress, err := assetprovider.New(protoScene, nil, trianglesToStream)
+		assetProvider, assetProviderAddress, err := assetprovider.New(protoScene, textures, trianglesToStream)
 		if err != nil {
 			log.Fatalln("Failed to create asset provider:", err.Error())
 		}
