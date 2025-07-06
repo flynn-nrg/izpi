@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sync"
 	"syscall"
+	"unsafe"
 
 	"github.com/godbus/dbus/v5"
 	"github.com/grandcat/zeroconf"
@@ -31,6 +32,7 @@ type workerServer struct {
 	pb_control.UnimplementedRenderControlServiceServer
 
 	workerID         string
+	endianness       pb_discovery.Endianness
 	availableCores   uint32
 	totalMemoryBytes uint64
 	freeMemoryBytes  uint64
@@ -64,12 +66,22 @@ func newWorkerServer(numCores uint32) *workerServer {
 
 	return &workerServer{
 		workerID:         workerID,
+		endianness:       getEndianness(),
 		availableCores:   numCores,
 		totalMemoryBytes: totalMem,
 		freeMemoryBytes:  freeMem,
 		currentStatus:    pb_discovery.WorkerStatus_FREE,
 		randPool:         sync.Pool{New: func() interface{} { return fastrandom.NewWithDefaults() }},
 	}
+}
+
+func getEndianness() pb_discovery.Endianness {
+	var i int32 = 1
+	b := (*[4]byte)(unsafe.Pointer(&i))
+	if b[0] == 1 {
+		return pb_discovery.Endianness_LITTLE_ENDIAN
+	}
+	return pb_discovery.Endianness_BIG_ENDIAN
 }
 
 // StartWorker initializes and runs the Izpi worker services.

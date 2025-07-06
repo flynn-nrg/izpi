@@ -83,6 +83,55 @@ func (WorkerStatus) EnumDescriptor() ([]byte, []int) {
 	return file_discovery_proto_rawDescGZIP(), []int{0}
 }
 
+type Endianness int32
+
+const (
+	Endianness_UNKNOWN_ENDIAN Endianness = 0 // Default zero value
+	Endianness_LITTLE_ENDIAN  Endianness = 1
+	Endianness_BIG_ENDIAN     Endianness = 2
+)
+
+// Enum value maps for Endianness.
+var (
+	Endianness_name = map[int32]string{
+		0: "UNKNOWN_ENDIAN",
+		1: "LITTLE_ENDIAN",
+		2: "BIG_ENDIAN",
+	}
+	Endianness_value = map[string]int32{
+		"UNKNOWN_ENDIAN": 0,
+		"LITTLE_ENDIAN":  1,
+		"BIG_ENDIAN":     2,
+	}
+)
+
+func (x Endianness) Enum() *Endianness {
+	p := new(Endianness)
+	*p = x
+	return p
+}
+
+func (x Endianness) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Endianness) Descriptor() protoreflect.EnumDescriptor {
+	return file_discovery_proto_enumTypes[1].Descriptor()
+}
+
+func (Endianness) Type() protoreflect.EnumType {
+	return &file_discovery_proto_enumTypes[1]
+}
+
+func (x Endianness) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Endianness.Descriptor instead.
+func (Endianness) EnumDescriptor() ([]byte, []int) {
+	return file_discovery_proto_rawDescGZIP(), []int{1}
+}
+
 type QueryWorkerStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -126,6 +175,7 @@ type QueryWorkerStatusResponse struct {
 	TotalMemoryBytes uint64                 `protobuf:"varint,3,opt,name=total_memory_bytes,json=totalMemoryBytes,proto3" json:"total_memory_bytes,omitempty"` // Total physical memory in bytes
 	FreeMemoryBytes  uint64                 `protobuf:"varint,4,opt,name=free_memory_bytes,json=freeMemoryBytes,proto3" json:"free_memory_bytes,omitempty"`    // Available physical memory in bytes
 	Status           WorkerStatus           `protobuf:"varint,5,opt,name=status,proto3,enum=discovery.WorkerStatus" json:"status,omitempty"`                   // Current status of the worker (e.g., FREE, BUSY_RENDERING)
+	Endianness       Endianness             `protobuf:"varint,6,opt,name=endianness,proto3,enum=discovery.Endianness" json:"endianness,omitempty"`             // Endianness of the worker's CPU
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -195,18 +245,28 @@ func (x *QueryWorkerStatusResponse) GetStatus() WorkerStatus {
 	return WorkerStatus_WORKER_STATUS_UNSPECIFIED
 }
 
+func (x *QueryWorkerStatusResponse) GetEndianness() Endianness {
+	if x != nil {
+		return x.Endianness
+	}
+	return Endianness_UNKNOWN_ENDIAN
+}
+
 var File_discovery_proto protoreflect.FileDescriptor
 
 const file_discovery_proto_rawDesc = "" +
 	"\n" +
 	"\x0fdiscovery.proto\x12\tdiscovery\"\x1a\n" +
-	"\x18QueryWorkerStatusRequest\"\xec\x01\n" +
+	"\x18QueryWorkerStatusRequest\"\xa3\x02\n" +
 	"\x19QueryWorkerStatusResponse\x12\x1b\n" +
 	"\tnode_name\x18\x01 \x01(\tR\bnodeName\x12'\n" +
 	"\x0favailable_cores\x18\x02 \x01(\rR\x0eavailableCores\x12,\n" +
 	"\x12total_memory_bytes\x18\x03 \x01(\x04R\x10totalMemoryBytes\x12*\n" +
 	"\x11free_memory_bytes\x18\x04 \x01(\x04R\x0ffreeMemoryBytes\x12/\n" +
-	"\x06status\x18\x05 \x01(\x0e2\x17.discovery.WorkerStatusR\x06status*\x8e\x01\n" +
+	"\x06status\x18\x05 \x01(\x0e2\x17.discovery.WorkerStatusR\x06status\x125\n" +
+	"\n" +
+	"endianness\x18\x06 \x01(\x0e2\x15.discovery.EndiannessR\n" +
+	"endianness*\x8e\x01\n" +
 	"\fWorkerStatus\x12\x1d\n" +
 	"\x19WORKER_STATUS_UNSPECIFIED\x10\x00\x12\b\n" +
 	"\x04FREE\x10\x01\x12\r\n" +
@@ -215,7 +275,13 @@ const file_discovery_proto_rawDesc = "" +
 	"\x0eBUSY_RENDERING\x10\x04\x12\x0e\n" +
 	"\n" +
 	"BUSY_OTHER\x10\x05\x12\v\n" +
-	"\aOFFLINE\x10\x062x\n" +
+	"\aOFFLINE\x10\x06*C\n" +
+	"\n" +
+	"Endianness\x12\x12\n" +
+	"\x0eUNKNOWN_ENDIAN\x10\x00\x12\x11\n" +
+	"\rLITTLE_ENDIAN\x10\x01\x12\x0e\n" +
+	"\n" +
+	"BIG_ENDIAN\x10\x022x\n" +
 	"\x16WorkerDiscoveryService\x12^\n" +
 	"\x11QueryWorkerStatus\x12#.discovery.QueryWorkerStatusRequest\x1a$.discovery.QueryWorkerStatusResponseB>Z<github.com/flynn-nrg/izpi/internal/proto/discovery;discoveryb\x06proto3"
 
@@ -231,22 +297,24 @@ func file_discovery_proto_rawDescGZIP() []byte {
 	return file_discovery_proto_rawDescData
 }
 
-var file_discovery_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_discovery_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_discovery_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_discovery_proto_goTypes = []any{
 	(WorkerStatus)(0),                 // 0: discovery.WorkerStatus
-	(*QueryWorkerStatusRequest)(nil),  // 1: discovery.QueryWorkerStatusRequest
-	(*QueryWorkerStatusResponse)(nil), // 2: discovery.QueryWorkerStatusResponse
+	(Endianness)(0),                   // 1: discovery.Endianness
+	(*QueryWorkerStatusRequest)(nil),  // 2: discovery.QueryWorkerStatusRequest
+	(*QueryWorkerStatusResponse)(nil), // 3: discovery.QueryWorkerStatusResponse
 }
 var file_discovery_proto_depIdxs = []int32{
 	0, // 0: discovery.QueryWorkerStatusResponse.status:type_name -> discovery.WorkerStatus
-	1, // 1: discovery.WorkerDiscoveryService.QueryWorkerStatus:input_type -> discovery.QueryWorkerStatusRequest
-	2, // 2: discovery.WorkerDiscoveryService.QueryWorkerStatus:output_type -> discovery.QueryWorkerStatusResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1, // 1: discovery.QueryWorkerStatusResponse.endianness:type_name -> discovery.Endianness
+	2, // 2: discovery.WorkerDiscoveryService.QueryWorkerStatus:input_type -> discovery.QueryWorkerStatusRequest
+	3, // 3: discovery.WorkerDiscoveryService.QueryWorkerStatus:output_type -> discovery.QueryWorkerStatusResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_discovery_proto_init() }
@@ -259,7 +327,7 @@ func file_discovery_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_discovery_proto_rawDesc), len(file_discovery_proto_rawDesc)),
-			NumEnums:      1,
+			NumEnums:      2,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,

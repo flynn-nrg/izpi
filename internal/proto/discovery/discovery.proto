@@ -15,6 +15,12 @@ enum WorkerStatus {
   OFFLINE = 6;                  // Worker is not responding (this state would be inferred by the leader)
 }
 
+enum Endianness {
+  UNKNOWN_ENDIAN = 0; // Default zero value
+  LITTLE_ENDIAN = 1;
+  BIG_ENDIAN = 2;
+}
+
 message QueryWorkerStatusRequest {
 }
 
@@ -24,6 +30,7 @@ message QueryWorkerStatusResponse {
   uint64 total_memory_bytes = 3; // Total physical memory in bytes
   uint64 free_memory_bytes = 4;  // Available physical memory in bytes
   WorkerStatus status = 5;       // Current status of the worker (e.g., FREE, BUSY_RENDERING)
+  Endianness endianness = 6;     // Endianness of the worker's CPU
 }
 
 service WorkerDiscoveryService {

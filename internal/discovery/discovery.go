@@ -101,6 +101,7 @@ func (d *Discovery) discoverWorker(target string) (*pb_discovery.QueryWorkerStat
 	// Print the response from the worker
 	log.Infof("--- Status from Worker %s ---", statusResp.GetNodeName())
 	log.Infof("  Node Name: %s", statusResp.GetNodeName())
+	log.Infof("  Endianness: %s", statusResp.GetEndianness().String())
 	log.Infof("  Available Cores: %d", statusResp.GetAvailableCores())
 	log.Infof("  Total Memory: %d MiB", statusResp.GetTotalMemoryBytes()/1024/1024)
 	log.Infof("  Free Memory: %d MiB", statusResp.GetFreeMemoryBytes()/1024/1024)
