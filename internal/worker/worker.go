@@ -98,8 +98,6 @@ func StartWorker(numCores uint32) {
 
 	var assignedPort int
 
-	// The listener on the worker side can still be on a random port.
-	// The leader will get this port via mDNS.
 	lis, err := net.Listen("tcp", ":0")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
@@ -131,9 +129,7 @@ func StartWorker(numCores uint32) {
 		fmt.Sprintf("grpc_port=%d", assignedPort),
 	}
 
-	// Create a channel to signal when mDNS advertising should stop
-	// This is important for both zeroconf.Register and avahi.EntryGroup
-	var mDNSServerCloser func() // Function to call to stop mDNS advertisement
+	var mDNSServerCloser func()
 
 	currentOS := runtime.GOOS
 	log.Infof("Operating environment: %s", currentOS)
@@ -148,20 +144,19 @@ func StartWorker(numCores uint32) {
 
 		server, err := avahi.ServerNew(conn)
 		if err != nil {
-			conn.Close() // Close D-Bus connection on Avahi server creation failure
+			conn.Close()
 			log.Fatalf("Failed to create Avahi server client: %v", err)
 		}
 
 		entryGroup, err := server.EntryGroupNew()
 		if err != nil {
-			server.Close() // Close Avahi server client on entry group creation failure
-			conn.Close()   // Close D-Bus connection
+			server.Close()
+			conn.Close()
 			log.Fatalf("Failed to create new Avahi entry group: %v", err)
 		}
 
 		fqdnHostname := hostname + ".local"
 
-		// Convert TXT records to []byte slice of slices for Avahi
 		avahiTxtRecords := make([][]byte, len(txtRecords))
 		for i, t := range txtRecords {
 			avahiTxtRecords[i] = []byte(t)
@@ -170,16 +165,16 @@ func StartWorker(numCores uint32) {
 		err = entryGroup.AddService(
 			avahi.InterfaceUnspec,
 			avahi.ProtoUnspec,
-			0, // Flags
+			0,
 			serviceName,
 			serviceType,
-			"local",      // Domain
-			fqdnHostname, // Hostname
+			"local",
+			fqdnHostname,
 			uint16(assignedPort),
 			avahiTxtRecords,
 		)
 		if err != nil {
-			entryGroup.Reset() // Try to clean up
+			entryGroup.Reset()
 			server.Close()
 			conn.Close()
 			log.Fatalf("Failed to add service to Avahi entry group: %v", err)
@@ -187,14 +182,14 @@ func StartWorker(numCores uint32) {
 
 		err = entryGroup.Commit()
 		if err != nil {
-			entryGroup.Reset() // Try to clean up
+			entryGroup.Reset()
 			server.Close()
 			conn.Close()
 			log.Fatalf("Failed to commit Avahi entry group: %v", err)
 		}
+
 		log.Infof("Avahi service '%s.%s' registered successfully on port %d with TXT: %v", serviceName, serviceType, assignedPort, txtRecords)
 
-		// Define the closer for Avahi
 		mDNSServerCloser = func() {
 			log.Info("Unpublishing Avahi service...")
 			if err := entryGroup.Reset(); err != nil {
@@ -208,23 +203,21 @@ func StartWorker(numCores uint32) {
 		}
 
 	case "darwin":
-		// Use grandcat/zeroconf for macOS
 		server, err := zeroconf.Register(
 			serviceName,
 			serviceType,
 			"local.",
 			assignedPort,
 			txtRecords,
-			nil, // interfaces: nil means all suitable interfaces
+			nil,
 		)
 		if err != nil {
 			log.Fatalf("Failed to register Zeroconf service: %v", err)
 		}
 		log.Infof("Zeroconf service '%s' advertising on port %d with TXT: %v", serviceName, assignedPort, txtRecords)
 
-		// Define the closer for grandcat/zeroconf
 		mDNSServerCloser = func() {
-			log.Info("Shutting down grandcat/zeroconf service...")
+			log.Info("Shutting down Zeroconf service...")
 			server.Shutdown()
 		}
 
@@ -236,13 +229,12 @@ func StartWorker(numCores uint32) {
 		}
 	}
 
-	// Ensure the mDNS service is shut down gracefully on exit
 	defer mDNSServerCloser()
 
 	// --- Graceful Shutdown ---
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	<-sigChan // Blocks until a signal is received
+	<-sigChan
 
 	log.Info("Shutting down Izpi Worker...")
 	grpcServer.GracefulStop()

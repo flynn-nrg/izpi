@@ -61,7 +61,7 @@ func (d *Discovery) FindWorkers() (map[string]*pb_discovery.QueryWorkerStatusRes
 
 		target := fmt.Sprintf("%s:%d", ipToDial, entry.Port)
 
-		statusResp, err := d.discoverWorker(target)
+		statusResp, err := d.discoverWorker(entry.HostName, target)
 		if err != nil {
 			log.Errorf("failed to discover worker %s: %v", target, err)
 			continue
@@ -76,11 +76,11 @@ func (d *Discovery) FindWorkers() (map[string]*pb_discovery.QueryWorkerStatusRes
 	return workerHosts, nil
 }
 
-func (d *Discovery) discoverWorker(target string) (*pb_discovery.QueryWorkerStatusResponse, error) {
+func (d *Discovery) discoverWorker(nodeName string, target string) (*pb_discovery.QueryWorkerStatusResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Infof("Leader: Attempting gRPC dial to %s", target)
+	log.Infof("Leader: Attempting gRPC dial to %s", nodeName)
 	conn, err := grpc.NewClient(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Errorf("failed to connect to worker %s: %v", target, err)
@@ -94,7 +94,7 @@ func (d *Discovery) discoverWorker(target string) (*pb_discovery.QueryWorkerStat
 
 	statusResp, err := discoveryClient.QueryWorkerStatus(ctx, &pb_discovery.QueryWorkerStatusRequest{})
 	if err != nil {
-		log.Errorf("failed to query status from worker %s: %v", target, err)
+		log.Errorf("failed to query status from worker %s: %v", nodeName, err)
 		return nil, err
 	}
 

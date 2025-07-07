@@ -549,16 +549,12 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		}
 		textures[t.GetFilename()] = imageText
 
-		// Update metadata
+		// Update metadata. The pixel format is always float64 with 4 channels.
 		t.Width = uint32(imageText.GetData().Bounds().Dx())
 		t.Height = uint32(imageText.GetData().Bounds().Dy())
 		t.PixelFormat = pb_transport.TexturePixelFormat_FLOAT64
 		t.Channels = 4
-
-		log.Infof("Texture size: %d x %d", t.Width, t.Height)
 	}
-
-	log.Infof("Textures loaded: %v", textures)
 
 	t := transport.NewTransport(aspectRatio, protoScene, nil, textures)
 	sceneData, err = t.ToScene()
@@ -674,6 +670,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
+
 	// Detach the renderer as SDL needs to use the main thread for everything.
 	go func() {
 		canvas = r.Render(ctx)

@@ -44,20 +44,18 @@ func (s *workerServer) getScene(ctx context.Context, transportClient pb_transpor
 	return scene, nil
 }
 
-// streamTextureFile streams a texture file from the asset provider.
-// `expectedTotalSize` is used for pre-allocation, obtained from ImageTexture.size.
 func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb_transport.SceneTransportServiceClient, filename string, expectedTotalSize uint64) ([]float64, error) {
 	req := &pb_transport.StreamTextureFileRequest{
 		Filename:  filename,
-		Offset:    0,         // Start from beginning
-		ChunkSize: 64 * 1024, // Consistent chunk size
+		Offset:    0,
+		ChunkSize: 64 * 1024,
 	}
 	stream, err := transportClient.StreamTextureFile(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open texture stream for %s: %w", filename, err)
 	}
 
-	textureData := make([]byte, 0, expectedTotalSize) // Pre-allocate based on ImageTexture.size
+	textureData := make([]byte, 0, expectedTotalSize)
 	receivedBytes := uint64(0)
 
 	for {
@@ -82,8 +80,6 @@ func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb
 			return nil, fmt.Errorf("failed to receive texture chunk for %s: %w", filename, err)
 		}
 
-		// resp.GetSize() here is the size of the *current chunk*, not the total size.
-		// Use len(resp.GetData()) instead if chunk size is meant for individual chunk size
 		textureData = append(textureData, resp.GetChunk()...)
 		receivedBytes += uint64(len(resp.GetChunk()))
 	}
@@ -97,17 +93,15 @@ func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb
 	return float64Data, nil
 }
 
-// streamTriangles streams triangles from the asset provider.
 func (s *workerServer) streamTriangles(ctx context.Context, transportClient pb_transport.SceneTransportServiceClient, sceneName string, totalTriangles uint64, batchSize uint32) ([]*pb_transport.Triangle, error) {
-	allTriangles := make([]*pb_transport.Triangle, 0, totalTriangles) // Pre-allocate for all triangles
+	allTriangles := make([]*pb_transport.Triangle, 0, totalTriangles)
 	var fetchedCount uint64 = 0
 
-	// Loop to fetch all batches
 	for fetchedCount < totalTriangles {
 		req := &pb_transport.StreamTrianglesRequest{
 			SceneName: sceneName,
 			BatchSize: batchSize,
-			Offset:    fetchedCount, // Request from the current offset
+			Offset:    fetchedCount,
 		}
 		stream, err := transportClient.StreamTriangles(ctx, req)
 		if err != nil {
@@ -126,8 +120,7 @@ func (s *workerServer) streamTriangles(ctx context.Context, transportClient pb_t
 					}
 					if s.Code() == codes.Unavailable {
 						log.Warnf("Triangles stream for scene '%s' closed by server gracefully (Unavailable). Received %d of %d triangles.", sceneName, fetchedCount, totalTriangles)
-						// This might happen if the server decides to close the stream early
-						break // Assume end of stream for this batch
+						break
 					}
 				}
 				if err.Error() == "EOF" { // gRPC stream end
@@ -140,17 +133,14 @@ func (s *workerServer) streamTriangles(ctx context.Context, transportClient pb_t
 			allTriangles = append(allTriangles, resp.GetTriangles()...)
 			fetchedCount += uint64(len(resp.GetTriangles()))
 
-			// If the batch returned fewer than requested (and we haven't hit total), it means we're at the end
 			if uint64(len(resp.GetTriangles())) < uint64(batchSize) {
 				log.Infof("Received partial triangle batch. Assuming end of stream for scene '%s'. Fetched %d of %d total triangles.", sceneName, fetchedCount, totalTriangles)
 				break
 			}
 		}
 
-		// After receiving all responses for one batch request, if fetchedCount is still less than totalTriangles,
-		// the outer loop will continue for the next batch.
 		if fetchedCount >= totalTriangles {
-			break // All triangles fetched
+			break
 		}
 	}
 
@@ -161,8 +151,6 @@ func (s *workerServer) streamTriangles(ctx context.Context, transportClient pb_t
 	return allTriangles, nil
 }
 
-// RenderSetup is a streaming RPC to configure a worker node.
-// It fetches scene data, textures, and triangles from the asset provider.
 func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb_control.RenderControlService_RenderSetupServer) error {
 	s.currentStatus = pb_discovery.WorkerStatus_ALLOCATED
 
@@ -177,17 +165,17 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		return status.Error(codes.InvalidArgument, errMsg)
 	}
 
-	ctx := stream.Context() // Use the stream's context for asset fetching client
+	ctx := stream.Context()
 
-	// Establish connection to asset provider (SceneTransportService)
-	// Using WithBlock to ensure connection is established before proceeding
 	assetConn, err := grpc.NewClient(assetProviderAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to dial asset provider %s: %v", assetProviderAddr, err)
 		s.sendStatus(stream, pb_control.RenderSetupStatus_FAILED, errMsg)
 		return status.Error(codes.Unavailable, errMsg)
 	}
+
 	defer assetConn.Close()
+
 	transportClient := pb_transport.NewSceneTransportServiceClient(assetConn)
 
 	s.currentStatus = pb_discovery.WorkerStatus_BUSY_RENDER_SETUP
@@ -234,7 +222,10 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_STREAMING_TEXTURES, ""); err != nil {
 		return status.Error(codes.Internal, fmt.Sprintf("failed to send STREAMING_TEXTURES status: %v", err))
 	}
+
 	log.Infof("RenderSetup: Streaming textures from '%s'...", assetProviderAddr)
+
+	textureFetchStart := time.Now()
 
 	// Collect all unique ImageTexture filenames from materials
 	texturesToFetch := protoScene.GetImageTextures()
@@ -264,7 +255,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		log.Infof("RenderSetup: Successfully loaded texture '%s'. Actual size: %d bytes.", filename, len(texData))
 	}
 
-	log.Infof("RenderSetup: Finished streaming %d unique textures.", len(textures))
+	log.Infof("RenderSetup: Finished streaming %d unique textures in %s.", len(textures), time.Since(textureFetchStart))
 
 	// Step 3: Transform the scene to its internal representation
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_BUILDING_ACCELERATION_STRUCTURE, ""); err != nil {
@@ -313,10 +304,10 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 	totalTriangles := len(protoScene.GetObjects().GetTriangles()) + len(triangles)
 
-	log.Infof("RenderSetup: Worker is READY for rendering scene '%s' with %d triangles, %d spheres, and %d textures.",
+	log.Infof("RenderSetup: Worker is READY to render scene '%s' with %d triangles, %d spheres, and %d textures.",
 		req.GetSceneName(), totalTriangles, len(protoScene.GetObjects().GetSpheres()), len(textures))
 
 	s.currentStatus = pb_discovery.WorkerStatus_BUSY_RENDERING
 
-	return nil // Successfully configured
+	return nil
 }

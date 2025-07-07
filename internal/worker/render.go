@@ -14,9 +14,6 @@ import (
 )
 
 func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_control.RenderControlService_RenderTileServer) error {
-	log.Debugf("RenderControlService: RenderTile called by %s - Tile: [%d,%d] to [%d,%d)",
-		s.workerID, req.GetX0(), req.GetY0(), req.GetX1(), req.GetY1())
-
 	x0 := req.GetX0()
 	y0 := req.GetY0()
 	x1 := req.GetX1()
@@ -39,7 +36,7 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 		for x := x0; x <= x1; x++ {
 			select {
 			case <-stream.Context().Done():
-				log.Debugf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
+				log.Warnf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
 				return stream.Context().Err()
 			default:
 				col := &vec3.Vec3Impl{}
