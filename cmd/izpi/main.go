@@ -1,22 +1,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"image"
 	"os"
-	"path/filepath"
 	"runtime"
 	"runtime/pprof"
-	"strings"
-	"sync"
+	"runtime/trace"
 
-	"github.com/flynn-nrg/izpi/pkg/colours"
-	"github.com/flynn-nrg/izpi/pkg/display"
-	"github.com/flynn-nrg/izpi/pkg/output"
-	"github.com/flynn-nrg/izpi/pkg/postprocess"
-	"github.com/flynn-nrg/izpi/pkg/render"
-	"github.com/flynn-nrg/izpi/pkg/sampler"
-	"github.com/flynn-nrg/izpi/pkg/scene"
+	"github.com/flynn-nrg/izpi/internal/config"
+	"github.com/flynn-nrg/izpi/internal/leader"
+	"github.com/flynn-nrg/izpi/internal/worker"
 
 	"github.com/alecthomas/kong"
 
@@ -24,63 +18,56 @@ import (
 )
 
 const (
-	programName       = "izpi"
-	defaultXSize      = "500"
-	defaultYSize      = "500"
-	defaultSamples    = "1000"
-	defaultMaxDepth   = "50"
-	defaultOutputFile = "output.png"
-	defaultSceneFile  = "examples/cornell_box.yaml"
-
-	displayWindowTitle = "Izpi Render Output"
+	programName             = "izpi"
+	defaultXSize            = "500"
+	defaultYSize            = "500"
+	defaultSamples          = "1000"
+	defaultMaxDepth         = "50"
+	defaultOutputFile       = "output.png"
+	defaultSceneFile        = "examples/cornell_box.izpi"
+	defaultDiscoveryTimeout = "3"
 )
 
 var flags struct {
-	LogLevel    string `name:"log-level" help:"The log level: error, warn, info, debug, trace." default:"info"`
-	Scene       string `type:"existingfile" name:"scene" help:"Scene file to render" default:"${defaultSceneFile}"`
-	NumWorkers  int64  `name:"num-workers" help:"Number of worker threads" default:"${defaultNumWorkers}"`
-	XSize       int64  `name:"x" help:"Output image x size" default:"${defaultXSize}"`
-	YSize       int64  `name:"y" help:"Output image y size" default:"${defaultYSize}"`
-	Samples     int64  `name:"samples" help:"Number of samples per ray" default:"${defaultSamples}"`
-	Sampler     string `name:"sampler-type" help:"Sampler function to use: colour, albedo, normal, wireframe" default:"colour"`
-	Depth       int64  `name:"max-depth" help:"Maximum depth" default:"${defaultMaxDepth}"`
-	OutputMode  string `name:"output-mode" help:"Output mode: png, exr, hdr or pfm" default:"png"`
-	OutputFile  string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
-	Verbose     bool   `name:"v" help:"Print rendering progress bar" default:"true"`
-	Preview     bool   `name:"p" help:"Display rendering progress in a window" default:"true"`
-	DisplayMode string `name:"display-mode" help:"Display mode: fyne or sdl" default:"fyne"`
-	CpuProfile  string `name:"cpu-profile" help:"Enable cpu profiling"`
+	LogLevel         string `name:"log-level" help:"The log level: error, warn, info, debug, trace." default:"info"`
+	Scene            string `type:"existingfile" name:"scene" help:"Scene file to render" default:"${defaultSceneFile}"`
+	NumWorkers       int64  `name:"num-workers" help:"Number of worker threads" default:"${defaultNumWorkers}"`
+	XSize            int64  `name:"x" help:"Output image x size" default:"${defaultXSize}"`
+	YSize            int64  `name:"y" help:"Output image y size" default:"${defaultYSize}"`
+	Samples          int64  `name:"samples" help:"Number of samples per ray" default:"${defaultSamples}"`
+	Sampler          string `name:"sampler-type" help:"Sampler function to use: colour, albedo, normal, wireframe" default:"colour"`
+	Depth            int64  `name:"max-depth" help:"Maximum depth" default:"${defaultMaxDepth}"`
+	OutputMode       string `name:"output-mode" help:"Output mode: png, exr, hdr or pfm" default:"png"`
+	OutputFile       string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
+	Verbose          bool   `name:"v" help:"Print rendering progress bar" default:"true"`
+	Preview          bool   `name:"p" help:"Display rendering progress in a window" default:"true"`
+	DisplayMode      string `name:"display-mode" help:"Display mode: fyne or sdl" default:"fyne"`
+	CpuProfile       string `name:"cpu-profile" help:"Enable cpu profiling"`
+	Instrument       bool   `name:"instrument" help:"Enable instrumentation" default:"false"`
+	Role             string `name:"role" help:"Role: worker, leader or standalone" default:"standalone"`
+	DiscoveryTimeout int64  `name:"discovery-timeout" help:"Discovery timeout in seconds" default:"${defaultDiscoveryTimeout}"`
 }
 
 func main() {
-	var disp display.Display
-	var err error
-	var canvas image.Image
+	ctx := context.Background()
 
 	kong.Parse(&flags,
 		kong.Name(programName),
 		kong.Description("A path tracer implemented in Go"),
 		kong.Vars{
-			"defaultNumWorkers": fmt.Sprintf("%v", runtime.NumCPU()),
-			"defaultXSize":      defaultXSize,
-			"defaultYSize":      defaultYSize,
-			"defaultSamples":    defaultSamples,
-			"defaultMaxDepth":   defaultMaxDepth,
-			"defaultOutputFile": defaultOutputFile,
-			"defaultSceneFile":  defaultSceneFile,
+			"defaultNumWorkers":       fmt.Sprintf("%v", runtime.NumCPU()),
+			"defaultXSize":            defaultXSize,
+			"defaultYSize":            defaultYSize,
+			"defaultSamples":          defaultSamples,
+			"defaultMaxDepth":         defaultMaxDepth,
+			"defaultOutputFile":       defaultOutputFile,
+			"defaultSceneFile":        defaultSceneFile,
+			"defaultDiscoveryTimeout": defaultDiscoveryTimeout,
 		})
 
 	setupLogging(flags.LogLevel)
 
-	sceneFile, err := os.Open(flags.Scene)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	scene, err := scene.FromYAML(sceneFile, filepath.Dir(flags.Scene), 0)
-	if err != nil {
-		log.Fatalf("Error loading scene: %v", err)
-	}
+	log.Infof("Running as %q", flags.Role)
 
 	if flags.CpuProfile != "" {
 		f, err := os.Create(flags.CpuProfile)
@@ -91,73 +78,58 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	previewChan := make(chan display.DisplayTile)
-	defer close(previewChan)
-
-	r := render.New(scene, int(flags.XSize), int(flags.YSize), int(flags.Samples), int(flags.Depth),
-		colours.Black, colours.White, int(flags.NumWorkers), flags.Verbose, previewChan, flags.Preview, sampler.StringToType(flags.Sampler))
-
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	// Detach the renderer as SDL needs to use the main thread for everything.
-	go func() {
-		canvas = r.Render()
-		wg.Done()
-	}()
-
-	if flags.Preview {
-		switch flags.DisplayMode {
-		case "fyne":
-			disp = display.NewFyneDisplay(displayWindowTitle, int(flags.XSize), int(flags.YSize), previewChan)
-			disp.Start()
-		case "sdl":
-			disp = display.NewSDLDisplay(displayWindowTitle, int(flags.XSize), int(flags.YSize), previewChan)
-			disp.Start()
-		default:
-			log.Fatalf("unknown display mode %q", flags.DisplayMode)
+	if flags.Instrument {
+		f, err := os.Create("trace.out")
+		if err != nil {
+			log.Fatalf("failed to create trace file: %v", err)
 		}
+		defer func() {
+			if err := f.Close(); err != nil {
+				log.Fatalf("failed to close trace file: %v", err)
+			}
+		}()
+
+		if err := trace.Start(f); err != nil {
+			log.Fatalf("failed to start trace: %v", err)
+		}
+		defer trace.Stop()
 	}
 
-	wg.Wait()
-
-	switch flags.OutputMode {
-	case "png":
-		pp := postprocess.NewPipeline([]postprocess.Filter{
-			postprocess.NewGamma(),
-			postprocess.NewClamp(1.0),
-		})
-		err = pp.Apply(canvas, scene)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// Output
-		out, err := output.NewPNG(flags.OutputFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = out.Write(canvas)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-	case "exr":
-		outFileName := strings.Replace(flags.OutputFile, "png", "exr", 1)
-		out, err := output.NewOIIO(outFileName)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = out.Write(canvas)
-		if err != nil {
-			log.Fatal(err)
-		}
+	cfg := &config.Config{
+		Scene:            flags.Scene,
+		NumWorkers:       flags.NumWorkers,
+		XSize:            flags.XSize,
+		YSize:            flags.YSize,
+		Samples:          flags.Samples,
+		Sampler:          flags.Sampler,
+		Depth:            flags.Depth,
+		OutputMode:       flags.OutputMode,
+		OutputFile:       flags.OutputFile,
+		Verbose:          flags.Verbose,
+		Preview:          flags.Preview,
+		DisplayMode:      flags.DisplayMode,
+		DiscoveryTimeout: flags.DiscoveryTimeout,
 	}
 
-	if flags.Preview {
-		disp.Wait()
+	switch flags.Role {
+	case "leader":
+		runAsLeader(ctx, cfg, false)
+	case "standalone":
+		runAsLeader(ctx, cfg, true)
+	case "worker":
+		runAsWorker()
+	default:
+		log.Fatalf("unknown role %q", flags.Role)
 	}
+}
+
+func runAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
+	leader.RunAsLeader(ctx, cfg, standalone)
+}
+
+func runAsWorker() {
+	worker.StartWorker(uint32(flags.NumWorkers))
+
 }
 
 func setupLogging(level string) {

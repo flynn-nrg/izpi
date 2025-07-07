@@ -1,0 +1,249 @@
+syntax = "proto3";
+
+option go_package = "github.com/flynn-nrg/izpi/internal/proto/transport;transport";
+
+package transport;
+
+enum TextureType {
+  TEXTURE_TYPE_UNSPECIFIED = 0;
+  CONSTANT = 1;
+  CHECKER = 2;
+  IMAGE = 3;
+  NOISE = 4;
+}
+
+enum TexturePixelFormat {
+  TEXTURE_PIXEL_FORMAT_UNSPECIFIED = 0;
+  FLOAT64 = 1;
+}
+
+message ImageTextureMetadata {
+  string filename = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+  uint32 channels = 4;
+  TexturePixelFormat pixel_format = 5; 
+}
+
+enum MaterialType {
+  MATERIAL_TYPE_UNSPECIFIED = 0;
+  DIELECTRIC = 1;
+  DIFFUSE_LIGHT = 2;
+  ISOTROPIC = 3;
+  LAMBERT = 4;
+  METAL = 5;
+  PBR = 6;
+}
+
+
+// Represents a 3D vector or point with float components.
+message Vec3 {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+// Represents a 2D vector or UV coordinate with float components.
+message Vec2 {
+  float u = 1;
+  float v = 2;
+}
+
+// Represents the camera settings for the scene.
+message Camera {
+  Vec3 lookfrom = 1;
+  Vec3 lookat = 2;
+  Vec3 vup = 3;
+  float vfov = 4;
+  float aspect = 5;
+  float aperture = 6;
+  float focusdist = 7;
+  float time0 = 8;
+  float time1 = 9;
+}
+
+
+// Texture definitions (can be embedded directly)
+
+// Represents different types of textures.
+message Texture {
+  string name = 1;
+  TextureType type = 2;
+  oneof texture_properties {
+    ConstantTexture constant = 3;
+    CheckerTexture checker = 4;
+    ImageTexture image = 5;
+    NoiseTexture noise = 6;
+  }
+}
+
+// Represents a constant color texture.
+message ConstantTexture {
+  Vec3 value = 1;
+}
+
+// Represents a checkerboard texture.
+message CheckerTexture {
+  Texture odd = 1;
+  Texture even = 2;
+}
+
+// Represents an image texture.
+message ImageTexture {
+  string filename = 1;
+}
+
+// Represents a noise texture.
+message NoiseTexture {
+  float scale = 1;
+}
+
+
+// Material definitions
+
+// Represents different types of materials.
+message Material {
+  string name = 1; // Material name, used as key in the scene's materials map
+  MaterialType type = 2;
+  oneof material_properties {
+    DielectricMaterial dielectric = 3;
+    DiffuseLightMaterial diffuselight = 4;
+    IsotropicMaterial isotropic = 5;
+    LambertMaterial lambert = 6;
+    MetalMaterial metal = 7;
+    PBRMaterial pbr = 8;
+  }
+}
+
+// Represents a Lambertian material.
+message LambertMaterial {
+  Texture albedo = 1;
+}
+
+// Represents a Dielectric material.
+message DielectricMaterial {
+  float refidx = 1;
+}
+
+// Represents a Diffuse Light material.
+message DiffuseLightMaterial {
+  Texture emit = 1; // Direct embedding of Texture
+}
+
+// Represents an Isotropic material.
+message IsotropicMaterial {
+  Texture albedo = 1; // Direct embedding of Texture
+}
+
+// Represents a Metal material.
+message MetalMaterial {
+  Vec3 albedo = 1; // Direct embedding of Texture
+  float fuzz = 2;
+}
+
+// Represents a Physically Based Rendering (PBR) material.
+message PBRMaterial {
+  Texture albedo = 1;
+  Texture roughness = 2;
+  Texture metalness = 3;
+  Texture normal_map = 4;
+  Texture sss = 5; // Subsurface Scattering
+  float sss_radius = 6;
+}
+
+
+// Scene Objects
+
+// Represents a triangle object with per-vertex data.
+message Triangle {
+  Vec3 vertex0 = 1;
+  Vec3 vertex1 = 2;
+  Vec3 vertex2 = 3;
+  // UV coordinates for each vertex
+  Vec2 uv0 = 4;
+  Vec2 uv1 = 5;
+  Vec2 uv2 = 6;
+  // Per-vertex normal vectors for smooth shading
+  Vec3 normal0 = 7;
+  Vec3 normal1 = 8;
+  Vec3 normal2 = 9;
+  string material_name = 10; // Reference material by name
+}
+
+// Represents a sphere object.
+message Sphere {
+  Vec3 center = 1;
+  float radius = 2;
+  string material_name = 3; // Reference material by name
+}
+
+// Contains all the objects in the scene.
+message SceneObjects {
+  repeated Triangle triangles = 1;
+  repeated Sphere spheres = 2;
+}
+
+
+// Scene Root
+
+// The root message describing the entire scene.
+message Scene {
+  string name = 1;
+  string version = 2;
+  Camera camera = 3;
+  map<string, Material> materials = 4;
+  map<string, ImageTextureMetadata> image_textures = 5;
+  SceneObjects objects = 6;
+  bool stream_triangles = 7;
+  uint64 total_triangles = 8;
+}
+
+// --- Service Definition ---
+
+// Service for transporting scene data and associated resources.
+service SceneTransportService {
+  // A unary RPC to retrieve the entire scene graph.
+  // The request can include a scene identifier (e.g., name or ID).
+  rpc GetScene (GetSceneRequest) returns (Scene);
+
+  // A streaming RPC to retrieve the binary content of a texture file.
+  // The client requests the texture by its filename, and the server streams chunks of the file data.
+  rpc StreamTextureFile (StreamTextureFileRequest) returns (stream StreamTextureFileResponse);
+
+  // Streaming RPC to retrieve triangle data in batches.
+  rpc StreamTriangles (StreamTrianglesRequest) returns (stream StreamTrianglesResponse);
+}
+
+// --- RPC Request/Response Messages ---
+
+// Request to retrieve a specific scene.
+message GetSceneRequest {
+  string scene_name = 1; // Identifier for the scene to retrieve.
+}
+
+
+// Request to stream the content of a texture file.
+message StreamTextureFileRequest {
+  string filename = 1; // The path/name of the texture file to stream.
+  uint64 offset = 2;   // The starting byte offset in the file to begin streaming from.
+  uint32 chunk_size = 3; // The maximum size of each chunk to stream in bytes.
+}
+
+// A chunk of binary data for a streamed texture file.
+message StreamTextureFileResponse {
+  repeated double chunk = 1; // A segment of the texture file's binary data.
+  uint64 size = 2; // The size of the returned chunk.
+}
+
+// Request to stream triangle data.
+message StreamTrianglesRequest {
+  string scene_name = 1; // The name of the scene the triangles belong to.
+  uint32 batch_size = 2; // The number of triangles to return in each batch.
+  uint64 offset = 3;     // Renamed from offset_bytes. This is the starting triangle index.
+}
+
+// Response containing a batch of triangles.
+message StreamTrianglesResponse {
+  repeated Triangle triangles = 1; // A batch of Triangle objects.
+  // uint64 total_triangles = 2; // Moved to Scene message
+}

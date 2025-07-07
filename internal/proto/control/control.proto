@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+option go_package = "github.com/flynn-nrg/izpi/internal/proto/control;control";
+
+package control;
+
+// Service for controlling render operations on worker nodes.
+service RenderControlService {
+  // Streaming RPC to send render configuration to a worker node and receive status updates.
+  // The worker should configure itself based on these parameters and stream back its progress.
+  rpc RenderSetup (RenderSetupRequest) returns (stream RenderSetupResponse); // Updated RPC signature
+
+  // Streaming RPC to request a worker node to render a specific tile of the image.
+  // The server streams back chunks of pixel data as they are rendered.
+  rpc RenderTile (RenderTileRequest) returns (stream RenderTileResponse);
+
+  // Unary RPC to signal the worker node that the rendering process is complete.
+  // The worker should clean up resources and can potentially exit.
+  rpc RenderEnd (RenderEndRequest) returns (RenderEndResponse);
+}
+
+// --- Imports ---
+// This is needed for the google.protobuf.Empty message
+// This is needed for the google.rpc.Status message, which can provide detailed error info.
+
+
+// --- Enums ---
+
+// Defines the supported sampler types for rendering.
+enum SamplerType {
+  SAMPLER_TYPE_UNSPECIFIED = 0; // Default zero value for enums
+  ALBEDO = 1;
+  NORMAL = 2;
+  WIRE_FRAME = 3; // Using snake_case for enum value
+  COLOUR = 4;
+}
+
+// Defines the status of the RenderConfiguration process on the worker.
+enum RenderSetupStatus { // Renamed enum
+  RENDER_SETUP_STATUS_UNKNOWN = 0; // Default zero value for enums
+  LOADING_SCENE = 1;
+  STREAMING_GEOMETRY = 2;
+  STREAMING_TEXTURES = 3;
+  BUILDING_ACCELERATION_STRUCTURE = 4;
+  READY = 5;
+  FAILED = 6; // Indicates an error occurred during configuration.
+}
+
+// --- Core Data Structures ---
+
+// Represents a 3D vector or point with float components, also used for colors.
+message Vec3 {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+// Represents the width and height of an image or tile.
+message ImageResolution {
+  uint32 width = 1;
+  uint32 height = 2;
+}
+
+// --- RenderSetup RPC Messages --- // Updated comment
+
+// Request to configure a worker node for rendering.
+message RenderSetupRequest { // Renamed message
+  string scene_name = 1;           // The name of the scene to be rendered.
+  string job_id = 2;               // The ID of the job to be rendered.
+  uint32 num_cores = 3;            // Number of CPU cores the worker should use for rendering.
+  uint32 samples_per_pixel = 4;    // Number of samples to take per pixel.
+  SamplerType sampler = 5;         // The type of sampler (render mode) to use.
+  ImageResolution image_resolution = 6; // The overall image resolution.
+  uint32 max_depth = 7;            // Maximum recursion depth for path tracing.
+  Vec3 background_color = 8;       // The background color of the scene.
+  Vec3 ink_color = 9;              // The ink color of the scene.
+  string asset_provider = 10;       // NEW: The network address (host:port) of the asset transport server (e.g., leader).
+}
+
+// Response containing status updates during the RenderConfiguration process.
+message RenderSetupResponse { // Renamed message
+  RenderSetupStatus status = 1; // Current status of the configuration process. // Updated field type
+  string error_message = 2; // Error message if status is FAILED.
+}
+
+
+// --- RenderTile RPC Messages ---
+
+// Request to render a specific tile of the image.
+// The worker should render the region defined by [x0, y0] to [x1, y1) (exclusive).
+message RenderTileRequest {
+  uint32 strip_height = 1; // Height of the strip to render.
+  uint32 x0 = 2; // Start X coordinate (inclusive) of the overall tile in image space.
+  uint32 y0 = 3; // Start Y coordinate (inclusive) of the overall tile in image space.
+  uint32 x1 = 4; // End X coordinate (exclusive) of the overall tile in image space.
+  uint32 y1 = 5; // End Y coordinate (exclusive) of the overall tile in image space.
+}
+
+// Response containing a rendered chunk of pixel data for a sub-region within the requested tile.
+// The client will receive multiple RenderTileResponse messages for a single RenderTileRequest,
+// which it can assemble to form the complete tile.
+message RenderTileResponse {
+  uint32 width = 1;  // Width of this specific pixel chunk (sub-tile).
+  uint32 height = 2; // Height of this specific pixel chunk (sub-tile).
+  uint32 pos_x = 3;  // X-coordinate of the top-left pixel of this chunk (relative to overall image origin).
+  uint32 pos_y = 4;  // Y-coordinate of the top-left pixel of this chunk (relative to overall image origin).
+  repeated double pixels = 5; // Flat array of pixel values (e.g., RGBA as [R1, G1, B1, A1, R2, G2, B2, A2...])
+}
+
+// --- RenderEnd RPC Messages ---
+
+// Request to signal the worker node that rendering is complete.
+// This message can be empty if no specific data is needed.
+message RenderEndRequest {
+  // string configuration_id = 1; // Optional: if you need to end a specific configuration
+}
+
+// Response containing statistics after rendering is complete.
+message RenderEndResponse {
+  uint64 total_rays_traced = 1;    // Total number of rays traced during rendering.
+}
