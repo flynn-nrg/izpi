@@ -33,8 +33,6 @@ func (t *Transport) ToScene() (*scene.Scene, error) {
 	}
 	t.materials = materials
 
-	fmt.Println(t.materials)
-
 	hitables, err := t.toSceneObjects()
 	if err != nil {
 		return nil, err

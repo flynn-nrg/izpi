@@ -52,8 +52,6 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 
 		defer sceneFile.Close()
 
-		aspectRatio := float64(cfg.XSize) / float64(cfg.YSize)
-
 		switch filepath.Ext(cfg.Scene) {
 		case ".izpi":
 			payload, err := io.ReadAll(sceneFile)
@@ -75,15 +73,12 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		default:
 			log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
 		}
-	*/
-	/*
 
 		payload, err := scenes.Challenger(aspectRatio)
 		if err != nil {
 			log.Fatalf("Error loading scene: %v", err)
 		}
-	*/
-	/*
+
 		protoScene = &pb_transport.Scene{}
 		err = proto.Unmarshal(payload, protoScene)
 		if err != nil {
