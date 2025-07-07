@@ -252,7 +252,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 		textures[filename] = texture.NewFromRawData(int(imgTex.GetWidth()), int(imgTex.GetHeight()), texData)
 
-		log.Infof("RenderSetup: Successfully loaded texture '%s'. Actual size: %d bytes.", filename, len(texData))
+		log.Infof("RenderSetup: Successfully loaded texture '%s'", filename)
 	}
 
 	log.Infof("RenderSetup: Finished streaming %d unique textures in %s.", len(textures), time.Since(textureFetchStart))
