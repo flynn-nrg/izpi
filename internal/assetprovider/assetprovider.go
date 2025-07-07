@@ -9,7 +9,7 @@ import (
 	"unsafe"
 
 	// For simulating delays
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
@@ -87,9 +87,9 @@ func New(scene *pb_transport.Scene, textures map[string]*texture.ImageTxt, trian
 	ap.wg.Add(1)
 	go func() {
 		defer ap.wg.Done()
-		logrus.Infof("AssetProvider gRPC server listening on %s (reported as %s)", lis.Addr().String(), ap.address)
+		log.Infof("AssetProvider gRPC server listening on %s (reported as %s)", lis.Addr().String(), ap.address)
 		if err := grpcServer.Serve(lis); err != nil {
-			logrus.Errorf("AssetProvider gRPC server failed to serve: %v", err)
+			log.Errorf("AssetProvider gRPC server failed to serve: %v", err)
 		}
 	}()
 
@@ -98,18 +98,18 @@ func New(scene *pb_transport.Scene, textures map[string]*texture.ImageTxt, trian
 
 // Stop gracefully shuts down the AssetProvider's gRPC server.
 func (ap *AssetProvider) Stop() {
-	logrus.Infof("Shutting down AssetProvider gRPC server on %s...", ap.address)
+	log.Infof("Shutting down AssetProvider gRPC server on %s...", ap.address)
 	ap.grpcServer.GracefulStop()
-	ap.wg.Wait() // Wait for the server goroutine to finish
-	logrus.Infof("AssetProvider gRPC server on %s stopped.", ap.address)
+	ap.wg.Wait()
+	log.Infof("AssetProvider gRPC server on %s stopped.", ap.address)
 }
 
 // GetScene implements pb_transport.SceneTransportServiceServer.
 // It returns the stored scene graph.
 func (s *assetProviderServer) GetScene(ctx context.Context, req *pb_transport.GetSceneRequest) (*pb_transport.Scene, error) {
-	logrus.Printf("AssetProvider: GetScene called for '%s'", req.GetSceneName())
+	log.Infof("AssetProvider: GetScene called for '%s'", req.GetSceneName())
+
 	if s.scene == nil || s.scene.GetName() != req.GetSceneName() {
-		// In a real implementation, you might load the scene from disk here
 		return nil, status.Errorf(codes.NotFound, "scene '%s' not found", req.GetSceneName())
 	}
 	return s.scene, nil
@@ -118,7 +118,7 @@ func (s *assetProviderServer) GetScene(ctx context.Context, req *pb_transport.Ge
 // StreamTextureFile implements pb_transport.SceneTransportServiceServer.
 // It streams the texture data in chunks.
 func (s *assetProviderServer) StreamTextureFile(req *pb_transport.StreamTextureFileRequest, stream pb_transport.SceneTransportService_StreamTextureFileServer) error {
-	logrus.Printf("AssetProvider: StreamTextureFile called for '%s' (offset: %d, chunk_size: %d)",
+	log.Infof("AssetProvider: StreamTextureFile called for '%s' (offset: %d, chunk_size: %d)",
 		req.GetFilename(), req.GetOffset(), req.GetChunkSize())
 
 	imageText, ok := s.textures[req.GetFilename()]
@@ -136,17 +136,9 @@ func (s *assetProviderServer) StreamTextureFile(req *pb_transport.StreamTextureF
 		return status.Errorf(codes.Internal, "texture data is not a floatimage.FloatNRGBA")
 	}
 
-	logrus.Infof("Total size: %d", totalSize)
-	logrus.Infof("Raw data length: %d", len(rawData))
-
 	// rawData is []float64
 	// Convert []float64 to []byte using unsafe.Slice
 	byteData := unsafe.Slice((*byte)(unsafe.Pointer(&rawData[0])), len(rawData)*int(unsafe.Sizeof(float64(0))))
-
-	logrus.Infof("Total size (calculated): %d", totalSize)
-	logrus.Infof("Raw data length (float64s): %d", len(rawData))
-	logrus.Infof("Byte data length (bytes after unsafe cast): %d", len(byteData))
-	logrus.Infof("Byte data capacity (bytes after unsafe cast): %d", cap(byteData))
 
 	// Ensure offset is within bounds
 	if req.GetOffset() >= totalSize && totalSize > 0 {
@@ -164,7 +156,7 @@ func (s *assetProviderServer) StreamTextureFile(req *pb_transport.StreamTextureF
 	for currentOffset < totalSize {
 		select {
 		case <-stream.Context().Done():
-			logrus.Warnf("AssetProvider: StreamTextureFile for '%s' cancelled by client.", req.GetFilename())
+			log.Warnf("AssetProvider: StreamTextureFile for '%s' cancelled by client.", req.GetFilename())
 			return stream.Context().Err()
 		default:
 			// Continue
@@ -177,29 +169,27 @@ func (s *assetProviderServer) StreamTextureFile(req *pb_transport.StreamTextureF
 
 		chunk := byteData[currentOffset:endOffset]
 
-		// convert chunk to []byte
 		resp := &pb_transport.StreamTextureFileResponse{
 			Chunk: chunk,
-			Size:  totalSize, // Send total size with every chunk for robustness
+			Size:  totalSize,
 		}
 
 		if err := stream.Send(resp); err != nil {
-			logrus.Errorf("AssetProvider: Failed to send texture chunk for '%s': %v", req.GetFilename(), err)
+			log.Errorf("AssetProvider: Failed to send texture chunk for '%s': %v", req.GetFilename(), err)
 			return fmt.Errorf("failed to send texture chunk: %w", err)
 		}
 		currentOffset = endOffset
-		// Simulate network delay for large files
-		// time.Sleep(10 * time.Millisecond)
 	}
 
-	logrus.Printf("AssetProvider: Finished streaming texture '%s' (total %d bytes).", req.GetFilename(), totalSize)
+	log.Infof("AssetProvider: Finished streaming texture '%s'", req.GetFilename())
+
 	return nil
 }
 
 // StreamTriangles implements pb_transport.SceneTransportServiceServer.
 // It streams triangle data in batches.
 func (s *assetProviderServer) StreamTriangles(req *pb_transport.StreamTrianglesRequest, stream pb_transport.SceneTransportService_StreamTrianglesServer) error {
-	logrus.Printf("AssetProvider: StreamTriangles called for scene '%s' (batch_size: %d, offset: %d)",
+	log.Infof("AssetProvider: StreamTriangles called for scene '%s' (batch_size: %d, offset: %d)",
 		req.GetSceneName(), req.GetBatchSize(), req.GetOffset())
 
 	if s.scene == nil || s.scene.GetName() != req.GetSceneName() {
@@ -211,7 +201,7 @@ func (s *assetProviderServer) StreamTriangles(req *pb_transport.StreamTrianglesR
 	s.trianglesMu.RUnlock()
 
 	if totalTriangles == 0 {
-		logrus.Infof("AssetProvider: No triangles to stream for scene '%s'.", req.GetSceneName())
+		log.Infof("AssetProvider: No triangles to stream for scene '%s'.", req.GetSceneName())
 		return nil // No triangles to stream
 	}
 
@@ -230,7 +220,7 @@ func (s *assetProviderServer) StreamTriangles(req *pb_transport.StreamTrianglesR
 	for currentOffset < totalTriangles {
 		select {
 		case <-stream.Context().Done():
-			logrus.Warnf("AssetProvider: StreamTriangles for '%s' cancelled by client.", req.GetSceneName())
+			log.Warnf("AssetProvider: StreamTriangles for '%s' cancelled by client.", req.GetSceneName())
 			return stream.Context().Err()
 		default:
 			// Continue
@@ -250,14 +240,13 @@ func (s *assetProviderServer) StreamTriangles(req *pb_transport.StreamTrianglesR
 		}
 
 		if err := stream.Send(resp); err != nil {
-			logrus.Errorf("AssetProvider: Failed to send triangle batch for '%s': %v", req.GetSceneName(), err)
+			log.Errorf("AssetProvider: Failed to send triangle batch for '%s': %v", req.GetSceneName(), err)
 			return fmt.Errorf("failed to send triangle batch: %w", err)
 		}
 		currentOffset = endIndex
-		// Simulate network delay
-		// time.Sleep(5 * time.Millisecond)
 	}
 
-	logrus.Printf("AssetProvider: Finished streaming triangles for scene '%s' (total %d).", req.GetSceneName(), totalTriangles)
+	log.Infof("AssetProvider: Finished streaming triangles for scene '%s' (total %d).", req.GetSceneName(), totalTriangles)
+
 	return nil
 }
