@@ -843,3 +843,500 @@ func Challenger(aspect float64) ([]byte, error) {
 	return marshalledScene, nil
 
 }
+
+func CornellBoxPB(aspect float64) *pb_transport.Scene {
+	protoScene := &pb_transport.Scene{
+		Name:    "Cornell Box",
+		Version: "1.0.0",
+		Camera: &pb_transport.Camera{
+			Lookfrom: &pb_transport.Vec3{
+				X: 50,
+				Y: 50,
+				Z: -140,
+			},
+			Lookat: &pb_transport.Vec3{
+				X: 50,
+				Y: 50,
+				Z: 0,
+			},
+			Vup: &pb_transport.Vec3{
+				X: 0,
+				Y: 1,
+				Z: 0,
+			},
+			Vfov:      40,
+			Aspect:    float32(aspect),
+			Aperture:  0,
+			Focusdist: 10,
+			Time0:     0,
+			Time1:     1,
+		},
+		Objects: &pb_transport.SceneObjects{
+			Triangles: []*pb_transport.Triangle{
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 100,
+						Y: 0,
+						Z: 100,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 100,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 100,
+						Y: 100,
+						Z: 100,
+					},
+					Uv0: &pb_transport.Vec2{
+						U: 0,
+						V: 0,
+					},
+					Uv1: &pb_transport.Vec2{
+						U: 1,
+						V: 0,
+					},
+					Uv2: &pb_transport.Vec2{
+						U: 1,
+						V: 1,
+					},
+					MaterialName: "White",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 100,
+						Y: 100,
+						Z: 100,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 100,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 0,
+						Y: 100,
+						Z: 100,
+					},
+					MaterialName: "White",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 100,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 0,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 100,
+						Y: 0,
+						Z: 100,
+					},
+					MaterialName: "White",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 0,
+						Y: 100,
+						Z: 0,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 100,
+						Y: 100,
+						Z: 0,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 100,
+						Y: 100,
+						Z: 100,
+					},
+					MaterialName: "White",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 0,
+						Y: 100,
+						Z: 100,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 0,
+						Y: 100,
+						Z: 0,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 100,
+						Y: 100,
+						Z: 100,
+					},
+					MaterialName: "White",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 100,
+						Y: 0,
+						Z: 0,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 0,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 100,
+						Y: 0,
+						Z: 100,
+					},
+					MaterialName: "White",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 100,
+						Y: 0,
+						Z: 0,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 0,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 100,
+						Y: 0,
+						Z: 100,
+					},
+					MaterialName: "White",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 100,
+						Y: 0,
+						Z: 100,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 0,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 100,
+					},
+					MaterialName: "White",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 0,
+						Y: 100,
+						Z: 100,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 0,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 0,
+						Y: 100,
+						Z: 0,
+					},
+					MaterialName: "Green",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 0,
+						Y: 100,
+						Z: 100,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 100,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 0,
+						Y: 0,
+						Z: 0,
+					},
+					MaterialName: "Green",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 100,
+						Y: 0,
+						Z: 0,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 100,
+						Y: 100,
+						Z: 100,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 100,
+						Y: 100,
+						Z: 0,
+					},
+					MaterialName: "Red",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 100,
+						Y: 0,
+						Z: 100,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 100,
+						Y: 100,
+						Z: 100,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 100,
+						Y: 0,
+						Z: 0,
+					},
+					Uv0: &pb_transport.Vec2{
+						U: 0,
+						V: 0,
+					},
+					Uv1: &pb_transport.Vec2{
+						U: 1,
+						V: 0,
+					},
+					Uv2: &pb_transport.Vec2{
+						U: 1,
+						V: 1,
+					},
+					MaterialName: "Red",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 33,
+						Y: 99,
+						Z: 33,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 66,
+						Y: 99,
+						Z: 33,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 66,
+						Y: 99,
+						Z: 66,
+					},
+					MaterialName: "white_light",
+				},
+				{
+					Vertex0: &pb_transport.Vec3{
+						X: 33,
+						Y: 99,
+						Z: 33,
+					},
+					Vertex1: &pb_transport.Vec3{
+						X: 66,
+						Y: 99,
+						Z: 66,
+					},
+					Vertex2: &pb_transport.Vec3{
+						X: 33,
+						Y: 99,
+						Z: 66,
+					},
+					MaterialName: "white_light",
+				},
+			},
+			Spheres: []*pb_transport.Sphere{
+				{
+					Center: &pb_transport.Vec3{
+						X: 30,
+						Y: 15,
+						Z: 30,
+					},
+					Radius:       15,
+					MaterialName: "Glass",
+				},
+				{
+					Center: &pb_transport.Vec3{
+						X: 70,
+						Y: 20,
+						Z: 60,
+					},
+					Radius:       20,
+					MaterialName: "Rusty Metal",
+				},
+			},
+		},
+		Materials: map[string]*pb_transport.Material{
+			"White": {
+				Name: "White",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						Albedo: &pb_transport.Texture{
+							TextureProperties: &pb_transport.Texture_Constant{
+								Constant: &pb_transport.ConstantTexture{
+									Value: &pb_transport.Vec3{
+										X: 0.73,
+										Y: 0.73,
+										Z: 0.73,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Green": {
+				Name: "Green",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						Albedo: &pb_transport.Texture{
+							TextureProperties: &pb_transport.Texture_Constant{
+								Constant: &pb_transport.ConstantTexture{
+									Value: &pb_transport.Vec3{
+										X: 0.0,
+										Y: 0.73,
+										Z: 0.0,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Red": {
+				Name: "Red",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						Albedo: &pb_transport.Texture{
+							TextureProperties: &pb_transport.Texture_Constant{
+								Constant: &pb_transport.ConstantTexture{
+									Value: &pb_transport.Vec3{
+										X: 0.73,
+										Y: 0.0,
+										Z: 0.0,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"white_light": {
+				Name: "white_light",
+				Type: pb_transport.MaterialType_DIFFUSE_LIGHT,
+				MaterialProperties: &pb_transport.Material_Diffuselight{
+					Diffuselight: &pb_transport.DiffuseLightMaterial{
+						Emit: &pb_transport.Texture{
+							TextureProperties: &pb_transport.Texture_Constant{
+								Constant: &pb_transport.ConstantTexture{
+									Value: &pb_transport.Vec3{
+										X: 15,
+										Y: 15,
+										Z: 15,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Glass": {
+				Name: "Glass",
+				Type: pb_transport.MaterialType_DIELECTRIC,
+				MaterialProperties: &pb_transport.Material_Dielectric{
+					Dielectric: &pb_transport.DielectricMaterial{
+						Refidx: 1.5,
+					},
+				},
+			},
+			"Marine Blue": {
+				Name: "Marine Blue",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						Albedo: &pb_transport.Texture{
+							TextureProperties: &pb_transport.Texture_Constant{
+								Constant: &pb_transport.ConstantTexture{
+									Value: &pb_transport.Vec3{X: 0.0, Y: 0.26666666666666666, Z: 0.5058823529411764},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Rusty Metal": {
+				Name: "Rusty Metal",
+				Type: pb_transport.MaterialType_PBR,
+				MaterialProperties: &pb_transport.Material_Pbr{
+					Pbr: &pb_transport.PBRMaterial{
+						Albedo: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal_albedo.png",
+								},
+							},
+						},
+						Metalness: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal_metallic.png",
+								},
+							},
+						},
+						NormalMap: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal_normal-ogl.png",
+								},
+							},
+						},
+						Roughness: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal_roughness.png",
+								},
+							},
+						},
+						Sss: &pb_transport.Texture{
+							Type: pb_transport.TextureType_CONSTANT,
+							TextureProperties: &pb_transport.Texture_Constant{
+								Constant: &pb_transport.ConstantTexture{
+									Value: &pb_transport.Vec3{X: 0.0, Y: 0.0, Z: 0.0},
+								},
+							},
+						},
+						SssRadius: 0.0,
+					},
+				},
+			},
+		},
+		ImageTextures: map[string]*pb_transport.ImageTextureMetadata{
+			"rusty-metal_albedo.png": {
+				Filename: "rusty-metal_albedo.png",
+			},
+			"rusty-metal_metallic.png": {
+				Filename: "rusty-metal_metallic.png",
+			},
+			"rusty-metal_normal-ogl.png": {
+				Filename: "rusty-metal_normal-ogl.png",
+			},
+			"rusty-metal_roughness.png": {
+				Filename: "rusty-metal_roughness.png",
+			},
+		},
+	}
+
+	return protoScene
+}
