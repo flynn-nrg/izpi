@@ -2,6 +2,7 @@ package leader
 
 import (
 	"context"
+	"fmt"
 	"image"
 	"io"
 	"os"
@@ -90,16 +91,8 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		}
 		textures[t.GetFilename()] = imageText
 
-		outfile, err := os.OpenFile("test-texture.bin", os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Fatalf("Error opening test-texture.bin: %v", err)
-		}
-		defer outfile.Close()
-
-		pix := imageText.GetData().(*floatimage.FloatNRGBA).Pix
-		for _, p := range pix {
-			outfile.Write([]byte{byte(p)})
-		}
+		data := imageText.GetData().(*floatimage.FloatNRGBA)
+		fmt.Printf("Size x: %d, y: %d, rect: %v, pixSize: %d\n", data.Bounds().Dx(), data.Bounds().Dy(), data.Bounds(), len(data.Pix))
 
 		// Update metadata. The pixel format is always float64 with 4 channels.
 		t.Width = uint32(imageText.GetData().Bounds().Dx())

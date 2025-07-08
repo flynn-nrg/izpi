@@ -3,7 +3,6 @@ package worker
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 	"unsafe"
 
@@ -261,16 +260,8 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 	// Save the first texture to a file
 	firstTexture := textures["test-texture.png"]
-	outfile, err := os.OpenFile("test-texture.bin", os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatalf("Error opening test-texture.bin: %v", err)
-	}
-	defer outfile.Close()
-
-	pix := firstTexture.GetData().(*floatimage.FloatNRGBA).Pix
-	for _, p := range pix {
-		outfile.Write([]byte{byte(p)})
-	}
+	data := firstTexture.GetData().(*floatimage.FloatNRGBA)
+	fmt.Printf("Size x: %d, y: %d, rect: %v, pixSize: %d\n", data.Bounds().Dx(), data.Bounds().Dy(), data.Bounds(), len(data.Pix))
 
 	// Step 3: Transform the scene to its internal representation
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_BUILDING_ACCELERATION_STRUCTURE, ""); err != nil {
