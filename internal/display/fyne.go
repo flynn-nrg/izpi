@@ -107,7 +107,9 @@ func (fd *FyneDisplay) busyLoop() {
 				}
 			}
 
-			fd.canvas.Refresh()
+			fyne.Do(func() {
+				fd.canvas.Refresh()
+			})
 		case <-fd.quit:
 			return
 		}
