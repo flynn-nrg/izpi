@@ -171,6 +171,7 @@ func (t *Transport) toSceneDiffuseLightMaterial(mat *pb_transport.Material) (mat
 }
 
 func (t *Transport) toSceneTexture(text *pb_transport.Texture) (texture.Texture, error) {
+	fmt.Printf("toSceneTexture: %v\n", text)
 	switch text.GetTextureProperties().(type) {
 	case *pb_transport.Texture_Constant:
 		return t.toSceneConstantTexture(text)

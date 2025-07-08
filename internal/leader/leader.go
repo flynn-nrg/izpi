@@ -2,7 +2,6 @@ package leader
 
 import (
 	"context"
-	"fmt"
 	"image"
 	"io"
 	"os"
@@ -11,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/flynn-nrg/floatimage/floatimage"
 	"github.com/flynn-nrg/izpi/internal/assetprovider"
 	"github.com/flynn-nrg/izpi/internal/colours"
 	"github.com/flynn-nrg/izpi/internal/config"
@@ -90,9 +88,6 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 			log.Fatalf("Error loading texture %s: %v", t.GetFilename(), err)
 		}
 		textures[t.GetFilename()] = imageText
-
-		data := imageText.GetData().(*floatimage.FloatNRGBA)
-		fmt.Printf("Size x: %d, y: %d, rect: %v, stride: %d, pixSize: %d\n", data.Bounds().Dx(), data.Bounds().Dy(), data.Bounds(), data.Stride, len(data.Pix))
 
 		// Update metadata. The pixel format is always float64 with 4 channels.
 		t.Width = uint32(imageText.GetData().Bounds().Dx())

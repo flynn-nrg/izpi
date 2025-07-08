@@ -6,7 +6,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/flynn-nrg/floatimage/floatimage"
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
@@ -91,8 +90,6 @@ func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb
 
 	float64Data := unsafe.Slice((*float64)(unsafe.Pointer(&textureData[0])), len(textureData)/int(unsafe.Sizeof(float64(0))))
 
-	fmt.Printf("textureData size: %d\n", len(textureData))
-	fmt.Printf("float64Data size: %d\n", len(float64Data))
 	return float64Data, nil
 }
 
@@ -259,11 +256,6 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	}
 
 	log.Infof("RenderSetup: Finished streaming %d unique textures in %s.", len(textures), time.Since(textureFetchStart))
-
-	// Save the first texture to a file
-	firstTexture := textures["test-texture.png"]
-	data := firstTexture.GetData().(*floatimage.FloatNRGBA)
-	fmt.Printf("Size x: %d, y: %d, rect: %v, stride: %d, pixSize: %d\n", data.Bounds().Dx(), data.Bounds().Dy(), data.Bounds(), data.Stride, len(data.Pix))
 
 	// Step 3: Transform the scene to its internal representation
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_BUILDING_ACCELERATION_STRUCTURE, ""); err != nil {

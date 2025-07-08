@@ -901,7 +901,7 @@ func CornellBoxPB(aspect float64) *pb_transport.Scene {
 						U: 1,
 						V: 1,
 					},
-					MaterialName: "Test Texture",
+					MaterialName: "White",
 				},
 				{
 					Vertex0: &pb_transport.Vec3{
@@ -1111,7 +1111,7 @@ func CornellBoxPB(aspect float64) *pb_transport.Scene {
 						U: 1,
 						V: 1,
 					},
-					MaterialName: "Test Texture",
+					MaterialName: "Red",
 				},
 				{
 					Vertex0: &pb_transport.Vec3{
@@ -1167,7 +1167,7 @@ func CornellBoxPB(aspect float64) *pb_transport.Scene {
 						Z: 60,
 					},
 					Radius:       20,
-					MaterialName: "Marine Blue",
+					MaterialName: "Rusty Metal",
 				},
 			},
 		},
@@ -1272,25 +1272,68 @@ func CornellBoxPB(aspect float64) *pb_transport.Scene {
 					},
 				},
 			},
-			"Test Texture": {
-				Name: "Test Texture",
-				Type: pb_transport.MaterialType_LAMBERT,
-				MaterialProperties: &pb_transport.Material_Lambert{
-					Lambert: &pb_transport.LambertMaterial{
+			"Rusty Metal": {
+				Name: "Rusty Metal",
+				Type: pb_transport.MaterialType_PBR,
+				MaterialProperties: &pb_transport.Material_Pbr{
+					Pbr: &pb_transport.PBRMaterial{
 						Albedo: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
 							TextureProperties: &pb_transport.Texture_Image{
 								Image: &pb_transport.ImageTexture{
-									Filename: "test-texture.png",
+									Filename: "rusty-metal_albedo.png",
 								},
 							},
 						},
+						Metalness: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal_metallic.png",
+								},
+							},
+						},
+						NormalMap: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal_normal-ogl.png",
+								},
+							},
+						},
+						Roughness: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "rusty-metal_roughness.png",
+								},
+							},
+						},
+						Sss: &pb_transport.Texture{
+							Type: pb_transport.TextureType_CONSTANT,
+							TextureProperties: &pb_transport.Texture_Constant{
+								Constant: &pb_transport.ConstantTexture{
+									Value: &pb_transport.Vec3{X: 0.0, Y: 0.0, Z: 0.0},
+								},
+							},
+						},
+						SssRadius: 0.0,
 					},
 				},
 			},
 		},
 		ImageTextures: map[string]*pb_transport.ImageTextureMetadata{
-			"test-texture.png": {
-				Filename: "test-texture.png",
+			"rusty-metal_albedo.png": {
+				Filename: "rusty-metal_albedo.png",
+			},
+			"rusty-metal_metallic.png": {
+				Filename: "rusty-metal_metallic.png",
+			},
+			"rusty-metal_normal-ogl.png": {
+				Filename: "rusty-metal_normal-ogl.png",
+			},
+			"rusty-metal_roughness.png": {
+				Filename: "rusty-metal_roughness.png",
 			},
 		},
 	}
