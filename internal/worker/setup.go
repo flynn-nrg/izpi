@@ -3,9 +3,11 @@ package worker
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 	"unsafe"
 
+	"github.com/flynn-nrg/floatimage/floatimage"
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
@@ -256,6 +258,19 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	}
 
 	log.Infof("RenderSetup: Finished streaming %d unique textures in %s.", len(textures), time.Since(textureFetchStart))
+
+	// Save the first texture to a file
+	firstTexture := textures["test-texture.png"]
+	outfile, err := os.OpenFile("test-texture.bin", os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("Error opening test-texture.bin: %v", err)
+	}
+	defer outfile.Close()
+
+	pix := firstTexture.GetData().(*floatimage.FloatNRGBA).Pix
+	for _, p := range pix {
+		outfile.Write([]byte{byte(p)})
+	}
 
 	// Step 3: Transform the scene to its internal representation
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_BUILDING_ACCELERATION_STRUCTURE, ""); err != nil {

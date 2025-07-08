@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/flynn-nrg/floatimage/floatimage"
 	"github.com/flynn-nrg/izpi/internal/assetprovider"
 	"github.com/flynn-nrg/izpi/internal/colours"
 	"github.com/flynn-nrg/izpi/internal/config"
@@ -21,6 +22,7 @@ import (
 	"github.com/flynn-nrg/izpi/internal/render"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
+	"github.com/flynn-nrg/izpi/internal/scenes"
 	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/transport"
 	"github.com/google/uuid"
@@ -76,6 +78,8 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
 	}
 
+	protoScene = scenes.CornellBoxPB(aspectRatio)
+
 	// Load textures
 	textures := make(map[string]*texture.ImageTxt)
 	for _, t := range protoScene.GetImageTextures() {
@@ -85,6 +89,17 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 			log.Fatalf("Error loading texture %s: %v", t.GetFilename(), err)
 		}
 		textures[t.GetFilename()] = imageText
+
+		outfile, err := os.OpenFile("test-texture.bin", os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatalf("Error opening test-texture.bin: %v", err)
+		}
+		defer outfile.Close()
+
+		pix := imageText.GetData().(*floatimage.FloatNRGBA).Pix
+		for _, p := range pix {
+			outfile.Write([]byte{byte(p)})
+		}
 
 		// Update metadata. The pixel format is always float64 with 4 channels.
 		t.Width = uint32(imageText.GetData().Bounds().Dx())
