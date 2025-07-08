@@ -89,7 +89,7 @@ func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb
 		return nil, fmt.Errorf("texture '%s' stream ended prematurely. Expected %d bytes, got %d", filename, expectedTotalSize, receivedBytes)
 	}
 
-	float64Data := *(*[]float64)(unsafe.Pointer(&textureData))
+	float64Data := unsafe.Slice((*float64)(unsafe.Pointer(&textureData[0])), len(textureData)/int(unsafe.Sizeof(float64(0))))
 
 	fmt.Printf("textureData size: %d\n", len(textureData))
 	fmt.Printf("float64Data size: %d\n", len(float64Data))
