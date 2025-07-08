@@ -21,7 +21,6 @@ import (
 	"github.com/flynn-nrg/izpi/internal/render"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
-	"github.com/flynn-nrg/izpi/internal/scenes"
 	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/transport"
 	"github.com/google/uuid"
@@ -76,8 +75,6 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	default:
 		log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
 	}
-
-	protoScene = scenes.CornellBoxPB(aspectRatio)
 
 	// Load textures
 	textures := make(map[string]*texture.ImageTxt)
