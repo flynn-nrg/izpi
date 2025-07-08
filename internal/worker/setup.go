@@ -261,7 +261,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	// Save the first texture to a file
 	firstTexture := textures["test-texture.png"]
 	data := firstTexture.GetData().(*floatimage.FloatNRGBA)
-	fmt.Printf("Size x: %d, y: %d, rect: %v, pixSize: %d\n", data.Bounds().Dx(), data.Bounds().Dy(), data.Bounds(), len(data.Pix))
+	fmt.Printf("Size x: %d, y: %d, rect: %v, stride: %d, pixSize: %d\n", data.Bounds().Dx(), data.Bounds().Dy(), data.Bounds(), data.Stride, len(data.Pix))
 
 	// Step 3: Transform the scene to its internal representation
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_BUILDING_ACCELERATION_STRUCTURE, ""); err != nil {

@@ -92,7 +92,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		textures[t.GetFilename()] = imageText
 
 		data := imageText.GetData().(*floatimage.FloatNRGBA)
-		fmt.Printf("Size x: %d, y: %d, rect: %v, pixSize: %d\n", data.Bounds().Dx(), data.Bounds().Dy(), data.Bounds(), len(data.Pix))
+		fmt.Printf("Size x: %d, y: %d, rect: %v, stride: %d, pixSize: %d\n", data.Bounds().Dx(), data.Bounds().Dy(), data.Bounds(), data.Stride, len(data.Pix))
 
 		// Update metadata. The pixel format is always float64 with 4 channels.
 		t.Width = uint32(imageText.GetData().Bounds().Dx())
