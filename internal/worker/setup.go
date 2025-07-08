@@ -91,6 +91,8 @@ func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb
 
 	float64Data := *(*[]float64)(unsafe.Pointer(&textureData))
 
+	fmt.Printf("textureData size: %d\n", len(textureData))
+	fmt.Printf("float64Data size: %d\n", len(float64Data))
 	return float64Data, nil
 }
 
