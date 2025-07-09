@@ -193,8 +193,8 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		return status.Error(codes.NotFound, errMsg) // Use NotFound for scene not found
 	}
 
-	log.Infof("RenderSetup: Successfully loaded scene '%s' (version: %s). Contains %d materials, %d spheres.",
-		protoScene.GetName(), protoScene.GetVersion(), len(protoScene.GetMaterials()), len(protoScene.GetObjects().GetSpheres()))
+	log.Infof("RenderSetup: Successfully loaded scene '%s' (version: %s)",
+		protoScene.GetName(), protoScene.GetVersion())
 
 	triangles := make([]*pb_transport.Triangle, 0)
 
@@ -304,8 +304,8 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 	totalTriangles := len(protoScene.GetObjects().GetTriangles()) + len(triangles)
 
-	log.Infof("RenderSetup: Worker is READY to render scene '%s' with %d triangles, %d spheres, and %d textures.",
-		req.GetSceneName(), totalTriangles, len(protoScene.GetObjects().GetSpheres()), len(textures))
+	log.Infof("RenderSetup: Worker is READY to render scene '%s' with %d triangles, %d spheres, %d materials and %d textures.",
+		req.GetSceneName(), totalTriangles, len(protoScene.GetObjects().GetSpheres()), len(protoScene.GetMaterials()), len(textures))
 
 	s.currentStatus = pb_discovery.WorkerStatus_BUSY_RENDERING
 
