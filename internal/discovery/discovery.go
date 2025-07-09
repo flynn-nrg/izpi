@@ -124,12 +124,12 @@ func (d *Discovery) FindWorkers() (map[string]*pb_discovery.QueryWorkerStatusRes
 			}
 		}()
 
-		log.Infof("Leader: Browse for Avahi services type '%s' in domain '%s'", serviceName, domain)
+		log.Infof("Discovery: Browse for Avahi services type '%s' in domain '%s'", serviceName, domain)
 
 		for {
 			select {
 			case addEvent := <-sb.AddChannel:
-				log.Infof("Leader: Discovered Avahi service ADD: Name='%s', Type='%s', Domain='%s'", addEvent.Name, addEvent.Type, addEvent.Domain)
+				log.Infof("Discovery: Found Avahi service ADD: Name='%s', Type='%s', Domain='%s'", addEvent.Name, addEvent.Type, addEvent.Domain)
 
 				resolvedService, err := server.ResolveService(
 					addEvent.Interface,
@@ -170,7 +170,7 @@ func (d *Discovery) FindWorkers() (map[string]*pb_discovery.QueryWorkerStatusRes
 					txtRecords[i] = string(txt)
 				}
 
-				log.Infof("Leader: Resolved service: Host='%s', IP='%s', Port=%d, TXT=%v", resolvedService.Host, ipToDial, resolvedService.Port, txtRecords)
+				log.Infof("Discovery: Resolved service: Host='%s', IP='%s', Port=%d, TXT=%v", resolvedService.Host, ipToDial, resolvedService.Port, txtRecords)
 
 				statusResp, err := d.discoverWorker(resolvedService.Host, target)
 				if err != nil {
@@ -182,7 +182,7 @@ func (d *Discovery) FindWorkers() (map[string]*pb_discovery.QueryWorkerStatusRes
 					workerHosts[target] = statusResp
 				}
 			case <-ctx.Done():
-				log.Infof("Leader: Avahi Browse context done: %v", ctx.Err())
+				log.Infof("Discovery: Avahi Browse context done: %v", ctx.Err())
 				return workerHosts, nil
 			}
 		}
@@ -203,7 +203,7 @@ func (d *Discovery) FindWorkers() (map[string]*pb_discovery.QueryWorkerStatusRes
 		}
 
 		for entry := range entries {
-			log.Infof("Leader: Discovered zeroconf service: HostName='%s', Port=%d, Addrs=%v", entry.HostName, entry.Port, entry.AddrIPv4)
+			log.Infof("Discovery: Found zeroconf service: HostName='%s', Port=%d, Addrs=%v", entry.HostName, entry.Port, entry.AddrIPv4)
 
 			var ipToDial string
 			if len(entry.AddrIPv4) > 0 {
@@ -239,7 +239,7 @@ func (d *Discovery) discoverWorker(nodeName string, target string) (*pb_discover
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Infof("Leader: Attempting gRPC dial to %s", nodeName)
+	log.Infof("Discovery: Attempting gRPC dial to %s", nodeName)
 	conn, err := grpc.NewClient(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Errorf("failed to connect to worker %s: %v", target, err)
