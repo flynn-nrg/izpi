@@ -8,12 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 
-	"github.com/flynn-nrg/izpi/internal/assetprovider"
 	"github.com/flynn-nrg/izpi/internal/colours"
 	"github.com/flynn-nrg/izpi/internal/config"
-	"github.com/flynn-nrg/izpi/internal/discovery"
 	"github.com/flynn-nrg/izpi/internal/display"
 	"github.com/flynn-nrg/izpi/internal/output"
 	"github.com/flynn-nrg/izpi/internal/postprocess"
@@ -23,9 +20,6 @@ import (
 	"github.com/flynn-nrg/izpi/internal/scene"
 	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/transport"
-	"github.com/google/uuid"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
@@ -65,11 +59,6 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		if err != nil {
 			log.Fatalf("Error unmarshalling scene: %v", err)
 		}
-		t := transport.NewTransport(aspectRatio, protoScene, nil, nil)
-		sceneData, err = t.ToScene()
-		if err != nil {
-			log.Fatalf("Error loading scene: %v", err)
-		}
 	case ".yaml":
 		log.Fatalf("YAML scenes are not supported in leader mode")
 	default:
@@ -102,105 +91,21 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	previewChan := make(chan display.DisplayTile)
 	defer close(previewChan)
 
-	remoteWorkers := make([]*render.RemoteWorkerConfig, 0)
-
 	if len(protoScene.Objects.Triangles) > triangleStreamThreshold {
 		protoScene.StreamTriangles = true
 	}
 
+	var remoteWorkers []*render.RemoteWorkerConfig
+
 	if !standalone {
-		jobID := uuid.New().String()
-
-		discovery, err := discovery.New(time.Second * time.Duration(cfg.DiscoveryTimeout))
+		remoteWorkers, err = setupWorkers(ctx, cfg, protoScene, textures)
 		if err != nil {
-			log.Fatalln("Failed to initialize discovery:", err.Error())
+			log.Fatalf("failed to setup workers: %v", err)
 		}
-
-		workerHosts, err := discovery.FindWorkers()
-		if err != nil {
-			log.Fatalln("Failed to find workers:", err.Error())
-		}
-
-		log.Infof("Found %d worker(s)", len(workerHosts))
-
-		var trianglesToStream []*pb_transport.Triangle
-
-		if len(protoScene.Objects.Triangles) > triangleStreamThreshold {
-			protoScene.StreamTriangles = true
-			trianglesToStream = protoScene.Objects.Triangles
-			protoScene.TotalTriangles = uint64(len(trianglesToStream))
-			protoScene.Objects.Triangles = nil
-		}
-
-		assetProvider, assetProviderAddress, err := assetprovider.New(protoScene, textures, trianglesToStream)
-		if err != nil {
-			log.Fatalln("Failed to create asset provider:", err.Error())
-		}
-
-		for target, workerHost := range workerHosts {
-			log.Infof("Setting up worker: %s", workerHost.GetNodeName())
-			conn, err := grpc.NewClient(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
-			controlClient := pb_control.NewRenderControlServiceClient(conn)
-			if err != nil {
-				log.Errorf("failed to create control client for worker %s: %v", target, err)
-				continue
-			}
-
-			stream, err := controlClient.RenderSetup(ctx, &pb_control.RenderSetupRequest{
-				SceneName:       protoScene.GetName(),
-				JobId:           jobID,
-				NumCores:        uint32(workerHost.GetAvailableCores()),
-				SamplesPerPixel: uint32(cfg.Samples),
-				Sampler:         stringToSamplerType(cfg.Sampler),
-				ImageResolution: &pb_control.ImageResolution{
-					Width:  uint32(cfg.XSize),
-					Height: uint32(cfg.YSize),
-				},
-				MaxDepth: uint32(cfg.Depth),
-				BackgroundColor: &pb_control.Vec3{
-					X: 0,
-					Y: 0,
-					Z: 0,
-				},
-				InkColor: &pb_control.Vec3{
-					X: 1,
-					Y: 1,
-					Z: 1,
-				},
-				AssetProvider: assetProviderAddress,
-			})
-			if err != nil {
-				log.Errorf("failed to create render setup stream for worker %s: %v", target, err)
-				continue
-			}
-
-			for {
-				msg, err := stream.Recv()
-				if err != nil {
-					if err == io.EOF {
-						log.Infof("Worker %s finished render setup", target)
-						break
-					}
-
-					log.Errorf("failed to receive message from worker %s: %v", target, err)
-					break
-				}
-
-				log.Infof("Worker %s status: %s", target, msg.GetStatus().String())
-			}
-
-			remoteWorkers = append(remoteWorkers, &render.RemoteWorkerConfig{
-				Client:   controlClient,
-				NumCores: int(workerHost.GetAvailableCores()),
-			})
-		}
-
-		// Free up resources
-		assetProvider.Stop()
-		protoScene = nil
-
-		log.Info("Finished setting up remote workers")
 	}
+
+	// Free up resources
+	protoScene = nil
 
 	r := render.New(sceneData, int(cfg.XSize), int(cfg.YSize), int(cfg.Samples), int(cfg.Depth),
 		colours.Black, colours.White, int(cfg.NumWorkers), remoteWorkers, cfg.Verbose, previewChan, cfg.Preview, sampler.StringToType(cfg.Sampler))

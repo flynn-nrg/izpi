@@ -232,16 +232,16 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 	textures := make(map[string]*texture.ImageTxt)
 
-	for filename, imgTex := range texturesToFetch {
+	for filename, textureMetadata := range texturesToFetch {
 		var pixelSize uint32
-		switch imgTex.GetPixelFormat() {
+		switch textureMetadata.GetPixelFormat() {
 		case pb_transport.TexturePixelFormat_FLOAT64:
-			pixelSize = 8 * imgTex.GetChannels()
+			pixelSize = 8 * textureMetadata.GetChannels()
 		default:
-			return status.Errorf(codes.InvalidArgument, "unsupported texture pixel format: %s", imgTex.GetPixelFormat().String())
+			return status.Errorf(codes.InvalidArgument, "unsupported texture pixel format: %s", textureMetadata.GetPixelFormat().String())
 		}
 
-		textureSize := uint64(imgTex.GetWidth() * imgTex.GetHeight() * pixelSize)
+		textureSize := uint64(textureMetadata.GetWidth() * textureMetadata.GetHeight() * pixelSize)
 		log.Infof("RenderSetup: Fetching texture '%s' (expected size: %d bytes)...", filename, textureSize)
 		texData, err := s.streamTextureFile(ctx, transportClient, filename, textureSize)
 		if err != nil {
@@ -250,7 +250,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 			return status.Error(codes.Internal, errMsg)
 		}
 
-		textures[filename] = texture.NewFromRawData(int(imgTex.GetWidth()), int(imgTex.GetHeight()), texData)
+		textures[filename] = texture.NewFromRawData(int(textureMetadata.GetWidth()), int(textureMetadata.GetHeight()), texData)
 
 		log.Infof("RenderSetup: Successfully loaded texture '%s'", filename)
 	}
