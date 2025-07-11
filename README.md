@@ -10,7 +10,7 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
 
 * Have fun.
 * Learn about advanced computer graphics topics and put them to practice.
-* Create a well-written and reliable renderer that is usable with real world scene workloads. 
+* Create a well-written and robust renderer that is usable with real world scene workloads. 
 
 ## Non-goals
 
