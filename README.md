@@ -1,17 +1,44 @@
 # Izpi
 
 ![Unit Tests](https://github.com/flynn-nrg/izpi/actions/workflows/test.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/flynn-nrg/izpi)](https://goreportcard.com/report/github.com/flynn-nrg/izpi)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/flynn-nrg/izpi)
 
-A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) implemented in Golang built on top of [Peter Shirley's Raytracing books](https://raytracing.github.io).
+A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as a Golang implementation of [Peter Shirley's Raytracing books](https://raytracing.github.io). It has since grown in scope and gained more features that were not part of the original version.
+
+## Goals
+
+* Have fun.
+* Learn about advanced computer graphics topics and put them to practice.
+* Create a well-written and reliable renderer that is usable with real world scene workloads. 
+
+## Non-goals
+
+* Write the most performant path tracer possible.
+* Build a GPU-based path tracer.
+* Integrate with DCC tools.
+* Support professional VFX flows. 
+
+## Roadmap
+
+ - [X] Support for [PBR](https://en.wikipedia.org/wiki/Physically_based_rendering) materials.
+ - [X] Distributed Rendering.
+ - [ ] Spectral Sampler to accurately simulate dispersion.
+ - [ ] Scene conversion tool by implementing Go bindings for [Open Asset Import Library](https://assimp.org).
+ - [ ] Implement [Metropolis light transport](https://en.wikipedia.org/wiki/Metropolis_light_transport).
 
 ## Features
 
+* Multi-threaded rendering engine.
+* Compact scene format using [Protocol Buffers](https://protobuf.dev).
+* Automatic worker node discovery via [Zeroconf](https://en.wikipedia.org/wiki/Zero-configuration_networking), with [Avahi](https://en.wikipedia.org/wiki/Avahi_(software)) integration on Linux and FreeBSD hosts.
+* Network distributed system using [gRPC](https://grpc.io) and [Protocol Buffers](https://protobuf.dev).
 * Rendering into a float64 image buffer.
 * Direct, indirect and image-based lighting.
 * Primitives: Spheres, boxes, rectangles and triangles.
 * Wavefront OBJ import.
 * Built-in materials: Glass, metal, Lambert, Perlin noise.
-* Support for PBR flows with albedo, metalness, roughness, normal and displacement textures.
+* Support for [PBR](https://en.wikipedia.org/wiki/Physically_based_rendering) flows with albedo, metalness, roughness, normal and displacement textures.
 * Textures: PNG (LDR) and various HDR fromats (OpenEXR, HDR, PFM).
 * Resulting images can saved in any format supported by [OpenImageIO](https://openimageio.readthedocs.io).
 * Normal mapping.

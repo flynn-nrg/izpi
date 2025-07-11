@@ -34,7 +34,7 @@ func getSphereUV(p *vec3.Vec3Impl) (float64, float64) {
 	return u, v
 }
 
-// SkyDome is a convenience function to construct a light emiting sphere with inverted normals.
+// SkyDome is a convenience function to construct a light emitting sphere with inverted normals.
 // For this to work correctly texture file needs to be in HDR (Radiance) format.
 func NewSkyDome(center *vec3.Vec3Impl, radius float64, fileName string) (*FlipNormals, error) {
 	texture, err := texture.NewFromHDR(fileName)
