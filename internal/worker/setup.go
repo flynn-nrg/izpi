@@ -196,7 +196,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	log.Infof("RenderSetup: Successfully loaded scene '%s' (version: %s)",
 		protoScene.GetName(), protoScene.GetVersion())
 
-	triangles := make([]*pb_transport.Triangle, 0)
+	var triangles []*pb_transport.Triangle
 
 	if protoScene.GetStreamTriangles() {
 		if err := s.sendStatus(stream, pb_control.RenderSetupStatus_STREAMING_GEOMETRY, ""); err != nil {
@@ -206,14 +206,12 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		streamingStart := time.Now()
 
 		log.Infof("RenderSetup: Streaming %d triangles", protoScene.GetTotalTriangles())
-		trianglesChunk, err := s.streamTriangles(ctx, transportClient, protoScene.GetName(), protoScene.GetTotalTriangles(), 1000) // Fetch in batches of 1000
+		triangles, err = s.streamTriangles(ctx, transportClient, protoScene.GetName(), protoScene.GetTotalTriangles(), 1000) // Fetch in batches of 1000
 		if err != nil {
 			errMsg := fmt.Sprintf("Failed to stream triangles for scene '%s': %v", protoScene.GetName(), err)
 			s.sendStatus(stream, pb_control.RenderSetupStatus_FAILED, errMsg)
 			return status.Error(codes.Internal, errMsg)
 		}
-
-		triangles = append(triangles, trianglesChunk...)
 
 		log.Infof("RenderSetup: Successfully streamed %d triangles in %s.", len(triangles), time.Since(streamingStart))
 	}
