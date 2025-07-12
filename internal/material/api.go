@@ -19,3 +19,12 @@ type Material interface {
 	IsEmitter() bool
 	Emitted(rIn ray.Ray, rec *hitrecord.HitRecord, u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl
 }
+
+// SpectralMaterial defines the methods to handle spectral materials.
+type SpectralMaterial interface {
+	Albedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64
+	Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool)
+	ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64
+	IsEmitter() bool
+	NormalMap() texture.Texture
+}
