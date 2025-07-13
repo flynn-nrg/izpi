@@ -15,6 +15,7 @@ var _ Material = (*Dielectric)(nil)
 type Dielectric struct {
 	nonPBR
 	nonSpectral
+	nonEmitter
 	refIdx float64
 }
 

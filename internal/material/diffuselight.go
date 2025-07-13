@@ -52,3 +52,12 @@ func (dl *DiffuseLight) IsEmitter() bool {
 func (dl *DiffuseLight) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return dl.emit.Value(u, v, p)
 }
+
+// EmittedSpectral returns the spectral emission at the given wavelength for diffuse lights.
+func (dl *DiffuseLight) EmittedSpectral(rIn ray.Ray, rec *hitrecord.HitRecord, u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+	if vec3.Dot(rec.Normal(), rIn.Direction()) < 0.0 {
+		// TODO: Replace with spectral texture lookup if available
+		return 1.0 // Placeholder: full emission for all wavelengths
+	}
+	return 0.0
+}

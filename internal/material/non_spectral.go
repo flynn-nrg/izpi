@@ -26,9 +26,3 @@ func (ns *nonSpectral) SpectralAlbedo(u float64, v float64, lambda float64, p *v
 	// In practice, spectral materials should override this method
 	return 0.5 // Default neutral response
 }
-
-// EmittedSpectral provides a stub implementation for spectral emission
-// Returns 0.0 indicating no spectral emission for non-spectral materials
-func (ns *nonSpectral) EmittedSpectral(rIn ray.Ray, rec *hitrecord.HitRecord, u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
-	return 0.0
-}

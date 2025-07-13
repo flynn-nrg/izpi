@@ -16,3 +16,8 @@ func (ne *nonEmitter) Emitted(_ ray.Ray, _ *hitrecord.HitRecord, _ float64, _ fl
 func (ne *nonEmitter) IsEmitter() bool {
 	return false
 }
+
+// EmittedSpectral returns 0.0 for non-emitter materials.
+func (ne *nonEmitter) EmittedSpectral(_ ray.Ray, _ *hitrecord.HitRecord, _ float64, _ float64, _ float64, _ *vec3.Vec3Impl) float64 {
+	return 0.0
+}
