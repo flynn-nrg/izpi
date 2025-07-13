@@ -20,6 +20,7 @@ var _ Material = (*Lambertian)(nil)
 type Lambertian struct {
 	nonPBR
 	nonEmitter
+	nonSpectral
 	albedo texture.Texture
 }
 

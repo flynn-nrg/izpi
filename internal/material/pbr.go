@@ -18,6 +18,7 @@ var _ Material = (*PBR)(nil)
 
 type PBR struct {
 	nonEmitter
+	nonSpectral
 	albedo    texture.Texture
 	normalMap texture.Texture
 	roughness texture.Texture

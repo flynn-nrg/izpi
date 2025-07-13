@@ -17,6 +17,7 @@ var _ Material = (*Isotropic)(nil)
 type Isotropic struct {
 	nonEmitter
 	nonPBR
+	nonSpectral
 	albedo texture.Texture
 }
 

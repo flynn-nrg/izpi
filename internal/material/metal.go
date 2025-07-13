@@ -15,6 +15,7 @@ var _ Material = (*Metal)(nil)
 type Metal struct {
 	nonEmitter
 	nonPBR
+	nonSpectral
 	albedo *vec3.Vec3Impl
 	fuzz   float64
 }

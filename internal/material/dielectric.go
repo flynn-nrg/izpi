@@ -14,6 +14,7 @@ var _ Material = (*Dielectric)(nil)
 // Dielectric represents a dielectric material.
 type Dielectric struct {
 	nonPBR
+	nonSpectral
 	refIdx float64
 }
 
