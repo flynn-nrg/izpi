@@ -29,6 +29,8 @@ const (
 	TextureType_CHECKER                  TextureType = 2
 	TextureType_IMAGE                    TextureType = 3
 	TextureType_NOISE                    TextureType = 4
+	TextureType_SPECTRAL_CONSTANT        TextureType = 5
+	TextureType_SPECTRAL_CHECKER         TextureType = 6
 )
 
 // Enum value maps for TextureType.
@@ -39,6 +41,8 @@ var (
 		2: "CHECKER",
 		3: "IMAGE",
 		4: "NOISE",
+		5: "SPECTRAL_CONSTANT",
+		6: "SPECTRAL_CHECKER",
 	}
 	TextureType_value = map[string]int32{
 		"TEXTURE_TYPE_UNSPECIFIED": 0,
@@ -46,6 +50,8 @@ var (
 		"CHECKER":                  2,
 		"IMAGE":                    3,
 		"NOISE":                    4,
+		"SPECTRAL_CONSTANT":        5,
+		"SPECTRAL_CHECKER":         6,
 	}
 )
 
@@ -181,6 +187,55 @@ func (x MaterialType) Number() protoreflect.EnumNumber {
 // Deprecated: Use MaterialType.Descriptor instead.
 func (MaterialType) EnumDescriptor() ([]byte, []int) {
 	return file_transport_proto_rawDescGZIP(), []int{2}
+}
+
+type ColourRepresentation int32
+
+const (
+	ColourRepresentation_COLOUR_REPRESENTATION_UNSPECIFIED ColourRepresentation = 0
+	ColourRepresentation_RGB                               ColourRepresentation = 1
+	ColourRepresentation_SPECTRAL                          ColourRepresentation = 2
+)
+
+// Enum value maps for ColourRepresentation.
+var (
+	ColourRepresentation_name = map[int32]string{
+		0: "COLOUR_REPRESENTATION_UNSPECIFIED",
+		1: "RGB",
+		2: "SPECTRAL",
+	}
+	ColourRepresentation_value = map[string]int32{
+		"COLOUR_REPRESENTATION_UNSPECIFIED": 0,
+		"RGB":                               1,
+		"SPECTRAL":                          2,
+	}
+)
+
+func (x ColourRepresentation) Enum() *ColourRepresentation {
+	p := new(ColourRepresentation)
+	*p = x
+	return p
+}
+
+func (x ColourRepresentation) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ColourRepresentation) Descriptor() protoreflect.EnumDescriptor {
+	return file_transport_proto_enumTypes[3].Descriptor()
+}
+
+func (ColourRepresentation) Type() protoreflect.EnumType {
+	return &file_transport_proto_enumTypes[3]
+}
+
+func (x ColourRepresentation) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ColourRepresentation.Descriptor instead.
+func (ColourRepresentation) EnumDescriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{3}
 }
 
 type ImageTextureMetadata struct {
@@ -493,6 +548,8 @@ type Texture struct {
 	//	*Texture_Checker
 	//	*Texture_Image
 	//	*Texture_Noise
+	//	*Texture_SpectralConstant
+	//	*Texture_SpectralChecker
 	TextureProperties isTexture_TextureProperties `protobuf_oneof:"texture_properties"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
@@ -585,6 +642,24 @@ func (x *Texture) GetNoise() *NoiseTexture {
 	return nil
 }
 
+func (x *Texture) GetSpectralConstant() *SpectralConstantTexture {
+	if x != nil {
+		if x, ok := x.TextureProperties.(*Texture_SpectralConstant); ok {
+			return x.SpectralConstant
+		}
+	}
+	return nil
+}
+
+func (x *Texture) GetSpectralChecker() *SpectralCheckerTexture {
+	if x != nil {
+		if x, ok := x.TextureProperties.(*Texture_SpectralChecker); ok {
+			return x.SpectralChecker
+		}
+	}
+	return nil
+}
+
 type isTexture_TextureProperties interface {
 	isTexture_TextureProperties()
 }
@@ -605,6 +680,14 @@ type Texture_Noise struct {
 	Noise *NoiseTexture `protobuf:"bytes,6,opt,name=noise,proto3,oneof"`
 }
 
+type Texture_SpectralConstant struct {
+	SpectralConstant *SpectralConstantTexture `protobuf:"bytes,7,opt,name=spectral_constant,json=spectralConstant,proto3,oneof"`
+}
+
+type Texture_SpectralChecker struct {
+	SpectralChecker *SpectralCheckerTexture `protobuf:"bytes,8,opt,name=spectral_checker,json=spectralChecker,proto3,oneof"`
+}
+
 func (*Texture_Constant) isTexture_TextureProperties() {}
 
 func (*Texture_Checker) isTexture_TextureProperties() {}
@@ -612,6 +695,10 @@ func (*Texture_Checker) isTexture_TextureProperties() {}
 func (*Texture_Image) isTexture_TextureProperties() {}
 
 func (*Texture_Noise) isTexture_TextureProperties() {}
+
+func (*Texture_SpectralConstant) isTexture_TextureProperties() {}
+
+func (*Texture_SpectralChecker) isTexture_TextureProperties() {}
 
 // Represents a constant color texture.
 type ConstantTexture struct {
@@ -715,7 +802,6 @@ func (x *CheckerTexture) GetEven() *Texture {
 type ImageTexture struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Filename      string                 `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
-	Size          uint64                 `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"` // NEW: Size of the image file in bytes (for pre-allocation)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -755,13 +841,6 @@ func (x *ImageTexture) GetFilename() string {
 		return x.Filename
 	}
 	return ""
-}
-
-func (x *ImageTexture) GetSize() uint64 {
-	if x != nil {
-		return x.Size
-	}
-	return 0
 }
 
 // Represents a noise texture.
@@ -809,6 +888,317 @@ func (x *NoiseTexture) GetScale() float32 {
 	return 0
 }
 
+// Represents a spectral constant texture with Gaussian or tabulated response.
+type SpectralConstantTexture struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to SpectralProperties:
+	//
+	//	*SpectralConstantTexture_Gaussian
+	//	*SpectralConstantTexture_Tabulated
+	//	*SpectralConstantTexture_Neutral
+	SpectralProperties isSpectralConstantTexture_SpectralProperties `protobuf_oneof:"spectral_properties"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *SpectralConstantTexture) Reset() {
+	*x = SpectralConstantTexture{}
+	mi := &file_transport_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SpectralConstantTexture) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SpectralConstantTexture) ProtoMessage() {}
+
+func (x *SpectralConstantTexture) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SpectralConstantTexture.ProtoReflect.Descriptor instead.
+func (*SpectralConstantTexture) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SpectralConstantTexture) GetSpectralProperties() isSpectralConstantTexture_SpectralProperties {
+	if x != nil {
+		return x.SpectralProperties
+	}
+	return nil
+}
+
+func (x *SpectralConstantTexture) GetGaussian() *GaussianSpectralConstant {
+	if x != nil {
+		if x, ok := x.SpectralProperties.(*SpectralConstantTexture_Gaussian); ok {
+			return x.Gaussian
+		}
+	}
+	return nil
+}
+
+func (x *SpectralConstantTexture) GetTabulated() *TabulatedSpectralConstant {
+	if x != nil {
+		if x, ok := x.SpectralProperties.(*SpectralConstantTexture_Tabulated); ok {
+			return x.Tabulated
+		}
+	}
+	return nil
+}
+
+func (x *SpectralConstantTexture) GetNeutral() *NeutralSpectralConstant {
+	if x != nil {
+		if x, ok := x.SpectralProperties.(*SpectralConstantTexture_Neutral); ok {
+			return x.Neutral
+		}
+	}
+	return nil
+}
+
+type isSpectralConstantTexture_SpectralProperties interface {
+	isSpectralConstantTexture_SpectralProperties()
+}
+
+type SpectralConstantTexture_Gaussian struct {
+	Gaussian *GaussianSpectralConstant `protobuf:"bytes,1,opt,name=gaussian,proto3,oneof"`
+}
+
+type SpectralConstantTexture_Tabulated struct {
+	Tabulated *TabulatedSpectralConstant `protobuf:"bytes,2,opt,name=tabulated,proto3,oneof"`
+}
+
+type SpectralConstantTexture_Neutral struct {
+	Neutral *NeutralSpectralConstant `protobuf:"bytes,3,opt,name=neutral,proto3,oneof"`
+}
+
+func (*SpectralConstantTexture_Gaussian) isSpectralConstantTexture_SpectralProperties() {}
+
+func (*SpectralConstantTexture_Tabulated) isSpectralConstantTexture_SpectralProperties() {}
+
+func (*SpectralConstantTexture_Neutral) isSpectralConstantTexture_SpectralProperties() {}
+
+// Represents a Gaussian spectral response.
+type GaussianSpectralConstant struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	PeakValue        float32                `protobuf:"fixed32,1,opt,name=peak_value,json=peakValue,proto3" json:"peak_value,omitempty"`                      // Maximum reflectance (0.0 to 1.0)
+	CenterWavelength float32                `protobuf:"fixed32,2,opt,name=center_wavelength,json=centerWavelength,proto3" json:"center_wavelength,omitempty"` // Wavelength where response is maximum (380-750nm)
+	Width            float32                `protobuf:"fixed32,3,opt,name=width,proto3" json:"width,omitempty"`                                               // Width of the response curve
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *GaussianSpectralConstant) Reset() {
+	*x = GaussianSpectralConstant{}
+	mi := &file_transport_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GaussianSpectralConstant) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GaussianSpectralConstant) ProtoMessage() {}
+
+func (x *GaussianSpectralConstant) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GaussianSpectralConstant.ProtoReflect.Descriptor instead.
+func (*GaussianSpectralConstant) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GaussianSpectralConstant) GetPeakValue() float32 {
+	if x != nil {
+		return x.PeakValue
+	}
+	return 0
+}
+
+func (x *GaussianSpectralConstant) GetCenterWavelength() float32 {
+	if x != nil {
+		return x.CenterWavelength
+	}
+	return 0
+}
+
+func (x *GaussianSpectralConstant) GetWidth() float32 {
+	if x != nil {
+		return x.Width
+	}
+	return 0
+}
+
+// Represents a tabulated spectral response.
+type TabulatedSpectralConstant struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Wavelengths   []float32              `protobuf:"fixed32,1,rep,packed,name=wavelengths,proto3" json:"wavelengths,omitempty"` // Array of wavelengths in nanometers
+	Values        []float32              `protobuf:"fixed32,2,rep,packed,name=values,proto3" json:"values,omitempty"`           // Array of spectral values at each wavelength
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TabulatedSpectralConstant) Reset() {
+	*x = TabulatedSpectralConstant{}
+	mi := &file_transport_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TabulatedSpectralConstant) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TabulatedSpectralConstant) ProtoMessage() {}
+
+func (x *TabulatedSpectralConstant) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TabulatedSpectralConstant.ProtoReflect.Descriptor instead.
+func (*TabulatedSpectralConstant) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *TabulatedSpectralConstant) GetWavelengths() []float32 {
+	if x != nil {
+		return x.Wavelengths
+	}
+	return nil
+}
+
+func (x *TabulatedSpectralConstant) GetValues() []float32 {
+	if x != nil {
+		return x.Values
+	}
+	return nil
+}
+
+// Represents a neutral spectral response (white, gray, black).
+type NeutralSpectralConstant struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Reflectance   float32                `protobuf:"fixed32,1,opt,name=reflectance,proto3" json:"reflectance,omitempty"` // Reflectance value (0.0 to 1.0)
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NeutralSpectralConstant) Reset() {
+	*x = NeutralSpectralConstant{}
+	mi := &file_transport_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NeutralSpectralConstant) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NeutralSpectralConstant) ProtoMessage() {}
+
+func (x *NeutralSpectralConstant) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NeutralSpectralConstant.ProtoReflect.Descriptor instead.
+func (*NeutralSpectralConstant) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *NeutralSpectralConstant) GetReflectance() float32 {
+	if x != nil {
+		return x.Reflectance
+	}
+	return 0
+}
+
+// Represents a spectral checker texture.
+type SpectralCheckerTexture struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Odd           *SpectralConstantTexture `protobuf:"bytes,1,opt,name=odd,proto3" json:"odd,omitempty"`   // Spectral texture for odd squares
+	Even          *SpectralConstantTexture `protobuf:"bytes,2,opt,name=even,proto3" json:"even,omitempty"` // Spectral texture for even squares
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SpectralCheckerTexture) Reset() {
+	*x = SpectralCheckerTexture{}
+	mi := &file_transport_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SpectralCheckerTexture) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SpectralCheckerTexture) ProtoMessage() {}
+
+func (x *SpectralCheckerTexture) ProtoReflect() protoreflect.Message {
+	mi := &file_transport_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SpectralCheckerTexture.ProtoReflect.Descriptor instead.
+func (*SpectralCheckerTexture) Descriptor() ([]byte, []int) {
+	return file_transport_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *SpectralCheckerTexture) GetOdd() *SpectralConstantTexture {
+	if x != nil {
+		return x.Odd
+	}
+	return nil
+}
+
+func (x *SpectralCheckerTexture) GetEven() *SpectralConstantTexture {
+	if x != nil {
+		return x.Even
+	}
+	return nil
+}
+
 // Represents different types of materials.
 type Material struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -829,7 +1219,7 @@ type Material struct {
 
 func (x *Material) Reset() {
 	*x = Material{}
-	mi := &file_transport_proto_msgTypes[9]
+	mi := &file_transport_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -841,7 +1231,7 @@ func (x *Material) String() string {
 func (*Material) ProtoMessage() {}
 
 func (x *Material) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[9]
+	mi := &file_transport_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -854,7 +1244,7 @@ func (x *Material) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Material.ProtoReflect.Descriptor instead.
 func (*Material) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{9}
+	return file_transport_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *Material) GetName() string {
@@ -974,15 +1364,19 @@ func (*Material_Pbr) isMaterial_MaterialProperties() {}
 
 // Represents a Lambertian material.
 type LambertMaterial struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Albedo        *Texture               `protobuf:"bytes,1,opt,name=albedo,proto3" json:"albedo,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to AlbedoProperties:
+	//
+	//	*LambertMaterial_Albedo
+	//	*LambertMaterial_SpectralAlbedo
+	AlbedoProperties isLambertMaterial_AlbedoProperties `protobuf_oneof:"albedo_properties"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *LambertMaterial) Reset() {
 	*x = LambertMaterial{}
-	mi := &file_transport_proto_msgTypes[10]
+	mi := &file_transport_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -994,7 +1388,7 @@ func (x *LambertMaterial) String() string {
 func (*LambertMaterial) ProtoMessage() {}
 
 func (x *LambertMaterial) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[10]
+	mi := &file_transport_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1007,27 +1401,65 @@ func (x *LambertMaterial) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LambertMaterial.ProtoReflect.Descriptor instead.
 func (*LambertMaterial) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{10}
+	return file_transport_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *LambertMaterial) GetAlbedo() *Texture {
+func (x *LambertMaterial) GetAlbedoProperties() isLambertMaterial_AlbedoProperties {
 	if x != nil {
-		return x.Albedo
+		return x.AlbedoProperties
 	}
 	return nil
 }
 
+func (x *LambertMaterial) GetAlbedo() *Texture {
+	if x != nil {
+		if x, ok := x.AlbedoProperties.(*LambertMaterial_Albedo); ok {
+			return x.Albedo
+		}
+	}
+	return nil
+}
+
+func (x *LambertMaterial) GetSpectralAlbedo() *SpectralConstantTexture {
+	if x != nil {
+		if x, ok := x.AlbedoProperties.(*LambertMaterial_SpectralAlbedo); ok {
+			return x.SpectralAlbedo
+		}
+	}
+	return nil
+}
+
+type isLambertMaterial_AlbedoProperties interface {
+	isLambertMaterial_AlbedoProperties()
+}
+
+type LambertMaterial_Albedo struct {
+	Albedo *Texture `protobuf:"bytes,1,opt,name=albedo,proto3,oneof"`
+}
+
+type LambertMaterial_SpectralAlbedo struct {
+	SpectralAlbedo *SpectralConstantTexture `protobuf:"bytes,2,opt,name=spectral_albedo,json=spectralAlbedo,proto3,oneof"`
+}
+
+func (*LambertMaterial_Albedo) isLambertMaterial_AlbedoProperties() {}
+
+func (*LambertMaterial_SpectralAlbedo) isLambertMaterial_AlbedoProperties() {}
+
 // Represents a Dielectric material.
 type DielectricMaterial struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Refidx        float32                `protobuf:"fixed32,1,opt,name=refidx,proto3" json:"refidx,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to RefractiveIndexProperties:
+	//
+	//	*DielectricMaterial_Refidx
+	//	*DielectricMaterial_SpectralRefidx
+	RefractiveIndexProperties isDielectricMaterial_RefractiveIndexProperties `protobuf_oneof:"refractive_index_properties"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *DielectricMaterial) Reset() {
 	*x = DielectricMaterial{}
-	mi := &file_transport_proto_msgTypes[11]
+	mi := &file_transport_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1039,7 +1471,7 @@ func (x *DielectricMaterial) String() string {
 func (*DielectricMaterial) ProtoMessage() {}
 
 func (x *DielectricMaterial) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[11]
+	mi := &file_transport_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1052,27 +1484,65 @@ func (x *DielectricMaterial) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DielectricMaterial.ProtoReflect.Descriptor instead.
 func (*DielectricMaterial) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{11}
+	return file_transport_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *DielectricMaterial) GetRefractiveIndexProperties() isDielectricMaterial_RefractiveIndexProperties {
+	if x != nil {
+		return x.RefractiveIndexProperties
+	}
+	return nil
 }
 
 func (x *DielectricMaterial) GetRefidx() float32 {
 	if x != nil {
-		return x.Refidx
+		if x, ok := x.RefractiveIndexProperties.(*DielectricMaterial_Refidx); ok {
+			return x.Refidx
+		}
 	}
 	return 0
 }
 
+func (x *DielectricMaterial) GetSpectralRefidx() *SpectralConstantTexture {
+	if x != nil {
+		if x, ok := x.RefractiveIndexProperties.(*DielectricMaterial_SpectralRefidx); ok {
+			return x.SpectralRefidx
+		}
+	}
+	return nil
+}
+
+type isDielectricMaterial_RefractiveIndexProperties interface {
+	isDielectricMaterial_RefractiveIndexProperties()
+}
+
+type DielectricMaterial_Refidx struct {
+	Refidx float32 `protobuf:"fixed32,1,opt,name=refidx,proto3,oneof"`
+}
+
+type DielectricMaterial_SpectralRefidx struct {
+	SpectralRefidx *SpectralConstantTexture `protobuf:"bytes,2,opt,name=spectral_refidx,json=spectralRefidx,proto3,oneof"`
+}
+
+func (*DielectricMaterial_Refidx) isDielectricMaterial_RefractiveIndexProperties() {}
+
+func (*DielectricMaterial_SpectralRefidx) isDielectricMaterial_RefractiveIndexProperties() {}
+
 // Represents a Diffuse Light material.
 type DiffuseLightMaterial struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Emit          *Texture               `protobuf:"bytes,1,opt,name=emit,proto3" json:"emit,omitempty"` // Direct embedding of Texture
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to EmissionProperties:
+	//
+	//	*DiffuseLightMaterial_Emit
+	//	*DiffuseLightMaterial_SpectralEmit
+	EmissionProperties isDiffuseLightMaterial_EmissionProperties `protobuf_oneof:"emission_properties"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *DiffuseLightMaterial) Reset() {
 	*x = DiffuseLightMaterial{}
-	mi := &file_transport_proto_msgTypes[12]
+	mi := &file_transport_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1084,7 +1554,7 @@ func (x *DiffuseLightMaterial) String() string {
 func (*DiffuseLightMaterial) ProtoMessage() {}
 
 func (x *DiffuseLightMaterial) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[12]
+	mi := &file_transport_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1097,27 +1567,65 @@ func (x *DiffuseLightMaterial) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DiffuseLightMaterial.ProtoReflect.Descriptor instead.
 func (*DiffuseLightMaterial) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{12}
+	return file_transport_proto_rawDescGZIP(), []int{17}
 }
 
-func (x *DiffuseLightMaterial) GetEmit() *Texture {
+func (x *DiffuseLightMaterial) GetEmissionProperties() isDiffuseLightMaterial_EmissionProperties {
 	if x != nil {
-		return x.Emit
+		return x.EmissionProperties
 	}
 	return nil
 }
 
+func (x *DiffuseLightMaterial) GetEmit() *Texture {
+	if x != nil {
+		if x, ok := x.EmissionProperties.(*DiffuseLightMaterial_Emit); ok {
+			return x.Emit
+		}
+	}
+	return nil
+}
+
+func (x *DiffuseLightMaterial) GetSpectralEmit() *SpectralConstantTexture {
+	if x != nil {
+		if x, ok := x.EmissionProperties.(*DiffuseLightMaterial_SpectralEmit); ok {
+			return x.SpectralEmit
+		}
+	}
+	return nil
+}
+
+type isDiffuseLightMaterial_EmissionProperties interface {
+	isDiffuseLightMaterial_EmissionProperties()
+}
+
+type DiffuseLightMaterial_Emit struct {
+	Emit *Texture `protobuf:"bytes,1,opt,name=emit,proto3,oneof"`
+}
+
+type DiffuseLightMaterial_SpectralEmit struct {
+	SpectralEmit *SpectralConstantTexture `protobuf:"bytes,2,opt,name=spectral_emit,json=spectralEmit,proto3,oneof"`
+}
+
+func (*DiffuseLightMaterial_Emit) isDiffuseLightMaterial_EmissionProperties() {}
+
+func (*DiffuseLightMaterial_SpectralEmit) isDiffuseLightMaterial_EmissionProperties() {}
+
 // Represents an Isotropic material.
 type IsotropicMaterial struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Albedo        *Texture               `protobuf:"bytes,1,opt,name=albedo,proto3" json:"albedo,omitempty"` // Direct embedding of Texture
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to AlbedoProperties:
+	//
+	//	*IsotropicMaterial_Albedo
+	//	*IsotropicMaterial_SpectralAlbedo
+	AlbedoProperties isIsotropicMaterial_AlbedoProperties `protobuf_oneof:"albedo_properties"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *IsotropicMaterial) Reset() {
 	*x = IsotropicMaterial{}
-	mi := &file_transport_proto_msgTypes[13]
+	mi := &file_transport_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1129,7 +1637,7 @@ func (x *IsotropicMaterial) String() string {
 func (*IsotropicMaterial) ProtoMessage() {}
 
 func (x *IsotropicMaterial) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[13]
+	mi := &file_transport_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1142,15 +1650,49 @@ func (x *IsotropicMaterial) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IsotropicMaterial.ProtoReflect.Descriptor instead.
 func (*IsotropicMaterial) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{13}
+	return file_transport_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *IsotropicMaterial) GetAlbedoProperties() isIsotropicMaterial_AlbedoProperties {
+	if x != nil {
+		return x.AlbedoProperties
+	}
+	return nil
 }
 
 func (x *IsotropicMaterial) GetAlbedo() *Texture {
 	if x != nil {
-		return x.Albedo
+		if x, ok := x.AlbedoProperties.(*IsotropicMaterial_Albedo); ok {
+			return x.Albedo
+		}
 	}
 	return nil
 }
+
+func (x *IsotropicMaterial) GetSpectralAlbedo() *SpectralConstantTexture {
+	if x != nil {
+		if x, ok := x.AlbedoProperties.(*IsotropicMaterial_SpectralAlbedo); ok {
+			return x.SpectralAlbedo
+		}
+	}
+	return nil
+}
+
+type isIsotropicMaterial_AlbedoProperties interface {
+	isIsotropicMaterial_AlbedoProperties()
+}
+
+type IsotropicMaterial_Albedo struct {
+	Albedo *Texture `protobuf:"bytes,1,opt,name=albedo,proto3,oneof"`
+}
+
+type IsotropicMaterial_SpectralAlbedo struct {
+	SpectralAlbedo *SpectralConstantTexture `protobuf:"bytes,2,opt,name=spectral_albedo,json=spectralAlbedo,proto3,oneof"`
+}
+
+func (*IsotropicMaterial_Albedo) isIsotropicMaterial_AlbedoProperties() {}
+
+func (*IsotropicMaterial_SpectralAlbedo) isIsotropicMaterial_AlbedoProperties() {}
 
 // Represents a Metal material.
 type MetalMaterial struct {
@@ -1163,7 +1705,7 @@ type MetalMaterial struct {
 
 func (x *MetalMaterial) Reset() {
 	*x = MetalMaterial{}
-	mi := &file_transport_proto_msgTypes[14]
+	mi := &file_transport_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1175,7 +1717,7 @@ func (x *MetalMaterial) String() string {
 func (*MetalMaterial) ProtoMessage() {}
 
 func (x *MetalMaterial) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[14]
+	mi := &file_transport_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1188,7 +1730,7 @@ func (x *MetalMaterial) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetalMaterial.ProtoReflect.Descriptor instead.
 func (*MetalMaterial) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{14}
+	return file_transport_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *MetalMaterial) GetAlbedo() *Vec3 {
@@ -1220,7 +1762,7 @@ type PBRMaterial struct {
 
 func (x *PBRMaterial) Reset() {
 	*x = PBRMaterial{}
-	mi := &file_transport_proto_msgTypes[15]
+	mi := &file_transport_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1232,7 +1774,7 @@ func (x *PBRMaterial) String() string {
 func (*PBRMaterial) ProtoMessage() {}
 
 func (x *PBRMaterial) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[15]
+	mi := &file_transport_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1245,7 +1787,7 @@ func (x *PBRMaterial) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PBRMaterial.ProtoReflect.Descriptor instead.
 func (*PBRMaterial) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{15}
+	return file_transport_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *PBRMaterial) GetAlbedo() *Texture {
@@ -1311,7 +1853,7 @@ type Triangle struct {
 
 func (x *Triangle) Reset() {
 	*x = Triangle{}
-	mi := &file_transport_proto_msgTypes[16]
+	mi := &file_transport_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1323,7 +1865,7 @@ func (x *Triangle) String() string {
 func (*Triangle) ProtoMessage() {}
 
 func (x *Triangle) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[16]
+	mi := &file_transport_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1336,7 +1878,7 @@ func (x *Triangle) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Triangle.ProtoReflect.Descriptor instead.
 func (*Triangle) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{16}
+	return file_transport_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *Triangle) GetVertex0() *Vec3 {
@@ -1421,7 +1963,7 @@ type Sphere struct {
 
 func (x *Sphere) Reset() {
 	*x = Sphere{}
-	mi := &file_transport_proto_msgTypes[17]
+	mi := &file_transport_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1433,7 +1975,7 @@ func (x *Sphere) String() string {
 func (*Sphere) ProtoMessage() {}
 
 func (x *Sphere) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[17]
+	mi := &file_transport_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1446,7 +1988,7 @@ func (x *Sphere) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Sphere.ProtoReflect.Descriptor instead.
 func (*Sphere) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{17}
+	return file_transport_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *Sphere) GetCenter() *Vec3 {
@@ -1481,7 +2023,7 @@ type SceneObjects struct {
 
 func (x *SceneObjects) Reset() {
 	*x = SceneObjects{}
-	mi := &file_transport_proto_msgTypes[18]
+	mi := &file_transport_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1493,7 +2035,7 @@ func (x *SceneObjects) String() string {
 func (*SceneObjects) ProtoMessage() {}
 
 func (x *SceneObjects) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[18]
+	mi := &file_transport_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1506,7 +2048,7 @@ func (x *SceneObjects) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SceneObjects.ProtoReflect.Descriptor instead.
 func (*SceneObjects) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{18}
+	return file_transport_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *SceneObjects) GetTriangles() []*Triangle {
@@ -1525,22 +2067,25 @@ func (x *SceneObjects) GetSpheres() []*Sphere {
 
 // The root message describing the entire scene.
 type Scene struct {
-	state           protoimpl.MessageState           `protogen:"open.v1"`
-	Name            string                           `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Version         string                           `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	Camera          *Camera                          `protobuf:"bytes,3,opt,name=camera,proto3" json:"camera,omitempty"`
-	Materials       map[string]*Material             `protobuf:"bytes,4,rep,name=materials,proto3" json:"materials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	ImageTextures   map[string]*ImageTextureMetadata `protobuf:"bytes,5,rep,name=image_textures,json=imageTextures,proto3" json:"image_textures,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Objects         *SceneObjects                    `protobuf:"bytes,6,opt,name=objects,proto3" json:"objects,omitempty"`
-	StreamTriangles bool                             `protobuf:"varint,7,opt,name=stream_triangles,json=streamTriangles,proto3" json:"stream_triangles,omitempty"`
-	TotalTriangles  uint64                           `protobuf:"varint,8,opt,name=total_triangles,json=totalTriangles,proto3" json:"total_triangles,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state                protoimpl.MessageState           `protogen:"open.v1"`
+	Name                 string                           `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Version              string                           `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
+	ColourRepresentation ColourRepresentation             `protobuf:"varint,3,opt,name=colour_representation,json=colourRepresentation,proto3,enum=transport.ColourRepresentation" json:"colour_representation,omitempty"`
+	Camera               *Camera                          `protobuf:"bytes,4,opt,name=camera,proto3" json:"camera,omitempty"`
+	Materials            map[string]*Material             `protobuf:"bytes,5,rep,name=materials,proto3" json:"materials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ImageTextures        map[string]*ImageTextureMetadata `protobuf:"bytes,6,rep,name=image_textures,json=imageTextures,proto3" json:"image_textures,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Objects              *SceneObjects                    `protobuf:"bytes,7,opt,name=objects,proto3" json:"objects,omitempty"`
+	StreamTriangles      bool                             `protobuf:"varint,8,opt,name=stream_triangles,json=streamTriangles,proto3" json:"stream_triangles,omitempty"`
+	TotalTriangles       uint64                           `protobuf:"varint,9,opt,name=total_triangles,json=totalTriangles,proto3" json:"total_triangles,omitempty"`
+	// Spectral background for spectral rendering
+	SpectralBackground *TabulatedSpectralConstant `protobuf:"bytes,10,opt,name=spectral_background,json=spectralBackground,proto3" json:"spectral_background,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *Scene) Reset() {
 	*x = Scene{}
-	mi := &file_transport_proto_msgTypes[19]
+	mi := &file_transport_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1552,7 +2097,7 @@ func (x *Scene) String() string {
 func (*Scene) ProtoMessage() {}
 
 func (x *Scene) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[19]
+	mi := &file_transport_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1565,7 +2110,7 @@ func (x *Scene) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Scene.ProtoReflect.Descriptor instead.
 func (*Scene) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{19}
+	return file_transport_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *Scene) GetName() string {
@@ -1580,6 +2125,13 @@ func (x *Scene) GetVersion() string {
 		return x.Version
 	}
 	return ""
+}
+
+func (x *Scene) GetColourRepresentation() ColourRepresentation {
+	if x != nil {
+		return x.ColourRepresentation
+	}
+	return ColourRepresentation_COLOUR_REPRESENTATION_UNSPECIFIED
 }
 
 func (x *Scene) GetCamera() *Camera {
@@ -1624,6 +2176,13 @@ func (x *Scene) GetTotalTriangles() uint64 {
 	return 0
 }
 
+func (x *Scene) GetSpectralBackground() *TabulatedSpectralConstant {
+	if x != nil {
+		return x.SpectralBackground
+	}
+	return nil
+}
+
 // Request to retrieve a specific scene.
 type GetSceneRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -1634,7 +2193,7 @@ type GetSceneRequest struct {
 
 func (x *GetSceneRequest) Reset() {
 	*x = GetSceneRequest{}
-	mi := &file_transport_proto_msgTypes[20]
+	mi := &file_transport_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1646,7 +2205,7 @@ func (x *GetSceneRequest) String() string {
 func (*GetSceneRequest) ProtoMessage() {}
 
 func (x *GetSceneRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[20]
+	mi := &file_transport_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1659,7 +2218,7 @@ func (x *GetSceneRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSceneRequest.ProtoReflect.Descriptor instead.
 func (*GetSceneRequest) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{20}
+	return file_transport_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetSceneRequest) GetSceneName() string {
@@ -1681,7 +2240,7 @@ type StreamTextureFileRequest struct {
 
 func (x *StreamTextureFileRequest) Reset() {
 	*x = StreamTextureFileRequest{}
-	mi := &file_transport_proto_msgTypes[21]
+	mi := &file_transport_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1693,7 +2252,7 @@ func (x *StreamTextureFileRequest) String() string {
 func (*StreamTextureFileRequest) ProtoMessage() {}
 
 func (x *StreamTextureFileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[21]
+	mi := &file_transport_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1706,7 +2265,7 @@ func (x *StreamTextureFileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamTextureFileRequest.ProtoReflect.Descriptor instead.
 func (*StreamTextureFileRequest) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{21}
+	return file_transport_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *StreamTextureFileRequest) GetFilename() string {
@@ -1741,7 +2300,7 @@ type StreamTextureFileResponse struct {
 
 func (x *StreamTextureFileResponse) Reset() {
 	*x = StreamTextureFileResponse{}
-	mi := &file_transport_proto_msgTypes[22]
+	mi := &file_transport_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1753,7 +2312,7 @@ func (x *StreamTextureFileResponse) String() string {
 func (*StreamTextureFileResponse) ProtoMessage() {}
 
 func (x *StreamTextureFileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[22]
+	mi := &file_transport_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1766,7 +2325,7 @@ func (x *StreamTextureFileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamTextureFileResponse.ProtoReflect.Descriptor instead.
 func (*StreamTextureFileResponse) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{22}
+	return file_transport_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *StreamTextureFileResponse) GetChunk() []byte {
@@ -1795,7 +2354,7 @@ type StreamTrianglesRequest struct {
 
 func (x *StreamTrianglesRequest) Reset() {
 	*x = StreamTrianglesRequest{}
-	mi := &file_transport_proto_msgTypes[23]
+	mi := &file_transport_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1807,7 +2366,7 @@ func (x *StreamTrianglesRequest) String() string {
 func (*StreamTrianglesRequest) ProtoMessage() {}
 
 func (x *StreamTrianglesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[23]
+	mi := &file_transport_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1820,7 +2379,7 @@ func (x *StreamTrianglesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamTrianglesRequest.ProtoReflect.Descriptor instead.
 func (*StreamTrianglesRequest) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{23}
+	return file_transport_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *StreamTrianglesRequest) GetSceneName() string {
@@ -1854,7 +2413,7 @@ type StreamTrianglesResponse struct {
 
 func (x *StreamTrianglesResponse) Reset() {
 	*x = StreamTrianglesResponse{}
-	mi := &file_transport_proto_msgTypes[24]
+	mi := &file_transport_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1866,7 +2425,7 @@ func (x *StreamTrianglesResponse) String() string {
 func (*StreamTrianglesResponse) ProtoMessage() {}
 
 func (x *StreamTrianglesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_transport_proto_msgTypes[24]
+	mi := &file_transport_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1879,7 +2438,7 @@ func (x *StreamTrianglesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamTrianglesResponse.ProtoReflect.Descriptor instead.
 func (*StreamTrianglesResponse) Descriptor() ([]byte, []int) {
-	return file_transport_proto_rawDescGZIP(), []int{24}
+	return file_transport_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *StreamTrianglesResponse) GetTriangles() []*Triangle {
@@ -1916,25 +2475,44 @@ const file_transport_proto_rawDesc = "" +
 	"\baperture\x18\x06 \x01(\x02R\baperture\x12\x1c\n" +
 	"\tfocusdist\x18\a \x01(\x02R\tfocusdist\x12\x14\n" +
 	"\x05time0\x18\b \x01(\x02R\x05time0\x12\x14\n" +
-	"\x05time1\x18\t \x01(\x02R\x05time1\"\xb2\x02\n" +
+	"\x05time1\x18\t \x01(\x02R\x05time1\"\xd5\x03\n" +
 	"\aTexture\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12*\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x16.transport.TextureTypeR\x04type\x128\n" +
 	"\bconstant\x18\x03 \x01(\v2\x1a.transport.ConstantTextureH\x00R\bconstant\x125\n" +
 	"\achecker\x18\x04 \x01(\v2\x19.transport.CheckerTextureH\x00R\achecker\x12/\n" +
 	"\x05image\x18\x05 \x01(\v2\x17.transport.ImageTextureH\x00R\x05image\x12/\n" +
-	"\x05noise\x18\x06 \x01(\v2\x17.transport.NoiseTextureH\x00R\x05noiseB\x14\n" +
+	"\x05noise\x18\x06 \x01(\v2\x17.transport.NoiseTextureH\x00R\x05noise\x12Q\n" +
+	"\x11spectral_constant\x18\a \x01(\v2\".transport.SpectralConstantTextureH\x00R\x10spectralConstant\x12N\n" +
+	"\x10spectral_checker\x18\b \x01(\v2!.transport.SpectralCheckerTextureH\x00R\x0fspectralCheckerB\x14\n" +
 	"\x12texture_properties\"8\n" +
 	"\x0fConstantTexture\x12%\n" +
 	"\x05value\x18\x01 \x01(\v2\x0f.transport.Vec3R\x05value\"^\n" +
 	"\x0eCheckerTexture\x12$\n" +
 	"\x03odd\x18\x01 \x01(\v2\x12.transport.TextureR\x03odd\x12&\n" +
-	"\x04even\x18\x02 \x01(\v2\x12.transport.TextureR\x04even\">\n" +
+	"\x04even\x18\x02 \x01(\v2\x12.transport.TextureR\x04even\"*\n" +
 	"\fImageTexture\x12\x1a\n" +
-	"\bfilename\x18\x01 \x01(\tR\bfilename\x12\x12\n" +
-	"\x04size\x18\x02 \x01(\x04R\x04size\"$\n" +
+	"\bfilename\x18\x01 \x01(\tR\bfilename\"$\n" +
 	"\fNoiseTexture\x12\x14\n" +
-	"\x05scale\x18\x01 \x01(\x02R\x05scale\"\xbe\x03\n" +
+	"\x05scale\x18\x01 \x01(\x02R\x05scale\"\xf9\x01\n" +
+	"\x17SpectralConstantTexture\x12A\n" +
+	"\bgaussian\x18\x01 \x01(\v2#.transport.GaussianSpectralConstantH\x00R\bgaussian\x12D\n" +
+	"\ttabulated\x18\x02 \x01(\v2$.transport.TabulatedSpectralConstantH\x00R\ttabulated\x12>\n" +
+	"\aneutral\x18\x03 \x01(\v2\".transport.NeutralSpectralConstantH\x00R\aneutralB\x15\n" +
+	"\x13spectral_properties\"|\n" +
+	"\x18GaussianSpectralConstant\x12\x1d\n" +
+	"\n" +
+	"peak_value\x18\x01 \x01(\x02R\tpeakValue\x12+\n" +
+	"\x11center_wavelength\x18\x02 \x01(\x02R\x10centerWavelength\x12\x14\n" +
+	"\x05width\x18\x03 \x01(\x02R\x05width\"U\n" +
+	"\x19TabulatedSpectralConstant\x12 \n" +
+	"\vwavelengths\x18\x01 \x03(\x02R\vwavelengths\x12\x16\n" +
+	"\x06values\x18\x02 \x03(\x02R\x06values\";\n" +
+	"\x17NeutralSpectralConstant\x12 \n" +
+	"\vreflectance\x18\x01 \x01(\x02R\vreflectance\"\x86\x01\n" +
+	"\x16SpectralCheckerTexture\x124\n" +
+	"\x03odd\x18\x01 \x01(\v2\".transport.SpectralConstantTextureR\x03odd\x126\n" +
+	"\x04even\x18\x02 \x01(\v2\".transport.SpectralConstantTextureR\x04even\"\xbe\x03\n" +
 	"\bMaterial\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12+\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x17.transport.MaterialTypeR\x04type\x12?\n" +
@@ -1946,15 +2524,23 @@ const file_transport_proto_rawDesc = "" +
 	"\alambert\x18\x06 \x01(\v2\x1a.transport.LambertMaterialH\x00R\alambert\x120\n" +
 	"\x05metal\x18\a \x01(\v2\x18.transport.MetalMaterialH\x00R\x05metal\x12*\n" +
 	"\x03pbr\x18\b \x01(\v2\x16.transport.PBRMaterialH\x00R\x03pbrB\x15\n" +
-	"\x13material_properties\"=\n" +
-	"\x0fLambertMaterial\x12*\n" +
-	"\x06albedo\x18\x01 \x01(\v2\x12.transport.TextureR\x06albedo\",\n" +
-	"\x12DielectricMaterial\x12\x16\n" +
-	"\x06refidx\x18\x01 \x01(\x02R\x06refidx\">\n" +
-	"\x14DiffuseLightMaterial\x12&\n" +
-	"\x04emit\x18\x01 \x01(\v2\x12.transport.TextureR\x04emit\"?\n" +
-	"\x11IsotropicMaterial\x12*\n" +
-	"\x06albedo\x18\x01 \x01(\v2\x12.transport.TextureR\x06albedo\"L\n" +
+	"\x13material_properties\"\xa3\x01\n" +
+	"\x0fLambertMaterial\x12,\n" +
+	"\x06albedo\x18\x01 \x01(\v2\x12.transport.TextureH\x00R\x06albedo\x12M\n" +
+	"\x0fspectral_albedo\x18\x02 \x01(\v2\".transport.SpectralConstantTextureH\x00R\x0espectralAlbedoB\x13\n" +
+	"\x11albedo_properties\"\x9c\x01\n" +
+	"\x12DielectricMaterial\x12\x18\n" +
+	"\x06refidx\x18\x01 \x01(\x02H\x00R\x06refidx\x12M\n" +
+	"\x0fspectral_refidx\x18\x02 \x01(\v2\".transport.SpectralConstantTextureH\x00R\x0espectralRefidxB\x1d\n" +
+	"\x1brefractive_index_properties\"\xa2\x01\n" +
+	"\x14DiffuseLightMaterial\x12(\n" +
+	"\x04emit\x18\x01 \x01(\v2\x12.transport.TextureH\x00R\x04emit\x12I\n" +
+	"\rspectral_emit\x18\x02 \x01(\v2\".transport.SpectralConstantTextureH\x00R\fspectralEmitB\x15\n" +
+	"\x13emission_properties\"\xa5\x01\n" +
+	"\x11IsotropicMaterial\x12,\n" +
+	"\x06albedo\x18\x01 \x01(\v2\x12.transport.TextureH\x00R\x06albedo\x12M\n" +
+	"\x0fspectral_albedo\x18\x02 \x01(\v2\".transport.SpectralConstantTextureH\x00R\x0espectralAlbedoB\x13\n" +
+	"\x11albedo_properties\"L\n" +
 	"\rMetalMaterial\x12'\n" +
 	"\x06albedo\x18\x01 \x01(\v2\x0f.transport.Vec3R\x06albedo\x12\x12\n" +
 	"\x04fuzz\x18\x02 \x01(\x02R\x04fuzz\"\x95\x02\n" +
@@ -1985,16 +2571,19 @@ const file_transport_proto_rawDesc = "" +
 	"\rmaterial_name\x18\x03 \x01(\tR\fmaterialName\"n\n" +
 	"\fSceneObjects\x121\n" +
 	"\ttriangles\x18\x01 \x03(\v2\x13.transport.TriangleR\ttriangles\x12+\n" +
-	"\aspheres\x18\x02 \x03(\v2\x11.transport.SphereR\aspheres\"\xa8\x04\n" +
+	"\aspheres\x18\x02 \x03(\v2\x11.transport.SphereR\aspheres\"\xd5\x05\n" +
 	"\x05Scene\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\tR\aversion\x12)\n" +
-	"\x06camera\x18\x03 \x01(\v2\x11.transport.CameraR\x06camera\x12=\n" +
-	"\tmaterials\x18\x04 \x03(\v2\x1f.transport.Scene.MaterialsEntryR\tmaterials\x12J\n" +
-	"\x0eimage_textures\x18\x05 \x03(\v2#.transport.Scene.ImageTexturesEntryR\rimageTextures\x121\n" +
-	"\aobjects\x18\x06 \x01(\v2\x17.transport.SceneObjectsR\aobjects\x12)\n" +
-	"\x10stream_triangles\x18\a \x01(\bR\x0fstreamTriangles\x12'\n" +
-	"\x0ftotal_triangles\x18\b \x01(\x04R\x0etotalTriangles\x1aQ\n" +
+	"\aversion\x18\x02 \x01(\tR\aversion\x12T\n" +
+	"\x15colour_representation\x18\x03 \x01(\x0e2\x1f.transport.ColourRepresentationR\x14colourRepresentation\x12)\n" +
+	"\x06camera\x18\x04 \x01(\v2\x11.transport.CameraR\x06camera\x12=\n" +
+	"\tmaterials\x18\x05 \x03(\v2\x1f.transport.Scene.MaterialsEntryR\tmaterials\x12J\n" +
+	"\x0eimage_textures\x18\x06 \x03(\v2#.transport.Scene.ImageTexturesEntryR\rimageTextures\x121\n" +
+	"\aobjects\x18\a \x01(\v2\x17.transport.SceneObjectsR\aobjects\x12)\n" +
+	"\x10stream_triangles\x18\b \x01(\bR\x0fstreamTriangles\x12'\n" +
+	"\x0ftotal_triangles\x18\t \x01(\x04R\x0etotalTriangles\x12U\n" +
+	"\x13spectral_background\x18\n" +
+	" \x01(\v2$.transport.TabulatedSpectralConstantR\x12spectralBackground\x1aQ\n" +
 	"\x0eMaterialsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12)\n" +
 	"\x05value\x18\x02 \x01(\v2\x13.transport.MaterialR\x05value:\x028\x01\x1aa\n" +
@@ -2019,13 +2608,15 @@ const file_transport_proto_rawDesc = "" +
 	"batch_size\x18\x02 \x01(\rR\tbatchSize\x12\x16\n" +
 	"\x06offset\x18\x03 \x01(\x04R\x06offset\"L\n" +
 	"\x17StreamTrianglesResponse\x121\n" +
-	"\ttriangles\x18\x01 \x03(\v2\x13.transport.TriangleR\ttriangles*\\\n" +
+	"\ttriangles\x18\x01 \x03(\v2\x13.transport.TriangleR\ttriangles*\x89\x01\n" +
 	"\vTextureType\x12\x1c\n" +
 	"\x18TEXTURE_TYPE_UNSPECIFIED\x10\x00\x12\f\n" +
 	"\bCONSTANT\x10\x01\x12\v\n" +
 	"\aCHECKER\x10\x02\x12\t\n" +
 	"\x05IMAGE\x10\x03\x12\t\n" +
-	"\x05NOISE\x10\x04*G\n" +
+	"\x05NOISE\x10\x04\x12\x15\n" +
+	"\x11SPECTRAL_CONSTANT\x10\x05\x12\x14\n" +
+	"\x10SPECTRAL_CHECKER\x10\x06*G\n" +
 	"\x12TexturePixelFormat\x12$\n" +
 	" TEXTURE_PIXEL_FORMAT_UNSPECIFIED\x10\x00\x12\v\n" +
 	"\aFLOAT64\x10\x01*\x80\x01\n" +
@@ -2037,7 +2628,11 @@ const file_transport_proto_rawDesc = "" +
 	"\tISOTROPIC\x10\x03\x12\v\n" +
 	"\aLAMBERT\x10\x04\x12\t\n" +
 	"\x05METAL\x10\x05\x12\a\n" +
-	"\x03PBR\x10\x062\x8f\x02\n" +
+	"\x03PBR\x10\x06*T\n" +
+	"\x14ColourRepresentation\x12%\n" +
+	"!COLOUR_REPRESENTATION_UNSPECIFIED\x10\x00\x12\a\n" +
+	"\x03RGB\x10\x01\x12\f\n" +
+	"\bSPECTRAL\x10\x022\x8f\x02\n" +
 	"\x15SceneTransportService\x128\n" +
 	"\bGetScene\x12\x1a.transport.GetSceneRequest\x1a\x10.transport.Scene\x12`\n" +
 	"\x11StreamTextureFile\x12#.transport.StreamTextureFileRequest\x1a$.transport.StreamTextureFileResponse0\x01\x12Z\n" +
@@ -2055,99 +2650,118 @@ func file_transport_proto_rawDescGZIP() []byte {
 	return file_transport_proto_rawDescData
 }
 
-var file_transport_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_transport_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
+var file_transport_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_transport_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_transport_proto_goTypes = []any{
 	(TextureType)(0),                  // 0: transport.TextureType
 	(TexturePixelFormat)(0),           // 1: transport.TexturePixelFormat
 	(MaterialType)(0),                 // 2: transport.MaterialType
-	(*ImageTextureMetadata)(nil),      // 3: transport.ImageTextureMetadata
-	(*Vec3)(nil),                      // 4: transport.Vec3
-	(*Vec2)(nil),                      // 5: transport.Vec2
-	(*Camera)(nil),                    // 6: transport.Camera
-	(*Texture)(nil),                   // 7: transport.Texture
-	(*ConstantTexture)(nil),           // 8: transport.ConstantTexture
-	(*CheckerTexture)(nil),            // 9: transport.CheckerTexture
-	(*ImageTexture)(nil),              // 10: transport.ImageTexture
-	(*NoiseTexture)(nil),              // 11: transport.NoiseTexture
-	(*Material)(nil),                  // 12: transport.Material
-	(*LambertMaterial)(nil),           // 13: transport.LambertMaterial
-	(*DielectricMaterial)(nil),        // 14: transport.DielectricMaterial
-	(*DiffuseLightMaterial)(nil),      // 15: transport.DiffuseLightMaterial
-	(*IsotropicMaterial)(nil),         // 16: transport.IsotropicMaterial
-	(*MetalMaterial)(nil),             // 17: transport.MetalMaterial
-	(*PBRMaterial)(nil),               // 18: transport.PBRMaterial
-	(*Triangle)(nil),                  // 19: transport.Triangle
-	(*Sphere)(nil),                    // 20: transport.Sphere
-	(*SceneObjects)(nil),              // 21: transport.SceneObjects
-	(*Scene)(nil),                     // 22: transport.Scene
-	(*GetSceneRequest)(nil),           // 23: transport.GetSceneRequest
-	(*StreamTextureFileRequest)(nil),  // 24: transport.StreamTextureFileRequest
-	(*StreamTextureFileResponse)(nil), // 25: transport.StreamTextureFileResponse
-	(*StreamTrianglesRequest)(nil),    // 26: transport.StreamTrianglesRequest
-	(*StreamTrianglesResponse)(nil),   // 27: transport.StreamTrianglesResponse
-	nil,                               // 28: transport.Scene.MaterialsEntry
-	nil,                               // 29: transport.Scene.ImageTexturesEntry
+	(ColourRepresentation)(0),         // 3: transport.ColourRepresentation
+	(*ImageTextureMetadata)(nil),      // 4: transport.ImageTextureMetadata
+	(*Vec3)(nil),                      // 5: transport.Vec3
+	(*Vec2)(nil),                      // 6: transport.Vec2
+	(*Camera)(nil),                    // 7: transport.Camera
+	(*Texture)(nil),                   // 8: transport.Texture
+	(*ConstantTexture)(nil),           // 9: transport.ConstantTexture
+	(*CheckerTexture)(nil),            // 10: transport.CheckerTexture
+	(*ImageTexture)(nil),              // 11: transport.ImageTexture
+	(*NoiseTexture)(nil),              // 12: transport.NoiseTexture
+	(*SpectralConstantTexture)(nil),   // 13: transport.SpectralConstantTexture
+	(*GaussianSpectralConstant)(nil),  // 14: transport.GaussianSpectralConstant
+	(*TabulatedSpectralConstant)(nil), // 15: transport.TabulatedSpectralConstant
+	(*NeutralSpectralConstant)(nil),   // 16: transport.NeutralSpectralConstant
+	(*SpectralCheckerTexture)(nil),    // 17: transport.SpectralCheckerTexture
+	(*Material)(nil),                  // 18: transport.Material
+	(*LambertMaterial)(nil),           // 19: transport.LambertMaterial
+	(*DielectricMaterial)(nil),        // 20: transport.DielectricMaterial
+	(*DiffuseLightMaterial)(nil),      // 21: transport.DiffuseLightMaterial
+	(*IsotropicMaterial)(nil),         // 22: transport.IsotropicMaterial
+	(*MetalMaterial)(nil),             // 23: transport.MetalMaterial
+	(*PBRMaterial)(nil),               // 24: transport.PBRMaterial
+	(*Triangle)(nil),                  // 25: transport.Triangle
+	(*Sphere)(nil),                    // 26: transport.Sphere
+	(*SceneObjects)(nil),              // 27: transport.SceneObjects
+	(*Scene)(nil),                     // 28: transport.Scene
+	(*GetSceneRequest)(nil),           // 29: transport.GetSceneRequest
+	(*StreamTextureFileRequest)(nil),  // 30: transport.StreamTextureFileRequest
+	(*StreamTextureFileResponse)(nil), // 31: transport.StreamTextureFileResponse
+	(*StreamTrianglesRequest)(nil),    // 32: transport.StreamTrianglesRequest
+	(*StreamTrianglesResponse)(nil),   // 33: transport.StreamTrianglesResponse
+	nil,                               // 34: transport.Scene.MaterialsEntry
+	nil,                               // 35: transport.Scene.ImageTexturesEntry
 }
 var file_transport_proto_depIdxs = []int32{
 	1,  // 0: transport.ImageTextureMetadata.pixel_format:type_name -> transport.TexturePixelFormat
-	4,  // 1: transport.Camera.lookfrom:type_name -> transport.Vec3
-	4,  // 2: transport.Camera.lookat:type_name -> transport.Vec3
-	4,  // 3: transport.Camera.vup:type_name -> transport.Vec3
+	5,  // 1: transport.Camera.lookfrom:type_name -> transport.Vec3
+	5,  // 2: transport.Camera.lookat:type_name -> transport.Vec3
+	5,  // 3: transport.Camera.vup:type_name -> transport.Vec3
 	0,  // 4: transport.Texture.type:type_name -> transport.TextureType
-	8,  // 5: transport.Texture.constant:type_name -> transport.ConstantTexture
-	9,  // 6: transport.Texture.checker:type_name -> transport.CheckerTexture
-	10, // 7: transport.Texture.image:type_name -> transport.ImageTexture
-	11, // 8: transport.Texture.noise:type_name -> transport.NoiseTexture
-	4,  // 9: transport.ConstantTexture.value:type_name -> transport.Vec3
-	7,  // 10: transport.CheckerTexture.odd:type_name -> transport.Texture
-	7,  // 11: transport.CheckerTexture.even:type_name -> transport.Texture
-	2,  // 12: transport.Material.type:type_name -> transport.MaterialType
-	14, // 13: transport.Material.dielectric:type_name -> transport.DielectricMaterial
-	15, // 14: transport.Material.diffuselight:type_name -> transport.DiffuseLightMaterial
-	16, // 15: transport.Material.isotropic:type_name -> transport.IsotropicMaterial
-	13, // 16: transport.Material.lambert:type_name -> transport.LambertMaterial
-	17, // 17: transport.Material.metal:type_name -> transport.MetalMaterial
-	18, // 18: transport.Material.pbr:type_name -> transport.PBRMaterial
-	7,  // 19: transport.LambertMaterial.albedo:type_name -> transport.Texture
-	7,  // 20: transport.DiffuseLightMaterial.emit:type_name -> transport.Texture
-	7,  // 21: transport.IsotropicMaterial.albedo:type_name -> transport.Texture
-	4,  // 22: transport.MetalMaterial.albedo:type_name -> transport.Vec3
-	7,  // 23: transport.PBRMaterial.albedo:type_name -> transport.Texture
-	7,  // 24: transport.PBRMaterial.roughness:type_name -> transport.Texture
-	7,  // 25: transport.PBRMaterial.metalness:type_name -> transport.Texture
-	7,  // 26: transport.PBRMaterial.normal_map:type_name -> transport.Texture
-	7,  // 27: transport.PBRMaterial.sss:type_name -> transport.Texture
-	4,  // 28: transport.Triangle.vertex0:type_name -> transport.Vec3
-	4,  // 29: transport.Triangle.vertex1:type_name -> transport.Vec3
-	4,  // 30: transport.Triangle.vertex2:type_name -> transport.Vec3
-	5,  // 31: transport.Triangle.uv0:type_name -> transport.Vec2
-	5,  // 32: transport.Triangle.uv1:type_name -> transport.Vec2
-	5,  // 33: transport.Triangle.uv2:type_name -> transport.Vec2
-	4,  // 34: transport.Triangle.normal0:type_name -> transport.Vec3
-	4,  // 35: transport.Triangle.normal1:type_name -> transport.Vec3
-	4,  // 36: transport.Triangle.normal2:type_name -> transport.Vec3
-	4,  // 37: transport.Sphere.center:type_name -> transport.Vec3
-	19, // 38: transport.SceneObjects.triangles:type_name -> transport.Triangle
-	20, // 39: transport.SceneObjects.spheres:type_name -> transport.Sphere
-	6,  // 40: transport.Scene.camera:type_name -> transport.Camera
-	28, // 41: transport.Scene.materials:type_name -> transport.Scene.MaterialsEntry
-	29, // 42: transport.Scene.image_textures:type_name -> transport.Scene.ImageTexturesEntry
-	21, // 43: transport.Scene.objects:type_name -> transport.SceneObjects
-	19, // 44: transport.StreamTrianglesResponse.triangles:type_name -> transport.Triangle
-	12, // 45: transport.Scene.MaterialsEntry.value:type_name -> transport.Material
-	3,  // 46: transport.Scene.ImageTexturesEntry.value:type_name -> transport.ImageTextureMetadata
-	23, // 47: transport.SceneTransportService.GetScene:input_type -> transport.GetSceneRequest
-	24, // 48: transport.SceneTransportService.StreamTextureFile:input_type -> transport.StreamTextureFileRequest
-	26, // 49: transport.SceneTransportService.StreamTriangles:input_type -> transport.StreamTrianglesRequest
-	22, // 50: transport.SceneTransportService.GetScene:output_type -> transport.Scene
-	25, // 51: transport.SceneTransportService.StreamTextureFile:output_type -> transport.StreamTextureFileResponse
-	27, // 52: transport.SceneTransportService.StreamTriangles:output_type -> transport.StreamTrianglesResponse
-	50, // [50:53] is the sub-list for method output_type
-	47, // [47:50] is the sub-list for method input_type
-	47, // [47:47] is the sub-list for extension type_name
-	47, // [47:47] is the sub-list for extension extendee
-	0,  // [0:47] is the sub-list for field type_name
+	9,  // 5: transport.Texture.constant:type_name -> transport.ConstantTexture
+	10, // 6: transport.Texture.checker:type_name -> transport.CheckerTexture
+	11, // 7: transport.Texture.image:type_name -> transport.ImageTexture
+	12, // 8: transport.Texture.noise:type_name -> transport.NoiseTexture
+	13, // 9: transport.Texture.spectral_constant:type_name -> transport.SpectralConstantTexture
+	17, // 10: transport.Texture.spectral_checker:type_name -> transport.SpectralCheckerTexture
+	5,  // 11: transport.ConstantTexture.value:type_name -> transport.Vec3
+	8,  // 12: transport.CheckerTexture.odd:type_name -> transport.Texture
+	8,  // 13: transport.CheckerTexture.even:type_name -> transport.Texture
+	14, // 14: transport.SpectralConstantTexture.gaussian:type_name -> transport.GaussianSpectralConstant
+	15, // 15: transport.SpectralConstantTexture.tabulated:type_name -> transport.TabulatedSpectralConstant
+	16, // 16: transport.SpectralConstantTexture.neutral:type_name -> transport.NeutralSpectralConstant
+	13, // 17: transport.SpectralCheckerTexture.odd:type_name -> transport.SpectralConstantTexture
+	13, // 18: transport.SpectralCheckerTexture.even:type_name -> transport.SpectralConstantTexture
+	2,  // 19: transport.Material.type:type_name -> transport.MaterialType
+	20, // 20: transport.Material.dielectric:type_name -> transport.DielectricMaterial
+	21, // 21: transport.Material.diffuselight:type_name -> transport.DiffuseLightMaterial
+	22, // 22: transport.Material.isotropic:type_name -> transport.IsotropicMaterial
+	19, // 23: transport.Material.lambert:type_name -> transport.LambertMaterial
+	23, // 24: transport.Material.metal:type_name -> transport.MetalMaterial
+	24, // 25: transport.Material.pbr:type_name -> transport.PBRMaterial
+	8,  // 26: transport.LambertMaterial.albedo:type_name -> transport.Texture
+	13, // 27: transport.LambertMaterial.spectral_albedo:type_name -> transport.SpectralConstantTexture
+	13, // 28: transport.DielectricMaterial.spectral_refidx:type_name -> transport.SpectralConstantTexture
+	8,  // 29: transport.DiffuseLightMaterial.emit:type_name -> transport.Texture
+	13, // 30: transport.DiffuseLightMaterial.spectral_emit:type_name -> transport.SpectralConstantTexture
+	8,  // 31: transport.IsotropicMaterial.albedo:type_name -> transport.Texture
+	13, // 32: transport.IsotropicMaterial.spectral_albedo:type_name -> transport.SpectralConstantTexture
+	5,  // 33: transport.MetalMaterial.albedo:type_name -> transport.Vec3
+	8,  // 34: transport.PBRMaterial.albedo:type_name -> transport.Texture
+	8,  // 35: transport.PBRMaterial.roughness:type_name -> transport.Texture
+	8,  // 36: transport.PBRMaterial.metalness:type_name -> transport.Texture
+	8,  // 37: transport.PBRMaterial.normal_map:type_name -> transport.Texture
+	8,  // 38: transport.PBRMaterial.sss:type_name -> transport.Texture
+	5,  // 39: transport.Triangle.vertex0:type_name -> transport.Vec3
+	5,  // 40: transport.Triangle.vertex1:type_name -> transport.Vec3
+	5,  // 41: transport.Triangle.vertex2:type_name -> transport.Vec3
+	6,  // 42: transport.Triangle.uv0:type_name -> transport.Vec2
+	6,  // 43: transport.Triangle.uv1:type_name -> transport.Vec2
+	6,  // 44: transport.Triangle.uv2:type_name -> transport.Vec2
+	5,  // 45: transport.Triangle.normal0:type_name -> transport.Vec3
+	5,  // 46: transport.Triangle.normal1:type_name -> transport.Vec3
+	5,  // 47: transport.Triangle.normal2:type_name -> transport.Vec3
+	5,  // 48: transport.Sphere.center:type_name -> transport.Vec3
+	25, // 49: transport.SceneObjects.triangles:type_name -> transport.Triangle
+	26, // 50: transport.SceneObjects.spheres:type_name -> transport.Sphere
+	3,  // 51: transport.Scene.colour_representation:type_name -> transport.ColourRepresentation
+	7,  // 52: transport.Scene.camera:type_name -> transport.Camera
+	34, // 53: transport.Scene.materials:type_name -> transport.Scene.MaterialsEntry
+	35, // 54: transport.Scene.image_textures:type_name -> transport.Scene.ImageTexturesEntry
+	27, // 55: transport.Scene.objects:type_name -> transport.SceneObjects
+	15, // 56: transport.Scene.spectral_background:type_name -> transport.TabulatedSpectralConstant
+	25, // 57: transport.StreamTrianglesResponse.triangles:type_name -> transport.Triangle
+	18, // 58: transport.Scene.MaterialsEntry.value:type_name -> transport.Material
+	4,  // 59: transport.Scene.ImageTexturesEntry.value:type_name -> transport.ImageTextureMetadata
+	29, // 60: transport.SceneTransportService.GetScene:input_type -> transport.GetSceneRequest
+	30, // 61: transport.SceneTransportService.StreamTextureFile:input_type -> transport.StreamTextureFileRequest
+	32, // 62: transport.SceneTransportService.StreamTriangles:input_type -> transport.StreamTrianglesRequest
+	28, // 63: transport.SceneTransportService.GetScene:output_type -> transport.Scene
+	31, // 64: transport.SceneTransportService.StreamTextureFile:output_type -> transport.StreamTextureFileResponse
+	33, // 65: transport.SceneTransportService.StreamTriangles:output_type -> transport.StreamTrianglesResponse
+	63, // [63:66] is the sub-list for method output_type
+	60, // [60:63] is the sub-list for method input_type
+	60, // [60:60] is the sub-list for extension type_name
+	60, // [60:60] is the sub-list for extension extendee
+	0,  // [0:60] is the sub-list for field type_name
 }
 
 func init() { file_transport_proto_init() }
@@ -2160,8 +2774,15 @@ func file_transport_proto_init() {
 		(*Texture_Checker)(nil),
 		(*Texture_Image)(nil),
 		(*Texture_Noise)(nil),
+		(*Texture_SpectralConstant)(nil),
+		(*Texture_SpectralChecker)(nil),
 	}
 	file_transport_proto_msgTypes[9].OneofWrappers = []any{
+		(*SpectralConstantTexture_Gaussian)(nil),
+		(*SpectralConstantTexture_Tabulated)(nil),
+		(*SpectralConstantTexture_Neutral)(nil),
+	}
+	file_transport_proto_msgTypes[14].OneofWrappers = []any{
 		(*Material_Dielectric)(nil),
 		(*Material_Diffuselight)(nil),
 		(*Material_Isotropic)(nil),
@@ -2169,13 +2790,29 @@ func file_transport_proto_init() {
 		(*Material_Metal)(nil),
 		(*Material_Pbr)(nil),
 	}
+	file_transport_proto_msgTypes[15].OneofWrappers = []any{
+		(*LambertMaterial_Albedo)(nil),
+		(*LambertMaterial_SpectralAlbedo)(nil),
+	}
+	file_transport_proto_msgTypes[16].OneofWrappers = []any{
+		(*DielectricMaterial_Refidx)(nil),
+		(*DielectricMaterial_SpectralRefidx)(nil),
+	}
+	file_transport_proto_msgTypes[17].OneofWrappers = []any{
+		(*DiffuseLightMaterial_Emit)(nil),
+		(*DiffuseLightMaterial_SpectralEmit)(nil),
+	}
+	file_transport_proto_msgTypes[18].OneofWrappers = []any{
+		(*IsotropicMaterial_Albedo)(nil),
+		(*IsotropicMaterial_SpectralAlbedo)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_transport_proto_rawDesc), len(file_transport_proto_rawDesc)),
-			NumEnums:      3,
-			NumMessages:   27,
+			NumEnums:      4,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -83,14 +83,9 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastran
 
 // SpectralScatter computes how the ray bounces off the surface of a dielectric material with spectral properties.
 func (d *Dielectric) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
-	// For spectral rendering, we need to get the wavelength from the ray
-	// Assuming the ray has a wavelength field or we need to sample one
-	lambda := 550.0 // Default wavelength, should be extracted from ray or sampled
-
-	// Get wavelength-dependent refractive index
+	lambda := r.Lambda()
 	refIdx := d.spectralRefIdx.Value(hr.U(), hr.V(), lambda, hr.P())
 
-	// Use the common scattering logic with spectral refractive index
 	scattered, ok := d.scatterCommon(r, hr, random, refIdx)
 	if !ok {
 		return nil, nil, false

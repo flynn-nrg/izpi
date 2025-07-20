@@ -10,6 +10,8 @@ enum TextureType {
   CHECKER = 2;
   IMAGE = 3;
   NOISE = 4;
+  SPECTRAL_CONSTANT = 5;
+  SPECTRAL_CHECKER = 6;
 }
 
 enum TexturePixelFormat {
@@ -35,6 +37,11 @@ enum MaterialType {
   PBR = 6;
 }
 
+enum ColourRepresentation {
+  COLOUR_REPRESENTATION_UNSPECIFIED = 0;
+  RGB = 1;
+  SPECTRAL = 2;
+}
 
 // Represents a 3D vector or point with float components.
 message Vec3 {
@@ -74,6 +81,8 @@ message Texture {
     CheckerTexture checker = 4;
     ImageTexture image = 5;
     NoiseTexture noise = 6;
+    SpectralConstantTexture spectral_constant = 7;
+    SpectralCheckerTexture spectral_checker = 8;
   }
 }
 
@@ -98,6 +107,41 @@ message NoiseTexture {
   float scale = 1;
 }
 
+// Spectral texture definitions
+
+// Represents a spectral constant texture with Gaussian or tabulated response.
+message SpectralConstantTexture {
+  oneof spectral_properties {
+    GaussianSpectralConstant gaussian = 1;
+    TabulatedSpectralConstant tabulated = 2;
+    NeutralSpectralConstant neutral = 3;
+  }
+}
+
+// Represents a Gaussian spectral response.
+message GaussianSpectralConstant {
+  float peak_value = 1;        // Maximum reflectance (0.0 to 1.0)
+  float center_wavelength = 2; // Wavelength where response is maximum (380-750nm)
+  float width = 3;             // Width of the response curve
+}
+
+// Represents a tabulated spectral response.
+message TabulatedSpectralConstant {
+  repeated float wavelengths = 1; // Array of wavelengths in nanometers
+  repeated float values = 2;      // Array of spectral values at each wavelength
+}
+
+// Represents a neutral spectral response (white, gray, black).
+message NeutralSpectralConstant {
+  float reflectance = 1; // Reflectance value (0.0 to 1.0)
+}
+
+// Represents a spectral checker texture.
+message SpectralCheckerTexture {
+  SpectralConstantTexture odd = 1;  // Spectral texture for odd squares
+  SpectralConstantTexture even = 2; // Spectral texture for even squares
+}
+
 
 // Material definitions
 
@@ -117,22 +161,34 @@ message Material {
 
 // Represents a Lambertian material.
 message LambertMaterial {
-  Texture albedo = 1;
+  oneof albedo_properties {
+    Texture albedo = 1;
+    SpectralConstantTexture spectral_albedo = 2;
+  }
 }
 
 // Represents a Dielectric material.
 message DielectricMaterial {
-  float refidx = 1;
+  oneof refractive_index_properties {
+    float refidx = 1;
+    SpectralConstantTexture spectral_refidx = 2;
+  }
 }
 
 // Represents a Diffuse Light material.
 message DiffuseLightMaterial {
-  Texture emit = 1; // Direct embedding of Texture
+  oneof emission_properties {
+    Texture emit = 1;
+    SpectralConstantTexture spectral_emit = 2;
+  }
 }
 
 // Represents an Isotropic material.
 message IsotropicMaterial {
-  Texture albedo = 1; // Direct embedding of Texture
+  oneof albedo_properties {
+    Texture albedo = 1;
+    SpectralConstantTexture spectral_albedo = 2;
+  }
 }
 
 // Represents a Metal material.
@@ -190,12 +246,15 @@ message SceneObjects {
 message Scene {
   string name = 1;
   string version = 2;
-  Camera camera = 3;
-  map<string, Material> materials = 4;
-  map<string, ImageTextureMetadata> image_textures = 5;
-  SceneObjects objects = 6;
-  bool stream_triangles = 7;
-  uint64 total_triangles = 8;
+  ColourRepresentation colour_representation = 3;
+  Camera camera = 4;
+  map<string, Material> materials = 5;
+  map<string, ImageTextureMetadata> image_textures = 6;
+  SceneObjects objects = 7;
+  bool stream_triangles = 8;
+  uint64 total_triangles = 9;
+  // Spectral background for spectral rendering
+  TabulatedSpectralConstant spectral_background = 10;
 }
 
 // --- Service Definition ---
@@ -231,7 +290,7 @@ message StreamTextureFileRequest {
 
 // A chunk of binary data for a streamed texture file.
 message StreamTextureFileResponse {
-  repeated double chunk = 1; // A segment of the texture file's binary data.
+  bytes chunk = 1; // A segment of the texture file's binary data.
   uint64 size = 2; // The size of the returned chunk.
 }
 

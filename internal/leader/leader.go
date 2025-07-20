@@ -3,9 +3,6 @@ package leader
 import (
 	"context"
 	"image"
-	"io"
-	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -18,9 +15,9 @@ import (
 	"github.com/flynn-nrg/izpi/internal/render"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
+	"github.com/flynn-nrg/izpi/internal/scenes"
 	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/transport"
-	"google.golang.org/protobuf/proto"
 
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	log "github.com/sirupsen/logrus"
@@ -40,30 +37,33 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	var protoScene *pb_transport.Scene
 
 	aspectRatio := float64(cfg.XSize) / float64(cfg.YSize)
-
-	sceneFile, err := os.Open(cfg.Scene)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer sceneFile.Close()
-
-	switch filepath.Ext(cfg.Scene) {
-	case ".izpi":
-		payload, err := io.ReadAll(sceneFile)
+	/*
+		sceneFile, err := os.Open(cfg.Scene)
 		if err != nil {
-			log.Fatalf("Error reading scene file: %v", err)
+			log.Fatal(err)
 		}
-		protoScene = &pb_transport.Scene{}
-		err = proto.Unmarshal(payload, protoScene)
-		if err != nil {
-			log.Fatalf("Error unmarshalling scene: %v", err)
+
+		defer sceneFile.Close()
+
+		switch filepath.Ext(cfg.Scene) {
+		case ".izpi":
+			payload, err := io.ReadAll(sceneFile)
+			if err != nil {
+				log.Fatalf("Error reading scene file: %v", err)
+			}
+			protoScene = &pb_transport.Scene{}
+			err = proto.Unmarshal(payload, protoScene)
+			if err != nil {
+				log.Fatalf("Error unmarshalling scene: %v", err)
+			}
+		case ".yaml":
+			log.Fatalf("YAML scenes are not supported in leader mode")
+		default:
+			log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
 		}
-	case ".yaml":
-		log.Fatalf("YAML scenes are not supported in leader mode")
-	default:
-		log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
-	}
+	*/
+
+	protoScene = scenes.CornellBoxRGB(aspectRatio)
 
 	// Load textures
 	textures := make(map[string]*texture.ImageTxt)

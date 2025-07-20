@@ -8,20 +8,28 @@ import (
 	"github.com/flynn-nrg/izpi/internal/material"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
 	"github.com/flynn-nrg/izpi/internal/scene"
+	"github.com/flynn-nrg/izpi/internal/spectral"
 	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 type Transport struct {
-	aspectOverride float64
-	protoScene     *pb_transport.Scene
-	triangles      []*pb_transport.Triangle
-	textures       map[string]*texture.ImageTxt
-	materials      map[string]material.Material
+	aspectOverride       float64
+	colourRepresentation pb_transport.ColourRepresentation
+	protoScene           *pb_transport.Scene
+	triangles            []*pb_transport.Triangle
+	textures             map[string]*texture.ImageTxt
+	materials            map[string]material.Material
 }
 
 func NewTransport(aspectOverride float64, protoScene *pb_transport.Scene, triangles []*pb_transport.Triangle, textures map[string]*texture.ImageTxt) *Transport {
-	return &Transport{aspectOverride: aspectOverride, protoScene: protoScene, triangles: triangles, textures: textures}
+	return &Transport{
+		aspectOverride:       aspectOverride,
+		colourRepresentation: protoScene.GetColourRepresentation(),
+		protoScene:           protoScene,
+		triangles:            triangles,
+		textures:             textures,
+	}
 }
 
 func (t *Transport) ToScene() (*scene.Scene, error) {
@@ -81,6 +89,12 @@ func (t *Transport) toSceneMaterials() (map[string]material.Material, error) {
 				return nil, err
 			}
 			materials[material.GetName()] = metal
+		case pb_transport.MaterialType_ISOTROPIC:
+			isotropic, err := t.toSceneIsotropicMaterial(material)
+			if err != nil {
+				return nil, err
+			}
+			materials[material.GetName()] = isotropic
 		case pb_transport.MaterialType_PBR:
 			pbr, err := t.toScenePBRMaterial(material)
 			if err != nil {
@@ -140,34 +154,87 @@ func (t *Transport) toSceneMetalMaterial(mat *pb_transport.Material) (material.M
 	return material.NewMetal(albedo, fuzz), nil
 }
 
+func (t *Transport) toSceneIsotropicMaterial(mat *pb_transport.Material) (material.Material, error) {
+	isotropic := mat.GetIsotropic()
+
+	switch isotropic.GetAlbedoProperties().(type) {
+	case *pb_transport.IsotropicMaterial_Albedo:
+		albedo, err := t.toSceneTexture(isotropic.GetAlbedo())
+		if err != nil {
+			return nil, err
+		}
+		return material.NewIsotropic(albedo), nil
+	case *pb_transport.IsotropicMaterial_SpectralAlbedo:
+		_, err := t.toSceneSpectralTexture(isotropic.GetSpectralAlbedo())
+		if err != nil {
+			return nil, err
+		}
+		// Note: Isotropic material doesn't have a spectral constructor yet
+		// We'll need to add NewSpectralIsotropic to the material package
+		return nil, fmt.Errorf("spectral isotropic materials not yet implemented")
+	default:
+		return nil, fmt.Errorf("isotropic material must have either albedo or spectral_albedo")
+	}
+}
+
 func (t *Transport) toSceneLambertMaterial(mat *pb_transport.Material) (material.Material, error) {
 	lambert := mat.GetLambert()
 
-	albedo, err := t.toSceneTexture(lambert.GetAlbedo())
-	if err != nil {
-		return nil, err
+	switch lambert.GetAlbedoProperties().(type) {
+	case *pb_transport.LambertMaterial_Albedo:
+		albedo, err := t.toSceneTexture(lambert.GetAlbedo())
+		if err != nil {
+			return nil, err
+		}
+		return material.NewLambertian(albedo), nil
+	case *pb_transport.LambertMaterial_SpectralAlbedo:
+		spectralAlbedo, err := t.toSceneSpectralTexture(lambert.GetSpectralAlbedo())
+		if err != nil {
+			return nil, err
+		}
+		return material.NewSpectralLambertian(spectralAlbedo), nil
+	default:
+		return nil, fmt.Errorf("lambert material must have either albedo or spectral_albedo")
 	}
-
-	return material.NewLambertian(albedo), nil
 }
 
 func (t *Transport) toSceneDielectricMaterial(mat *pb_transport.Material) (material.Material, error) {
 	dielectric := mat.GetDielectric()
 
-	refidx := float64(dielectric.GetRefidx())
-
-	return material.NewDielectric(refidx), nil
+	switch dielectric.GetRefractiveIndexProperties().(type) {
+	case *pb_transport.DielectricMaterial_Refidx:
+		refidx := float64(dielectric.GetRefidx())
+		return material.NewDielectric(refidx), nil
+	case *pb_transport.DielectricMaterial_SpectralRefidx:
+		spectralRefIdx, err := t.toSceneSpectralTexture(dielectric.GetSpectralRefidx())
+		if err != nil {
+			return nil, err
+		}
+		return material.NewSpectralDielectric(spectralRefIdx), nil
+	default:
+		return nil, fmt.Errorf("dielectric material must have either refidx or spectral_refidx")
+	}
 }
 
 func (t *Transport) toSceneDiffuseLightMaterial(mat *pb_transport.Material) (material.Material, error) {
 	diffuselight := mat.GetDiffuselight()
 
-	emit, err := t.toSceneTexture(diffuselight.GetEmit())
-	if err != nil {
-		return nil, err
+	switch diffuselight.GetEmissionProperties().(type) {
+	case *pb_transport.DiffuseLightMaterial_Emit:
+		emit, err := t.toSceneTexture(diffuselight.GetEmit())
+		if err != nil {
+			return nil, err
+		}
+		return material.NewDiffuseLight(emit), nil
+	case *pb_transport.DiffuseLightMaterial_SpectralEmit:
+		spectralEmit, err := t.toSceneSpectralTexture(diffuselight.GetSpectralEmit())
+		if err != nil {
+			return nil, err
+		}
+		return material.NewSpectralDiffuseLight(spectralEmit), nil
+	default:
+		return nil, fmt.Errorf("diffuse light material must have either emit or spectral_emit")
 	}
-
-	return material.NewDiffuseLight(emit), nil
 }
 
 func (t *Transport) toSceneTexture(text *pb_transport.Texture) (texture.Texture, error) {
@@ -176,6 +243,19 @@ func (t *Transport) toSceneTexture(text *pb_transport.Texture) (texture.Texture,
 		return t.toSceneConstantTexture(text)
 	case *pb_transport.Texture_Image:
 		return t.toSceneImageTexture(text)
+	case *pb_transport.Texture_SpectralConstant:
+		// Convert spectral texture to RGB texture for backward compatibility
+		// This is a fallback for RGB rendering when spectral textures are provided
+		_, err := t.toSceneSpectralTexture(text.GetSpectralConstant())
+		if err != nil {
+			return nil, err
+		}
+		// Create a neutral RGB texture as fallback
+		return texture.NewConstant(&vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5}), nil
+	case *pb_transport.Texture_SpectralChecker:
+		// Convert spectral checker to RGB checker for backward compatibility
+		// This is a fallback for RGB rendering when spectral textures are provided
+		return texture.NewConstant(&vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5}), nil
 	}
 
 	return nil, fmt.Errorf("unknown texture type: %T", text.GetTextureProperties())
@@ -200,6 +280,37 @@ func (t *Transport) toSceneImageTexture(text *pb_transport.Texture) (texture.Tex
 	}
 
 	return imageText, nil
+}
+
+func (t *Transport) toSceneSpectralTexture(spectralText *pb_transport.SpectralConstantTexture) (texture.SpectralTexture, error) {
+	switch spectralText.GetSpectralProperties().(type) {
+	case *pb_transport.SpectralConstantTexture_Gaussian:
+		gaussian := spectralText.GetGaussian()
+		return texture.NewSpectralConstant(
+			float64(gaussian.GetPeakValue()),
+			float64(gaussian.GetCenterWavelength()),
+			float64(gaussian.GetWidth()),
+		), nil
+	case *pb_transport.SpectralConstantTexture_Tabulated:
+		tabulated := spectralText.GetTabulated()
+		wavelengths := make([]float64, len(tabulated.GetWavelengths()))
+		values := make([]float64, len(tabulated.GetValues()))
+
+		for i, w := range tabulated.GetWavelengths() {
+			wavelengths[i] = float64(w)
+		}
+		for i, v := range tabulated.GetValues() {
+			values[i] = float64(v)
+		}
+
+		spd := spectral.NewSPD(wavelengths, values)
+		return texture.NewSpectralConstantFromSPD(spd), nil
+	case *pb_transport.SpectralConstantTexture_Neutral:
+		neutral := spectralText.GetNeutral()
+		return texture.NewSpectralNeutral(float64(neutral.GetReflectance())), nil
+	default:
+		return nil, fmt.Errorf("unknown spectral texture type: %T", spectralText.GetSpectralProperties())
+	}
 }
 
 func (t *Transport) toSceneCamera(aspectOverride float64) *camera.Camera {

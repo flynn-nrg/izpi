@@ -82,6 +82,38 @@ func (spd *SpectralPowerDistribution) Values() []float64 {
 	return spd.values
 }
 
+// Value returns the spectral value at the given wavelength, interpolating if necessary
+func (spd *SpectralPowerDistribution) Value(wavelength float64) float64 {
+	if len(spd.wavelengths) == 0 {
+		return 0.0
+	}
+
+	// Clamp wavelength to valid range
+	if wavelength < spd.wavelengths[0] {
+		return spd.values[0]
+	}
+	if wavelength > spd.wavelengths[len(spd.wavelengths)-1] {
+		return spd.values[len(spd.values)-1]
+	}
+
+	// Find the two wavelengths that bracket the input wavelength
+	for i := 0; i < len(spd.wavelengths)-1; i++ {
+		w1 := spd.wavelengths[i]
+		w2 := spd.wavelengths[i+1]
+
+		if wavelength >= w1 && wavelength <= w2 {
+			// Linear interpolation between the two points
+			t := (wavelength - w1) / (w2 - w1)
+			v1 := spd.values[i]
+			v2 := spd.values[i+1]
+			return v1 + t*(v2-v1)
+		}
+	}
+
+	// If we get here, wavelength is outside the range
+	return 0.0
+}
+
 // SampleWavelength samples a wavelength according to the CIE Y function (luminance)
 // This is useful for importance sampling in spectral rendering
 func SampleWavelength(random float64) float64 {

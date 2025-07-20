@@ -59,13 +59,10 @@ func (l *Lambertian) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastran
 // SpectralScatter computes how the ray bounces off the surface of a diffuse material with spectral properties.
 func (l *Lambertian) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
 	scattered, pdf := l.scatterCommon(hr, random, r.Time())
-
-	// For spectral rendering, we need to get the wavelength from the ray
-	// Assuming the ray has a wavelength field or we need to sample one
-	lambda := 550.0 // Default wavelength, should be extracted from ray or sampled
-
+	lambda := r.Lambda()
 	albedo := l.spectralAlbedo.Value(hr.U(), hr.V(), lambda, hr.P())
 	scatterRecord := scatterrecord.NewSpectralScatterRecord(nil, false, albedo, lambda, nil, 0.0, 0.0, pdf)
+
 	return scattered, scatterRecord, true
 }
 
