@@ -15,13 +15,15 @@ var _ Sampler = (*Albedo)(nil)
 
 // Albedo represents an albedo sampler.
 type Albedo struct {
-	numRays *uint64
+	NonSpectral // Embed to get SampleSpectral method
+	numRays     *uint64
 }
 
 // NewAlbedo returns an instance of the albedo sampler.
 func NewAlbedo(numRays *uint64) *Albedo {
 	return &Albedo{
-		numRays: numRays,
+		NonSpectral: *NewNonSpectral(), // Initialize embedded struct
+		numRays:     numRays,
 	}
 }
 

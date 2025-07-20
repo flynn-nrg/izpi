@@ -16,6 +16,7 @@ const (
 	ColourSampler
 	WireFrameSampler
 	AlbedoSampler
+	SpectralSampler
 )
 
 var samplerMap = map[string]SamplerType{
@@ -23,10 +24,12 @@ var samplerMap = map[string]SamplerType{
 	"normal":    NormalSampler,
 	"wireframe": WireFrameSampler,
 	"albedo":    AlbedoSampler,
+	"spectral":  SpectralSampler,
 }
 
 type Sampler interface {
 	Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) *vec3.Vec3Impl
+	SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) float64
 }
 
 func StringToType(s string) SamplerType {

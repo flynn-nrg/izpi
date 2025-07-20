@@ -24,8 +24,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Renderer represents a renderer config.
-type Renderer struct {
+// RendererRGB represents an RGB renderer config.
+type RendererRGB struct {
 	scene         *scene.Scene
 	numRays       uint64
 	remoteWorkers []*RemoteWorkerConfig
@@ -136,8 +136,8 @@ func New(
 	previewChan chan display.DisplayTile,
 	preview bool,
 	samplerType sampler.SamplerType,
-) *Renderer {
-	return &Renderer{
+) *RendererRGB {
+	return &RendererRGB{
 		scene:         scene,
 		remoteWorkers: remoteWorkers,
 		canvas:        floatimage.NewFloatNRGBA(image.Rect(0, 0, sizeX, sizeY), make([]float64, sizeX*sizeY*4)),
@@ -157,7 +157,7 @@ func New(
 
 // Render performs the rendering task spread across 1 or more worker goroutines.
 // It returns a FloatNRGBA image that can be further processed before output or fed to an output directly.
-func (r *Renderer) Render(ctx context.Context) image.Image {
+func (r *RendererRGB) Render(ctx context.Context) image.Image {
 
 	var bar *pb.ProgressBar
 

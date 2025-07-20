@@ -33,6 +33,7 @@ enum SamplerType {
   NORMAL = 2;
   WIRE_FRAME = 3; // Using snake_case for enum value
   COLOUR = 4;
+  SPECTRAL = 5;
 }
 
 // Defines the status of the RenderConfiguration process on the worker.
@@ -55,6 +56,20 @@ message Vec3 {
   double z = 3;
 }
 
+// Represents a tabulated spectral response for spectral backgrounds.
+message TabulatedSpectralConstant {
+  repeated double wavelengths = 1; // Array of wavelengths in nanometers
+  repeated double values = 2;      // Array of spectral values at each wavelength
+}
+
+// Represents a spectral background with different types of spectral responses.
+message SpectralBackground {
+  oneof spectral_properties {
+    TabulatedSpectralConstant tabulated = 1; // Tabulated spectral data
+    double neutral_value = 2;                // Neutral (white/gray) spectral value
+  }
+}
+
 // Represents the width and height of an image or tile.
 message ImageResolution {
   uint32 width = 1;
@@ -72,9 +87,10 @@ message RenderSetupRequest { // Renamed message
   SamplerType sampler = 5;         // The type of sampler (render mode) to use.
   ImageResolution image_resolution = 6; // The overall image resolution.
   uint32 max_depth = 7;            // Maximum recursion depth for path tracing.
-  Vec3 background_color = 8;       // The background color of the scene.
+  Vec3 background_color = 8;       // The background color of the scene (for RGB rendering).
   Vec3 ink_color = 9;              // The ink color of the scene.
   string asset_provider = 10;       // NEW: The network address (host:port) of the asset transport server (e.g., leader).
+  SpectralBackground spectral_background = 11; // Spectral background for spectral rendering.
 }
 
 // Response containing status updates during the RenderConfiguration process.

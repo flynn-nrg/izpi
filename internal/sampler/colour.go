@@ -15,16 +15,18 @@ import (
 var _ Sampler = (*Colour)(nil)
 
 type Colour struct {
-	maxDepth   int
-	numRays    *uint64
-	background *vec3.Vec3Impl
+	NonSpectral // Embed to get SampleSpectral method
+	maxDepth    int
+	numRays     *uint64
+	background  *vec3.Vec3Impl
 }
 
 func NewColour(maxDepth int, background *vec3.Vec3Impl, numRays *uint64) *Colour {
 	return &Colour{
-		maxDepth:   maxDepth,
-		numRays:    numRays,
-		background: background,
+		NonSpectral: *NewNonSpectral(), // Initialize embedded struct
+		maxDepth:    maxDepth,
+		numRays:     numRays,
+		background:  background,
 	}
 }
 
