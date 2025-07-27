@@ -16,8 +16,5 @@ var (
 	ResolutionBlue = &vec3.Vec3Impl{X: 0.0, Y: 32.0 / 255.0, Z: 130.0 / 255.0}
 	LimeStone      = &vec3.Vec3Impl{X: 152.0 / 255.0, Y: 154.0 / 255.0, Z: 152.0 / 255.0}
 
-	SpectralBlack = spectral.NewSPD(
-		[]float64{380, 780},
-		[]float64{0, 0},
-	)
+	SpectralBlack = spectral.NewEmptyCIESPD()
 )
