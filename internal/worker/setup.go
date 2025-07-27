@@ -309,24 +309,24 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 				spectralBackground = spectral.NewSPD(wavelengths, values)
 			case *pb_control.SpectralBackground_NeutralValue:
 				neutralValue := req.GetSpectralBackground().GetNeutralValue()
-				// Create a neutral spectral background with uniform response
-				spectralBackground = spectral.NewSPD(
-					[]float64{380, 550, 750},                            // Visible spectrum wavelengths
-					[]float64{neutralValue, neutralValue, neutralValue}, // Uniform neutral values
-				)
+				// Create a neutral spectral background with uniform response using CIE wavelengths
+				spectralBackground = spectral.NewEmptyCIESPD()
+				for i := range spectralBackground.Values() {
+					spectralBackground.SetValue(i, neutralValue)
+				}
 			default:
 				// Fallback to neutral gray if no spectral background is provided
-				spectralBackground = spectral.NewSPD(
-					[]float64{380, 550, 750}, // Visible spectrum wavelengths
-					[]float64{0.5, 0.5, 0.5}, // Neutral gray values
-				)
+				spectralBackground = spectral.NewEmptyCIESPD()
+				for i := range spectralBackground.Values() {
+					spectralBackground.SetValue(i, 0.5) // Neutral gray values
+				}
 			}
 		} else {
 			// Fallback to neutral gray if no spectral background is provided
-			spectralBackground = spectral.NewSPD(
-				[]float64{380, 550, 750}, // Visible spectrum wavelengths
-				[]float64{0.5, 0.5, 0.5}, // Neutral gray values
-			)
+			spectralBackground = spectral.NewEmptyCIESPD()
+			for i := range spectralBackground.Values() {
+				spectralBackground.SetValue(i, 0.5) // Neutral gray values
+			}
 		}
 
 		s.sampler = sampler.NewSpectral(s.maxDepth, spectralBackground, &s.numRays)

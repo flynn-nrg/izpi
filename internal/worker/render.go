@@ -92,8 +92,8 @@ func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom
 		// Choose a wavelength.
 		samplingIndex := int(float64(col.NumWavelengths()) * rand.Float64())
 		lambda := col.Wavelength(samplingIndex)
-		u := (float64(x) + rand.Float64()) / float64(nx)
-		v := (float64(y) + rand.Float64()) / float64(ny)
+		u := (x + rand.Float64()) / nx
+		v := (y + rand.Float64()) / ny
 		r := s.scene.Camera.GetRayWithLambda(u, v, lambda)
 		sampled := s.sampler.SampleSpectral(r, s.scene.World, s.scene.Lights, 0, rand)
 		col.AddValue(samplingIndex, sampled)
