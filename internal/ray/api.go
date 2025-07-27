@@ -10,4 +10,5 @@ type Ray interface {
 	PointAtParameter(t float64) *vec3.Vec3Impl
 	Time() float64
 	Lambda() float64
+	SetLambda(float64)
 }

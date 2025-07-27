@@ -1,7 +1,10 @@
 // Package colours defines a few useful colours.
 package colours
 
-import "github.com/flynn-nrg/izpi/internal/vec3"
+import (
+	"github.com/flynn-nrg/izpi/internal/spectral"
+	"github.com/flynn-nrg/izpi/internal/vec3"
+)
 
 var (
 	Red            = &vec3.Vec3Impl{X: 1.0}
@@ -12,4 +15,9 @@ var (
 	RoyalBlue      = &vec3.Vec3Impl{X: 48.0 / 255.0, Y: 87.0 / 255.0, Z: 225.0 / 255.0}
 	ResolutionBlue = &vec3.Vec3Impl{X: 0.0, Y: 32.0 / 255.0, Z: 130.0 / 255.0}
 	LimeStone      = &vec3.Vec3Impl{X: 152.0 / 255.0, Y: 154.0 / 255.0, Z: 152.0 / 255.0}
+
+	SpectralBlack = spectral.NewSPD(
+		[]float64{380, 780},
+		[]float64{0, 0},
+	)
 )

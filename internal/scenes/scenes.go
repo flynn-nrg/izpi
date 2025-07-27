@@ -2211,9 +2211,12 @@ func CornellBoxSpectral(aspect float64) *pb_transport.Scene {
 					Dielectric: &pb_transport.DielectricMaterial{
 						RefractiveIndexProperties: &pb_transport.DielectricMaterial_SpectralRefidx{
 							SpectralRefidx: &pb_transport.SpectralConstantTexture{
-								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
-									Neutral: &pb_transport.NeutralSpectralConstant{
-										Reflectance: 1.5, // Glass refractive index
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Tabulated{
+									Tabulated: &pb_transport.TabulatedSpectralConstant{
+										// Wavelengths in nanometers (visible spectrum)
+										Wavelengths: []float32{380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 750},
+										// Refractive indices for typical glass (slight dispersion)
+										Values: []float32{1.52, 1.51, 1.51, 1.50, 1.50, 1.49, 1.49, 1.48, 1.48, 1.47, 1.47, 1.46, 1.46, 1.45, 1.45, 1.44, 1.44, 1.43, 1.43, 1.42},
 									},
 								},
 							},

@@ -72,6 +72,35 @@ func NewSPD(wavelengths, values []float64) *SpectralPowerDistribution {
 	}
 }
 
+func NewEmptyCIESPD() *SpectralPowerDistribution {
+	return &SpectralPowerDistribution{
+		wavelengths: cieWavelengths,
+		values:      make([]float64, len(cieWavelengths)),
+	}
+}
+
+func (spd *SpectralPowerDistribution) SetValue(index int, value float64) {
+	spd.values[index] = value
+}
+
+func (spd *SpectralPowerDistribution) AddValue(index int, value float64) {
+	spd.values[index] += value
+}
+
+func (spd *SpectralPowerDistribution) NumWavelengths() int {
+	return len(spd.wavelengths)
+}
+
+func (spd *SpectralPowerDistribution) Wavelength(index int) float64 {
+	return spd.wavelengths[index]
+}
+
+func (spd *SpectralPowerDistribution) Normalise(numSamples int) {
+	for i, value := range spd.values {
+		spd.values[i] = value / float64(numSamples)
+	}
+}
+
 // Wavelengths returns the wavelengths array
 func (spd *SpectralPowerDistribution) Wavelengths() []float64 {
 	return spd.wavelengths

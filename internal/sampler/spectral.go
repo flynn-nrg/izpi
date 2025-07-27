@@ -62,7 +62,7 @@ func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightS
 			} else {
 				pLight := pdf.NewHitable(lightShape, rec.P())
 				p := pdf.NewMixture(pLight, srec.PDF())
-				scattered := ray.New(rec.P(), p.Generate(random), r.Time())
+				scattered := ray.NewWithLambda(rec.P(), p.Generate(random), r.Time(), r.Lambda())
 				pdfVal := p.Value(scattered.Direction())
 				// emitted + (albedo * scatteringPDF())*spectral() / pdf
 				v1 := s.SampleSpectral(scattered, world, lightShape, depth+1, random) * mat.ScatteringPDF(r, rec, scattered)
@@ -80,11 +80,17 @@ func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightS
 }
 
 // Sample implements the Sampler interface for RGB rendering
-// Converts spectral rendering to RGB by sampling at the ray's wavelength
-// and converting to RGB using the spectral conversion utilities
+// For stochastic spectral sampling, we need to assign a wavelength to the ray
 func (s *Spectral) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) *vec3.Vec3Impl {
-	// For RGB rendering, we need to convert spectral values to RGB
-	// This is a simplified approach - in practice, you'd want to sample multiple wavelengths
+	// For stochastic spectral sampling, assign a random wavelength to the ray
+	// if it doesn't already have one (depth 0 means it's a primary ray from camera)
+	if depth == 0 && r.Lambda() == 0.0 {
+		// Sample a wavelength according to CIE Y function (importance sampling)
+		wavelength := spectral.SampleWavelength(random.Float64())
+		r.SetLambda(wavelength)
+	}
+
+	// Sample at this wavelength
 	spectralValue := s.SampleSpectral(r, world, lightShape, depth, random)
 
 	// Convert single wavelength to RGB using the spectral conversion

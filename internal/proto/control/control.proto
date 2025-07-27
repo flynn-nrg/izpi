@@ -120,7 +120,9 @@ message RenderTileResponse {
   uint32 height = 2; // Height of this specific pixel chunk (sub-tile).
   uint32 pos_x = 3;  // X-coordinate of the top-left pixel of this chunk (relative to overall image origin).
   uint32 pos_y = 4;  // Y-coordinate of the top-left pixel of this chunk (relative to overall image origin).
-  repeated double pixels = 5; // Flat array of pixel values (e.g., RGBA as [R1, G1, B1, A1, R2, G2, B2, A2...])
+ // Flat array of pixel values (e.g., RGBA as [R1, G1, B1, A1, R2, G2, B2, A2...])
+ // For spectral rendering, the pixels are the spectral value for the sampled wavelength.
+  repeated double pixels = 5; 
 }
 
 // --- RenderEnd RPC Messages ---

@@ -63,7 +63,12 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		}
 	*/
 
-	protoScene = scenes.CornellBoxRGB(aspectRatio)
+	protoScene = scenes.CornellBoxSpectral(aspectRatio)
+
+	// Override the sampler type if the scene is spectral.
+	if protoScene.GetColourRepresentation() == pb_transport.ColourRepresentation_SPECTRAL {
+		cfg.Sampler = "spectral"
+	}
 
 	// Load textures
 	textures := make(map[string]*texture.ImageTxt)
@@ -107,8 +112,14 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	// Free up resources
 	protoScene = nil
 
-	r := render.New(sceneData, int(cfg.XSize), int(cfg.YSize), int(cfg.Samples), int(cfg.Depth),
-		colours.Black, colours.White, int(cfg.NumWorkers), remoteWorkers, cfg.Verbose, previewChan, cfg.Preview, sampler.StringToType(cfg.Sampler))
+	r := render.New(
+		sceneData,
+		int(cfg.XSize), int(cfg.YSize),
+		int(cfg.Samples), int(cfg.Depth),
+		colours.Black,
+		colours.White,
+		colours.SpectralBlack,
+		int(cfg.NumWorkers), remoteWorkers, cfg.Verbose, previewChan, cfg.Preview, sampler.StringToType(cfg.Sampler))
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -184,6 +195,8 @@ func stringToSamplerType(s string) pb_control.SamplerType {
 		return pb_control.SamplerType_NORMAL
 	case "wireframe":
 		return pb_control.SamplerType_WIRE_FRAME
+	case "spectral":
+		return pb_control.SamplerType_SPECTRAL
 	default:
 		log.Fatalf("unknown sampler type %q", s)
 	}

@@ -63,9 +63,9 @@ func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *f
 	}
 
 	if random.Float64() < reflectProb {
-		scattered = ray.New(hr.P(), reflected, r.Time())
+		scattered = ray.NewWithLambda(hr.P(), reflected, r.Time(), r.Lambda())
 	} else {
-		scattered = ray.New(hr.P(), refracted, r.Time())
+		scattered = ray.NewWithLambda(hr.P(), refracted, r.Time(), r.Lambda())
 	}
 	return scattered, true
 }

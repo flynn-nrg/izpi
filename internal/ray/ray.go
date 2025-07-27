@@ -56,3 +56,8 @@ func (r *RayImpl) Time() float64 {
 func (r *RayImpl) Lambda() float64 {
 	return r.lambda
 }
+
+// SetLambda sets the wavelength associated with this ray.
+func (r *RayImpl) SetLambda(lambda float64) {
+	r.lambda = lambda
+}

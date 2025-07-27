@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v5.29.3
-// source: internal/proto/control/control.proto
+// source: control.proto
 
 package control
 
@@ -64,11 +64,11 @@ func (x SamplerType) String() string {
 }
 
 func (SamplerType) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_control_control_proto_enumTypes[0].Descriptor()
+	return file_control_proto_enumTypes[0].Descriptor()
 }
 
 func (SamplerType) Type() protoreflect.EnumType {
-	return &file_internal_proto_control_control_proto_enumTypes[0]
+	return &file_control_proto_enumTypes[0]
 }
 
 func (x SamplerType) Number() protoreflect.EnumNumber {
@@ -77,7 +77,7 @@ func (x SamplerType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SamplerType.Descriptor instead.
 func (SamplerType) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{0}
+	return file_control_proto_rawDescGZIP(), []int{0}
 }
 
 // Defines the status of the RenderConfiguration process on the worker.
@@ -126,11 +126,11 @@ func (x RenderSetupStatus) String() string {
 }
 
 func (RenderSetupStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_internal_proto_control_control_proto_enumTypes[1].Descriptor()
+	return file_control_proto_enumTypes[1].Descriptor()
 }
 
 func (RenderSetupStatus) Type() protoreflect.EnumType {
-	return &file_internal_proto_control_control_proto_enumTypes[1]
+	return &file_control_proto_enumTypes[1]
 }
 
 func (x RenderSetupStatus) Number() protoreflect.EnumNumber {
@@ -139,7 +139,7 @@ func (x RenderSetupStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use RenderSetupStatus.Descriptor instead.
 func (RenderSetupStatus) EnumDescriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{1}
+	return file_control_proto_rawDescGZIP(), []int{1}
 }
 
 // Represents a 3D vector or point with float components, also used for colors.
@@ -154,7 +154,7 @@ type Vec3 struct {
 
 func (x *Vec3) Reset() {
 	*x = Vec3{}
-	mi := &file_internal_proto_control_control_proto_msgTypes[0]
+	mi := &file_control_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -166,7 +166,7 @@ func (x *Vec3) String() string {
 func (*Vec3) ProtoMessage() {}
 
 func (x *Vec3) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_control_control_proto_msgTypes[0]
+	mi := &file_control_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -179,7 +179,7 @@ func (x *Vec3) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Vec3.ProtoReflect.Descriptor instead.
 func (*Vec3) Descriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{0}
+	return file_control_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Vec3) GetX() float64 {
@@ -214,7 +214,7 @@ type TabulatedSpectralConstant struct {
 
 func (x *TabulatedSpectralConstant) Reset() {
 	*x = TabulatedSpectralConstant{}
-	mi := &file_internal_proto_control_control_proto_msgTypes[1]
+	mi := &file_control_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -226,7 +226,7 @@ func (x *TabulatedSpectralConstant) String() string {
 func (*TabulatedSpectralConstant) ProtoMessage() {}
 
 func (x *TabulatedSpectralConstant) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_control_control_proto_msgTypes[1]
+	mi := &file_control_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -239,7 +239,7 @@ func (x *TabulatedSpectralConstant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TabulatedSpectralConstant.ProtoReflect.Descriptor instead.
 func (*TabulatedSpectralConstant) Descriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{1}
+	return file_control_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *TabulatedSpectralConstant) GetWavelengths() []float64 {
@@ -270,7 +270,7 @@ type SpectralBackground struct {
 
 func (x *SpectralBackground) Reset() {
 	*x = SpectralBackground{}
-	mi := &file_internal_proto_control_control_proto_msgTypes[2]
+	mi := &file_control_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -282,7 +282,7 @@ func (x *SpectralBackground) String() string {
 func (*SpectralBackground) ProtoMessage() {}
 
 func (x *SpectralBackground) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_control_control_proto_msgTypes[2]
+	mi := &file_control_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -295,7 +295,7 @@ func (x *SpectralBackground) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SpectralBackground.ProtoReflect.Descriptor instead.
 func (*SpectralBackground) Descriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{2}
+	return file_control_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *SpectralBackground) GetSpectralProperties() isSpectralBackground_SpectralProperties {
@@ -350,7 +350,7 @@ type ImageResolution struct {
 
 func (x *ImageResolution) Reset() {
 	*x = ImageResolution{}
-	mi := &file_internal_proto_control_control_proto_msgTypes[3]
+	mi := &file_control_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -362,7 +362,7 @@ func (x *ImageResolution) String() string {
 func (*ImageResolution) ProtoMessage() {}
 
 func (x *ImageResolution) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_control_control_proto_msgTypes[3]
+	mi := &file_control_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -375,7 +375,7 @@ func (x *ImageResolution) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImageResolution.ProtoReflect.Descriptor instead.
 func (*ImageResolution) Descriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{3}
+	return file_control_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ImageResolution) GetWidth() uint32 {
@@ -412,7 +412,7 @@ type RenderSetupRequest struct {
 
 func (x *RenderSetupRequest) Reset() {
 	*x = RenderSetupRequest{}
-	mi := &file_internal_proto_control_control_proto_msgTypes[4]
+	mi := &file_control_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -424,7 +424,7 @@ func (x *RenderSetupRequest) String() string {
 func (*RenderSetupRequest) ProtoMessage() {}
 
 func (x *RenderSetupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_control_control_proto_msgTypes[4]
+	mi := &file_control_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -437,7 +437,7 @@ func (x *RenderSetupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderSetupRequest.ProtoReflect.Descriptor instead.
 func (*RenderSetupRequest) Descriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{4}
+	return file_control_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *RenderSetupRequest) GetSceneName() string {
@@ -528,7 +528,7 @@ type RenderSetupResponse struct {
 
 func (x *RenderSetupResponse) Reset() {
 	*x = RenderSetupResponse{}
-	mi := &file_internal_proto_control_control_proto_msgTypes[5]
+	mi := &file_control_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -540,7 +540,7 @@ func (x *RenderSetupResponse) String() string {
 func (*RenderSetupResponse) ProtoMessage() {}
 
 func (x *RenderSetupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_control_control_proto_msgTypes[5]
+	mi := &file_control_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -553,7 +553,7 @@ func (x *RenderSetupResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderSetupResponse.ProtoReflect.Descriptor instead.
 func (*RenderSetupResponse) Descriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{5}
+	return file_control_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *RenderSetupResponse) GetStatus() RenderSetupStatus {
@@ -585,7 +585,7 @@ type RenderTileRequest struct {
 
 func (x *RenderTileRequest) Reset() {
 	*x = RenderTileRequest{}
-	mi := &file_internal_proto_control_control_proto_msgTypes[6]
+	mi := &file_control_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -597,7 +597,7 @@ func (x *RenderTileRequest) String() string {
 func (*RenderTileRequest) ProtoMessage() {}
 
 func (x *RenderTileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_control_control_proto_msgTypes[6]
+	mi := &file_control_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -610,7 +610,7 @@ func (x *RenderTileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderTileRequest.ProtoReflect.Descriptor instead.
 func (*RenderTileRequest) Descriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{6}
+	return file_control_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *RenderTileRequest) GetStripHeight() uint32 {
@@ -652,19 +652,21 @@ func (x *RenderTileRequest) GetY1() uint32 {
 // The client will receive multiple RenderTileResponse messages for a single RenderTileRequest,
 // which it can assemble to form the complete tile.
 type RenderTileResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Width         uint32                 `protobuf:"varint,1,opt,name=width,proto3" json:"width,omitempty"`           // Width of this specific pixel chunk (sub-tile).
-	Height        uint32                 `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`         // Height of this specific pixel chunk (sub-tile).
-	PosX          uint32                 `protobuf:"varint,3,opt,name=pos_x,json=posX,proto3" json:"pos_x,omitempty"` // X-coordinate of the top-left pixel of this chunk (relative to overall image origin).
-	PosY          uint32                 `protobuf:"varint,4,opt,name=pos_y,json=posY,proto3" json:"pos_y,omitempty"` // Y-coordinate of the top-left pixel of this chunk (relative to overall image origin).
-	Pixels        []float64              `protobuf:"fixed64,5,rep,packed,name=pixels,proto3" json:"pixels,omitempty"` // Flat array of pixel values (e.g., RGBA as [R1, G1, B1, A1, R2, G2, B2, A2...])
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Width  uint32                 `protobuf:"varint,1,opt,name=width,proto3" json:"width,omitempty"`           // Width of this specific pixel chunk (sub-tile).
+	Height uint32                 `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`         // Height of this specific pixel chunk (sub-tile).
+	PosX   uint32                 `protobuf:"varint,3,opt,name=pos_x,json=posX,proto3" json:"pos_x,omitempty"` // X-coordinate of the top-left pixel of this chunk (relative to overall image origin).
+	PosY   uint32                 `protobuf:"varint,4,opt,name=pos_y,json=posY,proto3" json:"pos_y,omitempty"` // Y-coordinate of the top-left pixel of this chunk (relative to overall image origin).
+	// Flat array of pixel values (e.g., RGBA as [R1, G1, B1, A1, R2, G2, B2, A2...])
+	// For spectral rendering, the pixels are the spectral value for the sampled wavelength.
+	Pixels        []float64 `protobuf:"fixed64,5,rep,packed,name=pixels,proto3" json:"pixels,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RenderTileResponse) Reset() {
 	*x = RenderTileResponse{}
-	mi := &file_internal_proto_control_control_proto_msgTypes[7]
+	mi := &file_control_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -676,7 +678,7 @@ func (x *RenderTileResponse) String() string {
 func (*RenderTileResponse) ProtoMessage() {}
 
 func (x *RenderTileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_control_control_proto_msgTypes[7]
+	mi := &file_control_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -689,7 +691,7 @@ func (x *RenderTileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderTileResponse.ProtoReflect.Descriptor instead.
 func (*RenderTileResponse) Descriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{7}
+	return file_control_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *RenderTileResponse) GetWidth() uint32 {
@@ -737,7 +739,7 @@ type RenderEndRequest struct {
 
 func (x *RenderEndRequest) Reset() {
 	*x = RenderEndRequest{}
-	mi := &file_internal_proto_control_control_proto_msgTypes[8]
+	mi := &file_control_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -749,7 +751,7 @@ func (x *RenderEndRequest) String() string {
 func (*RenderEndRequest) ProtoMessage() {}
 
 func (x *RenderEndRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_control_control_proto_msgTypes[8]
+	mi := &file_control_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -762,7 +764,7 @@ func (x *RenderEndRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderEndRequest.ProtoReflect.Descriptor instead.
 func (*RenderEndRequest) Descriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{8}
+	return file_control_proto_rawDescGZIP(), []int{8}
 }
 
 // Response containing statistics after rendering is complete.
@@ -775,7 +777,7 @@ type RenderEndResponse struct {
 
 func (x *RenderEndResponse) Reset() {
 	*x = RenderEndResponse{}
-	mi := &file_internal_proto_control_control_proto_msgTypes[9]
+	mi := &file_control_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -787,7 +789,7 @@ func (x *RenderEndResponse) String() string {
 func (*RenderEndResponse) ProtoMessage() {}
 
 func (x *RenderEndResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_control_control_proto_msgTypes[9]
+	mi := &file_control_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -800,7 +802,7 @@ func (x *RenderEndResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderEndResponse.ProtoReflect.Descriptor instead.
 func (*RenderEndResponse) Descriptor() ([]byte, []int) {
-	return file_internal_proto_control_control_proto_rawDescGZIP(), []int{9}
+	return file_control_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *RenderEndResponse) GetTotalRaysTraced() uint64 {
@@ -810,11 +812,11 @@ func (x *RenderEndResponse) GetTotalRaysTraced() uint64 {
 	return 0
 }
 
-var File_internal_proto_control_control_proto protoreflect.FileDescriptor
+var File_control_proto protoreflect.FileDescriptor
 
-const file_internal_proto_control_control_proto_rawDesc = "" +
+const file_control_proto_rawDesc = "" +
 	"\n" +
-	"$internal/proto/control/control.proto\x12\acontrol\"0\n" +
+	"\rcontrol.proto\x12\acontrol\"0\n" +
 	"\x04Vec3\x12\f\n" +
 	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
 	"\x01y\x18\x02 \x01(\x01R\x01y\x12\f\n" +
@@ -888,20 +890,20 @@ const file_internal_proto_control_control_proto_rawDesc = "" +
 	"\tRenderEnd\x12\x19.control.RenderEndRequest\x1a\x1a.control.RenderEndResponseB:Z8github.com/flynn-nrg/izpi/internal/proto/control;controlb\x06proto3"
 
 var (
-	file_internal_proto_control_control_proto_rawDescOnce sync.Once
-	file_internal_proto_control_control_proto_rawDescData []byte
+	file_control_proto_rawDescOnce sync.Once
+	file_control_proto_rawDescData []byte
 )
 
-func file_internal_proto_control_control_proto_rawDescGZIP() []byte {
-	file_internal_proto_control_control_proto_rawDescOnce.Do(func() {
-		file_internal_proto_control_control_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_proto_control_control_proto_rawDesc), len(file_internal_proto_control_control_proto_rawDesc)))
+func file_control_proto_rawDescGZIP() []byte {
+	file_control_proto_rawDescOnce.Do(func() {
+		file_control_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_control_proto_rawDesc), len(file_control_proto_rawDesc)))
 	})
-	return file_internal_proto_control_control_proto_rawDescData
+	return file_control_proto_rawDescData
 }
 
-var file_internal_proto_control_control_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_internal_proto_control_control_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
-var file_internal_proto_control_control_proto_goTypes = []any{
+var file_control_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_control_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_control_proto_goTypes = []any{
 	(SamplerType)(0),                  // 0: control.SamplerType
 	(RenderSetupStatus)(0),            // 1: control.RenderSetupStatus
 	(*Vec3)(nil),                      // 2: control.Vec3
@@ -915,7 +917,7 @@ var file_internal_proto_control_control_proto_goTypes = []any{
 	(*RenderEndRequest)(nil),          // 10: control.RenderEndRequest
 	(*RenderEndResponse)(nil),         // 11: control.RenderEndResponse
 }
-var file_internal_proto_control_control_proto_depIdxs = []int32{
+var file_control_proto_depIdxs = []int32{
 	3,  // 0: control.SpectralBackground.tabulated:type_name -> control.TabulatedSpectralConstant
 	0,  // 1: control.RenderSetupRequest.sampler:type_name -> control.SamplerType
 	5,  // 2: control.RenderSetupRequest.image_resolution:type_name -> control.ImageResolution
@@ -936,12 +938,12 @@ var file_internal_proto_control_control_proto_depIdxs = []int32{
 	0,  // [0:7] is the sub-list for field type_name
 }
 
-func init() { file_internal_proto_control_control_proto_init() }
-func file_internal_proto_control_control_proto_init() {
-	if File_internal_proto_control_control_proto != nil {
+func init() { file_control_proto_init() }
+func file_control_proto_init() {
+	if File_control_proto != nil {
 		return
 	}
-	file_internal_proto_control_control_proto_msgTypes[2].OneofWrappers = []any{
+	file_control_proto_msgTypes[2].OneofWrappers = []any{
 		(*SpectralBackground_Tabulated)(nil),
 		(*SpectralBackground_NeutralValue)(nil),
 	}
@@ -949,18 +951,18 @@ func file_internal_proto_control_control_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_proto_control_control_proto_rawDesc), len(file_internal_proto_control_control_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_control_proto_rawDesc), len(file_control_proto_rawDesc)),
 			NumEnums:      2,
 			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_internal_proto_control_control_proto_goTypes,
-		DependencyIndexes: file_internal_proto_control_control_proto_depIdxs,
-		EnumInfos:         file_internal_proto_control_control_proto_enumTypes,
-		MessageInfos:      file_internal_proto_control_control_proto_msgTypes,
+		GoTypes:           file_control_proto_goTypes,
+		DependencyIndexes: file_control_proto_depIdxs,
+		EnumInfos:         file_control_proto_enumTypes,
+		MessageInfos:      file_control_proto_msgTypes,
 	}.Build()
-	File_internal_proto_control_control_proto = out.File
-	file_internal_proto_control_control_proto_goTypes = nil
-	file_internal_proto_control_control_proto_depIdxs = nil
+	File_control_proto = out.File
+	file_control_proto_goTypes = nil
+	file_control_proto_depIdxs = nil
 }

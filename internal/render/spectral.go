@@ -7,10 +7,10 @@ import (
 	"github.com/flynn-nrg/floatimage/colour"
 	"github.com/flynn-nrg/izpi/internal/display"
 	"github.com/flynn-nrg/izpi/internal/fastrandom"
-	"github.com/flynn-nrg/izpi/internal/vec3"
+	"github.com/flynn-nrg/izpi/internal/spectral"
 )
 
-func renderRectRGB(w workUnit, random *fastrandom.LCG) {
+func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 	var tile display.DisplayTile
 
 	nx := w.canvas.Bounds().Max.X
@@ -29,21 +29,27 @@ func renderRectRGB(w workUnit, random *fastrandom.LCG) {
 		i := 0
 		tile.PosY = ny - y
 		for x := w.x0; x <= w.x1; x++ {
-			col := &vec3.Vec3Impl{}
+			col := spectral.NewEmptyCIESPD()
 			for s := 0; s < w.numSamples; s++ {
+				// Choose a wavelength.
+				samplingIndex := int(float64(col.NumWavelengths()) * rand.Float64())
+				lambda := col.Wavelength(samplingIndex)
 				u := (float64(x) + rand.Float64()) / float64(nx)
 				v := (float64(y) + rand.Float64()) / float64(ny)
-				r := w.scene.Camera.GetRay(u, v)
-				col = vec3.Add(col, vec3.DeNAN(w.sampler.Sample(r, w.scene.World, w.scene.Lights, 0, random)))
+				r := w.scene.Camera.GetRayWithLambda(u, v, lambda)
+				sampled := w.sampler.SampleSpectral(r, w.scene.World, w.scene.Lights, 0, random)
+				col.AddValue(samplingIndex, sampled)
 			}
 
-			// Linear colour space.
-			col = vec3.ScalarDiv(col, float64(w.numSamples))
-			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
+			// Normalise the spectral power distribution.
+			col.Normalise(w.numSamples)
+			// Convert to RGB.
+			r, g, b := spectral.SPDToRGB(col)
+			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: r, G: g, B: b, A: 1.0})
 			if w.preview {
-				tile.Pixels[i] = col.Z
-				tile.Pixels[i+1] = col.Y
-				tile.Pixels[i+2] = col.X
+				tile.Pixels[i] = b
+				tile.Pixels[i+1] = g
+				tile.Pixels[i+2] = r
 				tile.Pixels[i+3] = 1.0
 				i += 4
 			}
@@ -57,15 +63,14 @@ func renderRectRGB(w workUnit, random *fastrandom.LCG) {
 	}
 }
 
-func workerRGB(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg *sync.WaitGroup) {
+func workerSpectral(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		select {
 		case w := <-input:
-			renderRectRGB(w, random)
+			renderRectSpectral(w, random)
 		case <-quit:
 			return
 		}
 	}
-
 }

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.3
-// source: internal/proto/control/control.proto
+// source: control.proto
 
 package control
 
@@ -216,5 +216,5 @@ var RenderControlService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "internal/proto/control/control.proto",
+	Metadata: "control.proto",
 }
