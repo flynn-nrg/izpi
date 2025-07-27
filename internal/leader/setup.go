@@ -59,6 +59,26 @@ func setupWorkers(ctx context.Context, cfg *config.Config, protoScene *pb_transp
 			continue
 		}
 
+		// Convert scene's spectral background to control protobuf format
+		var spectralBackground *pb_control.SpectralBackground
+		if protoScene.GetSpectralBackground() != nil {
+			spectralBackground = &pb_control.SpectralBackground{
+				SpectralProperties: &pb_control.SpectralBackground_Tabulated{
+					Tabulated: &pb_control.TabulatedSpectralConstant{
+						Wavelengths: make([]float64, len(protoScene.GetSpectralBackground().GetWavelengths())),
+						Values:      make([]float64, len(protoScene.GetSpectralBackground().GetValues())),
+					},
+				},
+			}
+			// Convert float32 to float64
+			for i, w := range protoScene.GetSpectralBackground().GetWavelengths() {
+				spectralBackground.GetTabulated().Wavelengths[i] = float64(w)
+			}
+			for i, v := range protoScene.GetSpectralBackground().GetValues() {
+				spectralBackground.GetTabulated().Values[i] = float64(v)
+			}
+		}
+
 		stream, err := controlClient.RenderSetup(ctx, &pb_control.RenderSetupRequest{
 			SceneName:       protoScene.GetName(),
 			JobId:           jobID,
@@ -80,7 +100,8 @@ func setupWorkers(ctx context.Context, cfg *config.Config, protoScene *pb_transp
 				Y: 1,
 				Z: 1,
 			},
-			AssetProvider: assetProviderAddress,
+			AssetProvider:      assetProviderAddress,
+			SpectralBackground: spectralBackground,
 		})
 		if err != nil {
 			log.Errorf("failed to create render setup stream for worker %s: %v", target, err)
