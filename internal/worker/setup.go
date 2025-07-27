@@ -281,7 +281,9 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	s.imageResolutionX = int(req.GetImageResolution().GetWidth())
 	s.imageResolutionY = int(req.GetImageResolution().GetHeight())
 
-	switch req.GetSampler() {
+	s.samplerType = req.GetSampler()
+
+	switch s.samplerType {
 	case pb_control.SamplerType_ALBEDO:
 		s.sampler = sampler.NewAlbedo(&s.numRays)
 	case pb_control.SamplerType_COLOUR:
