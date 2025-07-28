@@ -2158,9 +2158,9 @@ func CornellBoxSpectral(aspect float64) *pb_transport.Scene {
 							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
 								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
 									Gaussian: &pb_transport.GaussianSpectralConstant{
-										PeakValue:        0.73,
-										CenterWavelength: 550.0, // Green wavelength
-										Width:            50.0,  // Narrow green response
+										PeakValue:        0.9,   // Higher peak for more vibrant color
+										CenterWavelength: 540.0, // Slightly shifted for more saturated green
+										Width:            40.0,  // Narrower for more saturation
 									},
 								},
 							},
@@ -2177,9 +2177,9 @@ func CornellBoxSpectral(aspect float64) *pb_transport.Scene {
 							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
 								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
 									Gaussian: &pb_transport.GaussianSpectralConstant{
-										PeakValue:        0.73,
-										CenterWavelength: 650.0, // Red wavelength
-										Width:            50.0,  // Narrow red response
+										PeakValue:        0.9,   // Higher peak for more vibrant color
+										CenterWavelength: 640.0, // Slightly shifted for more saturated red
+										Width:            40.0,  // Narrower for more saturation
 									},
 								},
 							},
