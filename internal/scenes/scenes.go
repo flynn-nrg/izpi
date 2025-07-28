@@ -2253,3 +2253,1494 @@ func CornellBoxSpectral(aspect float64) *pb_transport.Scene {
 
 	return protoScene
 }
+
+func CornellBoxPrismSpectral(aspect float64) *pb_transport.Scene {
+	protoScene := &pb_transport.Scene{
+		Name:                 "Cornell Box Prism Spectral",
+		Version:              "1.0.0",
+		ColourRepresentation: pb_transport.ColourRepresentation_SPECTRAL,
+		Camera: &pb_transport.Camera{
+			Lookfrom: &pb_transport.Vec3{
+				X: 50,
+				Y: 50,
+				Z: -140,
+			},
+			Lookat: &pb_transport.Vec3{
+				X: 50,
+				Y: 50,
+				Z: 0,
+			},
+			Vup: &pb_transport.Vec3{
+				X: 0,
+				Y: 1,
+				Z: 0,
+			},
+			Vfov:      40,
+			Aspect:    float32(aspect),
+			Aperture:  0,
+			Focusdist: 10,
+			Time0:     0,
+			Time1:     1,
+		},
+		Objects: &pb_transport.SceneObjects{
+			Triangles: []*pb_transport.Triangle{
+				// Room walls (same as CornellBoxSpectral)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
+					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
+					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				// Additional floor triangles
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				// Ceiling triangles
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				// Left wall (Green)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					MaterialName: "Green",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					MaterialName: "Green",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
+					MaterialName: "Red",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
+					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
+					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
+					MaterialName: "Red",
+				},
+				// Light source (same as CornellBoxSpectral)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 33, Y: 99, Z: 33},
+					Vertex1:      &pb_transport.Vec3{X: 66, Y: 99, Z: 33},
+					Vertex2:      &pb_transport.Vec3{X: 66, Y: 99, Z: 66},
+					MaterialName: "white_light",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 33, Y: 99, Z: 33},
+					Vertex1:      &pb_transport.Vec3{X: 66, Y: 99, Z: 66},
+					Vertex2:      &pb_transport.Vec3{X: 33, Y: 99, Z: 66},
+					MaterialName: "white_light",
+				},
+				// Triangular Prism (replacing the glass sphere) - Bigger, lifted, and rotated
+				// Base triangle (bottom face) - rotated and tilted
+				{
+					Vertex0:      &pb_transport.Vec3{X: 20, Y: 20, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 20, Z: 10}, // Bottom right
+					Vertex2:      &pb_transport.Vec3{X: 35, Y: 20, Z: 40}, // Top
+					MaterialName: "Glass",
+				},
+				// Top triangle (top face) - rotated and tilted
+				{
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 50, Z: 20}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 50, Z: 20}, // Bottom right
+					Vertex2:      &pb_transport.Vec3{X: 30, Y: 50, Z: 50}, // Top
+					MaterialName: "Glass",
+				},
+				// Side faces (3 rectangles, each made of 2 triangles)
+				// Left face
+				{
+					Vertex0:      &pb_transport.Vec3{X: 20, Y: 20, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 15, Y: 50, Z: 20}, // Top left
+					Vertex2:      &pb_transport.Vec3{X: 30, Y: 50, Z: 50}, // Top right
+					MaterialName: "Glass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 20, Y: 20, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 30, Y: 50, Z: 50}, // Top right
+					Vertex2:      &pb_transport.Vec3{X: 35, Y: 20, Z: 40}, // Bottom right
+					MaterialName: "Glass",
+				},
+				// Right face
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 20, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 50, Z: 20}, // Top left
+					Vertex2:      &pb_transport.Vec3{X: 30, Y: 50, Z: 50}, // Top right
+					MaterialName: "Glass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 20, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 30, Y: 50, Z: 50}, // Top right
+					Vertex2:      &pb_transport.Vec3{X: 35, Y: 20, Z: 40}, // Bottom right
+					MaterialName: "Glass",
+				},
+				// Back face
+				{
+					Vertex0:      &pb_transport.Vec3{X: 20, Y: 20, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 15, Y: 50, Z: 20}, // Top left
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 50, Z: 20}, // Top right
+					MaterialName: "Glass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 20, Y: 20, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 50, Z: 20}, // Top right
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 20, Z: 10}, // Bottom right
+					MaterialName: "Glass",
+				},
+			},
+			Spheres: []*pb_transport.Sphere{
+				// Keep the Marine Blue sphere
+				{
+					Center: &pb_transport.Vec3{
+						X: 70,
+						Y: 20,
+						Z: 60,
+					},
+					Radius:       20,
+					MaterialName: "Marine Blue",
+				},
+			},
+		},
+		Materials: map[string]*pb_transport.Material{
+			"White": {
+				Name: "White",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 0.73,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Green": {
+				Name: "Green",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.9,   // Higher peak for more vibrant color
+										CenterWavelength: 540.0, // Slightly shifted for more saturated green
+										Width:            40.0,  // Narrower for more saturation
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Red": {
+				Name: "Red",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.9,   // Higher peak for more vibrant color
+										CenterWavelength: 640.0, // Slightly shifted for more saturated red
+										Width:            40.0,  // Narrower for more saturation
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"white_light": {
+				Name: "white_light",
+				Type: pb_transport.MaterialType_DIFFUSE_LIGHT,
+				MaterialProperties: &pb_transport.Material_Diffuselight{
+					Diffuselight: &pb_transport.DiffuseLightMaterial{
+						EmissionProperties: &pb_transport.DiffuseLightMaterial_SpectralEmit{
+							SpectralEmit: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 15.0, // High emission for light
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Glass": {
+				Name: "Glass",
+				Type: pb_transport.MaterialType_DIELECTRIC,
+				MaterialProperties: &pb_transport.Material_Dielectric{
+					Dielectric: &pb_transport.DielectricMaterial{
+						RefractiveIndexProperties: &pb_transport.DielectricMaterial_SpectralRefidx{
+							SpectralRefidx: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Tabulated{
+									Tabulated: &pb_transport.TabulatedSpectralConstant{
+										// Wavelengths in nanometers (visible spectrum)
+										Wavelengths: []float32{380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 750},
+										// Refractive indices for typical glass (slight dispersion)
+										Values: []float32{1.52, 1.51, 1.51, 1.50, 1.50, 1.49, 1.49, 1.48, 1.48, 1.47, 1.47, 1.46, 1.46, 1.45, 1.45, 1.44, 1.44, 1.43, 1.43, 1.42},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Marine Blue": {
+				Name: "Marine Blue",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.5,
+										CenterWavelength: 480.0, // Blue wavelength
+										Width:            80.0,  // Broader blue response
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Spectral background - black (no emission)
+		SpectralBackground: &pb_transport.TabulatedSpectralConstant{
+			Wavelengths: []float32{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750},
+			Values:      []float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		},
+	}
+
+	return protoScene
+}
+
+func CornellBoxPrismSpectralEnhanced(aspect float64) *pb_transport.Scene {
+	protoScene := &pb_transport.Scene{
+		Name:                 "Cornell Box Prism Spectral Enhanced",
+		Version:              "1.0.0",
+		ColourRepresentation: pb_transport.ColourRepresentation_SPECTRAL,
+		Camera: &pb_transport.Camera{
+			Lookfrom: &pb_transport.Vec3{
+				X: 50,
+				Y: 50,
+				Z: -140,
+			},
+			Lookat: &pb_transport.Vec3{
+				X: 50,
+				Y: 50,
+				Z: 0,
+			},
+			Vup: &pb_transport.Vec3{
+				X: 0,
+				Y: 1,
+				Z: 0,
+			},
+			Vfov:      40,
+			Aspect:    float32(aspect),
+			Aperture:  0,
+			Focusdist: 10,
+			Time0:     0,
+			Time1:     1,
+		},
+		Objects: &pb_transport.SceneObjects{
+			Triangles: []*pb_transport.Triangle{
+				// Back wall (White)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
+					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
+					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				// Floor (White)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				// Additional floor triangles
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				// Ceiling triangles
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				// Left wall (Green)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					MaterialName: "Green",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					MaterialName: "Green",
+				},
+				// Right wall (Red)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
+					MaterialName: "Red",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
+					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
+					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
+					MaterialName: "Red",
+				},
+				// Light source (same as CornellBoxSpectral)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 33, Y: 99, Z: 33},
+					Vertex1:      &pb_transport.Vec3{X: 66, Y: 99, Z: 33},
+					Vertex2:      &pb_transport.Vec3{X: 66, Y: 99, Z: 66},
+					MaterialName: "white_light",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 33, Y: 99, Z: 33},
+					Vertex1:      &pb_transport.Vec3{X: 66, Y: 99, Z: 66},
+					Vertex2:      &pb_transport.Vec3{X: 33, Y: 99, Z: 66},
+					MaterialName: "white_light",
+				},
+				// Triangular Prism (replacing the glass sphere) - Bigger, lifted, and rotated around Z-axis (horizontal orientation)
+				// Base triangle (bottom face) - rotated around Z-axis for horizontal orientation
+				{
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 20}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 15, Z: 20}, // Bottom right
+					Vertex2:      &pb_transport.Vec3{X: 35, Y: 15, Z: 50}, // Top
+					MaterialName: "Glass",
+				},
+				// Top triangle (top face) - rotated around Z-axis for horizontal orientation
+				{
+					Vertex0:      &pb_transport.Vec3{X: 10, Y: 55, Z: 30}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 55, Z: 30}, // Bottom right
+					Vertex2:      &pb_transport.Vec3{X: 30, Y: 55, Z: 60}, // Top
+					MaterialName: "Glass",
+				},
+				// Side faces (3 rectangles, each made of 2 triangles)
+				// Left face
+				{
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 20}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 10, Y: 55, Z: 30}, // Top left
+					Vertex2:      &pb_transport.Vec3{X: 30, Y: 55, Z: 60}, // Top right
+					MaterialName: "Glass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 20}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 30, Y: 55, Z: 60}, // Top right
+					Vertex2:      &pb_transport.Vec3{X: 35, Y: 15, Z: 50}, // Bottom right
+					MaterialName: "Glass",
+				},
+				// Right face
+				{
+					Vertex0:      &pb_transport.Vec3{X: 55, Y: 15, Z: 20}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 55, Z: 30}, // Top left
+					Vertex2:      &pb_transport.Vec3{X: 30, Y: 55, Z: 60}, // Top right
+					MaterialName: "Glass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 55, Y: 15, Z: 20}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 30, Y: 55, Z: 60}, // Top right
+					Vertex2:      &pb_transport.Vec3{X: 35, Y: 15, Z: 50}, // Bottom right
+					MaterialName: "Glass",
+				},
+				// Back face
+				{
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 20}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 10, Y: 55, Z: 30}, // Top left
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 55, Z: 30}, // Top right
+					MaterialName: "Glass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 20}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 55, Z: 30}, // Top right
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 15, Z: 20}, // Bottom right
+					MaterialName: "Glass",
+				},
+			},
+			Spheres: []*pb_transport.Sphere{
+				// Keep the Marine Blue sphere
+				{
+					Center: &pb_transport.Vec3{
+						X: 70,
+						Y: 20,
+						Z: 60,
+					},
+					Radius:       20,
+					MaterialName: "Marine Blue",
+				},
+			},
+		},
+		Materials: map[string]*pb_transport.Material{
+			"White": {
+				Name: "White",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 0.73,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Green": {
+				Name: "Green",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.9,   // Higher peak for more vibrant color
+										CenterWavelength: 540.0, // Slightly shifted for more saturated green
+										Width:            40.0,  // Narrower for more saturation
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Red": {
+				Name: "Red",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.9,   // Higher peak for more vibrant color
+										CenterWavelength: 640.0, // Slightly shifted for more saturated red
+										Width:            40.0,  // Narrower for more saturation
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"white_light": {
+				Name: "white_light",
+				Type: pb_transport.MaterialType_DIFFUSE_LIGHT,
+				MaterialProperties: &pb_transport.Material_Diffuselight{
+					Diffuselight: &pb_transport.DiffuseLightMaterial{
+						EmissionProperties: &pb_transport.DiffuseLightMaterial_SpectralEmit{
+							SpectralEmit: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 15.0, // High emission for light
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Glass": {
+				Name: "Glass",
+				Type: pb_transport.MaterialType_DIELECTRIC,
+				MaterialProperties: &pb_transport.Material_Dielectric{
+					Dielectric: &pb_transport.DielectricMaterial{
+						RefractiveIndexProperties: &pb_transport.DielectricMaterial_SpectralRefidx{
+							SpectralRefidx: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Tabulated{
+									Tabulated: &pb_transport.TabulatedSpectralConstant{
+										// Wavelengths in nanometers (visible spectrum)
+										Wavelengths: []float32{380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 750},
+										// Refractive indices for high-dispersion glass (dramatic dispersion for visible chromatic aberration)
+										Values: []float32{1.65, 1.62, 1.60, 1.58, 1.56, 1.54, 1.52, 1.50, 1.48, 1.46, 1.44, 1.42, 1.40, 1.38, 1.36, 1.34, 1.32, 1.30, 1.28, 1.26},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Marine Blue": {
+				Name: "Marine Blue",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.5,
+										CenterWavelength: 480.0, // Blue wavelength
+										Width:            80.0,  // Broader blue response
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Spectral background - black (no emission)
+		SpectralBackground: &pb_transport.TabulatedSpectralConstant{
+			Wavelengths: []float32{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750},
+			Values:      []float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		},
+	}
+
+	return protoScene
+}
+
+func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
+	protoScene := &pb_transport.Scene{
+		Name:                 "Cornell Box Diamonds Spectral",
+		Version:              "1.0.0",
+		ColourRepresentation: pb_transport.ColourRepresentation_SPECTRAL,
+		Camera: &pb_transport.Camera{
+			Lookfrom: &pb_transport.Vec3{
+				X: 50,
+				Y: 60,
+				Z: -120,
+			},
+			Lookat: &pb_transport.Vec3{
+				X: 50,
+				Y: 30,
+				Z: 50,
+			},
+			Vup: &pb_transport.Vec3{
+				X: 0,
+				Y: 1,
+				Z: 0,
+			},
+			Vfov:      35,
+			Aspect:    float32(aspect),
+			Aperture:  0,
+			Focusdist: 10,
+			Time0:     0,
+			Time1:     1,
+		},
+		Objects: &pb_transport.SceneObjects{
+			Triangles: []*pb_transport.Triangle{
+				// Back wall (White)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
+					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
+					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				// Floor (White)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				// Additional floor triangles
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				// Ceiling triangles
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				// Left wall (Green)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					MaterialName: "Green",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					MaterialName: "Green",
+				},
+				// Right wall (Red)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
+					MaterialName: "Red",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
+					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
+					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
+					MaterialName: "Red",
+				},
+				// Light source (larger and brighter for diamonds)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 25, Y: 99, Z: 25},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 99, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 99, Z: 75},
+					MaterialName: "white_light",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 25, Y: 99, Z: 25},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 99, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 99, Z: 75},
+					MaterialName: "white_light",
+				},
+				// Diamond 1 - Large main diamond (enhanced brilliant cut with more facets) - Rotated 15° around X, 15° around Y, 15° around Z
+				// Crown (top) facets - 8 main crown facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 58, Y: 22, Z: 38}, // Right top
+					Vertex2:      &pb_transport.Vec3{X: 48, Y: 32, Z: 52}, // Front top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 48, Y: 32, Z: 52}, // Front top
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left top
+					Vertex1:      &pb_transport.Vec3{X: 48, Y: 32, Z: 52}, // Front top
+					Vertex2:      &pb_transport.Vec3{X: 62, Y: 18, Z: 62}, // Back top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 62, Y: 18, Z: 62}, // Back top
+					Vertex1:      &pb_transport.Vec3{X: 48, Y: 32, Z: 52}, // Front top
+					Vertex2:      &pb_transport.Vec3{X: 58, Y: 22, Z: 38}, // Right top
+					MaterialName: "Diamond",
+				},
+				// Additional crown facets for more sparkle
+				{
+					Vertex0:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 52, Y: 23, Z: 47}, // Front right
+					Vertex2:      &pb_transport.Vec3{X: 43, Y: 27, Z: 52}, // Front left
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 43, Y: 27, Z: 52}, // Front left
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left top
+					Vertex1:      &pb_transport.Vec3{X: 43, Y: 27, Z: 52}, // Front left
+					Vertex2:      &pb_transport.Vec3{X: 53, Y: 23, Z: 57}, // Back left
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 62, Y: 18, Z: 62}, // Back top
+					Vertex1:      &pb_transport.Vec3{X: 53, Y: 23, Z: 57}, // Back left
+					Vertex2:      &pb_transport.Vec3{X: 57, Y: 25, Z: 52}, // Back right
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 58, Y: 22, Z: 38}, // Right top
+					Vertex1:      &pb_transport.Vec3{X: 57, Y: 25, Z: 52}, // Back right
+					Vertex2:      &pb_transport.Vec3{X: 52, Y: 23, Z: 47}, // Front right
+					MaterialName: "Diamond",
+				},
+				// Pavilion (bottom) facets - 8 main pavilion facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Left bottom
+					Vertex2:      &pb_transport.Vec3{X: 58, Y: 22, Z: 38}, // Right bottom
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 58, Y: 22, Z: 38}, // Right bottom
+					Vertex2:      &pb_transport.Vec3{X: 62, Y: 18, Z: 62}, // Back bottom
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 62, Y: 18, Z: 62}, // Back bottom
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left bottom
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left bottom
+					Vertex2:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Front bottom
+					MaterialName: "Diamond",
+				},
+				// Additional pavilion facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 48, Y: 17, Z: 47}, // Front center
+					Vertex2:      &pb_transport.Vec3{X: 43, Y: 17, Z: 52}, // Left center
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 43, Y: 17, Z: 52}, // Left center
+					Vertex2:      &pb_transport.Vec3{X: 52, Y: 17, Z: 57}, // Back center
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 52, Y: 17, Z: 57}, // Back center
+					Vertex2:      &pb_transport.Vec3{X: 57, Y: 17, Z: 52}, // Right center
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 57, Y: 17, Z: 52}, // Right center
+					Vertex2:      &pb_transport.Vec3{X: 48, Y: 17, Z: 47}, // Front center
+					MaterialName: "Diamond",
+				},
+				// Diamond 2 - Medium diamond (left) - enhanced with more facets - Rotated 15° around X, -15° around Y, 0° around Z
+				// Crown facets - 8 main crown facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 18, Y: 13, Z: 32}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 42, Y: 17, Z: 28}, // Right top
+					Vertex2:      &pb_transport.Vec3{X: 28, Y: 24, Z: 37}, // Front top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 18, Y: 13, Z: 32}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 28, Y: 24, Z: 37}, // Front top
+					Vertex2:      &pb_transport.Vec3{X: 22, Y: 13, Z: 38}, // Left top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 22, Y: 13, Z: 38}, // Left top
+					Vertex1:      &pb_transport.Vec3{X: 28, Y: 24, Z: 37}, // Front top
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 17, Z: 42}, // Back top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 17, Z: 42}, // Back top
+					Vertex1:      &pb_transport.Vec3{X: 28, Y: 24, Z: 37}, // Front top
+					Vertex2:      &pb_transport.Vec3{X: 42, Y: 17, Z: 28}, // Right top
+					MaterialName: "Diamond",
+				},
+				// Additional crown facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 18, Y: 13, Z: 32}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 32, Y: 16, Z: 30}, // Front right
+					Vertex2:      &pb_transport.Vec3{X: 23, Y: 20, Z: 37}, // Front left
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 18, Y: 13, Z: 32}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 23, Y: 20, Z: 37}, // Front left
+					Vertex2:      &pb_transport.Vec3{X: 22, Y: 13, Z: 38}, // Left top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 22, Y: 13, Z: 38}, // Left top
+					Vertex1:      &pb_transport.Vec3{X: 23, Y: 20, Z: 37}, // Front left
+					Vertex2:      &pb_transport.Vec3{X: 33, Y: 16, Z: 40}, // Back left
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 17, Z: 42}, // Back top
+					Vertex1:      &pb_transport.Vec3{X: 33, Y: 16, Z: 40}, // Back left
+					Vertex2:      &pb_transport.Vec3{X: 37, Y: 20, Z: 37}, // Back right
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 42, Y: 17, Z: 28}, // Right top
+					Vertex1:      &pb_transport.Vec3{X: 37, Y: 20, Z: 37}, // Back right
+					Vertex2:      &pb_transport.Vec3{X: 32, Y: 16, Z: 30}, // Front right
+					MaterialName: "Diamond",
+				},
+				// Pavilion facets - 8 main pavilion facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 18, Y: 13, Z: 32}, // Left bottom
+					Vertex2:      &pb_transport.Vec3{X: 42, Y: 17, Z: 28}, // Right bottom
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 42, Y: 17, Z: 28}, // Right bottom
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 17, Z: 42}, // Back bottom
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 38, Y: 17, Z: 42}, // Back bottom
+					Vertex2:      &pb_transport.Vec3{X: 22, Y: 13, Z: 38}, // Left bottom
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 22, Y: 13, Z: 38}, // Left bottom
+					Vertex2:      &pb_transport.Vec3{X: 18, Y: 13, Z: 32}, // Front bottom
+					MaterialName: "Diamond",
+				},
+				// Additional pavilion facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 28, Y: 14, Z: 30}, // Front center
+					Vertex2:      &pb_transport.Vec3{X: 23, Y: 14, Z: 37}, // Left center
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 23, Y: 14, Z: 37}, // Left center
+					Vertex2:      &pb_transport.Vec3{X: 32, Y: 14, Z: 40}, // Back center
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 32, Y: 14, Z: 40}, // Back center
+					Vertex2:      &pb_transport.Vec3{X: 37, Y: 14, Z: 37}, // Right center
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 37, Y: 14, Z: 37}, // Right center
+					Vertex2:      &pb_transport.Vec3{X: 28, Y: 14, Z: 30}, // Front center
+					MaterialName: "Diamond",
+				},
+				// Diamond 3 - Small diamond (right) - enhanced with more facets - Rotated 0° around X, 15° around Y, 15° around Z
+				// Crown facets - 8 main crown facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 82, Y: 10, Z: 53}, // Right top
+					Vertex2:      &pb_transport.Vec3{X: 68, Y: 16, Z: 62}, // Front top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 68, Y: 16, Z: 62}, // Front top
+					Vertex2:      &pb_transport.Vec3{X: 62, Y: 10, Z: 63}, // Left top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 62, Y: 10, Z: 63}, // Left top
+					Vertex1:      &pb_transport.Vec3{X: 68, Y: 16, Z: 62}, // Front top
+					Vertex2:      &pb_transport.Vec3{X: 78, Y: 10, Z: 67}, // Back top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 78, Y: 10, Z: 67}, // Back top
+					Vertex1:      &pb_transport.Vec3{X: 68, Y: 16, Z: 62}, // Front top
+					Vertex2:      &pb_transport.Vec3{X: 82, Y: 10, Z: 53}, // Right top
+					MaterialName: "Diamond",
+				},
+				// Additional crown facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 72, Y: 13, Z: 59}, // Front right
+					Vertex2:      &pb_transport.Vec3{X: 63, Y: 13, Z: 62}, // Front left
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 63, Y: 13, Z: 62}, // Front left
+					Vertex2:      &pb_transport.Vec3{X: 62, Y: 10, Z: 63}, // Left top
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 62, Y: 10, Z: 63}, // Left top
+					Vertex1:      &pb_transport.Vec3{X: 63, Y: 13, Z: 62}, // Front left
+					Vertex2:      &pb_transport.Vec3{X: 72, Y: 13, Z: 65}, // Back left
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 78, Y: 10, Z: 67}, // Back top
+					Vertex1:      &pb_transport.Vec3{X: 72, Y: 13, Z: 65}, // Back left
+					Vertex2:      &pb_transport.Vec3{X: 77, Y: 13, Z: 62}, // Back right
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 82, Y: 10, Z: 53}, // Right top
+					Vertex1:      &pb_transport.Vec3{X: 77, Y: 13, Z: 62}, // Back right
+					Vertex2:      &pb_transport.Vec3{X: 72, Y: 13, Z: 59}, // Front right
+					MaterialName: "Diamond",
+				},
+				// Pavilion facets - 8 main pavilion facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 70, Y: 2, Z: 60},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Left bottom
+					Vertex2:      &pb_transport.Vec3{X: 82, Y: 10, Z: 53}, // Right bottom
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 70, Y: 2, Z: 60},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 82, Y: 10, Z: 53}, // Right bottom
+					Vertex2:      &pb_transport.Vec3{X: 78, Y: 10, Z: 67}, // Back bottom
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 70, Y: 2, Z: 60},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 78, Y: 10, Z: 67}, // Back bottom
+					Vertex2:      &pb_transport.Vec3{X: 62, Y: 10, Z: 63}, // Left bottom
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 70, Y: 2, Z: 60},  // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 62, Y: 10, Z: 63}, // Left bottom
+					Vertex2:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Front bottom
+					MaterialName: "Diamond",
+				},
+				// Additional pavilion facets
+				{
+					Vertex0:      &pb_transport.Vec3{X: 70, Y: 2, Z: 60}, // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 68, Y: 8, Z: 59}, // Front center
+					Vertex2:      &pb_transport.Vec3{X: 63, Y: 8, Z: 62}, // Left center
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 70, Y: 2, Z: 60}, // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 63, Y: 8, Z: 62}, // Left center
+					Vertex2:      &pb_transport.Vec3{X: 72, Y: 8, Z: 65}, // Back center
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 70, Y: 2, Z: 60}, // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 72, Y: 8, Z: 65}, // Back center
+					Vertex2:      &pb_transport.Vec3{X: 77, Y: 8, Z: 62}, // Right center
+					MaterialName: "Diamond",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 70, Y: 2, Z: 60}, // Center bottom
+					Vertex1:      &pb_transport.Vec3{X: 77, Y: 8, Z: 62}, // Right center
+					Vertex2:      &pb_transport.Vec3{X: 68, Y: 8, Z: 59}, // Front center
+					MaterialName: "Diamond",
+				},
+			},
+			Spheres: []*pb_transport.Sphere{},
+		},
+		Materials: map[string]*pb_transport.Material{
+			"White": {
+				Name: "White",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 0.73,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Green": {
+				Name: "Green",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.9,
+										CenterWavelength: 540.0,
+										Width:            40.0,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Red": {
+				Name: "Red",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.9,
+										CenterWavelength: 640.0,
+										Width:            40.0,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"white_light": {
+				Name: "white_light",
+				Type: pb_transport.MaterialType_DIFFUSE_LIGHT,
+				MaterialProperties: &pb_transport.Material_Diffuselight{
+					Diffuselight: &pb_transport.DiffuseLightMaterial{
+						EmissionProperties: &pb_transport.DiffuseLightMaterial_SpectralEmit{
+							SpectralEmit: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 25.0, // Brighter light for diamonds
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Diamond": {
+				Name: "Diamond",
+				Type: pb_transport.MaterialType_DIELECTRIC,
+				MaterialProperties: &pb_transport.Material_Dielectric{
+					Dielectric: &pb_transport.DielectricMaterial{
+						RefractiveIndexProperties: &pb_transport.DielectricMaterial_SpectralRefidx{
+							SpectralRefidx: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Tabulated{
+									Tabulated: &pb_transport.TabulatedSpectralConstant{
+										// Wavelengths in nanometers (visible spectrum)
+										Wavelengths: []float32{380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 750},
+										// Refractive indices for diamond (extremely high dispersion)
+										Values: []float32{2.45, 2.42, 2.40, 2.38, 2.36, 2.34, 2.32, 2.30, 2.28, 2.26, 2.24, 2.22, 2.20, 2.18, 2.16, 2.14, 2.12, 2.10, 2.08, 2.06},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Spectral background - black (no emission)
+		SpectralBackground: &pb_transport.TabulatedSpectralConstant{
+			Wavelengths: []float32{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750},
+			Values:      []float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		},
+	}
+
+	return protoScene
+}
+
+// CornellBoxColoredGlassSpectral creates a Cornell Box scene with colored glass spheres
+// demonstrating the Beer-Lambert law for spectral absorption
+func CornellBoxColoredGlassSpectral(aspect float64) *pb_transport.Scene {
+	protoScene := &pb_transport.Scene{
+		Name:                 "Cornell Box Colored Glass Spectral",
+		Version:              "1.0.0",
+		ColourRepresentation: pb_transport.ColourRepresentation_SPECTRAL,
+		Camera: &pb_transport.Camera{
+			Lookfrom: &pb_transport.Vec3{
+				X: 50,
+				Y: 50,
+				Z: -120,
+			},
+			Lookat: &pb_transport.Vec3{
+				X: 50,
+				Y: 50,
+				Z: 50,
+			},
+			Vup: &pb_transport.Vec3{
+				X: 0,
+				Y: 1,
+				Z: 0,
+			},
+			Vfov:      35,
+			Aspect:    float32(aspect),
+			Aperture:  0,
+			Focusdist: 10,
+			Time0:     0,
+			Time1:     1,
+		},
+		Objects: &pb_transport.SceneObjects{
+			Triangles: []*pb_transport.Triangle{
+				// Back wall (White)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
+					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
+					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				// Floor (White)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				// Ceiling (White)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				// Light (white_light)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 33, Y: 99, Z: 33},
+					Vertex1:      &pb_transport.Vec3{X: 66, Y: 99, Z: 33},
+					Vertex2:      &pb_transport.Vec3{X: 66, Y: 99, Z: 66},
+					MaterialName: "white_light",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 33, Y: 99, Z: 33},
+					Vertex1:      &pb_transport.Vec3{X: 66, Y: 99, Z: 66},
+					Vertex2:      &pb_transport.Vec3{X: 33, Y: 99, Z: 66},
+					MaterialName: "white_light",
+				},
+				// Left wall (Green)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					MaterialName: "Green",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					MaterialName: "Green",
+				},
+				// Right wall (Red)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
+					MaterialName: "Red",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "Red",
+				},
+			},
+			Spheres: []*pb_transport.Sphere{
+				// Blue glass sphere
+				{
+					Center:       &pb_transport.Vec3{X: 30, Y: 25, Z: 50},
+					Radius:       15,
+					MaterialName: "BlueGlass",
+				},
+				// Red glass sphere
+				{
+					Center:       &pb_transport.Vec3{X: 70, Y: 25, Z: 50},
+					Radius:       15,
+					MaterialName: "RedGlass",
+				},
+				// Green glass sphere
+				{
+					Center:       &pb_transport.Vec3{X: 50, Y: 65, Z: 50},
+					Radius:       15,
+					MaterialName: "GreenGlass",
+				},
+			},
+		},
+		Materials: map[string]*pb_transport.Material{
+			"White": {
+				Name: "White",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 0.73,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Green": {
+				Name: "Green",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.9,
+										CenterWavelength: 540.0,
+										Width:            40.0,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Red": {
+				Name: "Red",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.9,
+										CenterWavelength: 640.0,
+										Width:            40.0,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"white_light": {
+				Name: "white_light",
+				Type: pb_transport.MaterialType_DIFFUSE_LIGHT,
+				MaterialProperties: &pb_transport.Material_Diffuselight{
+					Diffuselight: &pb_transport.DiffuseLightMaterial{
+						EmissionProperties: &pb_transport.DiffuseLightMaterial_SpectralEmit{
+							SpectralEmit: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 15.0,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"BlueGlass": {
+				Name: "BlueGlass",
+				Type: pb_transport.MaterialType_DIELECTRIC,
+				MaterialProperties: &pb_transport.Material_Dielectric{
+					Dielectric: &pb_transport.DielectricMaterial{
+						RefractiveIndexProperties: &pb_transport.DielectricMaterial_SpectralRefidx{
+							SpectralRefidx: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Tabulated{
+									Tabulated: &pb_transport.TabulatedSpectralConstant{
+										// Wavelengths in nanometers (visible spectrum)
+										Wavelengths: []float32{380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 750},
+										// Refractive indices for glass (slight dispersion)
+										Values: []float32{1.52, 1.51, 1.51, 1.50, 1.50, 1.49, 1.49, 1.48, 1.48, 1.47, 1.47, 1.46, 1.46, 1.45, 1.45, 1.44, 1.44, 1.43, 1.43, 1.42},
+									},
+								},
+							},
+						},
+						AbsorptionProperties: &pb_transport.DielectricMaterial_SpectralAbsorptionCoeff{
+							SpectralAbsorptionCoeff: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.1,   // Moderate absorption at blue wavelengths
+										CenterWavelength: 480.0, // Blue wavelength
+										Width:            60.0,  // Broad absorption in blue region
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"RedGlass": {
+				Name: "RedGlass",
+				Type: pb_transport.MaterialType_DIELECTRIC,
+				MaterialProperties: &pb_transport.Material_Dielectric{
+					Dielectric: &pb_transport.DielectricMaterial{
+						RefractiveIndexProperties: &pb_transport.DielectricMaterial_SpectralRefidx{
+							SpectralRefidx: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Tabulated{
+									Tabulated: &pb_transport.TabulatedSpectralConstant{
+										// Wavelengths in nanometers (visible spectrum)
+										Wavelengths: []float32{380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 750},
+										// Refractive indices for glass (slight dispersion)
+										Values: []float32{1.52, 1.51, 1.51, 1.50, 1.50, 1.49, 1.49, 1.48, 1.48, 1.47, 1.47, 1.46, 1.46, 1.45, 1.45, 1.44, 1.44, 1.43, 1.43, 1.42},
+									},
+								},
+							},
+						},
+						AbsorptionProperties: &pb_transport.DielectricMaterial_SpectralAbsorptionCoeff{
+							SpectralAbsorptionCoeff: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.1,   // Moderate absorption at red wavelengths
+										CenterWavelength: 640.0, // Red wavelength
+										Width:            60.0,  // Broad absorption in red region
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"GreenGlass": {
+				Name: "GreenGlass",
+				Type: pb_transport.MaterialType_DIELECTRIC,
+				MaterialProperties: &pb_transport.Material_Dielectric{
+					Dielectric: &pb_transport.DielectricMaterial{
+						RefractiveIndexProperties: &pb_transport.DielectricMaterial_SpectralRefidx{
+							SpectralRefidx: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Tabulated{
+									Tabulated: &pb_transport.TabulatedSpectralConstant{
+										// Wavelengths in nanometers (visible spectrum)
+										Wavelengths: []float32{380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 750},
+										// Refractive indices for glass (slight dispersion)
+										Values: []float32{1.52, 1.51, 1.51, 1.50, 1.50, 1.49, 1.49, 1.48, 1.48, 1.47, 1.47, 1.46, 1.46, 1.45, 1.45, 1.44, 1.44, 1.43, 1.43, 1.42},
+									},
+								},
+							},
+						},
+						AbsorptionProperties: &pb_transport.DielectricMaterial_SpectralAbsorptionCoeff{
+							SpectralAbsorptionCoeff: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.1,   // Moderate absorption at green wavelengths
+										CenterWavelength: 540.0, // Green wavelength
+										Width:            60.0,  // Broad absorption in green region
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Spectral background - black (no emission)
+		SpectralBackground: &pb_transport.TabulatedSpectralConstant{
+			Wavelengths: []float32{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750},
+			Values:      []float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		},
+	}
+
+	return protoScene
+}

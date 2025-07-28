@@ -173,6 +173,11 @@ message DielectricMaterial {
     float refidx = 1;
     SpectralConstantTexture spectral_refidx = 2;
   }
+  // Optional absorption properties for colored glass
+  oneof absorption_properties {
+    Vec3 absorption_coeff = 3; // RGB absorption coefficient
+    SpectralConstantTexture spectral_absorption_coeff = 4; // Spectral absorption coefficient
+  }
 }
 
 // Represents a Diffuse Light material.

@@ -1453,8 +1453,15 @@ type DielectricMaterial struct {
 	//	*DielectricMaterial_Refidx
 	//	*DielectricMaterial_SpectralRefidx
 	RefractiveIndexProperties isDielectricMaterial_RefractiveIndexProperties `protobuf_oneof:"refractive_index_properties"`
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	// Optional absorption properties for colored glass
+	//
+	// Types that are valid to be assigned to AbsorptionProperties:
+	//
+	//	*DielectricMaterial_AbsorptionCoeff
+	//	*DielectricMaterial_SpectralAbsorptionCoeff
+	AbsorptionProperties isDielectricMaterial_AbsorptionProperties `protobuf_oneof:"absorption_properties"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *DielectricMaterial) Reset() {
@@ -1512,6 +1519,31 @@ func (x *DielectricMaterial) GetSpectralRefidx() *SpectralConstantTexture {
 	return nil
 }
 
+func (x *DielectricMaterial) GetAbsorptionProperties() isDielectricMaterial_AbsorptionProperties {
+	if x != nil {
+		return x.AbsorptionProperties
+	}
+	return nil
+}
+
+func (x *DielectricMaterial) GetAbsorptionCoeff() *Vec3 {
+	if x != nil {
+		if x, ok := x.AbsorptionProperties.(*DielectricMaterial_AbsorptionCoeff); ok {
+			return x.AbsorptionCoeff
+		}
+	}
+	return nil
+}
+
+func (x *DielectricMaterial) GetSpectralAbsorptionCoeff() *SpectralConstantTexture {
+	if x != nil {
+		if x, ok := x.AbsorptionProperties.(*DielectricMaterial_SpectralAbsorptionCoeff); ok {
+			return x.SpectralAbsorptionCoeff
+		}
+	}
+	return nil
+}
+
 type isDielectricMaterial_RefractiveIndexProperties interface {
 	isDielectricMaterial_RefractiveIndexProperties()
 }
@@ -1527,6 +1559,22 @@ type DielectricMaterial_SpectralRefidx struct {
 func (*DielectricMaterial_Refidx) isDielectricMaterial_RefractiveIndexProperties() {}
 
 func (*DielectricMaterial_SpectralRefidx) isDielectricMaterial_RefractiveIndexProperties() {}
+
+type isDielectricMaterial_AbsorptionProperties interface {
+	isDielectricMaterial_AbsorptionProperties()
+}
+
+type DielectricMaterial_AbsorptionCoeff struct {
+	AbsorptionCoeff *Vec3 `protobuf:"bytes,3,opt,name=absorption_coeff,json=absorptionCoeff,proto3,oneof"` // RGB absorption coefficient
+}
+
+type DielectricMaterial_SpectralAbsorptionCoeff struct {
+	SpectralAbsorptionCoeff *SpectralConstantTexture `protobuf:"bytes,4,opt,name=spectral_absorption_coeff,json=spectralAbsorptionCoeff,proto3,oneof"` // Spectral absorption coefficient
+}
+
+func (*DielectricMaterial_AbsorptionCoeff) isDielectricMaterial_AbsorptionProperties() {}
+
+func (*DielectricMaterial_SpectralAbsorptionCoeff) isDielectricMaterial_AbsorptionProperties() {}
 
 // Represents a Diffuse Light material.
 type DiffuseLightMaterial struct {
@@ -2528,11 +2576,14 @@ const file_transport_proto_rawDesc = "" +
 	"\x0fLambertMaterial\x12,\n" +
 	"\x06albedo\x18\x01 \x01(\v2\x12.transport.TextureH\x00R\x06albedo\x12M\n" +
 	"\x0fspectral_albedo\x18\x02 \x01(\v2\".transport.SpectralConstantTextureH\x00R\x0espectralAlbedoB\x13\n" +
-	"\x11albedo_properties\"\x9c\x01\n" +
+	"\x11albedo_properties\"\xd5\x02\n" +
 	"\x12DielectricMaterial\x12\x18\n" +
 	"\x06refidx\x18\x01 \x01(\x02H\x00R\x06refidx\x12M\n" +
-	"\x0fspectral_refidx\x18\x02 \x01(\v2\".transport.SpectralConstantTextureH\x00R\x0espectralRefidxB\x1d\n" +
-	"\x1brefractive_index_properties\"\xa2\x01\n" +
+	"\x0fspectral_refidx\x18\x02 \x01(\v2\".transport.SpectralConstantTextureH\x00R\x0espectralRefidx\x12<\n" +
+	"\x10absorption_coeff\x18\x03 \x01(\v2\x0f.transport.Vec3H\x01R\x0fabsorptionCoeff\x12`\n" +
+	"\x19spectral_absorption_coeff\x18\x04 \x01(\v2\".transport.SpectralConstantTextureH\x01R\x17spectralAbsorptionCoeffB\x1d\n" +
+	"\x1brefractive_index_propertiesB\x17\n" +
+	"\x15absorption_properties\"\xa2\x01\n" +
 	"\x14DiffuseLightMaterial\x12(\n" +
 	"\x04emit\x18\x01 \x01(\v2\x12.transport.TextureH\x00R\x04emit\x12I\n" +
 	"\rspectral_emit\x18\x02 \x01(\v2\".transport.SpectralConstantTextureH\x00R\fspectralEmitB\x15\n" +
@@ -2720,48 +2771,50 @@ var file_transport_proto_depIdxs = []int32{
 	8,  // 26: transport.LambertMaterial.albedo:type_name -> transport.Texture
 	13, // 27: transport.LambertMaterial.spectral_albedo:type_name -> transport.SpectralConstantTexture
 	13, // 28: transport.DielectricMaterial.spectral_refidx:type_name -> transport.SpectralConstantTexture
-	8,  // 29: transport.DiffuseLightMaterial.emit:type_name -> transport.Texture
-	13, // 30: transport.DiffuseLightMaterial.spectral_emit:type_name -> transport.SpectralConstantTexture
-	8,  // 31: transport.IsotropicMaterial.albedo:type_name -> transport.Texture
-	13, // 32: transport.IsotropicMaterial.spectral_albedo:type_name -> transport.SpectralConstantTexture
-	5,  // 33: transport.MetalMaterial.albedo:type_name -> transport.Vec3
-	8,  // 34: transport.PBRMaterial.albedo:type_name -> transport.Texture
-	8,  // 35: transport.PBRMaterial.roughness:type_name -> transport.Texture
-	8,  // 36: transport.PBRMaterial.metalness:type_name -> transport.Texture
-	8,  // 37: transport.PBRMaterial.normal_map:type_name -> transport.Texture
-	8,  // 38: transport.PBRMaterial.sss:type_name -> transport.Texture
-	5,  // 39: transport.Triangle.vertex0:type_name -> transport.Vec3
-	5,  // 40: transport.Triangle.vertex1:type_name -> transport.Vec3
-	5,  // 41: transport.Triangle.vertex2:type_name -> transport.Vec3
-	6,  // 42: transport.Triangle.uv0:type_name -> transport.Vec2
-	6,  // 43: transport.Triangle.uv1:type_name -> transport.Vec2
-	6,  // 44: transport.Triangle.uv2:type_name -> transport.Vec2
-	5,  // 45: transport.Triangle.normal0:type_name -> transport.Vec3
-	5,  // 46: transport.Triangle.normal1:type_name -> transport.Vec3
-	5,  // 47: transport.Triangle.normal2:type_name -> transport.Vec3
-	5,  // 48: transport.Sphere.center:type_name -> transport.Vec3
-	25, // 49: transport.SceneObjects.triangles:type_name -> transport.Triangle
-	26, // 50: transport.SceneObjects.spheres:type_name -> transport.Sphere
-	3,  // 51: transport.Scene.colour_representation:type_name -> transport.ColourRepresentation
-	7,  // 52: transport.Scene.camera:type_name -> transport.Camera
-	34, // 53: transport.Scene.materials:type_name -> transport.Scene.MaterialsEntry
-	35, // 54: transport.Scene.image_textures:type_name -> transport.Scene.ImageTexturesEntry
-	27, // 55: transport.Scene.objects:type_name -> transport.SceneObjects
-	15, // 56: transport.Scene.spectral_background:type_name -> transport.TabulatedSpectralConstant
-	25, // 57: transport.StreamTrianglesResponse.triangles:type_name -> transport.Triangle
-	18, // 58: transport.Scene.MaterialsEntry.value:type_name -> transport.Material
-	4,  // 59: transport.Scene.ImageTexturesEntry.value:type_name -> transport.ImageTextureMetadata
-	29, // 60: transport.SceneTransportService.GetScene:input_type -> transport.GetSceneRequest
-	30, // 61: transport.SceneTransportService.StreamTextureFile:input_type -> transport.StreamTextureFileRequest
-	32, // 62: transport.SceneTransportService.StreamTriangles:input_type -> transport.StreamTrianglesRequest
-	28, // 63: transport.SceneTransportService.GetScene:output_type -> transport.Scene
-	31, // 64: transport.SceneTransportService.StreamTextureFile:output_type -> transport.StreamTextureFileResponse
-	33, // 65: transport.SceneTransportService.StreamTriangles:output_type -> transport.StreamTrianglesResponse
-	63, // [63:66] is the sub-list for method output_type
-	60, // [60:63] is the sub-list for method input_type
-	60, // [60:60] is the sub-list for extension type_name
-	60, // [60:60] is the sub-list for extension extendee
-	0,  // [0:60] is the sub-list for field type_name
+	5,  // 29: transport.DielectricMaterial.absorption_coeff:type_name -> transport.Vec3
+	13, // 30: transport.DielectricMaterial.spectral_absorption_coeff:type_name -> transport.SpectralConstantTexture
+	8,  // 31: transport.DiffuseLightMaterial.emit:type_name -> transport.Texture
+	13, // 32: transport.DiffuseLightMaterial.spectral_emit:type_name -> transport.SpectralConstantTexture
+	8,  // 33: transport.IsotropicMaterial.albedo:type_name -> transport.Texture
+	13, // 34: transport.IsotropicMaterial.spectral_albedo:type_name -> transport.SpectralConstantTexture
+	5,  // 35: transport.MetalMaterial.albedo:type_name -> transport.Vec3
+	8,  // 36: transport.PBRMaterial.albedo:type_name -> transport.Texture
+	8,  // 37: transport.PBRMaterial.roughness:type_name -> transport.Texture
+	8,  // 38: transport.PBRMaterial.metalness:type_name -> transport.Texture
+	8,  // 39: transport.PBRMaterial.normal_map:type_name -> transport.Texture
+	8,  // 40: transport.PBRMaterial.sss:type_name -> transport.Texture
+	5,  // 41: transport.Triangle.vertex0:type_name -> transport.Vec3
+	5,  // 42: transport.Triangle.vertex1:type_name -> transport.Vec3
+	5,  // 43: transport.Triangle.vertex2:type_name -> transport.Vec3
+	6,  // 44: transport.Triangle.uv0:type_name -> transport.Vec2
+	6,  // 45: transport.Triangle.uv1:type_name -> transport.Vec2
+	6,  // 46: transport.Triangle.uv2:type_name -> transport.Vec2
+	5,  // 47: transport.Triangle.normal0:type_name -> transport.Vec3
+	5,  // 48: transport.Triangle.normal1:type_name -> transport.Vec3
+	5,  // 49: transport.Triangle.normal2:type_name -> transport.Vec3
+	5,  // 50: transport.Sphere.center:type_name -> transport.Vec3
+	25, // 51: transport.SceneObjects.triangles:type_name -> transport.Triangle
+	26, // 52: transport.SceneObjects.spheres:type_name -> transport.Sphere
+	3,  // 53: transport.Scene.colour_representation:type_name -> transport.ColourRepresentation
+	7,  // 54: transport.Scene.camera:type_name -> transport.Camera
+	34, // 55: transport.Scene.materials:type_name -> transport.Scene.MaterialsEntry
+	35, // 56: transport.Scene.image_textures:type_name -> transport.Scene.ImageTexturesEntry
+	27, // 57: transport.Scene.objects:type_name -> transport.SceneObjects
+	15, // 58: transport.Scene.spectral_background:type_name -> transport.TabulatedSpectralConstant
+	25, // 59: transport.StreamTrianglesResponse.triangles:type_name -> transport.Triangle
+	18, // 60: transport.Scene.MaterialsEntry.value:type_name -> transport.Material
+	4,  // 61: transport.Scene.ImageTexturesEntry.value:type_name -> transport.ImageTextureMetadata
+	29, // 62: transport.SceneTransportService.GetScene:input_type -> transport.GetSceneRequest
+	30, // 63: transport.SceneTransportService.StreamTextureFile:input_type -> transport.StreamTextureFileRequest
+	32, // 64: transport.SceneTransportService.StreamTriangles:input_type -> transport.StreamTrianglesRequest
+	28, // 65: transport.SceneTransportService.GetScene:output_type -> transport.Scene
+	31, // 66: transport.SceneTransportService.StreamTextureFile:output_type -> transport.StreamTextureFileResponse
+	33, // 67: transport.SceneTransportService.StreamTriangles:output_type -> transport.StreamTrianglesResponse
+	65, // [65:68] is the sub-list for method output_type
+	62, // [62:65] is the sub-list for method input_type
+	62, // [62:62] is the sub-list for extension type_name
+	62, // [62:62] is the sub-list for extension extendee
+	0,  // [0:62] is the sub-list for field type_name
 }
 
 func init() { file_transport_proto_init() }
@@ -2797,6 +2850,8 @@ func file_transport_proto_init() {
 	file_transport_proto_msgTypes[16].OneofWrappers = []any{
 		(*DielectricMaterial_Refidx)(nil),
 		(*DielectricMaterial_SpectralRefidx)(nil),
+		(*DielectricMaterial_AbsorptionCoeff)(nil),
+		(*DielectricMaterial_SpectralAbsorptionCoeff)(nil),
 	}
 	file_transport_proto_msgTypes[17].OneofWrappers = []any{
 		(*DiffuseLightMaterial_Emit)(nil),

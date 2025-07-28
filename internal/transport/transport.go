@@ -201,18 +201,55 @@ func (t *Transport) toSceneLambertMaterial(mat *pb_transport.Material) (material
 func (t *Transport) toSceneDielectricMaterial(mat *pb_transport.Material) (material.Material, error) {
 	dielectric := mat.GetDielectric()
 
+	// Handle refractive index properties
+	var refIdx float64
+	var spectralRefIdx texture.SpectralTexture
+	var err error
+
 	switch dielectric.GetRefractiveIndexProperties().(type) {
 	case *pb_transport.DielectricMaterial_Refidx:
-		refidx := float64(dielectric.GetRefidx())
-		return material.NewDielectric(refidx), nil
+		refIdx = float64(dielectric.GetRefidx())
 	case *pb_transport.DielectricMaterial_SpectralRefidx:
-		spectralRefIdx, err := t.toSceneSpectralTexture(dielectric.GetSpectralRefidx())
+		spectralRefIdx, err = t.toSceneSpectralTexture(dielectric.GetSpectralRefidx())
 		if err != nil {
 			return nil, err
 		}
-		return material.NewSpectralDielectric(spectralRefIdx), nil
 	default:
 		return nil, fmt.Errorf("dielectric material must have either refidx or spectral_refidx")
+	}
+
+	// Handle absorption properties (optional)
+	var absorptionCoeff *vec3.Vec3Impl
+	var spectralAbsorptionCoeff texture.SpectralTexture
+
+	switch dielectric.GetAbsorptionProperties().(type) {
+	case *pb_transport.DielectricMaterial_AbsorptionCoeff:
+		abs := dielectric.GetAbsorptionCoeff()
+		absorptionCoeff = &vec3.Vec3Impl{
+			X: float64(abs.GetX()),
+			Y: float64(abs.GetY()),
+			Z: float64(abs.GetZ()),
+		}
+	case *pb_transport.DielectricMaterial_SpectralAbsorptionCoeff:
+		spectralAbsorptionCoeff, err = t.toSceneSpectralTexture(dielectric.GetSpectralAbsorptionCoeff())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Create the appropriate dielectric material based on available properties
+	if spectralRefIdx != nil {
+		if spectralAbsorptionCoeff != nil {
+			return material.NewSpectralColoredDielectric(spectralRefIdx, spectralAbsorptionCoeff), nil
+		} else {
+			return material.NewSpectralDielectric(spectralRefIdx), nil
+		}
+	} else {
+		if absorptionCoeff != nil {
+			return material.NewColoredDielectric(refIdx, absorptionCoeff), nil
+		} else {
+			return material.NewDielectric(refIdx), nil
+		}
 	}
 }
 
