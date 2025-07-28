@@ -16,6 +16,7 @@ type Metal struct {
 	nonEmitter
 	nonPBR
 	nonSpectral
+	nonPathLength
 	albedo *vec3.Vec3Impl
 	fuzz   float64
 }
@@ -45,4 +46,9 @@ func (m *Metal) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.
 func (m *Metal) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 	a := *m.albedo
 	return &a
+}
+
+// SpectralAlbedo returns the spectral albedo at the given wavelength.
+func (m *Metal) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+	return m.albedo.X // Use red component as approximation
 }

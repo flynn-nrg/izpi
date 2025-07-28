@@ -16,9 +16,11 @@ import (
 // Ensure interface compliance.
 var _ Material = (*PBR)(nil)
 
+// PBR represents a physically based rendering material.
 type PBR struct {
 	nonEmitter
 	nonSpectral
+	nonPathLength
 	albedo    texture.Texture
 	normalMap texture.Texture
 	roughness texture.Texture
@@ -162,4 +164,9 @@ func (pbr *PBR) NormalMap() texture.Texture {
 
 func (pbr *PBR) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return pbr.albedo.Value(u, v, p)
+}
+
+// SpectralAlbedo returns the spectral albedo at the given wavelength.
+func (pbr *PBR) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+	return pbr.albedo.Value(u, v, p).X // Use red component as approximation
 }

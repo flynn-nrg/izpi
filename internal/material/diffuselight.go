@@ -15,6 +15,8 @@ var _ Material = (*DiffuseLight)(nil)
 // DiffuseLight represents a diffuse light material.
 type DiffuseLight struct {
 	nonPBR
+	nonSpectral
+	nonPathLength
 	emit         texture.Texture
 	spectralEmit texture.SpectralTexture
 }
@@ -75,5 +77,5 @@ func (dl *DiffuseLight) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
 func (dl *DiffuseLight) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
-	return dl.spectralEmit.Value(u, v, lambda, p)
+	return dl.emit.Value(u, v, p).X // Use red component as approximation
 }

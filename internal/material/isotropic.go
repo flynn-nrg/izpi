@@ -18,6 +18,7 @@ type Isotropic struct {
 	nonEmitter
 	nonPBR
 	nonSpectral
+	nonPathLength
 	albedo texture.Texture
 }
 
@@ -44,4 +45,9 @@ func (i *Isotropic) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered 
 
 func (i *Isotropic) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return i.albedo.Value(u, v, p)
+}
+
+// SpectralAlbedo returns the spectral albedo at the given wavelength.
+func (i *Isotropic) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+	return i.albedo.Value(u, v, p).X // Use red component as approximation
 }

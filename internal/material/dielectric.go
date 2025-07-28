@@ -104,17 +104,8 @@ func (d *Dielectric) calculateBeerLambertAttenuation(pathLength float64, lambda 
 }
 
 // calculatePathLength estimates the path length through the material
-// For spheres, we can calculate the actual chord length through the sphere
+// For convex geometries, we trace the scattered ray to find the exit point
 func (d *Dielectric) calculatePathLength(hr *hitrecord.HitRecord, r ray.Ray) float64 {
-	// For spheres, we can calculate the actual chord length
-	// The chord length through a sphere is: 2 * sqrt(r² - d²)
-	// where r is the sphere radius and d is the distance from center to ray
-
-	// Estimate sphere center and radius from hit point
-	// This is a simplified approach - in practice, you'd get this from the object
-	// For now, we'll use a reasonable default path length since we don't have access to the object's center
-	// In a full implementation, you'd pass the object's center and radius to this method
-
 	// For now, use a reasonable default path length for spheres
 	// This is a simplified approach - in a full implementation, you'd calculate the actual chord length
 	// through the sphere based on the object's center and radius
@@ -131,6 +122,39 @@ func (d *Dielectric) calculatePathLength(hr *hitrecord.HitRecord, r ray.Ray) flo
 	return chordLength
 }
 
+// CalculatePathLength calculates the path length through the material for Beer-Lambert absorption
+// This method traces the scattered ray through the scene to find the exit point
+func (d *Dielectric) CalculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray, world SceneGeometry) float64 {
+	// For convex geometries, we can trace the scattered ray to find the exit point
+	// Start from a small offset from the hit point to avoid self-intersection
+	epsilon := 0.001
+
+	// Create a ray starting from slightly inside the material
+	startPoint := vec3.Add(hr.P(), vec3.ScalarMul(scattered.Direction(), epsilon))
+	traceRay := ray.NewWithLambda(startPoint, scattered.Direction(), r.Time(), r.Lambda())
+
+	// Trace the ray through the scene to find the exit point
+	// We use a large tMax to ensure we find the exit point
+	if exitHit, _, hit := world.Hit(traceRay, 0.0, 1000.0); hit {
+		// Calculate the path length from entry to exit
+		pathLength := vec3.Sub(exitHit.P(), hr.P()).Length()
+
+		// Clamp to reasonable values to avoid extreme attenuation
+		if pathLength < 0.1 {
+			pathLength = 0.1
+		}
+		if pathLength > 100.0 {
+			pathLength = 100.0
+		}
+
+		return pathLength
+	}
+
+	// If we don't find an exit point (shouldn't happen for closed convex geometry),
+	// return a reasonable default
+	return 10.0
+}
+
 // Scatter computes how the ray bounces off the surface of a dielectric material.
 func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	scattered, ok := d.scatterCommon(r, hr, random, d.refIdx)
@@ -141,6 +165,7 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastran
 	// Calculate Beer-Lambert attenuation for RGB rendering
 	var attenuation *vec3.Vec3Impl
 	if d.absorptionCoeff != nil {
+		// For now, use the old method until we update the sampler to pass scene geometry
 		pathLength := d.calculatePathLength(hr, r)
 		// Apply Beer-Lambert law for each RGB component
 		attenuation = &vec3.Vec3Impl{
@@ -167,6 +192,7 @@ func (d *Dielectric) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random 
 	}
 
 	// Calculate Beer-Lambert attenuation for spectral rendering
+	// For now, use the old method until we update the sampler to pass scene geometry
 	pathLength := d.calculatePathLength(hr, r)
 	albedo := d.calculateBeerLambertAttenuation(pathLength, lambda, hr.U(), hr.V(), hr.P())
 

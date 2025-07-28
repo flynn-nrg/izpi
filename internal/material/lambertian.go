@@ -18,8 +18,10 @@ var _ Material = (*Lambertian)(nil)
 
 // Lambertian represents a diffuse material.
 type Lambertian struct {
-	nonPBR
 	nonEmitter
+	nonPBR
+	nonSpectral
+	nonPathLength
 	albedo         texture.Texture
 	spectralAlbedo texture.SpectralTexture
 }

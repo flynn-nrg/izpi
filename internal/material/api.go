@@ -10,6 +10,11 @@ import (
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
+// SceneGeometry defines the minimal interface needed for path length calculation
+type SceneGeometry interface {
+	Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, Material, bool)
+}
+
 // Material defines the methods to handle materials.
 type Material interface {
 	Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool)
@@ -21,4 +26,11 @@ type Material interface {
 	IsEmitter() bool
 	Emitted(rIn ray.Ray, rec *hitrecord.HitRecord, u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl
 	EmittedSpectral(rIn ray.Ray, rec *hitrecord.HitRecord, u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64
+}
+
+// nonPathLength is a stub for materials that don't need path length calculation
+type nonPathLength struct{}
+
+func (npl *nonPathLength) CalculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray, world SceneGeometry) float64 {
+	return 0.0
 }

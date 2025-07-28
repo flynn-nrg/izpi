@@ -182,7 +182,7 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 7, Y: 7, Z: 7}))
 	list = append(list, hitable.NewXZRect(123, 423, 147, 412, 554, light))
 
-	center := &vec3.Vec3Impl{X: 400, Y: 400, Z: 200}
+	center := &vec3.Vec3Impl{X: 400, Y: 400, Z: 350}
 	list = append(list, hitable.NewSphere(center, vec3.Add(center, &vec3.Vec3Impl{X: 30}), 0, 1, 50, material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.7, Y: 0.3, Z: 0.1}))))
 	list = append(list, hitable.NewSphere(&vec3.Vec3Impl{X: 260, Y: 150, Z: 45}, &vec3.Vec3Impl{X: 260, Y: 150, Z: 45}, 0, 1, 50, material.NewDielectric(1.5)))
 	list = append(list, hitable.NewSphere(&vec3.Vec3Impl{X: 0, Y: 150, Z: 145}, &vec3.Vec3Impl{X: 0, Y: 150, Z: 145}, 0, 1, 50, material.NewMetal(&vec3.Vec3Impl{X: 0.8, Y: 0.8, Z: 0.9}, 10.0)))
@@ -202,7 +202,7 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 		log.Fatalf("failed to decode image; %v", err)
 	}
 	emat := material.NewLambertian(imgText)
-	list = append(list, hitable.NewSphere(&vec3.Vec3Impl{X: 400, Y: 200, Z: 400}, &vec3.Vec3Impl{X: 400, Y: 200, Z: 400}, 0, 1, 100, emat))
+	list = append(list, hitable.NewSphere(&vec3.Vec3Impl{X: 400, Y: 300, Z: 400}, &vec3.Vec3Impl{X: 400, Y: 300, Z: 400}, 0, 1, 100, emat))
 
 	perText := texture.NewNoise(0.1)
 	list = append(list, hitable.NewSphere(&vec3.Vec3Impl{X: 220, Y: 280, Z: 300}, &vec3.Vec3Impl{X: 220, Y: 280, Z: 300}, 0, 1, 80, material.NewLambertian(perText)))
@@ -293,7 +293,7 @@ func CornellBoxObj(aspect float64) (*scene.Scene, error) {
 		return nil, err
 	}
 
-	cube.Translate(&vec3.Vec3Impl{X: 280, Y: 20, Z: 390})
+	cube.Translate(&vec3.Vec3Impl{X: 280, Y: 30, Z: 390})
 	cube.Scale(&vec3.Vec3Impl{X: 14, Y: 14, Z: 14})
 
 	hitables := []hitable.Hitable{
@@ -362,7 +362,7 @@ func TVSet(aspect float64) (*scene.Scene, error) {
 	}
 
 	cube.Scale(&vec3.Vec3Impl{X: 500, Y: 500, Z: 500})
-	cube.Translate(&vec3.Vec3Impl{X: 280, Y: 100, Z: 420})
+	cube.Translate(&vec3.Vec3Impl{X: 280, Y: 100, Z: 450})
 
 	hitables := []hitable.Hitable{
 		hitable.NewFlipNormals(hitable.NewYZRect(0, 555, 0, 555, 555, green)),
@@ -422,8 +422,8 @@ func SWHangar(aspect float64) (*scene.Scene, error) {
 	light := material.NewDiffuseLight(texture.NewConstant(&vec3.Vec3Impl{X: 10, Y: 10, Z: 10}))
 
 	hitables := []hitable.Hitable{
-		hitable.NewSphere(&vec3.Vec3Impl{X: 0, Y: 20, Z: -30}, &vec3.Vec3Impl{X: 0, Y: 20, Z: -30}, 0, 1, 20, light),
-		hitable.NewSphere(&vec3.Vec3Impl{X: -50, Y: 15, Z: 80}, &vec3.Vec3Impl{X: -50, Y: 15, Z: 80}, 0, 1, 20, glass),
+		hitable.NewSphere(&vec3.Vec3Impl{X: 0, Y: 30, Z: -30}, &vec3.Vec3Impl{X: 0, Y: 30, Z: -30}, 0, 1, 20, light),
+		hitable.NewSphere(&vec3.Vec3Impl{X: -50, Y: 15, Z: 65}, &vec3.Vec3Impl{X: -50, Y: 15, Z: 65}, 0, 1, 20, glass),
 	}
 
 	for i := range hangar.Groups {
@@ -442,8 +442,8 @@ func SWHangar(aspect float64) (*scene.Scene, error) {
 		}
 	}
 
-	lookFrom := &vec3.Vec3Impl{X: 0.0, Y: 25.0, Z: 30.0}
-	lookAt := &vec3.Vec3Impl{X: -1, Y: 25, Z: 31}
+	lookFrom := &vec3.Vec3Impl{X: 0.0, Y: 33.0, Z: 30.0}
+	lookAt := &vec3.Vec3Impl{X: -1, Y: 33, Z: 31}
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
@@ -1167,7 +1167,7 @@ func CornellBoxPB(aspect float64) *pb_transport.Scene {
 				{
 					Center: &pb_transport.Vec3{
 						X: 70,
-						Y: 20,
+						Y: 30,
 						Z: 60,
 					},
 					Radius:       20,
@@ -1676,7 +1676,7 @@ func CornellBoxRGB(aspect float64) *pb_transport.Scene {
 				{
 					Center: &pb_transport.Vec3{
 						X: 70,
-						Y: 20,
+						Y: 30,
 						Z: 60,
 					},
 					Radius:       20,
@@ -2123,7 +2123,7 @@ func CornellBoxSpectral(aspect float64) *pb_transport.Scene {
 				{
 					Center: &pb_transport.Vec3{
 						X: 70,
-						Y: 20,
+						Y: 30,
 						Z: 60,
 					},
 					Radius:       20,
@@ -2376,56 +2376,56 @@ func CornellBoxPrismSpectral(aspect float64) *pb_transport.Scene {
 				// Triangular Prism (replacing the glass sphere) - Bigger, lifted, and rotated
 				// Base triangle (bottom face) - rotated and tilted
 				{
-					Vertex0:      &pb_transport.Vec3{X: 20, Y: 20, Z: 10}, // Bottom left
-					Vertex1:      &pb_transport.Vec3{X: 50, Y: 20, Z: 10}, // Bottom right
-					Vertex2:      &pb_transport.Vec3{X: 35, Y: 20, Z: 40}, // Top
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 30, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 30, Z: 10}, // Bottom right
+					Vertex2:      &pb_transport.Vec3{X: 35, Y: 30, Z: 40}, // Top
 					MaterialName: "Glass",
 				},
 				// Top triangle (top face) - rotated and tilted
 				{
-					Vertex0:      &pb_transport.Vec3{X: 15, Y: 50, Z: 20}, // Bottom left
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 50, Z: 20}, // Bottom right
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 50, Z: 35}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 50, Z: 35}, // Bottom right
 					Vertex2:      &pb_transport.Vec3{X: 30, Y: 50, Z: 50}, // Top
 					MaterialName: "Glass",
 				},
 				// Side faces (3 rectangles, each made of 2 triangles)
 				// Left face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 20, Y: 20, Z: 10}, // Bottom left
-					Vertex1:      &pb_transport.Vec3{X: 15, Y: 50, Z: 20}, // Top left
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 30, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 15, Y: 50, Z: 35}, // Top left
 					Vertex2:      &pb_transport.Vec3{X: 30, Y: 50, Z: 50}, // Top right
 					MaterialName: "Glass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 20, Y: 20, Z: 10}, // Bottom left
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 30, Z: 10}, // Bottom left
 					Vertex1:      &pb_transport.Vec3{X: 30, Y: 50, Z: 50}, // Top right
-					Vertex2:      &pb_transport.Vec3{X: 35, Y: 20, Z: 40}, // Bottom right
+					Vertex2:      &pb_transport.Vec3{X: 35, Y: 30, Z: 40}, // Bottom right
 					MaterialName: "Glass",
 				},
 				// Right face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 20, Z: 10}, // Bottom left
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 50, Z: 20}, // Top left
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 50, Z: 35}, // Top left
 					Vertex2:      &pb_transport.Vec3{X: 30, Y: 50, Z: 50}, // Top right
 					MaterialName: "Glass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 20, Z: 10}, // Bottom left
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 10}, // Bottom left
 					Vertex1:      &pb_transport.Vec3{X: 30, Y: 50, Z: 50}, // Top right
-					Vertex2:      &pb_transport.Vec3{X: 35, Y: 20, Z: 40}, // Bottom right
+					Vertex2:      &pb_transport.Vec3{X: 35, Y: 30, Z: 40}, // Bottom right
 					MaterialName: "Glass",
 				},
 				// Back face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 20, Y: 20, Z: 10}, // Bottom left
-					Vertex1:      &pb_transport.Vec3{X: 15, Y: 50, Z: 20}, // Top left
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 50, Z: 20}, // Top right
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 30, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 15, Y: 50, Z: 35}, // Top left
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 50, Z: 35}, // Top right
 					MaterialName: "Glass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 20, Y: 20, Z: 10}, // Bottom left
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 50, Z: 20}, // Top right
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 20, Z: 10}, // Bottom right
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 30, Z: 10}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 50, Z: 35}, // Top right
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 30, Z: 10}, // Bottom right
 					MaterialName: "Glass",
 				},
 			},
@@ -2434,7 +2434,7 @@ func CornellBoxPrismSpectral(aspect float64) *pb_transport.Scene {
 				{
 					Center: &pb_transport.Vec3{
 						X: 70,
-						Y: 20,
+						Y: 30,
 						Z: 60,
 					},
 					Radius:       20,
@@ -2689,8 +2689,8 @@ func CornellBoxPrismSpectralEnhanced(aspect float64) *pb_transport.Scene {
 				// Triangular Prism (replacing the glass sphere) - Bigger, lifted, and rotated around Z-axis (horizontal orientation)
 				// Base triangle (bottom face) - rotated around Z-axis for horizontal orientation
 				{
-					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 20}, // Bottom left
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 15, Z: 20}, // Bottom right
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 35}, // Bottom left
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 15, Z: 35}, // Bottom right
 					Vertex2:      &pb_transport.Vec3{X: 35, Y: 15, Z: 50}, // Top
 					MaterialName: "Glass",
 				},
@@ -2704,41 +2704,41 @@ func CornellBoxPrismSpectralEnhanced(aspect float64) *pb_transport.Scene {
 				// Side faces (3 rectangles, each made of 2 triangles)
 				// Left face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 20}, // Bottom left
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 35}, // Bottom left
 					Vertex1:      &pb_transport.Vec3{X: 10, Y: 55, Z: 30}, // Top left
 					Vertex2:      &pb_transport.Vec3{X: 30, Y: 55, Z: 60}, // Top right
 					MaterialName: "Glass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 20}, // Bottom left
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 35}, // Bottom left
 					Vertex1:      &pb_transport.Vec3{X: 30, Y: 55, Z: 60}, // Top right
 					Vertex2:      &pb_transport.Vec3{X: 35, Y: 15, Z: 50}, // Bottom right
 					MaterialName: "Glass",
 				},
 				// Right face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 55, Y: 15, Z: 20}, // Bottom left
+					Vertex0:      &pb_transport.Vec3{X: 55, Y: 15, Z: 35}, // Bottom left
 					Vertex1:      &pb_transport.Vec3{X: 50, Y: 55, Z: 30}, // Top left
 					Vertex2:      &pb_transport.Vec3{X: 30, Y: 55, Z: 60}, // Top right
 					MaterialName: "Glass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 55, Y: 15, Z: 20}, // Bottom left
+					Vertex0:      &pb_transport.Vec3{X: 55, Y: 15, Z: 35}, // Bottom left
 					Vertex1:      &pb_transport.Vec3{X: 30, Y: 55, Z: 60}, // Top right
 					Vertex2:      &pb_transport.Vec3{X: 35, Y: 15, Z: 50}, // Bottom right
 					MaterialName: "Glass",
 				},
 				// Back face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 20}, // Bottom left
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 35}, // Bottom left
 					Vertex1:      &pb_transport.Vec3{X: 10, Y: 55, Z: 30}, // Top left
 					Vertex2:      &pb_transport.Vec3{X: 50, Y: 55, Z: 30}, // Top right
 					MaterialName: "Glass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 20}, // Bottom left
+					Vertex0:      &pb_transport.Vec3{X: 15, Y: 15, Z: 35}, // Bottom left
 					Vertex1:      &pb_transport.Vec3{X: 50, Y: 55, Z: 30}, // Top right
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 15, Z: 20}, // Bottom right
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 15, Z: 35}, // Bottom right
 					MaterialName: "Glass",
 				},
 			},
@@ -2747,7 +2747,7 @@ func CornellBoxPrismSpectralEnhanced(aspect float64) *pb_transport.Scene {
 				{
 					Center: &pb_transport.Vec3{
 						X: 70,
-						Y: 20,
+						Y: 30,
 						Z: 60,
 					},
 					Radius:       20,
@@ -3002,19 +3002,19 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 				// Diamond 1 - Large main diamond (enhanced brilliant cut with more facets) - Rotated 15° around X, 15° around Y, 15° around Z
 				// Crown (top) facets - 8 main crown facets
 				{
-					Vertex0:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Center top
-					Vertex1:      &pb_transport.Vec3{X: 58, Y: 22, Z: 38}, // Right top
+					Vertex0:      &pb_transport.Vec3{X: 45, Y: 18, Z: 45}, // Center top
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 22, Z: 38}, // Right top
 					Vertex2:      &pb_transport.Vec3{X: 48, Y: 32, Z: 52}, // Front top
 					MaterialName: "Diamond",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Center top
+					Vertex0:      &pb_transport.Vec3{X: 45, Y: 18, Z: 45}, // Center top
 					Vertex1:      &pb_transport.Vec3{X: 48, Y: 32, Z: 52}, // Front top
-					Vertex2:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left top
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 22, Z: 55}, // Left top
 					MaterialName: "Diamond",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left top
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 22, Z: 55}, // Left top
 					Vertex1:      &pb_transport.Vec3{X: 48, Y: 32, Z: 52}, // Front top
 					Vertex2:      &pb_transport.Vec3{X: 62, Y: 18, Z: 62}, // Back top
 					MaterialName: "Diamond",
@@ -3022,24 +3022,24 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 				{
 					Vertex0:      &pb_transport.Vec3{X: 62, Y: 18, Z: 62}, // Back top
 					Vertex1:      &pb_transport.Vec3{X: 48, Y: 32, Z: 52}, // Front top
-					Vertex2:      &pb_transport.Vec3{X: 58, Y: 22, Z: 38}, // Right top
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 22, Z: 38}, // Right top
 					MaterialName: "Diamond",
 				},
 				// Additional crown facets for more sparkle
 				{
-					Vertex0:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Center top
+					Vertex0:      &pb_transport.Vec3{X: 45, Y: 18, Z: 45}, // Center top
 					Vertex1:      &pb_transport.Vec3{X: 52, Y: 23, Z: 47}, // Front right
 					Vertex2:      &pb_transport.Vec3{X: 43, Y: 27, Z: 52}, // Front left
 					MaterialName: "Diamond",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Center top
+					Vertex0:      &pb_transport.Vec3{X: 45, Y: 18, Z: 45}, // Center top
 					Vertex1:      &pb_transport.Vec3{X: 43, Y: 27, Z: 52}, // Front left
-					Vertex2:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left top
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 22, Z: 55}, // Left top
 					MaterialName: "Diamond",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left top
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 22, Z: 55}, // Left top
 					Vertex1:      &pb_transport.Vec3{X: 43, Y: 27, Z: 52}, // Front left
 					Vertex2:      &pb_transport.Vec3{X: 53, Y: 23, Z: 57}, // Back left
 					MaterialName: "Diamond",
@@ -3047,38 +3047,38 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 				{
 					Vertex0:      &pb_transport.Vec3{X: 62, Y: 18, Z: 62}, // Back top
 					Vertex1:      &pb_transport.Vec3{X: 53, Y: 23, Z: 57}, // Back left
-					Vertex2:      &pb_transport.Vec3{X: 57, Y: 25, Z: 52}, // Back right
+					Vertex2:      &pb_transport.Vec3{X: 57, Y: 33, Z: 52}, // Back right
 					MaterialName: "Diamond",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 58, Y: 22, Z: 38}, // Right top
-					Vertex1:      &pb_transport.Vec3{X: 57, Y: 25, Z: 52}, // Back right
+					Vertex0:      &pb_transport.Vec3{X: 55, Y: 22, Z: 38}, // Right top
+					Vertex1:      &pb_transport.Vec3{X: 57, Y: 33, Z: 52}, // Back right
 					Vertex2:      &pb_transport.Vec3{X: 52, Y: 23, Z: 47}, // Front right
 					MaterialName: "Diamond",
 				},
 				// Pavilion (bottom) facets - 8 main pavilion facets
 				{
 					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
-					Vertex1:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Left bottom
-					Vertex2:      &pb_transport.Vec3{X: 58, Y: 22, Z: 38}, // Right bottom
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 18, Z: 45}, // Left bottom
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 22, Z: 38}, // Right bottom
 					MaterialName: "Diamond",
 				},
 				{
 					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
-					Vertex1:      &pb_transport.Vec3{X: 58, Y: 22, Z: 38}, // Right bottom
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 22, Z: 38}, // Right bottom
 					Vertex2:      &pb_transport.Vec3{X: 62, Y: 18, Z: 62}, // Back bottom
 					MaterialName: "Diamond",
 				},
 				{
 					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
 					Vertex1:      &pb_transport.Vec3{X: 62, Y: 18, Z: 62}, // Back bottom
-					Vertex2:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left bottom
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 22, Z: 55}, // Left bottom
 					MaterialName: "Diamond",
 				},
 				{
 					Vertex0:      &pb_transport.Vec3{X: 50, Y: 6, Z: 50},  // Center bottom
-					Vertex1:      &pb_transport.Vec3{X: 38, Y: 22, Z: 58}, // Left bottom
-					Vertex2:      &pb_transport.Vec3{X: 42, Y: 18, Z: 42}, // Front bottom
+					Vertex1:      &pb_transport.Vec3{X: 38, Y: 22, Z: 55}, // Left bottom
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 18, Z: 45}, // Front bottom
 					MaterialName: "Diamond",
 				},
 				// Additional pavilion facets
@@ -3110,7 +3110,7 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 				// Crown facets - 8 main crown facets
 				{
 					Vertex0:      &pb_transport.Vec3{X: 18, Y: 13, Z: 32}, // Center top
-					Vertex1:      &pb_transport.Vec3{X: 42, Y: 17, Z: 28}, // Right top
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 17, Z: 28}, // Right top
 					Vertex2:      &pb_transport.Vec3{X: 28, Y: 24, Z: 37}, // Front top
 					MaterialName: "Diamond",
 				},
@@ -3123,43 +3123,43 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 				{
 					Vertex0:      &pb_transport.Vec3{X: 22, Y: 13, Z: 38}, // Left top
 					Vertex1:      &pb_transport.Vec3{X: 28, Y: 24, Z: 37}, // Front top
-					Vertex2:      &pb_transport.Vec3{X: 38, Y: 17, Z: 42}, // Back top
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 17, Z: 45}, // Back top
 					MaterialName: "Diamond",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 38, Y: 17, Z: 42}, // Back top
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 17, Z: 45}, // Back top
 					Vertex1:      &pb_transport.Vec3{X: 28, Y: 24, Z: 37}, // Front top
-					Vertex2:      &pb_transport.Vec3{X: 42, Y: 17, Z: 28}, // Right top
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 17, Z: 28}, // Right top
 					MaterialName: "Diamond",
 				},
 				// Additional crown facets
 				{
 					Vertex0:      &pb_transport.Vec3{X: 18, Y: 13, Z: 32}, // Center top
 					Vertex1:      &pb_transport.Vec3{X: 32, Y: 16, Z: 30}, // Front right
-					Vertex2:      &pb_transport.Vec3{X: 23, Y: 20, Z: 37}, // Front left
+					Vertex2:      &pb_transport.Vec3{X: 23, Y: 30, Z: 37}, // Front left
 					MaterialName: "Diamond",
 				},
 				{
 					Vertex0:      &pb_transport.Vec3{X: 18, Y: 13, Z: 32}, // Center top
-					Vertex1:      &pb_transport.Vec3{X: 23, Y: 20, Z: 37}, // Front left
+					Vertex1:      &pb_transport.Vec3{X: 23, Y: 30, Z: 37}, // Front left
 					Vertex2:      &pb_transport.Vec3{X: 22, Y: 13, Z: 38}, // Left top
 					MaterialName: "Diamond",
 				},
 				{
 					Vertex0:      &pb_transport.Vec3{X: 22, Y: 13, Z: 38}, // Left top
-					Vertex1:      &pb_transport.Vec3{X: 23, Y: 20, Z: 37}, // Front left
+					Vertex1:      &pb_transport.Vec3{X: 23, Y: 30, Z: 37}, // Front left
 					Vertex2:      &pb_transport.Vec3{X: 33, Y: 16, Z: 40}, // Back left
 					MaterialName: "Diamond",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 38, Y: 17, Z: 42}, // Back top
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 17, Z: 45}, // Back top
 					Vertex1:      &pb_transport.Vec3{X: 33, Y: 16, Z: 40}, // Back left
-					Vertex2:      &pb_transport.Vec3{X: 37, Y: 20, Z: 37}, // Back right
+					Vertex2:      &pb_transport.Vec3{X: 37, Y: 30, Z: 37}, // Back right
 					MaterialName: "Diamond",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 42, Y: 17, Z: 28}, // Right top
-					Vertex1:      &pb_transport.Vec3{X: 37, Y: 20, Z: 37}, // Back right
+					Vertex0:      &pb_transport.Vec3{X: 45, Y: 17, Z: 28}, // Right top
+					Vertex1:      &pb_transport.Vec3{X: 37, Y: 30, Z: 37}, // Back right
 					Vertex2:      &pb_transport.Vec3{X: 32, Y: 16, Z: 30}, // Front right
 					MaterialName: "Diamond",
 				},
@@ -3167,18 +3167,18 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 				{
 					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
 					Vertex1:      &pb_transport.Vec3{X: 18, Y: 13, Z: 32}, // Left bottom
-					Vertex2:      &pb_transport.Vec3{X: 42, Y: 17, Z: 28}, // Right bottom
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 17, Z: 28}, // Right bottom
 					MaterialName: "Diamond",
 				},
 				{
 					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
-					Vertex1:      &pb_transport.Vec3{X: 42, Y: 17, Z: 28}, // Right bottom
-					Vertex2:      &pb_transport.Vec3{X: 38, Y: 17, Z: 42}, // Back bottom
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 17, Z: 28}, // Right bottom
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 17, Z: 45}, // Back bottom
 					MaterialName: "Diamond",
 				},
 				{
 					Vertex0:      &pb_transport.Vec3{X: 30, Y: 4, Z: 35},  // Center bottom
-					Vertex1:      &pb_transport.Vec3{X: 38, Y: 17, Z: 42}, // Back bottom
+					Vertex1:      &pb_transport.Vec3{X: 38, Y: 17, Z: 45}, // Back bottom
 					Vertex2:      &pb_transport.Vec3{X: 22, Y: 13, Z: 38}, // Left bottom
 					MaterialName: "Diamond",
 				},
@@ -3216,13 +3216,13 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 				// Diamond 3 - Small diamond (right) - enhanced with more facets - Rotated 0° around X, 15° around Y, 15° around Z
 				// Crown facets - 8 main crown facets
 				{
-					Vertex0:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Center top
+					Vertex0:      &pb_transport.Vec3{X: 55, Y: 10, Z: 57}, // Center top
 					Vertex1:      &pb_transport.Vec3{X: 82, Y: 10, Z: 53}, // Right top
 					Vertex2:      &pb_transport.Vec3{X: 68, Y: 16, Z: 62}, // Front top
 					MaterialName: "Diamond",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Center top
+					Vertex0:      &pb_transport.Vec3{X: 55, Y: 10, Z: 57}, // Center top
 					Vertex1:      &pb_transport.Vec3{X: 68, Y: 16, Z: 62}, // Front top
 					Vertex2:      &pb_transport.Vec3{X: 62, Y: 10, Z: 63}, // Left top
 					MaterialName: "Diamond",
@@ -3241,13 +3241,13 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 				},
 				// Additional crown facets
 				{
-					Vertex0:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Center top
+					Vertex0:      &pb_transport.Vec3{X: 55, Y: 10, Z: 57}, // Center top
 					Vertex1:      &pb_transport.Vec3{X: 72, Y: 13, Z: 59}, // Front right
 					Vertex2:      &pb_transport.Vec3{X: 63, Y: 13, Z: 62}, // Front left
 					MaterialName: "Diamond",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Center top
+					Vertex0:      &pb_transport.Vec3{X: 55, Y: 10, Z: 57}, // Center top
 					Vertex1:      &pb_transport.Vec3{X: 63, Y: 13, Z: 62}, // Front left
 					Vertex2:      &pb_transport.Vec3{X: 62, Y: 10, Z: 63}, // Left top
 					MaterialName: "Diamond",
@@ -3273,7 +3273,7 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 				// Pavilion facets - 8 main pavilion facets
 				{
 					Vertex0:      &pb_transport.Vec3{X: 70, Y: 2, Z: 60},  // Center bottom
-					Vertex1:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Left bottom
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 10, Z: 57}, // Left bottom
 					Vertex2:      &pb_transport.Vec3{X: 82, Y: 10, Z: 53}, // Right bottom
 					MaterialName: "Diamond",
 				},
@@ -3292,7 +3292,7 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 				{
 					Vertex0:      &pb_transport.Vec3{X: 70, Y: 2, Z: 60},  // Center bottom
 					Vertex1:      &pb_transport.Vec3{X: 62, Y: 10, Z: 63}, // Left bottom
-					Vertex2:      &pb_transport.Vec3{X: 58, Y: 10, Z: 57}, // Front bottom
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 10, Z: 57}, // Front bottom
 					MaterialName: "Diamond",
 				},
 				// Additional pavilion facets
@@ -3546,25 +3546,430 @@ func CornellBoxColoredGlassSpectral(aspect float64) *pb_transport.Scene {
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
 					MaterialName: "Red",
 				},
+				// Green glass dodecahedron (replacing the green sphere) - SMALLER VERSION
+				// Face 1 (top pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 67, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 67, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 67, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 67, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 67, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 67, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 67, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 67, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				// Face 2 (bottom pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 33, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 33, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 33, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 33, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 33, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 33, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 33, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 33, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				// Face 3 (front pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 42, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 58, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 58, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 58, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 58, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 42, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 42, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 42, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				// Face 4 (back pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 42, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 58, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 58, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 58, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 58, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 42, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 42, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 42, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				// Face 5 (left pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 42, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 58, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 58, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 58, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 58, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 42, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 42, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 42, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				// Face 6 (right pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 42, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 58, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 58, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 58, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 58, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 42, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 42, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 42, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				// Face 7 (top-front pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 67, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 67, Z: 65},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 67, Z: 65},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 67, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				// Face 8 (top-back pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 67, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 67, Z: 35},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 67, Z: 35},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 67, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				// Face 9 (bottom-front pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 33, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 33, Z: 65},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 33, Z: 65},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 33, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				// Face 10 (bottom-back pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 33, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 33, Z: 35},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 33, Z: 35},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 33, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				// Face 11 (left-front pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 58, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 58, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 58, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 42, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				// Face 12 (right-front pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 58, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 58, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 58, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 42, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				// Face 13 (left-back pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 58, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 58, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 58, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 42, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				// Face 14 (right-back pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 58, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 58, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 50, Y: 58, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 50, Y: 42, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				// Face 15 (top-left pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 67, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 67, Z: 50},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 67, Z: 50},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 67, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				// Face 16 (top-right pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 67, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 67, Z: 50},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 67, Z: 50},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 67, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				// Face 17 (bottom-left pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 33, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 33, Z: 50},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 33, Z: 50},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 33, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				// Face 18 (bottom-right pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 33, Z: 45},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 33, Z: 50},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 33, Z: 50},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 33, Z: 55},
+					MaterialName: "GreenGlass",
+				},
+				// Face 19 (front-left pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 58, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 50, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 50, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 42, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				// Face 20 (front-right pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 42, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 50, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 50, Z: 75},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 58, Z: 75},
+					MaterialName: "GreenGlass",
+				},
+				// Face 21 (back-left pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
+					Vertex1:      &pb_transport.Vec3{X: 45, Y: 58, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 50, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 50, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 45, Y: 42, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				// Face 22 (back-right pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
+					Vertex1:      &pb_transport.Vec3{X: 55, Y: 42, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 50, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 50, Z: 25},
+					Vertex2:      &pb_transport.Vec3{X: 55, Y: 58, Z: 25},
+					MaterialName: "GreenGlass",
+				},
+				// Face 23 (left-top pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 58, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 67, Z: 50},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 67, Z: 50},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 58, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				// Face 24 (left-bottom pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 42, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 33, Z: 50},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 25, Y: 33, Z: 50},
+					Vertex2:      &pb_transport.Vec3{X: 25, Y: 42, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				// Face 25 (right-top pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 58, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 67, Z: 50},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 67, Z: 50},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 58, Z: 45},
+					MaterialName: "GreenGlass",
+				},
+				// Face 26 (right-bottom pentagon)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 42, Z: 55},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 33, Z: 50},
+					MaterialName: "GreenGlass",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
+					Vertex1:      &pb_transport.Vec3{X: 75, Y: 33, Z: 50},
+					Vertex2:      &pb_transport.Vec3{X: 75, Y: 42, Z: 45},
+					MaterialName: "GreenGlass",
+				},
 			},
 			Spheres: []*pb_transport.Sphere{
 				// Blue glass sphere
 				{
-					Center:       &pb_transport.Vec3{X: 30, Y: 25, Z: 50},
+					Center:       &pb_transport.Vec3{X: 30, Y: 33, Z: 50},
 					Radius:       15,
 					MaterialName: "BlueGlass",
 				},
 				// Red glass sphere
 				{
-					Center:       &pb_transport.Vec3{X: 70, Y: 25, Z: 50},
+					Center:       &pb_transport.Vec3{X: 70, Y: 33, Z: 50},
 					Radius:       15,
 					MaterialName: "RedGlass",
-				},
-				// Green glass sphere
-				{
-					Center:       &pb_transport.Vec3{X: 50, Y: 65, Z: 50},
-					Radius:       15,
-					MaterialName: "GreenGlass",
 				},
 			},
 		},
