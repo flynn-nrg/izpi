@@ -18,11 +18,14 @@ var _ Material = (*Dielectric)(nil)
 type Dielectric struct {
 	nonPBR
 	nonEmitter
+	nonWorldSetter
 	refIdx         float64
 	spectralRefIdx texture.SpectralTexture
 	// Absorption properties for colored glass
 	absorptionCoeff         *vec3.Vec3Impl          // RGB absorption coefficient (for RGB rendering)
 	spectralAbsorptionCoeff texture.SpectralTexture // Spectral absorption coefficient (for spectral rendering)
+	// World reference for path length calculation
+	world SceneGeometry
 }
 
 // NewDielectric returns an instance of a dielectric material.
@@ -103,28 +106,15 @@ func (d *Dielectric) calculateBeerLambertAttenuation(pathLength float64, lambda 
 	return 1.0
 }
 
-// calculatePathLength estimates the path length through the material
-// For convex geometries, we trace the scattered ray to find the exit point
-func (d *Dielectric) calculatePathLength(hr *hitrecord.HitRecord, r ray.Ray) float64 {
-	// For now, use a reasonable default path length for spheres
-	// This is a simplified approach - in a full implementation, you'd calculate the actual chord length
-	// through the sphere based on the object's center and radius
-	chordLength := 30.0 // Approximate diameter of our spheres
-
-	// Clamp to reasonable values
-	if chordLength < 0.1 {
-		chordLength = 0.1
-	}
-	if chordLength > 10.0 {
-		chordLength = 10.0
-	}
-
-	return chordLength
-}
-
-// CalculatePathLength calculates the path length through the material for Beer-Lambert absorption
+// calculatePathLength calculates the path length through the material for Beer-Lambert absorption
 // This method traces the scattered ray through the scene to find the exit point
-func (d *Dielectric) CalculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray, world SceneGeometry) float64 {
+func (d *Dielectric) calculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray, world SceneGeometry) float64 {
+	// Use the stored world reference if available, otherwise fall back to the passed parameter
+	sceneWorld := d.world
+	if sceneWorld == nil {
+		sceneWorld = world
+	}
+
 	// For convex geometries, we can trace the scattered ray to find the exit point
 	// Start from a small offset from the hit point to avoid self-intersection
 	epsilon := 0.001
@@ -135,7 +125,7 @@ func (d *Dielectric) CalculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, sca
 
 	// Trace the ray through the scene to find the exit point
 	// We use a large tMax to ensure we find the exit point
-	if exitHit, _, hit := world.Hit(traceRay, 0.0, 1000.0); hit {
+	if exitHit, _, hit := sceneWorld.Hit(traceRay, 0.0, 1000.0); hit {
 		// Calculate the path length from entry to exit
 		pathLength := vec3.Sub(exitHit.P(), hr.P()).Length()
 
@@ -165,8 +155,8 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastran
 	// Calculate Beer-Lambert attenuation for RGB rendering
 	var attenuation *vec3.Vec3Impl
 	if d.absorptionCoeff != nil {
-		// For now, use the old method until we update the sampler to pass scene geometry
-		pathLength := d.calculatePathLength(hr, r)
+		// Use the new path length calculation with world geometry
+		pathLength := d.calculatePathLength(r, hr, scattered, d.world)
 		// Apply Beer-Lambert law for each RGB component
 		attenuation = &vec3.Vec3Impl{
 			X: math.Exp(-d.absorptionCoeff.X * pathLength),
@@ -192,8 +182,8 @@ func (d *Dielectric) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random 
 	}
 
 	// Calculate Beer-Lambert attenuation for spectral rendering
-	// For now, use the old method until we update the sampler to pass scene geometry
-	pathLength := d.calculatePathLength(hr, r)
+	// Use the new path length calculation with world geometry
+	pathLength := d.calculatePathLength(r, hr, scattered, d.world)
 	albedo := d.calculateBeerLambertAttenuation(pathLength, lambda, hr.U(), hr.V(), hr.P())
 
 	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, true, albedo, lambda, nil, 0.0, 0.0, nil)
@@ -222,4 +212,9 @@ func (d *Dielectric) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Im
 // Dielectrics have no absorption in the visible spectrum, so this returns 1.0.
 func (d *Dielectric) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
 	return 1.0
+}
+
+// SetWorld stores the world reference for path length calculation
+func (d *Dielectric) SetWorld(world SceneGeometry) {
+	d.world = world
 }

@@ -3546,415 +3546,83 @@ func CornellBoxColoredGlassSpectral(aspect float64) *pb_transport.Scene {
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
 					MaterialName: "Red",
 				},
-				// Green glass dodecahedron (replacing the green sphere) - SMALLER VERSION
-				// Face 1 (top pentagon)
+				// Green glass cube on top of spheres (rotated ~15 degrees around all axes)
+				// Cube bottom face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 67, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 67, Z: 55},
+					Vertex0:      &pb_transport.Vec3{X: 32, Y: 58, Z: 38},
+					Vertex1:      &pb_transport.Vec3{X: 68, Y: 62, Z: 32},
+					Vertex2:      &pb_transport.Vec3{X: 62, Y: 58, Z: 68},
 					MaterialName: "GreenGlass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 67, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 67, Z: 55},
+					Vertex0:      &pb_transport.Vec3{X: 32, Y: 58, Z: 38},
+					Vertex1:      &pb_transport.Vec3{X: 62, Y: 58, Z: 68},
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 62, Z: 62},
+					MaterialName: "GreenGlass",
+				},
+				// Cube top face
+				{
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 82, Z: 32},
+					Vertex1:      &pb_transport.Vec3{X: 62, Y: 78, Z: 38},
+					Vertex2:      &pb_transport.Vec3{X: 68, Y: 82, Z: 62},
 					MaterialName: "GreenGlass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 67, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 67, Z: 45},
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 82, Z: 32},
+					Vertex1:      &pb_transport.Vec3{X: 68, Y: 82, Z: 62},
+					Vertex2:      &pb_transport.Vec3{X: 32, Y: 78, Z: 68},
+					MaterialName: "GreenGlass",
+				},
+				// Cube front face
+				{
+					Vertex0:      &pb_transport.Vec3{X: 32, Y: 58, Z: 38},
+					Vertex1:      &pb_transport.Vec3{X: 68, Y: 62, Z: 32},
+					Vertex2:      &pb_transport.Vec3{X: 62, Y: 78, Z: 38},
 					MaterialName: "GreenGlass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 67, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 67, Z: 45},
+					Vertex0:      &pb_transport.Vec3{X: 32, Y: 58, Z: 38},
+					Vertex1:      &pb_transport.Vec3{X: 62, Y: 78, Z: 38},
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 82, Z: 32},
 					MaterialName: "GreenGlass",
 				},
-				// Face 2 (bottom pentagon)
+				// Cube back face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 33, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 33, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 33, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 33, Z: 55},
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 62, Z: 62},
+					Vertex1:      &pb_transport.Vec3{X: 62, Y: 58, Z: 68},
+					Vertex2:      &pb_transport.Vec3{X: 68, Y: 82, Z: 62},
 					MaterialName: "GreenGlass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 33, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 33, Z: 45},
+					Vertex0:      &pb_transport.Vec3{X: 38, Y: 62, Z: 62},
+					Vertex1:      &pb_transport.Vec3{X: 68, Y: 82, Z: 62},
+					Vertex2:      &pb_transport.Vec3{X: 32, Y: 78, Z: 68},
+					MaterialName: "GreenGlass",
+				},
+				// Cube left face
+				{
+					Vertex0:      &pb_transport.Vec3{X: 32, Y: 58, Z: 38},
+					Vertex1:      &pb_transport.Vec3{X: 38, Y: 62, Z: 62},
+					Vertex2:      &pb_transport.Vec3{X: 32, Y: 78, Z: 68},
 					MaterialName: "GreenGlass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 33, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 33, Z: 45},
+					Vertex0:      &pb_transport.Vec3{X: 32, Y: 58, Z: 38},
+					Vertex1:      &pb_transport.Vec3{X: 32, Y: 78, Z: 68},
+					Vertex2:      &pb_transport.Vec3{X: 38, Y: 82, Z: 32},
 					MaterialName: "GreenGlass",
 				},
-				// Face 3 (front pentagon)
+				// Cube right face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 42, Z: 75},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 58, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 58, Z: 75},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 58, Z: 75},
+					Vertex0:      &pb_transport.Vec3{X: 68, Y: 62, Z: 32},
+					Vertex1:      &pb_transport.Vec3{X: 62, Y: 58, Z: 68},
+					Vertex2:      &pb_transport.Vec3{X: 68, Y: 82, Z: 62},
 					MaterialName: "GreenGlass",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 58, Z: 75},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 42, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 42, Z: 75},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 42, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				// Face 4 (back pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 42, Z: 25},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 58, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 58, Z: 25},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 58, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 58, Z: 25},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 42, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 42, Z: 25},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 42, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				// Face 5 (left pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 42, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 58, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 58, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 58, Z: 45},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 58, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 42, Z: 45},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 42, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 42, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				// Face 6 (right pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 42, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 58, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 58, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 58, Z: 45},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 58, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 42, Z: 45},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 42, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 42, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				// Face 7 (top-front pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 67, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 67, Z: 65},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 50, Y: 67, Z: 65},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 67, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				// Face 8 (top-back pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 67, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 67, Z: 35},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 50, Y: 67, Z: 35},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 67, Z: 45},
-					MaterialName: "GreenGlass",
-				},
-				// Face 9 (bottom-front pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 33, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 33, Z: 65},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 50, Y: 33, Z: 65},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 33, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				// Face 10 (bottom-back pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 33, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 33, Z: 35},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 50, Y: 33, Z: 35},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 33, Z: 45},
-					MaterialName: "GreenGlass",
-				},
-				// Face 11 (left-front pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 58, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 58, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 50, Y: 58, Z: 75},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 42, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				// Face 12 (right-front pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 58, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 58, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 50, Y: 58, Z: 75},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 42, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				// Face 13 (left-back pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 58, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 58, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 50, Y: 58, Z: 25},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 42, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				// Face 14 (right-back pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 58, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 58, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 50, Y: 58, Z: 25},
-					Vertex2:      &pb_transport.Vec3{X: 50, Y: 42, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				// Face 15 (top-left pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 67, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 67, Z: 50},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 67, Z: 50},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 67, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				// Face 16 (top-right pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 67, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 67, Z: 50},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 70, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 67, Z: 50},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 67, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				// Face 17 (bottom-left pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 33, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 33, Z: 50},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 33, Z: 50},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 33, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				// Face 18 (bottom-right pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 33, Z: 45},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 33, Z: 50},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 30, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 33, Z: 50},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 33, Z: 55},
-					MaterialName: "GreenGlass",
-				},
-				// Face 19 (front-left pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 58, Z: 75},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 50, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 50, Z: 75},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 42, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				// Face 20 (front-right pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 42, Z: 75},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 50, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 65},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 50, Z: 75},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 58, Z: 75},
-					MaterialName: "GreenGlass",
-				},
-				// Face 21 (back-left pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
-					Vertex1:      &pb_transport.Vec3{X: 45, Y: 58, Z: 25},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 50, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 50, Z: 25},
-					Vertex2:      &pb_transport.Vec3{X: 45, Y: 42, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				// Face 22 (back-right pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
-					Vertex1:      &pb_transport.Vec3{X: 55, Y: 42, Z: 25},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 50, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 50, Y: 50, Z: 35},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 50, Z: 25},
-					Vertex2:      &pb_transport.Vec3{X: 55, Y: 58, Z: 25},
-					MaterialName: "GreenGlass",
-				},
-				// Face 23 (left-top pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 58, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 67, Z: 50},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 67, Z: 50},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 58, Z: 45},
-					MaterialName: "GreenGlass",
-				},
-				// Face 24 (left-bottom pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 42, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 33, Z: 50},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 40, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 25, Y: 33, Z: 50},
-					Vertex2:      &pb_transport.Vec3{X: 25, Y: 42, Z: 45},
-					MaterialName: "GreenGlass",
-				},
-				// Face 25 (right-top pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 58, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 67, Z: 50},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 67, Z: 50},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 58, Z: 45},
-					MaterialName: "GreenGlass",
-				},
-				// Face 26 (right-bottom pentagon)
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 42, Z: 55},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 33, Z: 50},
-					MaterialName: "GreenGlass",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 60, Y: 50, Z: 50},
-					Vertex1:      &pb_transport.Vec3{X: 75, Y: 33, Z: 50},
-					Vertex2:      &pb_transport.Vec3{X: 75, Y: 42, Z: 45},
+					Vertex0:      &pb_transport.Vec3{X: 68, Y: 62, Z: 32},
+					Vertex1:      &pb_transport.Vec3{X: 68, Y: 82, Z: 62},
+					Vertex2:      &pb_transport.Vec3{X: 62, Y: 78, Z: 38},
 					MaterialName: "GreenGlass",
 				},
 			},

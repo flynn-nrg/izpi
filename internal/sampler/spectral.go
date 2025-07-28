@@ -8,7 +8,6 @@ import (
 	"github.com/flynn-nrg/izpi/internal/hitable"
 	"github.com/flynn-nrg/izpi/internal/pdf"
 	"github.com/flynn-nrg/izpi/internal/ray"
-	"github.com/flynn-nrg/izpi/internal/scatterrecord"
 	"github.com/flynn-nrg/izpi/internal/spectral"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
@@ -55,26 +54,12 @@ func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightS
 
 	// L(λ) = Le(λ) + ∫ f(λ) * L(λ) * cos(θ) / p(ω) dω
 	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
-		scattered, srec, ok := mat.SpectralScatter(r, rec, random)
+		_, srec, ok := mat.SpectralScatter(r, rec, random)
 		emitted := mat.EmittedSpectral(r, rec, rec.U(), rec.V(), r.Lambda(), rec.P())
 		if depth < s.maxDepth && ok {
 			if srec.IsSpecular() {
-				// For dielectric materials with absorption, recalculate path length with scene geometry
-				if dielectric, isDielectric := mat.(interface {
-					CalculatePathLength(ray.Ray, interface{}, ray.Ray, interface{}) float64
-				}); isDielectric {
-					// Recalculate path length using scene geometry for accurate Beer-Lambert absorption
-					pathLength := dielectric.CalculatePathLength(r, rec, scattered, world)
-					lambda := r.Lambda()
-					// Apply Beer-Lambert law: I = I₀ * exp(-α * d)
-					// For now, we'll use a simplified approach - in a full implementation,
-					// we'd get the absorption coefficient from the material
-					absorptionCoeff := 0.1 // Simplified - should come from material
-					albedo := math.Exp(-absorptionCoeff * pathLength)
-
-					// Create a new scatter record with the corrected albedo
-					srec = scatterrecord.NewSpectralScatterRecord(scattered, true, albedo, lambda, nil, 0.0, 0.0, nil)
-				}
+				// For dielectric materials with absorption, the path length calculation
+				// is now handled internally by the material using the stored world reference
 				return srec.Attenuation() * s.SampleSpectral(srec.SpecularRay(), world, lightShape, depth+1, random)
 			} else {
 				pLight := pdf.NewHitable(lightShape, rec.P())

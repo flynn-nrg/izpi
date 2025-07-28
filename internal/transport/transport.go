@@ -5,8 +5,10 @@ import (
 
 	"github.com/flynn-nrg/izpi/internal/camera"
 	"github.com/flynn-nrg/izpi/internal/hitable"
+	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/material"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
+	"github.com/flynn-nrg/izpi/internal/ray"
 	"github.com/flynn-nrg/izpi/internal/scene"
 	"github.com/flynn-nrg/izpi/internal/spectral"
 	"github.com/flynn-nrg/izpi/internal/texture"
@@ -53,11 +55,23 @@ func (t *Transport) ToScene() (*scene.Scene, error) {
 		}
 	}
 
-	return &scene.Scene{
+	// Create the scene
+	scene := &scene.Scene{
 		World:  hitable.NewSlice([]hitable.Hitable{hitable.NewBVH(hitables, 0, 1)}),
 		Lights: hitable.NewSlice(lights),
 		Camera: camera,
-	}, nil
+	}
+
+	// Set world reference on dielectric materials for path length calculation
+	for _, mat := range materials {
+		if dielectric, ok := mat.(interface{ SetWorld(material.SceneGeometry) }); ok {
+			// Create an adapter to convert HitableSlice to SceneGeometry
+			sceneGeometry := &sceneGeometryAdapter{scene.World}
+			dielectric.SetWorld(sceneGeometry)
+		}
+	}
+
+	return scene, nil
 }
 
 func (t *Transport) toSceneMaterials() (map[string]material.Material, error) {
@@ -495,4 +509,13 @@ func (t *Transport) toSceneSphere(sphere *pb_transport.Sphere) (*hitable.Sphere,
 	radius := float64(sphere.GetRadius())
 
 	return hitable.NewSphere(center, center, 0, 1, radius, material), nil
+}
+
+// sceneGeometryAdapter adapts HitableSlice to SceneGeometry interface
+type sceneGeometryAdapter struct {
+	world *hitable.HitableSlice
+}
+
+func (sga *sceneGeometryAdapter) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+	return sga.world.Hit(r, tMin, tMax)
 }

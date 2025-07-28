@@ -15,8 +15,8 @@ var _ Material = (*DiffuseLight)(nil)
 // DiffuseLight represents a diffuse light material.
 type DiffuseLight struct {
 	nonPBR
-	nonSpectral
 	nonPathLength
+	nonWorldSetter
 	emit         texture.Texture
 	spectralEmit texture.SpectralTexture
 }

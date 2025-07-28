@@ -64,7 +64,7 @@ func TestBeerLambertAttenuation(t *testing.T) {
 func TestPathLengthCalculation(t *testing.T) {
 	dielectric := NewDielectric(1.5)
 
-	// Create a hit record for a sphere at origin with radius 1
+	// Create a hit record
 	hitPoint := &vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5}
 	normal := &vec3.Vec3Impl{X: 0.577, Y: 0.577, Z: 0.577} // Normalized
 	hr := hitrecord.New(1.0, 0.0, 0.0, hitPoint, normal)
@@ -74,7 +74,13 @@ func TestPathLengthCalculation(t *testing.T) {
 	direction := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
 	r := ray.New(origin, direction, 0.0)
 
-	pathLength := dielectric.calculatePathLength(hr, r)
+	// Create a scattered ray
+	scattered := ray.New(origin, direction, 0.0)
+
+	// Create a mock world geometry for testing
+	mockWorld := &mockSceneGeometry{}
+
+	pathLength := dielectric.calculatePathLength(r, hr, scattered, mockWorld)
 
 	// For a sphere with radius ~0.866 (distance from origin to hit point)
 	// and ray passing through center, chord length should be ~1.732
@@ -83,9 +89,24 @@ func TestPathLengthCalculation(t *testing.T) {
 	}
 }
 
+// mockSceneGeometry is a simple mock for testing
+type mockSceneGeometry struct{}
+
+func (m *mockSceneGeometry) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, Material, bool) {
+	// Return a mock exit point for testing
+	exitPoint := &vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 1.5}
+	normal := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
+	hr := hitrecord.New(2.0, 0.0, 0.0, exitPoint, normal)
+	return hr, nil, true
+}
+
 func TestColoredGlassScattering(t *testing.T) {
 	absorptionCoeff := &vec3.Vec3Impl{X: 0.1, Y: 0.2, Z: 0.3}
 	dielectric := NewColoredDielectric(1.5, absorptionCoeff)
+
+	// Set up a mock world for path length calculation
+	mockWorld := &mockSceneGeometry{}
+	dielectric.SetWorld(mockWorld)
 
 	// Create a hit record
 	hitPoint := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
@@ -124,6 +145,10 @@ func TestSpectralColoredGlassScattering(t *testing.T) {
 	spectralRefIdx := texture.NewSpectralConstant(1.5, 550.0, 50.0)
 	spectralAbsorptionCoeff := texture.NewSpectralConstant(0.5, 480.0, 60.0)
 	dielectric := NewSpectralColoredDielectric(spectralRefIdx, spectralAbsorptionCoeff)
+
+	// Set up a mock world for path length calculation
+	mockWorld := &mockSceneGeometry{}
+	dielectric.SetWorld(mockWorld)
 
 	// Create a hit record
 	hitPoint := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}

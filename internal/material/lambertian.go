@@ -16,12 +16,12 @@ import (
 // Ensure interface compliance.
 var _ Material = (*Lambertian)(nil)
 
-// Lambertian represents a diffuse material.
+// Lambertian represents a lambertian material.
 type Lambertian struct {
-	nonEmitter
 	nonPBR
-	nonSpectral
+	nonEmitter
 	nonPathLength
+	nonWorldSetter
 	albedo         texture.Texture
 	spectralAlbedo texture.SpectralTexture
 }

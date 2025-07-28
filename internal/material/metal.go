@@ -17,6 +17,7 @@ type Metal struct {
 	nonPBR
 	nonSpectral
 	nonPathLength
+	nonWorldSetter
 	albedo *vec3.Vec3Impl
 	fuzz   float64
 }

@@ -26,6 +26,7 @@ type Material interface {
 	IsEmitter() bool
 	Emitted(rIn ray.Ray, rec *hitrecord.HitRecord, u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl
 	EmittedSpectral(rIn ray.Ray, rec *hitrecord.HitRecord, u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64
+	SetWorld(world SceneGeometry)
 }
 
 // nonPathLength is a stub for materials that don't need path length calculation
@@ -33,4 +34,11 @@ type nonPathLength struct{}
 
 func (npl *nonPathLength) CalculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray, world SceneGeometry) float64 {
 	return 0.0
+}
+
+// nonWorldSetter is a stub for materials that don't need world reference
+type nonWorldSetter struct{}
+
+func (nws *nonWorldSetter) SetWorld(world SceneGeometry) {
+	// Do nothing - this material doesn't need world reference
 }
