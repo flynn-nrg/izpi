@@ -3906,17 +3906,23 @@ func CornellBoxWaterSpectral(aspect float64) *pb_transport.Scene {
 					MaterialName: "Red",
 				},
 				// Water cube (40% of box height = 40 units, extending to walls)
+				// IMPORTANT: The water body must extend exactly to the Cornell Box walls (X=0-100, Z=0-100)
+				// with only a small Y offset (Y=0.01) to avoid floor intersection. This is critical because:
+				// 1. If there are gaps between water and walls, the walls won't be visible through the water
+				// 2. If the water intersects with walls/floor, it causes numerical precision issues and rendering artifacts
+				// 3. The small Y offset (0.01) prevents floor intersection while keeping gaps negligible
+				// 4. This construction ensures proper light propagation through the water body
 				// Water cube bottom face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
-					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0.01, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0.01, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0.01, Z: 100},
 					MaterialName: "Water",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
-					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0.01, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0.01, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0.01, Z: 100},
 					MaterialName: "Water",
 				},
 				// Water cube top face (at 40% height = 40 units)
@@ -3934,52 +3940,52 @@ func CornellBoxWaterSpectral(aspect float64) *pb_transport.Scene {
 				},
 				// Water cube front face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0.01, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0.01, Z: 0},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 40, Z: 0},
 					MaterialName: "Water",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0.01, Z: 0},
 					Vertex1:      &pb_transport.Vec3{X: 100, Y: 40, Z: 0},
 					Vertex2:      &pb_transport.Vec3{X: 0, Y: 40, Z: 0},
 					MaterialName: "Water",
 				},
 				// Water cube back face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
-					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0.01, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0.01, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 40, Z: 100},
 					MaterialName: "Water",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0.01, Z: 100},
 					Vertex1:      &pb_transport.Vec3{X: 100, Y: 40, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 0, Y: 40, Z: 100},
 					MaterialName: "Water",
 				},
 				// Water cube left face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0.01, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0.01, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 0, Y: 40, Z: 100},
 					MaterialName: "Water",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0.01, Z: 0},
 					Vertex1:      &pb_transport.Vec3{X: 0, Y: 40, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 0, Y: 40, Z: 0},
 					MaterialName: "Water",
 				},
 				// Water cube right face
 				{
-					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
-					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0.01, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0.01, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 40, Z: 100},
 					MaterialName: "Water",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0.01, Z: 0},
 					Vertex1:      &pb_transport.Vec3{X: 100, Y: 40, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 40, Z: 0},
 					MaterialName: "Water",
@@ -4139,6 +4145,302 @@ func CornellBoxWaterSpectral(aspect float64) *pb_transport.Scene {
 										PeakValue:        0.8,   // High reflectance at blue wavelengths
 										CenterWavelength: 480.0, // Blue wavelength
 										Width:            60.0,  // Broad reflectance in blue region
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// Spectral background - black (no emission)
+		SpectralBackground: &pb_transport.TabulatedSpectralConstant{
+			Wavelengths: []float32{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750},
+			Values:      []float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		},
+	}
+
+	return protoScene
+}
+
+// CornellBoxTransparentPyramidSpectral creates a Cornell Box scene with a floating pyramid
+// of transparent spheres to demonstrate refraction and transparency effects
+func CornellBoxTransparentPyramidSpectral(aspect float64) *pb_transport.Scene {
+	protoScene := &pb_transport.Scene{
+		Name:                 "Cornell Box Transparent Pyramid Spectral",
+		Version:              "1.0.0",
+		ColourRepresentation: pb_transport.ColourRepresentation_SPECTRAL,
+		Camera: &pb_transport.Camera{
+			Lookfrom: &pb_transport.Vec3{
+				X: 50,
+				Y: 50,
+				Z: -120,
+			},
+			Lookat: &pb_transport.Vec3{
+				X: 50,
+				Y: 50,
+				Z: 50,
+			},
+			Vup: &pb_transport.Vec3{
+				X: 0,
+				Y: 1,
+				Z: 0,
+			},
+			Vfov:      35,
+			Aspect:    float32(aspect),
+			Aperture:  0,
+			Focusdist: 10,
+			Time0:     0,
+			Time1:     1,
+		},
+		Objects: &pb_transport.SceneObjects{
+			Triangles: []*pb_transport.Triangle{
+				// Back wall (White)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
+					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
+					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				// Floor (White)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					MaterialName: "White",
+				},
+				// Ceiling (White)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "White",
+				},
+				// Light (white_light)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 33, Y: 99, Z: 33},
+					Vertex1:      &pb_transport.Vec3{X: 66, Y: 99, Z: 33},
+					Vertex2:      &pb_transport.Vec3{X: 66, Y: 99, Z: 66},
+					MaterialName: "white_light",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 33, Y: 99, Z: 33},
+					Vertex1:      &pb_transport.Vec3{X: 66, Y: 99, Z: 66},
+					Vertex2:      &pb_transport.Vec3{X: 33, Y: 99, Z: 66},
+					MaterialName: "white_light",
+				},
+				// Left wall (Green)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
+					MaterialName: "Green",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					MaterialName: "Green",
+				},
+				// Right wall (Red)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
+					MaterialName: "Red",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
+					MaterialName: "Red",
+				},
+			},
+			Spheres: []*pb_transport.Sphere{
+				// Pyramid of transparent spheres on the floor
+				// Bottom layer: 6 transparent spheres arranged in a triangle pattern
+				// Row 1: 3 spheres
+				{
+					Center:       &pb_transport.Vec3{X: 30, Y: 15, Z: 30},
+					Radius:       10,
+					MaterialName: "Transparent",
+				},
+				{
+					Center:       &pb_transport.Vec3{X: 50, Y: 15, Z: 30},
+					Radius:       10,
+					MaterialName: "Transparent",
+				},
+				{
+					Center:       &pb_transport.Vec3{X: 70, Y: 15, Z: 30},
+					Radius:       10,
+					MaterialName: "Transparent",
+				},
+				// Row 2: 2 spheres
+				{
+					Center:       &pb_transport.Vec3{X: 40, Y: 15, Z: 50},
+					Radius:       10,
+					MaterialName: "Transparent",
+				},
+				{
+					Center:       &pb_transport.Vec3{X: 60, Y: 15, Z: 50},
+					Radius:       10,
+					MaterialName: "Transparent",
+				},
+				// Row 3: 1 sphere
+				{
+					Center:       &pb_transport.Vec3{X: 50, Y: 15, Z: 70},
+					Radius:       10,
+					MaterialName: "Transparent",
+				},
+
+				// Middle layer: 3 transparent spheres positioned in gaps between bottom spheres
+				{
+					Center:       &pb_transport.Vec3{X: 40, Y: 28, Z: 40},
+					Radius:       10,
+					MaterialName: "Transparent",
+				},
+				{
+					Center:       &pb_transport.Vec3{X: 60, Y: 28, Z: 40},
+					Radius:       10,
+					MaterialName: "Transparent",
+				},
+				{
+					Center:       &pb_transport.Vec3{X: 50, Y: 28, Z: 60},
+					Radius:       10,
+					MaterialName: "Transparent",
+				},
+
+				// Top layer: 1 transparent sphere
+				{
+					Center:       &pb_transport.Vec3{X: 50, Y: 42, Z: 50},
+					Radius:       10,
+					MaterialName: "Transparent",
+				},
+			},
+		},
+		Materials: map[string]*pb_transport.Material{
+			"White": {
+				Name: "White",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 0.73,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Green": {
+				Name: "Green",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.9,
+										CenterWavelength: 540.0,
+										Width:            40.0,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"Red": {
+				Name: "Red",
+				Type: pb_transport.MaterialType_LAMBERT,
+				MaterialProperties: &pb_transport.Material_Lambert{
+					Lambert: &pb_transport.LambertMaterial{
+						AlbedoProperties: &pb_transport.LambertMaterial_SpectralAlbedo{
+							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
+									Gaussian: &pb_transport.GaussianSpectralConstant{
+										PeakValue:        0.9,
+										CenterWavelength: 640.0,
+										Width:            40.0,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"white_light": {
+				Name: "white_light",
+				Type: pb_transport.MaterialType_DIFFUSE_LIGHT,
+				MaterialProperties: &pb_transport.Material_Diffuselight{
+					Diffuselight: &pb_transport.DiffuseLightMaterial{
+						EmissionProperties: &pb_transport.DiffuseLightMaterial_SpectralEmit{
+							SpectralEmit: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 15.0,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			// Transparent material with minimal absorption for clear glass effect
+			"Transparent": {
+				Name: "Transparent",
+				Type: pb_transport.MaterialType_DIELECTRIC,
+				MaterialProperties: &pb_transport.Material_Dielectric{
+					Dielectric: &pb_transport.DielectricMaterial{
+						RefractiveIndexProperties: &pb_transport.DielectricMaterial_SpectralRefidx{
+							SpectralRefidx: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Tabulated{
+									Tabulated: &pb_transport.TabulatedSpectralConstant{
+										// Wavelengths in nanometers (visible spectrum)
+										Wavelengths: []float32{380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 750},
+										// Refractive indices for glass (slight dispersion)
+										Values: []float32{1.52, 1.51, 1.51, 1.50, 1.50, 1.49, 1.49, 1.48, 1.48, 1.47, 1.47, 1.46, 1.46, 1.45, 1.45, 1.44, 1.44, 1.43, 1.43, 1.42},
+									},
+								},
+							},
+						},
+						AbsorptionProperties: &pb_transport.DielectricMaterial_SpectralAbsorptionCoeff{
+							SpectralAbsorptionCoeff: &pb_transport.SpectralConstantTexture{
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
+									Neutral: &pb_transport.NeutralSpectralConstant{
+										Reflectance: 0.01, // Very low absorption for transparency
 									},
 								},
 							},
