@@ -101,6 +101,14 @@ func (spd *SpectralPowerDistribution) Normalise(numSamples int) {
 	}
 }
 
+// NormaliseAndScale normalises the spectral power distribution by dividing by numSamples
+// and then applies a scale factor in a single pass for efficiency
+func (spd *SpectralPowerDistribution) NormaliseAndScale(numSamples int, scale float64) {
+	for i, value := range spd.values {
+		spd.values[i] = (value / float64(numSamples)) * scale
+	}
+}
+
 // Wavelengths returns the wavelengths array
 func (spd *SpectralPowerDistribution) Wavelengths() []float64 {
 	return spd.wavelengths

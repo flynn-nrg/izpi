@@ -127,9 +127,16 @@ func (si *SpectralImage) transformRGBToSpectral() {
 
 // rgbToSpectralValue converts RGB values to a spectral value at a specific wavelength.
 // This uses an improved model with better wavelength ranges and falloff characteristics:
-// - Red channel influences longer wavelengths (580-750nm) with peak at 650nm
+// - Red channel influences longer wavelengths (600-750nm) with peak at 650nm
 // - Green channel influences medium wavelengths (480-620nm) with peak at 550nm
 // - Blue channel influences shorter wavelengths (380-520nm) with peak at 450nm
+//
+// Note: The red channel has a slight bias (reduced strength by 20%) to compensate for
+// the fact that many PBR materials (like metals, rust, etc.) naturally have strong
+// red components in their albedo textures. Without this bias, the spectral conversion
+// would over-emphasize red, making materials appear too reddish compared to the RGB reference.
+// This bias helps maintain color balance while still preserving the spectral characteristics
+// of the materials.
 func (si *SpectralImage) rgbToSpectralValue(r, g, b, wavelength float64) float64 {
 	var spectralValue float64
 
