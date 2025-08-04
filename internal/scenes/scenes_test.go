@@ -133,8 +133,13 @@ func TestCornellBoxPBRSpectral(t *testing.T) {
 	diffuseLight := lightMaterial.GetDiffuselight()
 	assert.NotNil(t, diffuseLight)
 	assert.NotNil(t, diffuseLight.GetSpectralEmit())
-	assert.NotNil(t, diffuseLight.GetSpectralEmit().GetNeutral())
-	assert.Equal(t, float32(15.0), diffuseLight.GetSpectralEmit().GetNeutral().Reflectance)
+	assert.NotNil(t, diffuseLight.GetSpectralEmit().GetTabulated())
+	assert.Len(t, diffuseLight.GetSpectralEmit().GetTabulated().Wavelengths, 38)
+	assert.Len(t, diffuseLight.GetSpectralEmit().GetTabulated().Values, 38)
+	assert.Equal(t, float32(380), diffuseLight.GetSpectralEmit().GetTabulated().Wavelengths[0])
+	assert.Equal(t, float32(750), diffuseLight.GetSpectralEmit().GetTabulated().Wavelengths[37])
+	assert.Equal(t, float32(15.0), diffuseLight.GetSpectralEmit().GetTabulated().Values[0])
+	assert.Equal(t, float32(15.0), diffuseLight.GetSpectralEmit().GetTabulated().Values[37])
 
 	// Test spectral glass material
 	glassMaterial := scene.Materials["Glass"]

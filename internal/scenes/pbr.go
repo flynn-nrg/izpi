@@ -835,9 +835,12 @@ func CornellBoxPBRSpectral(aspect float64) *pb_transport.Scene {
 					Diffuselight: &pb_transport.DiffuseLightMaterial{
 						EmissionProperties: &pb_transport.DiffuseLightMaterial_SpectralEmit{
 							SpectralEmit: &pb_transport.SpectralConstantTexture{
-								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
-									Neutral: &pb_transport.NeutralSpectralConstant{
-										Reflectance: 15.0, // Bright white light
+								SpectralProperties: &pb_transport.SpectralConstantTexture_Tabulated{
+									Tabulated: &pb_transport.TabulatedSpectralConstant{
+										// Wavelengths in nanometers (visible spectrum)
+										Wavelengths: []float32{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750},
+										// White light spectrum (daylight-like, balanced across all wavelengths)
+										Values: []float32{15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0},
 									},
 								},
 							},
