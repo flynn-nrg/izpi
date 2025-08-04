@@ -2,6 +2,7 @@ package leader
 
 import (
 	"context"
+	"fmt"
 	"image"
 	"strings"
 	"sync"
@@ -63,7 +64,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		}
 	*/
 
-	protoScene = scenes.CornellBoxTransparentPyramidSpectral(aspectRatio)
+	protoScene = scenes.CornellBoxPBRRGB(aspectRatio)
 
 	// Override the sampler type if the scene is spectral.
 	if protoScene.GetColourRepresentation() == pb_transport.ColourRepresentation_SPECTRAL {
@@ -112,6 +113,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	// Free up resources
 	protoScene = nil
 
+	fmt.Println("Rendering scene, sampler type: ", cfg.Sampler)
 	r := render.New(
 		sceneData,
 		int(cfg.XSize), int(cfg.YSize),

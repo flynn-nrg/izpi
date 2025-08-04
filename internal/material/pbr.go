@@ -108,9 +108,6 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	roughnessValue := (roughness.X + roughness.Y + roughness.Z) / 3.0
 	metalnessValue := (metalness.X + metalness.Y + metalness.Z) / 3.0
 
-	// Adjust for better appearance
-	adjustedMetalness := metalnessValue * (1.0 - roughnessValue*0.5)
-
 	// Create ONB for local space calculations
 	uvw := onb.New()
 	uvw.BuildFromW(normal)
@@ -118,26 +115,41 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	// Calculate reflection vector for specular component
 	reflected := reflect(vec3.UnitVector(r.Direction()), normal)
 
-	// Adjust roughness factor based on material type
-	roughnessFactor := math.Max(0.2, roughnessValue)
-	randomDir := randomInUnitSphere(random)
-	specularDir := vec3.Add(reflected, vec3.ScalarMul(randomDir, roughnessFactor))
-	specularDir = vec3.UnitVector(specularDir)
+	// Balanced PBR scattering logic using roughness to control specular probability
+	var finalDir *vec3.Vec3Impl
+	var isSpecular bool
 
-	// Calculate diffuse direction
-	diffuseDir := uvw.Local(vec3.RandomCosineDirection(random))
-	diffuseDir = vec3.UnitVector(diffuseDir)
+	// Calculate Fresnel effect (simplified)
+	cosTheta := math.Abs(vec3.Dot(vec3.UnitVector(r.Direction()), normal))
+	fresnel := 0.04 + (1.0-0.04)*math.Pow(1.0-cosTheta, 5.0)
 
-	// Mix specular and diffuse based on metalness
-	finalDir := vec3.Add(vec3.ScalarMul(specularDir, adjustedMetalness), vec3.ScalarMul(diffuseDir, 1.0-adjustedMetalness))
-	finalDir = vec3.UnitVector(finalDir)
+	// Adjust fresnel based on metalness
+	fresnel = fresnel + (metalnessValue * 0.5)
+
+	// Use roughness to control specular probability
+	// Lower roughness = higher chance of specular reflection
+	specularProbability := fresnel * (1.0 - roughnessValue)
+
+	if random.Float64() < specularProbability {
+		// Specular reflection
+		roughnessFactor := math.Max(0.01, roughnessValue*0.3)
+		randomDir := randomInUnitSphere(random)
+		specularDir := vec3.Add(reflected, vec3.ScalarMul(randomDir, roughnessFactor))
+		finalDir = vec3.UnitVector(specularDir)
+		isSpecular = true
+	} else {
+		// Diffuse reflection
+		diffuseDir := uvw.Local(vec3.RandomCosineDirection(random))
+		finalDir = vec3.UnitVector(diffuseDir)
+		isSpecular = false
+	}
 
 	scattered := ray.New(hr.P(), finalDir, r.Time())
 
 	// Create PDF for importance sampling
 	pdf := pdf.NewCosine(normal)
 
-	scatterRecord := scatterrecord.New(scattered, false, albedo, nil, nil, nil, pdf)
+	scatterRecord := scatterrecord.New(scattered, isSpecular, albedo, nil, nil, nil, pdf)
 	return scattered, scatterRecord, true
 }
 
@@ -196,9 +208,6 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	roughnessValue := (roughness.X + roughness.Y + roughness.Z) / 3.0
 	metalnessValue := (metalness.X + metalness.Y + metalness.Z) / 3.0
 
-	// Adjust for better appearance
-	adjustedMetalness := metalnessValue * (1.0 - roughnessValue*0.5)
-
 	// Create ONB for local space calculations
 	uvw := onb.New()
 	uvw.BuildFromW(normal)
@@ -206,26 +215,41 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	// Calculate reflection vector for specular component
 	reflected := reflect(vec3.UnitVector(r.Direction()), normal)
 
-	// Adjust roughness factor based on material type
-	roughnessFactor := math.Max(0.2, roughnessValue)
-	randomDir := randomInUnitSphere(random)
-	specularDir := vec3.Add(reflected, vec3.ScalarMul(randomDir, roughnessFactor))
-	specularDir = vec3.UnitVector(specularDir)
+	// Balanced PBR scattering logic using roughness to control specular probability
+	var finalDir *vec3.Vec3Impl
+	var isSpecular bool
 
-	// Calculate diffuse direction
-	diffuseDir := uvw.Local(vec3.RandomCosineDirection(random))
-	diffuseDir = vec3.UnitVector(diffuseDir)
+	// Calculate Fresnel effect (simplified)
+	cosTheta := math.Abs(vec3.Dot(vec3.UnitVector(r.Direction()), normal))
+	fresnel := 0.04 + (1.0-0.04)*math.Pow(1.0-cosTheta, 5.0)
 
-	// Mix specular and diffuse based on metalness
-	finalDir := vec3.Add(vec3.ScalarMul(specularDir, adjustedMetalness), vec3.ScalarMul(diffuseDir, 1.0-adjustedMetalness))
-	finalDir = vec3.UnitVector(finalDir)
+	// Adjust fresnel based on metalness
+	fresnel = fresnel + (metalnessValue * 0.5)
+
+	// Use roughness to control specular probability
+	// Lower roughness = higher chance of specular reflection
+	specularProbability := fresnel * (1.0 - roughnessValue)
+
+	if random.Float64() < specularProbability {
+		// Specular reflection
+		roughnessFactor := math.Max(0.01, roughnessValue*0.3)
+		randomDir := randomInUnitSphere(random)
+		specularDir := vec3.Add(reflected, vec3.ScalarMul(randomDir, roughnessFactor))
+		finalDir = vec3.UnitVector(specularDir)
+		isSpecular = true
+	} else {
+		// Diffuse reflection
+		diffuseDir := uvw.Local(vec3.RandomCosineDirection(random))
+		finalDir = vec3.UnitVector(diffuseDir)
+		isSpecular = false
+	}
 
 	scattered := ray.NewWithLambda(hr.P(), finalDir, r.Time(), lambda)
 
 	// Create PDF for importance sampling
 	pdf := pdf.NewCosine(normal)
 
-	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, false, albedo, lambda, nil, 0.0, 0.0, pdf)
+	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, isSpecular, albedo, lambda, nil, 0.0, 0.0, pdf)
 	return scattered, scatterRecord, true
 }
 
