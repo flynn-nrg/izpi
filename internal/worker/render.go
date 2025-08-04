@@ -104,7 +104,7 @@ func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom
 	// Apply brightness compensation to match RGB renderer
 	// The normalization makes values much smaller, so we scale them back up
 	// Use a fixed scaling factor that doesn't depend on numSamples
-	scale := 10.0 // Increased scaling factor to make scene much brighter
+	scale := 5.0 // Increased scaling factor to make scene much brighter
 	for i := range col.Values() {
 		col.SetValue(i, col.Values()[i]*scale)
 	}
