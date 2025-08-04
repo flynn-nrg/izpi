@@ -126,60 +126,52 @@ func (si *SpectralImage) transformRGBToSpectral() {
 }
 
 // rgbToSpectralValue converts RGB values to a spectral value at a specific wavelength.
-// This uses a simple model where:
-// - Red channel influences longer wavelengths (600-750nm)
-// - Green channel influences medium wavelengths (500-600nm)
-// - Blue channel influences shorter wavelengths (380-500nm)
+// This uses an improved model with better wavelength ranges and falloff characteristics:
+// - Red channel influences longer wavelengths (580-750nm) with peak at 650nm
+// - Green channel influences medium wavelengths (480-620nm) with peak at 550nm
+// - Blue channel influences shorter wavelengths (380-520nm) with peak at 450nm
 func (si *SpectralImage) rgbToSpectralValue(r, g, b, wavelength float64) float64 {
-	// Define wavelength ranges for each color channel
-	redRange := [2]float64{600.0, 750.0}
-	greenRange := [2]float64{500.0, 600.0}
-	blueRange := [2]float64{380.0, 500.0}
-
 	var spectralValue float64
 
-	// Red channel contribution
-	if wavelength >= redRange[0] && wavelength <= redRange[1] {
-		// Use a simple linear falloff from center of red range
-		center := (redRange[0] + redRange[1]) / 2.0
+	// Red channel contribution (580-750nm, peak at 650nm)
+	if wavelength >= 580.0 && wavelength <= 750.0 {
+		// Use a Gaussian-like falloff centered at 650nm
+		center := 650.0
 		distance := math.Abs(wavelength - center)
-		maxDistance := (redRange[1] - redRange[0]) / 2.0
-		falloff := 1.0 - (distance / maxDistance)
-		if falloff > 0 {
-			redContribution := r * falloff
-			spectralValue += redContribution
-		}
+		width := 70.0 // Wider range for red
+		falloff := math.Exp(-(distance * distance) / (2.0 * width * width))
+		redContribution := r * falloff
+		spectralValue += redContribution
 	}
 
-	// Green channel contribution
-	if wavelength >= greenRange[0] && wavelength <= greenRange[1] {
-		// Use a simple linear falloff from center of green range
-		center := (greenRange[0] + greenRange[1]) / 2.0
+	// Green channel contribution (480-620nm, peak at 550nm)
+	if wavelength >= 480.0 && wavelength <= 620.0 {
+		// Use a Gaussian-like falloff centered at 550nm
+		center := 550.0
 		distance := math.Abs(wavelength - center)
-		maxDistance := (greenRange[1] - greenRange[0]) / 2.0
-		falloff := 1.0 - (distance / maxDistance)
-		if falloff > 0 {
-			greenContribution := g * falloff
-			spectralValue += greenContribution
-		}
+		width := 50.0
+		falloff := math.Exp(-(distance * distance) / (2.0 * width * width))
+		greenContribution := g * falloff
+		spectralValue += greenContribution
 	}
 
-	// Blue channel contribution
-	if wavelength >= blueRange[0] && wavelength <= blueRange[1] {
-		// Use a simple linear falloff from center of blue range
-		center := (blueRange[0] + blueRange[1]) / 2.0
+	// Blue channel contribution (380-520nm, peak at 450nm)
+	if wavelength >= 380.0 && wavelength <= 520.0 {
+		// Use a Gaussian-like falloff centered at 450nm
+		center := 450.0
 		distance := math.Abs(wavelength - center)
-		maxDistance := (blueRange[1] - blueRange[0]) / 2.0
-		falloff := 1.0 - (distance / maxDistance)
-		if falloff > 0 {
-			blueContribution := b * falloff
-			spectralValue += blueContribution
-		}
+		width := 50.0
+		falloff := math.Exp(-(distance * distance) / (2.0 * width * width))
+		blueContribution := b * falloff
+		spectralValue += blueContribution
 	}
 
-	// Add some baseline reflectance to avoid completely black areas
-	baseline := 0.1
-	spectralValue = math.Max(baseline, spectralValue)
+	// For neutral colors (when r ≈ g ≈ b), ensure truly neutral response
+	// by adding a small constant across all wavelengths
+	if math.Abs(r-g) < 0.1 && math.Abs(g-b) < 0.1 && math.Abs(r-b) < 0.1 {
+		// This is a neutral color, add a small constant to ensure proper white/gray
+		spectralValue = math.Max(spectralValue, r*0.8) // Use the RGB value as base
+	}
 
 	// Clamp to [0, 1]
 	return math.Max(0.0, math.Min(1.0, spectralValue))
