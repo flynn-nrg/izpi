@@ -133,14 +133,14 @@ func (si *SpectralImage) transformRGBToSpectral() {
 func (si *SpectralImage) rgbToSpectralValue(r, g, b, wavelength float64) float64 {
 	var spectralValue float64
 
-	// Red channel contribution (580-750nm, peak at 650nm)
-	if wavelength >= 580.0 && wavelength <= 750.0 {
+	// Red channel contribution (600-750nm, peak at 650nm) - reduced range
+	if wavelength >= 600.0 && wavelength <= 750.0 {
 		// Use a Gaussian-like falloff centered at 650nm
 		center := 650.0
 		distance := math.Abs(wavelength - center)
-		width := 70.0 // Wider range for red
+		width := 50.0 // Reduced width for less red influence
 		falloff := math.Exp(-(distance * distance) / (2.0 * width * width))
-		redContribution := r * falloff
+		redContribution := r * falloff * 0.8 // Reduced strength by 20%
 		spectralValue += redContribution
 	}
 
