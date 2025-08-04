@@ -43,6 +43,12 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 
 			// Normalise the spectral power distribution.
 			col.Normalise(w.numSamples)
+			// Apply brightness compensation to match RGB renderer
+			// The normalization makes values much smaller, so we scale them back up
+			scale := float64(w.numSamples) * 0.1 // Empirical scaling factor
+			for i := range col.Values() {
+				col.SetValue(i, col.Values()[i]*scale)
+			}
 			// Convert to RGB.
 			r, g, b := spectral.SPDToRGB(col)
 			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: r, G: g, B: b, A: 1.0})

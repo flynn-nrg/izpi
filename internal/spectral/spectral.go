@@ -275,6 +275,9 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 		}
 	}
 
+	// For colored materials, use the CIE integration as-is
+	// The renderer should handle the final brightness adjustment
+
 	// Convert XYZ to RGB
 	r = 3.2406*x - 1.5372*y - 0.4986*z
 	g = -0.9689*x + 1.8758*y + 0.0415*z
