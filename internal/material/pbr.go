@@ -21,12 +21,13 @@ type PBR struct {
 	nonEmitter
 	nonPathLength
 	nonWorldSetter
-	albedo    texture.Texture
-	normalMap texture.Texture
-	roughness texture.Texture
-	metalness texture.Texture
-	sss       texture.Texture // Subsurface scattering strength
-	sssRadius float64         // Subsurface scattering radius
+	albedo         texture.Texture
+	spectralAlbedo texture.SpectralTexture
+	normalMap      texture.Texture
+	roughness      texture.Texture
+	metalness      texture.Texture
+	sss            texture.Texture // Subsurface scattering strength
+	sssRadius      float64         // Subsurface scattering radius
 }
 
 // NewPBR returns a new PBR material with the supplied textures.
@@ -38,6 +39,19 @@ func NewPBR(albedo, normalMap, roughness, metalness, sss texture.Texture, sssRad
 		metalness: metalness,
 		sss:       sss,
 		sssRadius: sssRadius,
+	}
+}
+
+// NewPBRWithSpectralAlbedo returns a new PBR material with spectral albedo support.
+func NewPBRWithSpectralAlbedo(albedo texture.Texture, spectralAlbedo texture.SpectralTexture, normalMap, roughness, metalness, sss texture.Texture, sssRadius float64) *PBR {
+	return &PBR{
+		albedo:         albedo,
+		spectralAlbedo: spectralAlbedo,
+		normalMap:      normalMap,
+		roughness:      roughness,
+		metalness:      metalness,
+		sss:            sss,
+		sssRadius:      sssRadius,
 	}
 }
 
@@ -129,9 +143,9 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 
 // SpectralScatter computes how the ray bounces off the surface of a PBR material with spectral properties.
 func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
-	// For spectral rendering, use the same scattering logic but with spectral albedo
-	albedo := pbr.albedo.Value(hr.U(), hr.V(), hr.P()).X // Use red component as approximation
+	// Use spectral albedo if available, otherwise fall back to RGB albedo
 	lambda := r.Lambda()
+	albedo := pbr.SpectralAlbedo(hr.U(), hr.V(), lambda, hr.P())
 
 	// Handle normal map - convert from tangent space to world space
 	var normal *vec3.Vec3Impl
@@ -236,5 +250,9 @@ func (pbr *PBR) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
 func (pbr *PBR) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+	if pbr.spectralAlbedo != nil {
+		return pbr.spectralAlbedo.Value(u, v, lambda, p)
+	}
+	// Fallback to RGB albedo if no spectral albedo is provided
 	return pbr.albedo.Value(u, v, p).X // Use red component as approximation
 }

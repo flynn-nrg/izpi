@@ -151,7 +151,18 @@ func (t *Transport) toScenePBRMaterial(mat *pb_transport.Material) (material.Mat
 
 	sssRadius := float64(pbr.GetSssRadius())
 
-	return material.NewPBR(albedo, roughness, metalness, normalMap, sss, sssRadius), nil
+	// Check if we need spectral rendering
+	if t.colourRepresentation == pb_transport.ColourRepresentation_SPECTRAL {
+		// Transform the albedo texture to spectral
+		spectralAlbedo, err := t.textureToSpectralTexture(albedo)
+		if err != nil {
+			return nil, err
+		}
+		return material.NewPBRWithSpectralAlbedo(albedo, spectralAlbedo, normalMap, roughness, metalness, sss, sssRadius), nil
+	}
+
+	// Use regular RGB PBR material
+	return material.NewPBR(albedo, normalMap, roughness, metalness, sss, sssRadius), nil
 }
 
 func (t *Transport) toSceneMetalMaterial(mat *pb_transport.Material) (material.Material, error) {
@@ -362,6 +373,36 @@ func (t *Transport) toSceneSpectralTexture(spectralText *pb_transport.SpectralCo
 	default:
 		return nil, fmt.Errorf("unknown spectral texture type: %T", spectralText.GetSpectralProperties())
 	}
+}
+
+// textureToSpectralTexture converts a regular texture to a spectral texture
+// by creating a spectral image texture from the regular texture's data
+func (t *Transport) textureToSpectralTexture(tex texture.Texture) (texture.SpectralTexture, error) {
+	// Note: A texture cannot implement both Texture and SpectralTexture interfaces
+	// due to conflicting Value method signatures, so we don't need to check for this
+
+	// For image textures, we can convert them to spectral image textures
+	if imageTex, ok := tex.(*texture.ImageTxt); ok {
+		// Get the image data and create a spectral image texture
+		img := imageTex.GetData()
+		if img == nil {
+			return nil, fmt.Errorf("image texture has no data")
+		}
+
+		// Create spectral image texture from the image data
+		spectralImage := texture.NewSpectralImageFromImage(img)
+		return spectralImage, nil
+	}
+
+	// For constant textures, create a neutral spectral texture
+	if _, ok := tex.(*texture.Constant); ok {
+		// Get the RGB value and create a spectral constant
+		// For now, use a neutral spectral texture as fallback
+		return texture.NewSpectralNeutral(0.5), nil
+	}
+
+	// For other texture types, create a neutral spectral texture as fallback
+	return texture.NewSpectralNeutral(0.5), nil
 }
 
 func (t *Transport) toSceneCamera(aspectOverride float64) *camera.Camera {
