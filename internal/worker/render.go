@@ -101,6 +101,13 @@ func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom
 
 	// Normalise the spectral power distribution.
 	col.Normalise(s.samplesPerPixel)
+	// Apply brightness compensation to match RGB renderer
+	// The normalization makes values much smaller, so we scale them back up
+	// Use a fixed scaling factor that doesn't depend on numSamples
+	scale := 2.0 // Fixed scaling factor to make scene brighter and match RGB
+	for i := range col.Values() {
+		col.SetValue(i, col.Values()[i]*scale)
+	}
 	// Convert to RGB.
 	r, g, b := spectral.SPDToRGB(col)
 

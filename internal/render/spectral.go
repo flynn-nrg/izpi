@@ -45,7 +45,8 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 			col.Normalise(w.numSamples)
 			// Apply brightness compensation to match RGB renderer
 			// The normalization makes values much smaller, so we scale them back up
-			scale := float64(w.numSamples) * 0.1 // Empirical scaling factor
+			// Use a fixed scaling factor that doesn't depend on numSamples
+			scale := 2.0 // Fixed scaling factor to make scene brighter and match RGB
 			for i := range col.Values() {
 				col.SetValue(i, col.Values()[i]*scale)
 			}
