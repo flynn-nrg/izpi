@@ -799,7 +799,7 @@ func CornellBoxPBRSpectral(aspect float64) *pb_transport.Scene {
 							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
 								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
 									Gaussian: &pb_transport.GaussianSpectralConstant{
-										PeakValue:        0.73,
+										PeakValue:        0.9,   // Changed from 0.73 to 0.9
 										CenterWavelength: 550.0, // Green wavelength
 										Width:            50.0,  // Narrow bandwidth for green
 									},
@@ -818,7 +818,7 @@ func CornellBoxPBRSpectral(aspect float64) *pb_transport.Scene {
 							SpectralAlbedo: &pb_transport.SpectralConstantTexture{
 								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
 									Gaussian: &pb_transport.GaussianSpectralConstant{
-										PeakValue:        0.73,
+										PeakValue:        0.9,   // Changed from 0.73 to 0.9 for more vivid red
 										CenterWavelength: 650.0, // Red wavelength
 										Width:            50.0,  // Narrow bandwidth for red
 									},
@@ -1169,6 +1169,11 @@ func CornellBoxPBRSpectral(aspect float64) *pb_transport.Scene {
 			"textures/lightgold_normal-ogl.png": {
 				Filename: "textures/lightgold_normal-ogl.png",
 			},
+		},
+		// Spectral background - black (no emission)
+		SpectralBackground: &pb_transport.TabulatedSpectralConstant{
+			Wavelengths: []float32{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750},
+			Values:      []float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		},
 	}
 
