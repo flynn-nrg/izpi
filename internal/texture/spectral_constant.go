@@ -43,13 +43,19 @@ func NewSpectralConstantFromSPD(spd *spectral.SpectralPowerDistribution) *Spectr
 }
 
 // NewSpectralNeutral returns a spectral texture for neutral materials (white, gray, black).
-// This creates a very broad Gaussian that approximates uniform response across all wavelengths.
+// This creates a truly neutral response with constant reflectance across all wavelengths.
 func NewSpectralNeutral(reflectance float64) *SpectralConstant {
+	// Create a tabulated SPD with constant value across all wavelengths
+	wavelengths := []float64{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750}
+	values := make([]float64, len(wavelengths))
+	for i := range values {
+		values[i] = reflectance
+	}
+
+	spd := spectral.NewSPD(wavelengths, values)
 	return &SpectralConstant{
-		peakValue:        reflectance,
-		centerWavelength: 550.0, // Center in middle of visible spectrum
-		width:            200.0, // Very broad response
-		useTabulated:     false,
+		spd:          spd,
+		useTabulated: true,
 	}
 }
 

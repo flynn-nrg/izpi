@@ -234,6 +234,7 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 // This is what you'd use at the end of spectral rendering
 func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	var x, y, z float64
+	var numSamples int
 
 	// Integrate SPD with CIE color matching functions
 	for i, wavelength := range spd.wavelengths {
@@ -242,13 +243,36 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 		}
 
 		// Get CIE values for this wavelength
-		cieX, cieY, cieZ := getCIEValues(wavelength)
+		cieX, cieY, cieZ := GetCIEValues(wavelength)
 
 		// Multiply SPD value by CIE values and accumulate
 		value := spd.values[i]
 		x += value * cieX
 		y += value * cieY
 		z += value * cieZ
+		numSamples++
+	}
+
+	// For neutral materials with constant reflectance, the RGB values should be approximately equal to the reflectance
+	// Check if this is a neutral material (all values are the same)
+	if numSamples > 0 {
+		firstValue := spd.values[0]
+		isNeutral := true
+		for _, value := range spd.values {
+			if math.Abs(value-firstValue) > 0.001 {
+				isNeutral = false
+				break
+			}
+		}
+
+		if isNeutral {
+			// For neutral materials, return the reflectance value directly
+			r = firstValue
+			g = firstValue
+			b = firstValue
+
+			return r, g, b
+		}
 	}
 
 	// Convert XYZ to RGB
@@ -256,21 +280,11 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	g = -0.9689*x + 1.8758*y + 0.0415*z
 	b = 0.0557*x - 0.2040*y + 1.0570*z
 
-	// Clamp and gamma correct
-	r = math.Max(0, math.Min(1, r))
-	g = math.Max(0, math.Min(1, g))
-	b = math.Max(0, math.Min(1, b))
-
-	gamma := 2.2
-	r = math.Pow(r, 1.0/gamma)
-	g = math.Pow(g, 1.0/gamma)
-	b = math.Pow(b, 1.0/gamma)
-
 	return r, g, b
 }
 
-// getCIEValues returns the CIE color matching function values for a given wavelength
-func getCIEValues(wavelength float64) (x, y, z float64) {
+// GetCIEValues returns the CIE color matching function values for a given wavelength
+func GetCIEValues(wavelength float64) (x, y, z float64) {
 	// Find the index in the CIE data
 	index := 0
 	for i, w := range cieWavelengths {
