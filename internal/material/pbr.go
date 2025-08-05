@@ -249,7 +249,16 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	// Create PDF for importance sampling
 	pdf := pdf.NewCosine(normal)
 
-	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, isSpecular, albedo, lambda, nil, 0.0, 0.0, pdf)
+	// Boost specular reflections to match RGB brightness
+	var finalAlbedo float64
+	if isSpecular {
+		// Apply a boost factor for specular reflections to compensate for spectral conversion
+		finalAlbedo = albedo * 1.2 // 20% boost for specular reflections
+	} else {
+		finalAlbedo = albedo
+	}
+
+	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, isSpecular, finalAlbedo, lambda, nil, 0.0, 0.0, pdf)
 	return scattered, scatterRecord, true
 }
 
@@ -278,5 +287,7 @@ func (pbr *PBR) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec
 		return pbr.spectralAlbedo.Value(u, v, lambda, p)
 	}
 	// Fallback to RGB albedo if no spectral albedo is provided
-	return pbr.albedo.Value(u, v, p).X // Use red component as approximation
+	// Use luminance-weighted average to preserve overall brightness
+	rgbAlbedo := pbr.albedo.Value(u, v, p)
+	return 0.299*rgbAlbedo.X + 0.587*rgbAlbedo.Y + 0.114*rgbAlbedo.Z
 }

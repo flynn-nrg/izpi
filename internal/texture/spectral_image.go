@@ -176,8 +176,8 @@ func (si *SpectralImage) rgbToSpectralValue(r, g, b, wavelength float64) float64
 	// For neutral colors (when r ≈ g ≈ b), ensure truly neutral response
 	// by adding a small constant across all wavelengths
 	if math.Abs(r-g) < 0.1 && math.Abs(g-b) < 0.1 && math.Abs(r-b) < 0.1 {
-		// This is a neutral color, add a small constant to ensure proper white/gray
-		spectralValue = math.Max(spectralValue, r*0.8) // Use the RGB value as base
+		// This is a neutral color, preserve more brightness for specular highlights
+		spectralValue = math.Max(spectralValue, r*0.95) // Increased from 0.8 to 0.95
 	}
 
 	// Clamp to [0, 1]

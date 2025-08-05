@@ -395,10 +395,11 @@ func (t *Transport) textureToSpectralTexture(tex texture.Texture) (texture.Spect
 	}
 
 	// For constant textures, create a neutral spectral texture
-	if _, ok := tex.(*texture.Constant); ok {
-		// Get the RGB value and create a spectral constant
-		// For now, use a neutral spectral texture as fallback
-		return texture.NewSpectralNeutral(0.5), nil
+	if constTex, ok := tex.(*texture.Constant); ok {
+		// Get the RGB value and create a spectral constant with proper luminance
+		rgbValue := constTex.Value(0, 0, nil) // UV coordinates don't matter for constant textures
+		luminance := 0.299*rgbValue.X + 0.587*rgbValue.Y + 0.114*rgbValue.Z
+		return texture.NewSpectralNeutral(luminance), nil
 	}
 
 	// For other texture types, create a neutral spectral texture as fallback
