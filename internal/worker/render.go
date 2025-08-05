@@ -88,9 +88,12 @@ func (s *workerServer) renderTileRGB(x, y, nx, ny float64, rand *fastrandom.LCG)
 
 func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom.LCG) *vec3.Vec3Impl {
 	col := spectral.NewEmptyCIESPD()
+	numWavelengths := col.NumWavelengths()
+
+	// Use systematic sampling instead of random sampling to ensure uniform wavelength coverage
 	for sample := 0; sample < s.samplesPerPixel; sample++ {
-		// Choose a wavelength.
-		samplingIndex := int(float64(col.NumWavelengths()) * rand.Float64())
+		// Cycle through wavelengths systematically
+		samplingIndex := sample % numWavelengths
 		lambda := col.Wavelength(samplingIndex)
 		u := (x + rand.Float64()) / nx
 		v := (y + rand.Float64()) / ny
