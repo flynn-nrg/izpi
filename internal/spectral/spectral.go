@@ -236,7 +236,6 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 // This is what you'd use at the end of spectral rendering
 func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	var x, y, z float64
-	var numSamples int
 
 	// Integrate SPD with CIE color matching functions
 	for i, wavelength := range spd.wavelengths {
@@ -252,35 +251,9 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 		x += value * cieX
 		y += value * cieY
 		z += value * cieZ
-		numSamples++
 	}
 
-	// For neutral materials with constant reflectance, the RGB values should be approximately equal to the reflectance
-	// Check if this is a neutral material (all values are the same)
-	if numSamples > 0 {
-		firstValue := spd.values[0]
-		isNeutral := true
-		for _, value := range spd.values {
-			if math.Abs(value-firstValue) > 0.001 {
-				isNeutral = false
-				break
-			}
-		}
-
-		if isNeutral {
-			// For neutral materials, return the reflectance value directly
-			r = firstValue
-			g = firstValue
-			b = firstValue
-
-			return r, g, b
-		}
-	}
-
-	// For colored materials, use the CIE integration as-is
-	// The renderer should handle the final brightness adjustment
-
-	// Convert XYZ to RGB
+	// Convert XYZ to RGB using sRGB transformation matrix
 	r = 3.2406*x - 1.5372*y - 0.4986*z
 	g = -0.9689*x + 1.8758*y + 0.0415*z
 	b = 0.0557*x - 0.2040*y + 1.0570*z
