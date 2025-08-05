@@ -300,7 +300,7 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 
 	// Convert XYZ to RGB using an adjusted sRGB transformation matrix
 	// Fine-tuned to address remaining color biases
-	r = 3.15*x - 1.45*y - 0.47*z  // Increased red coefficient to restore warmth
+	r = 3.04*x - 1.45*y - 0.47*z  // Further increased red to reduce blue tint
 	g = -0.90*x + 1.72*y + 0.04*z // Slightly adjusted green
 	b = 0.05*x - 0.17*y + 0.93*z  // Slightly reduced blue to fix granite teal tint
 
