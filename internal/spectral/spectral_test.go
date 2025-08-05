@@ -215,3 +215,41 @@ func TestNeutralMaterialDebug(t *testing.T) {
 	t.Logf("  RGB result: R=%.3f, G=%.3f, B=%.3f", r, g, b)
 	t.Logf("  RGB ratios: R/G=%.3f, B/G=%.3f", r/g, b/g)
 }
+
+func TestColorBalanceDebug(t *testing.T) {
+	// Test to check if we have a blue-green bias in our color conversion
+	spd := NewEmptyCIESPD()
+	
+	// Test different reflectance values
+	testCases := []struct {
+		name        string
+		reflectance float64
+	}{
+		{"Neutral 1.0", 1.0},
+		{"Neutral 0.8", 0.8},
+		{"Neutral 0.6", 0.6},
+		{"Neutral 0.4", 0.4},
+	}
+	
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Set all wavelengths to the same reflectance value
+			for i := range spd.values {
+				spd.SetValue(i, tc.reflectance)
+			}
+			
+			r, g, b := SPDToRGB(spd)
+			
+			t.Logf("%s: R=%.3f, G=%.3f, B=%.3f", tc.name, r, g, b)
+			t.Logf("  Ratios: R/G=%.3f, B/G=%.3f", r/g, b/g)
+			
+			// Check if we have a consistent bias
+			if r/g < 0.95 {
+				t.Logf("  WARNING: Red is significantly lower than green (R/G=%.3f)", r/g)
+			}
+			if b/g > 1.05 {
+				t.Logf("  WARNING: Blue is significantly higher than green (B/G=%.3f)", b/g)
+			}
+		})
+	}
+}

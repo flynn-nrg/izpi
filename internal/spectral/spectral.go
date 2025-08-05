@@ -248,13 +248,6 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	var x, y, z float64
 
-	// Normalize CIE functions to match sRGB white point (D65)
-	// sRGB white point: X=0.95047, Y=1.00000, Z=1.08883
-	// We need to scale our CIE functions so that a neutral material produces these values
-	sRGBWhiteX := 0.95047
-	sRGBWhiteY := 1.00000
-	sRGBWhiteZ := 1.08883
-
 	// Calculate the sum of CIE functions for normalization
 	sumX := 0.0
 	sumY := 0.0
@@ -268,6 +261,13 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	for _, zVal := range cieZ {
 		sumZ += zVal
 	}
+
+	// Normalize CIE functions to match sRGB white point (D65)
+	// sRGB white point: X=0.95047, Y=1.00000, Z=1.08883
+	// We need to scale our CIE functions so that a neutral material produces these values
+	sRGBWhiteX := 0.95047
+	sRGBWhiteY := 1.00000
+	sRGBWhiteZ := 1.08883
 
 	// Calculate normalization factors to match sRGB white point
 	normX := sRGBWhiteX / sumX
@@ -284,7 +284,7 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 		cieX, cieY, cieZ := GetCIEValues(wavelength)
 
 		// Multiply SPD value by CIE values and accumulate
-		// Apply normalization to match sRGB white point
+		// Apply normalization so neutral materials produce equal RGB
 		value := spd.values[i]
 		x += value * cieX * normX
 		y += value * cieY * normY
@@ -292,15 +292,17 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	}
 
 	// Apply scaling factor to compensate for normalization
+	// We need to scale up significantly for the actual rendering pipeline
 	scale := 80.0
 	x *= scale
 	y *= scale
 	z *= scale
 
-	// Convert XYZ to RGB using the standard sRGB transformation matrix
-	r = 3.2406*x - 1.5372*y - 0.4986*z
-	g = -0.9689*x + 1.8758*y + 0.0415*z
-	b = 0.0557*x - 0.2040*y + 1.0570*z
+	// Convert XYZ to RGB using an adjusted sRGB transformation matrix
+	// Fine-tuned to address remaining color biases
+	r = 3.15*x - 1.45*y - 0.47*z  // Increased red coefficient to restore warmth
+	g = -0.90*x + 1.72*y + 0.04*z // Slightly adjusted green
+	b = 0.05*x - 0.17*y + 0.93*z  // Slightly reduced blue to fix granite teal tint
 
 	// Clamp RGB values to [0,1] range
 	r = math.Max(0, math.Min(1, r))
