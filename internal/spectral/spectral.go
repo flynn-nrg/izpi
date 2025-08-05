@@ -219,10 +219,10 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 	}
 
 	// Convert XYZ to RGB using sRGB transformation matrix
-	// This is a simplified conversion - production code would use more accurate matrices
-	r = 3.2406*x - 1.5372*y - 0.4986*z
-	g = -0.9689*x + 1.8758*y + 0.0415*z
-	b = 0.0557*x - 0.2040*y + 1.0570*z
+	// Using a different matrix that might be more accurate for neutral materials
+	r = 3.2404542*x - 1.5371385*y - 0.4985314*z
+	g = -0.9692660*x + 1.8760108*y + 0.0415560*z
+	b = 0.0556434*x - 0.2040259*y + 1.0572252*z
 
 	// Clamp to [0,1] - gamma correction should be applied at the end of the pipeline
 	r = math.Max(0, math.Min(1, r))
@@ -236,7 +236,7 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 // This is what you'd use at the end of spectral rendering
 func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	var x, y, z float64
-	var totalWeight float64
+	var numValidWavelengths int
 
 	// Integrate SPD with CIE color matching functions
 	for i, wavelength := range spd.wavelengths {
@@ -252,22 +252,20 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 		x += value * cieX
 		y += value * cieY
 		z += value * cieZ
-
-		// Accumulate the Y weight for normalization
-		totalWeight += cieY
+		numValidWavelengths++
 	}
 
-	// Normalize by the total Y weight to preserve reflectance values for neutral materials
-	if totalWeight > 0 {
-		x /= totalWeight
-		y /= totalWeight
-		z /= totalWeight
+	// Normalize by the number of wavelengths to ensure proper integration
+	if numValidWavelengths > 0 {
+		x /= float64(numValidWavelengths)
+		y /= float64(numValidWavelengths)
+		z /= float64(numValidWavelengths)
 	}
 
 	// Convert XYZ to RGB using sRGB transformation matrix
-	r = 3.2406*x - 1.5372*y - 0.4986*z
-	g = -0.9689*x + 1.8758*y + 0.0415*z
-	b = 0.0557*x - 0.2040*y + 1.0570*z
+	r = 3.2404542*x - 1.5371385*y - 0.4985314*z
+	g = -0.9692660*x + 1.8760108*y + 0.0415560*z
+	b = 0.0556434*x - 0.2040259*y + 1.0572252*z
 
 	return r, g, b
 }

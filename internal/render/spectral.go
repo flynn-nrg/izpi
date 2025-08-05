@@ -42,7 +42,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 			}
 
 			// Normalise and scale the spectral power distribution in one pass for efficiency
-			scale := 1.0 // Try a different scaling factor to fix neutral material rendering
+			scale := 3.5 // Scaling factor to make scene brighter and match RGB renderer
 			col.NormaliseAndScale(w.numSamples, scale)
 			// Convert to RGB.
 			r, g, b := spectral.SPDToRGB(col)
