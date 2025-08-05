@@ -92,6 +92,13 @@ func (spd *SpectralPowerDistribution) NumWavelengths() int {
 }
 
 func (spd *SpectralPowerDistribution) Wavelength(index int) float64 {
+	if index < 0 || index >= len(spd.wavelengths) {
+		// Return a safe default value if index is out of bounds
+		if len(spd.wavelengths) > 0 {
+			return spd.wavelengths[len(spd.wavelengths)-1]
+		}
+		return WavelengthMax
+	}
 	return spd.wavelengths[index]
 }
 
@@ -198,11 +205,15 @@ func SampleWavelengthIndex(random float64) int {
 	for i, y := range cieY {
 		currentWeight += y
 		if currentWeight >= target {
+			// Ensure we don't return an out-of-bounds index
+			if i >= len(cieY) {
+				return len(cieY) - 1
+			}
 			return i
 		}
 	}
 
-	// Fallback to last index if we somehow get here
+	// Fallback to last valid index
 	return len(cieY) - 1
 }
 
