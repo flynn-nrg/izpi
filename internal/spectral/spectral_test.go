@@ -137,3 +137,62 @@ func TestSpectralPowerDistribution(t *testing.T) {
 			spd.Values()[0], spd.Values()[1])
 	}
 }
+
+func TestNeutralMaterialDebug(t *testing.T) {
+	// Test to debug the XYZ to RGB transformation for neutral materials
+	spd := NewEmptyCIESPD()
+	reflectance := 1.0
+
+	// Set all wavelengths to the same reflectance value
+	for i := range spd.values {
+		spd.SetValue(i, reflectance)
+	}
+
+	// Calculate XYZ manually
+	var x, y, z float64
+	sumY := 0.0
+	for _, yVal := range cieY {
+		sumY += yVal
+	}
+	normalizationFactor := 1.0 / sumY
+
+	for i, wavelength := range spd.wavelengths {
+		cieX, cieY, cieZ := GetCIEValues(wavelength)
+		value := spd.values[i]
+		x += value * cieX * normalizationFactor
+		y += value * cieY * normalizationFactor
+		z += value * cieZ * normalizationFactor
+	}
+
+	// Apply scaling
+	scale := 80.0
+	x *= scale
+	y *= scale
+	z *= scale
+
+	t.Logf("Neutral material (reflectance=%.1f):", reflectance)
+	t.Logf("  XYZ before adaptation: X=%.3f, Y=%.3f, Z=%.3f", x, y, z)
+	t.Logf("  XYZ ratios: X/Y=%.3f, Z/Y=%.3f", x/y, z/y)
+
+	// Apply chromatic adaptation
+	adaptationMatrix := [3][3]float64{
+		{0.8951, 0.2664, -0.1614},
+		{-0.7502, 1.7135, 0.0367},
+		{0.0389, -0.0685, 1.0296},
+	}
+
+	xAdapted := adaptationMatrix[0][0]*x + adaptationMatrix[0][1]*y + adaptationMatrix[0][2]*z
+	yAdapted := adaptationMatrix[1][0]*x + adaptationMatrix[1][1]*y + adaptationMatrix[1][2]*z
+	zAdapted := adaptationMatrix[2][0]*x + adaptationMatrix[2][1]*y + adaptationMatrix[2][2]*z
+
+	t.Logf("  XYZ after adaptation: X=%.3f, Y=%.3f, Z=%.3f", xAdapted, yAdapted, zAdapted)
+	t.Logf("  Adapted ratios: X/Y=%.3f, Z/Y=%.3f", xAdapted/yAdapted, zAdapted/yAdapted)
+
+	// Convert to RGB using the new transformation matrix
+	r := 0.95*xAdapted + 0.05*yAdapted
+	g := 0.05*xAdapted + 0.95*yAdapted
+	b := 0.05*xAdapted + 0.05*yAdapted + 0.9*zAdapted
+
+	t.Logf("  RGB result: R=%.3f, G=%.3f, B=%.3f", r, g, b)
+	t.Logf("  RGB ratios: R/G=%.3f, B/G=%.3f", r/g, b/g)
+}
