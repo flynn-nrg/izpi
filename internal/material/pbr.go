@@ -223,15 +223,12 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	cosTheta := math.Abs(vec3.Dot(vec3.UnitVector(r.Direction()), normal))
 	fresnel := 0.04 + (1.0-0.04)*math.Pow(1.0-cosTheta, 5.0)
 
-	// Adjust fresnel based on metalness - increased influence for more prominent specular
-	fresnel = fresnel + (metalnessValue * 0.8) // Increased from 0.5 to 0.8
+	// Adjust fresnel based on metalness
+	fresnel = fresnel + (metalnessValue * 0.5)
 
-	// Use roughness to control specular probability with adjusted curve
+	// Use roughness to control specular probability
 	// Lower roughness = higher chance of specular reflection
-	roughnessFactor := 1.0 - (roughnessValue * roughnessValue) // Square roughness for less aggressive falloff
-
-	// Use the base specular probability without aggressive boosting
-	specularProbability := fresnel * roughnessFactor
+	specularProbability := fresnel * (1.0 - roughnessValue)
 
 	if random.Float64() < specularProbability {
 		// Specular reflection
