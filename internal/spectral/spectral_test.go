@@ -148,20 +148,39 @@ func TestNeutralMaterialDebug(t *testing.T) {
 		spd.SetValue(i, reflectance)
 	}
 
-	// Calculate XYZ manually
+	// Calculate XYZ manually with new normalization
 	var x, y, z float64
+
+	// Normalize CIE functions to match sRGB white point (D65)
+	sRGBWhiteX := 0.95047
+	sRGBWhiteY := 1.00000
+	sRGBWhiteZ := 1.08883
+
+	// Calculate the sum of CIE functions for normalization
+	sumX := 0.0
 	sumY := 0.0
+	sumZ := 0.0
+	for _, xVal := range cieX {
+		sumX += xVal
+	}
 	for _, yVal := range cieY {
 		sumY += yVal
 	}
-	normalizationFactor := 1.0 / sumY
+	for _, zVal := range cieZ {
+		sumZ += zVal
+	}
+
+	// Calculate normalization factors to match sRGB white point
+	normX := sRGBWhiteX / sumX
+	normY := sRGBWhiteY / sumY
+	normZ := sRGBWhiteZ / sumZ
 
 	for i, wavelength := range spd.wavelengths {
 		cieX, cieY, cieZ := GetCIEValues(wavelength)
 		value := spd.values[i]
-		x += value * cieX * normalizationFactor
-		y += value * cieY * normalizationFactor
-		z += value * cieZ * normalizationFactor
+		x += value * cieX * normX
+		y += value * cieY * normY
+		z += value * cieZ * normZ
 	}
 
 	// Apply scaling

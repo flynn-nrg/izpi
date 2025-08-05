@@ -248,12 +248,31 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	var x, y, z float64
 
-	// Calculate the actual sum of CIE Y function for proper normalization
+	// Normalize CIE functions to match sRGB white point (D65)
+	// sRGB white point: X=0.95047, Y=1.00000, Z=1.08883
+	// We need to scale our CIE functions so that a neutral material produces these values
+	sRGBWhiteX := 0.95047
+	sRGBWhiteY := 1.00000
+	sRGBWhiteZ := 1.08883
+
+	// Calculate the sum of CIE functions for normalization
+	sumX := 0.0
 	sumY := 0.0
+	sumZ := 0.0
+	for _, xVal := range cieX {
+		sumX += xVal
+	}
 	for _, yVal := range cieY {
 		sumY += yVal
 	}
-	normalizationFactor := 1.0 / sumY
+	for _, zVal := range cieZ {
+		sumZ += zVal
+	}
+
+	// Calculate normalization factors to match sRGB white point
+	normX := sRGBWhiteX / sumX
+	normY := sRGBWhiteY / sumY
+	normZ := sRGBWhiteZ / sumZ
 
 	// Integrate SPD with CIE color matching functions
 	for i, wavelength := range spd.wavelengths {
@@ -265,11 +284,11 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 		cieX, cieY, cieZ := GetCIEValues(wavelength)
 
 		// Multiply SPD value by CIE values and accumulate
-		// Apply normalization to ensure proper integration
+		// Apply normalization to match sRGB white point
 		value := spd.values[i]
-		x += value * cieX * normalizationFactor
-		y += value * cieY * normalizationFactor
-		z += value * cieZ * normalizationFactor
+		x += value * cieX * normX
+		y += value * cieY * normY
+		z += value * cieZ * normZ
 	}
 
 	// Apply scaling factor to compensate for normalization
@@ -278,12 +297,10 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	y *= scale
 	z *= scale
 
-	// Use a transformation matrix that preserves neutral colors
-	// This matrix is designed to map equal XYZ values to equal RGB values
-	// It's a simplified approach that works for neutral materials
-	r = 0.95*x + 0.05*y
-	g = 0.05*x + 0.95*y
-	b = 0.05*x + 0.05*y + 0.9*z
+	// Convert XYZ to RGB using the standard sRGB transformation matrix
+	r = 3.2406*x - 1.5372*y - 0.4986*z
+	g = -0.9689*x + 1.8758*y + 0.0415*z
+	b = 0.0557*x - 0.2040*y + 1.0570*z
 
 	// Clamp RGB values to [0,1] range
 	r = math.Max(0, math.Min(1, r))
