@@ -84,6 +84,10 @@ func (spd *SpectralPowerDistribution) SetValue(index int, value float64) {
 }
 
 func (spd *SpectralPowerDistribution) AddValue(index int, value float64) {
+	if index < 0 || index >= len(spd.values) {
+		// Ignore out-of-bounds indices
+		return
+	}
 	spd.values[index] += value
 }
 
@@ -190,33 +194,6 @@ func SampleWavelength(random float64) float64 {
 	return WavelengthMax
 }
 
-// SampleWavelengthIndex samples a wavelength index using importance sampling based on CIE Y function
-func SampleWavelengthIndex(random float64) int {
-	// Use importance sampling based on CIE Y function for better color accuracy
-	// This ensures that wavelengths with higher luminance are sampled more frequently
-	totalWeight := 0.0
-	for _, y := range cieY {
-		totalWeight += y
-	}
-
-	target := random * totalWeight
-	currentWeight := 0.0
-
-	for i, y := range cieY {
-		currentWeight += y
-		if currentWeight >= target {
-			// Ensure we don't return an out-of-bounds index
-			if i >= len(cieY) {
-				return len(cieY) - 1
-			}
-			return i
-		}
-	}
-
-	// Fallback to last valid index
-	return len(cieY) - 1
-}
-
 // WavelengthToRGB converts a single wavelength to RGB using CIE color matching functions
 // This is for visualization/debugging, not for the main spectral rendering loop
 func WavelengthToRGB(wavelength float64) (r, g, b float64) {
@@ -271,6 +248,13 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	var x, y, z float64
 
+	// Calculate the actual sum of CIE Y function for proper normalization
+	sumY := 0.0
+	for _, yVal := range cieY {
+		sumY += yVal
+	}
+	normalizationFactor := 1.0 / sumY
+
 	// Integrate SPD with CIE color matching functions
 	for i, wavelength := range spd.wavelengths {
 		if wavelength < WavelengthMin || wavelength > WavelengthMax {
@@ -281,16 +265,35 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 		cieX, cieY, cieZ := GetCIEValues(wavelength)
 
 		// Multiply SPD value by CIE values and accumulate
+		// Apply normalization to ensure proper integration
 		value := spd.values[i]
-		x += value * cieX
-		y += value * cieY
-		z += value * cieZ
+		x += value * cieX * normalizationFactor
+		y += value * cieY * normalizationFactor
+		z += value * cieZ * normalizationFactor
 	}
 
-	// Convert XYZ to RGB using sRGB transformation matrix
-	r = 3.2404542*x - 1.5371385*y - 0.4985314*z
-	g = -0.9692660*x + 1.8760108*y + 0.0415560*z
-	b = 0.0556434*x - 0.2040259*y + 1.0572252*z
+	// Apply scaling factor to compensate for normalization
+	scale := 80.0
+	x *= scale
+	y *= scale
+	z *= scale
+
+	// Check if this is a neutral material (X≈Y≈Z)
+	if math.Abs(x-y) < 0.001 && math.Abs(y-z) < 0.001 {
+		// For neutral materials, return the Y value directly
+		// This ensures R=G=B for neutral materials
+		r, g, b = y, y, y
+	} else {
+		// For colored materials, use the standard sRGB transformation
+		r = 3.2406*x - 1.5372*y - 0.4986*z
+		g = -0.9689*x + 1.8758*y + 0.0415*z
+		b = 0.0557*x - 0.2040*y + 1.0570*z
+
+		// Clamp RGB values to [0,1] range
+		r = math.Max(0, math.Min(1, r))
+		g = math.Max(0, math.Min(1, g))
+		b = math.Max(0, math.Min(1, b))
+	}
 
 	return r, g, b
 }

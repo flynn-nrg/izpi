@@ -90,8 +90,8 @@ func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom
 	col := spectral.NewEmptyCIESPD()
 	// Use importance sampling based on CIE Y function for better color accuracy
 	for sample := 0; sample < s.samplesPerPixel; sample++ {
-		// Use importance sampling based on CIE Y function for better color accuracy
-		samplingIndex := spectral.SampleWavelengthIndex(rand.Float64())
+		// Choose a wavelength.
+		samplingIndex := int(float64(col.NumWavelengths()) * rand.Float64())
 		lambda := col.Wavelength(samplingIndex)
 		u := (x + rand.Float64()) / nx
 		v := (y + rand.Float64()) / ny
@@ -100,9 +100,8 @@ func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom
 		col.AddValue(samplingIndex, sampled)
 	}
 
-	// Normalise and scale the spectral power distribution in one pass for efficiency
-	scale := 3.5 // Scaling factor to make scene brighter and match RGB renderer
-	col.NormaliseAndScale(s.samplesPerPixel, scale)
+	// Normalise the spectral power distribution
+	col.Normalise(s.samplesPerPixel)
 	// Convert to RGB.
 	r, g, b := spectral.SPDToRGB(col)
 
