@@ -230,9 +230,8 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	// Lower roughness = higher chance of specular reflection
 	roughnessFactor := 1.0 - (roughnessValue * roughnessValue) // Square roughness for less aggressive falloff
 
-	// Boost overall specular probability to match RGB reference
-	baseSpecularProbability := fresnel * roughnessFactor
-	specularProbability := math.Min(0.95, baseSpecularProbability*1.5) // Boost by 50% with cap
+	// Use the base specular probability without aggressive boosting
+	specularProbability := fresnel * roughnessFactor
 
 	if random.Float64() < specularProbability {
 		// Specular reflection
@@ -253,7 +252,16 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	// Create PDF for importance sampling
 	pdf := pdf.NewCosine(normal)
 
-	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, isSpecular, albedo, lambda, nil, 0.0, 0.0, pdf)
+	// Boost specular reflection brightness to match RGB reference
+	var finalAlbedo float64
+	if isSpecular {
+		// Increase the brightness of specular reflections specifically
+		finalAlbedo = albedo * 2.0 // Double the brightness for specular reflections
+	} else {
+		finalAlbedo = albedo
+	}
+
+	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, isSpecular, finalAlbedo, lambda, nil, 0.0, 0.0, pdf)
 	return scattered, scatterRecord, true
 }
 
