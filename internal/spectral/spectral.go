@@ -224,16 +224,10 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 	g = -0.9689*x + 1.8758*y + 0.0415*z
 	b = 0.0557*x - 0.2040*y + 1.0570*z
 
-	// Clamp to [0,1] and apply gamma correction
+	// Clamp to [0,1] - gamma correction should be applied at the end of the pipeline
 	r = math.Max(0, math.Min(1, r))
 	g = math.Max(0, math.Min(1, g))
 	b = math.Max(0, math.Min(1, b))
-
-	// Apply gamma correction (sRGB gamma)
-	gamma := 2.2
-	r = math.Pow(r, 1.0/gamma)
-	g = math.Pow(g, 1.0/gamma)
-	b = math.Pow(b, 1.0/gamma)
 
 	return r, g, b
 }

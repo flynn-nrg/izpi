@@ -64,7 +64,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		}
 	*/
 
-	protoScene = scenes.CornellBoxPBRSpectral(aspectRatio)
+	protoScene = scenes.CornellBoxEmptySpectral(aspectRatio)
 
 	// Override the colour sampler if the scene is spectral.
 	if protoScene.GetColourRepresentation() == pb_transport.ColourRepresentation_SPECTRAL && cfg.Sampler == "colour" {
