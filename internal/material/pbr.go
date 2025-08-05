@@ -256,7 +256,7 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	var finalAlbedo float64
 	if isSpecular {
 		// Increase the brightness of specular reflections specifically
-		finalAlbedo = albedo * 2.0 // Double the brightness for specular reflections
+		finalAlbedo = albedo * 1.5 // 50% boost for specular reflections
 	} else {
 		finalAlbedo = albedo
 	}
