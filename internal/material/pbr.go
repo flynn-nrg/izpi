@@ -223,12 +223,13 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	cosTheta := math.Abs(vec3.Dot(vec3.UnitVector(r.Direction()), normal))
 	fresnel := 0.04 + (1.0-0.04)*math.Pow(1.0-cosTheta, 5.0)
 
-	// Adjust fresnel based on metalness
-	fresnel = fresnel + (metalnessValue * 0.5)
+	// Adjust fresnel based on metalness - increased influence for more prominent specular
+	fresnel = fresnel + (metalnessValue * 0.8) // Increased from 0.5 to 0.8
 
-	// Use roughness to control specular probability
+	// Use roughness to control specular probability with adjusted curve
 	// Lower roughness = higher chance of specular reflection
-	specularProbability := fresnel * (1.0 - roughnessValue)
+	roughnessFactor := 1.0 - (roughnessValue * roughnessValue) // Square roughness for less aggressive falloff
+	specularProbability := fresnel * roughnessFactor
 
 	if random.Float64() < specularProbability {
 		// Specular reflection
@@ -249,16 +250,7 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	// Create PDF for importance sampling
 	pdf := pdf.NewCosine(normal)
 
-	// Boost specular reflections to match RGB brightness
-	var finalAlbedo float64
-	if isSpecular {
-		// Apply a boost factor for specular reflections to compensate for spectral conversion
-		finalAlbedo = albedo * 1.2 // 20% boost for specular reflections
-	} else {
-		finalAlbedo = albedo
-	}
-
-	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, isSpecular, finalAlbedo, lambda, nil, 0.0, 0.0, pdf)
+	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, isSpecular, albedo, lambda, nil, 0.0, 0.0, pdf)
 	return scattered, scatterRecord, true
 }
 
