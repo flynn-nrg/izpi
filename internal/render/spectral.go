@@ -30,12 +30,9 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 		tile.PosY = ny - y
 		for x := w.x0; x <= w.x1; x++ {
 			col := spectral.NewEmptyCIESPD()
-			numWavelengths := col.NumWavelengths()
-
-			// Use systematic sampling instead of random sampling to ensure uniform wavelength coverage
 			for s := 0; s < w.numSamples; s++ {
-				// Cycle through wavelengths systematically
-				samplingIndex := s % numWavelengths
+				// Choose a wavelength.
+				samplingIndex := int(float64(col.NumWavelengths()) * rand.Float64())
 				lambda := col.Wavelength(samplingIndex)
 				u := (float64(x) + rand.Float64()) / float64(nx)
 				v := (float64(y) + rand.Float64()) / float64(ny)
@@ -45,7 +42,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 			}
 
 			// Normalise and scale the spectral power distribution in one pass for efficiency
-			scale := 3.5 // Scaling factor to make scene brighter and match RGB renderer
+			scale := 1.0 // Try a different scaling factor to fix neutral material rendering
 			col.NormaliseAndScale(w.numSamples, scale)
 			// Convert to RGB.
 			r, g, b := spectral.SPDToRGB(col)

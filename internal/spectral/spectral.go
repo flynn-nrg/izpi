@@ -236,6 +236,7 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 // This is what you'd use at the end of spectral rendering
 func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	var x, y, z float64
+	var totalWeight float64
 
 	// Integrate SPD with CIE color matching functions
 	for i, wavelength := range spd.wavelengths {
@@ -251,6 +252,16 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 		x += value * cieX
 		y += value * cieY
 		z += value * cieZ
+
+		// Accumulate the Y weight for normalization
+		totalWeight += cieY
+	}
+
+	// Normalize by the total Y weight to preserve reflectance values for neutral materials
+	if totalWeight > 0 {
+		x /= totalWeight
+		y /= totalWeight
+		z /= totalWeight
 	}
 
 	// Convert XYZ to RGB using sRGB transformation matrix
