@@ -183,6 +183,29 @@ func SampleWavelength(random float64) float64 {
 	return WavelengthMax
 }
 
+// SampleWavelengthIndex samples a wavelength index using importance sampling based on CIE Y function
+func SampleWavelengthIndex(random float64) int {
+	// Use importance sampling based on CIE Y function for better color accuracy
+	// This ensures that wavelengths with higher luminance are sampled more frequently
+	totalWeight := 0.0
+	for _, y := range cieY {
+		totalWeight += y
+	}
+
+	target := random * totalWeight
+	currentWeight := 0.0
+
+	for i, y := range cieY {
+		currentWeight += y
+		if currentWeight >= target {
+			return i
+		}
+	}
+
+	// Fallback to last index if we somehow get here
+	return len(cieY) - 1
+}
+
 // WavelengthToRGB converts a single wavelength to RGB using CIE color matching functions
 // This is for visualization/debugging, not for the main spectral rendering loop
 func WavelengthToRGB(wavelength float64) (r, g, b float64) {
@@ -236,7 +259,6 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 // This is what you'd use at the end of spectral rendering
 func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 	var x, y, z float64
-	var numValidWavelengths int
 
 	// Integrate SPD with CIE color matching functions
 	for i, wavelength := range spd.wavelengths {
@@ -252,14 +274,6 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 		x += value * cieX
 		y += value * cieY
 		z += value * cieZ
-		numValidWavelengths++
-	}
-
-	// Normalize by the number of wavelengths to ensure proper integration
-	if numValidWavelengths > 0 {
-		x /= float64(numValidWavelengths)
-		y /= float64(numValidWavelengths)
-		z /= float64(numValidWavelengths)
 	}
 
 	// Convert XYZ to RGB using sRGB transformation matrix

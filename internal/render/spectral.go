@@ -31,8 +31,8 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 		for x := w.x0; x <= w.x1; x++ {
 			col := spectral.NewEmptyCIESPD()
 			for s := 0; s < w.numSamples; s++ {
-				// Choose a wavelength.
-				samplingIndex := int(float64(col.NumWavelengths()) * rand.Float64())
+				// Use importance sampling based on CIE Y function for better color accuracy
+				samplingIndex := spectral.SampleWavelengthIndex(rand.Float64())
 				lambda := col.Wavelength(samplingIndex)
 				u := (float64(x) + rand.Float64()) / float64(nx)
 				v := (float64(y) + rand.Float64()) / float64(ny)
