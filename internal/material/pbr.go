@@ -229,7 +229,10 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	// Use roughness to control specular probability with adjusted curve
 	// Lower roughness = higher chance of specular reflection
 	roughnessFactor := 1.0 - (roughnessValue * roughnessValue) // Square roughness for less aggressive falloff
-	specularProbability := fresnel * roughnessFactor
+
+	// Boost overall specular probability to match RGB reference
+	baseSpecularProbability := fresnel * roughnessFactor
+	specularProbability := math.Min(0.95, baseSpecularProbability*1.5) // Boost by 50% with cap
 
 	if random.Float64() < specularProbability {
 		// Specular reflection
