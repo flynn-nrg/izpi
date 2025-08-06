@@ -1,7 +1,6 @@
 package render
 
 import (
-	"math"
 	"math/rand/v2"
 	"sync"
 
@@ -69,10 +68,6 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 			r := 3.2404542*(finalX*exposure) - 1.5371385*(finalY*exposure) - 0.4985314*(finalZ*exposure)
 			g := -0.9692660*(finalX*exposure) + 1.8760108*(finalY*exposure) + 0.0415560*(finalZ*exposure)
 			b := 0.0556434*(finalX*exposure) - 0.2040259*(finalY*exposure) + 1.0572252*(finalZ*exposure)
-
-			r = math.Max(0, math.Min(1, r))
-			g = math.Max(0, math.Min(1, g))
-			b = math.Max(0, math.Min(1, b))
 
 			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: r, G: g, B: b, A: 1.0})
 			if w.preview {
