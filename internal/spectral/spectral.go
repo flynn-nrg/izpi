@@ -21,7 +21,7 @@ var cieX = []float64{
 	0.9163, 0.9786, 1.0263, 1.0567, 1.0622, 1.0456, 1.0026, 0.9384, 0.8544, 0.7514,
 	0.6424, 0.5419, 0.4479, 0.3608, 0.2835, 0.2187, 0.1649, 0.1212, 0.0874, 0.0636,
 	0.0468, 0.0329, 0.0227, 0.0158, 0.0114, 0.0081, 0.0058, 0.0041, 0.0029, 0.0021,
-	0.0015, 0.0011, 0.0008, 0.0006, 0.0004, 0.0003, 0.0002, 0.0002, 0.0001, 0.0001,
+	0.0015, 0.0011, 0.0008, 0.0006, 0.0004,
 }
 
 var cieY = []float64{
@@ -32,7 +32,7 @@ var cieY = []float64{
 	0.8700, 0.8163, 0.7570, 0.6949, 0.6310, 0.5668, 0.5030, 0.4412, 0.3810, 0.3210,
 	0.2650, 0.2170, 0.1750, 0.1382, 0.1070, 0.0816, 0.0610, 0.0446, 0.0320, 0.0232,
 	0.0170, 0.0119, 0.0082, 0.0057, 0.0041, 0.0029, 0.0021, 0.0015, 0.0010, 0.0007,
-	0.0005, 0.0004, 0.0003, 0.0002, 0.0001, 0.0001, 0.0001, 0.0000, 0.0000, 0.0000,
+	0.0005, 0.0004, 0.0003, 0.0002, 0.0001,
 }
 
 var cieZ = []float64{
@@ -43,7 +43,7 @@ var cieZ = []float64{
 	0.0017, 0.0014, 0.0011, 0.0010, 0.0009, 0.0008, 0.0006, 0.0003, 0.0002, 0.0000,
 	0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000,
 	0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000,
-	0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000,
+	0.0000, 0.0000, 0.0000, 0.0000, 0.0000,
 }
 
 // Wavelengths corresponding to the CIE data (380-750nm in 5nm steps)
@@ -176,9 +176,8 @@ func (spd *SpectralPowerDistribution) Value(wavelength float64) float64 {
 	return 0.0
 }
 
-// SampleWavelength samples a wavelength according to the CIE Y function (luminance)
-// This is useful for importance sampling in spectral rendering
-func SampleWavelength(random float64) float64 {
+// / SampleWavelength now returns both the sampled wavelength and its PDF.
+func SampleWavelength(random float64) (lambda, pdf float64) {
 	// Use CIE Y function as importance sampling distribution
 	// This samples wavelengths according to human eye sensitivity
 
@@ -193,14 +192,36 @@ func SampleWavelength(random float64) float64 {
 			if i > 0 {
 				prev := current
 				t := (target - prev) / y
-				return cieWavelengths[i-1] + t*(cieWavelengths[i]-cieWavelengths[i-1])
+				lambda = cieWavelengths[i-1] + t*(cieWavelengths[i]-cieWavelengths[i-1])
+
+				// --- NEW CODE START ---
+				// Calculate the PDF for the sampled wavelength.
+				// 1. First, find the interpolated height of the Y-curve at this point.
+				interpolatedY := cieY[i-1] + t*(cieY[i]-cieY[i-1])
+				// 2. The PDF is this height divided by the total area under the curve.
+				if cieYIntegral > 0 {
+					pdf = interpolatedY / cieYIntegral
+				}
+				// --- NEW CODE END ---
+
+				return lambda, pdf // Return both values
 			}
-			return cieWavelengths[i]
+
+			lambda = cieWavelengths[i]
+			if cieYIntegral > 0 {
+				pdf = y / cieYIntegral // PDF for the non-interpolated case
+			}
+			return lambda, pdf // Return both values
 		}
 		current += y
 	}
 
-	return WavelengthMax
+	// Fallback for the very end of the spectrum
+	lambda = WavelengthMax
+	if cieYIntegral > 0 {
+		pdf = cieY[len(cieY)-1] / cieYIntegral
+	}
+	return lambda, pdf // Return both values
 }
 
 // SPDToRGB converts a spectral power distribution to sRGB.

@@ -88,7 +88,7 @@ func (s *Spectral) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hit
 	// if it doesn't already have one (depth 0 means it's a primary ray from camera)
 	if depth == 0 && r.Lambda() == 0.0 {
 		// Sample a wavelength according to CIE Y function (importance sampling)
-		wavelength := spectral.SampleWavelength(random.Float64())
+		wavelength, _ := spectral.SampleWavelength(random.Float64())
 		r.SetLambda(wavelength)
 	}
 
