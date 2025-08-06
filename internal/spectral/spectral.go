@@ -58,6 +58,11 @@ var cieWavelengths = []float64{
 	730, 735, 740, 745, 750,
 }
 
+// The integral of the CIE Y curve, used for normalization.
+// This ensures that an SPD representing a perfect reflector under an
+// equal-energy illuminant will result in Y=1.
+const cieYIntegral = 21.3768 // Sum of all values in the cieY array
+
 // SpectralPowerDistribution represents spectral data
 type SpectralPowerDistribution struct {
 	wavelengths []float64
@@ -107,16 +112,24 @@ func (spd *SpectralPowerDistribution) Wavelength(index int) float64 {
 }
 
 func (spd *SpectralPowerDistribution) Normalise(numSamples int) {
-	for i, value := range spd.values {
-		spd.values[i] = value / float64(numSamples)
+	if numSamples == 0 {
+		return
+	}
+	invNumSamples := 1.0 / float64(numSamples)
+	for i := range spd.values {
+		spd.values[i] *= invNumSamples
 	}
 }
 
 // NormaliseAndScale normalises the spectral power distribution by dividing by numSamples
 // and then applies a scale factor in a single pass for efficiency
 func (spd *SpectralPowerDistribution) NormaliseAndScale(numSamples int, scale float64) {
-	for i, value := range spd.values {
-		spd.values[i] = (value / float64(numSamples)) * scale
+	if numSamples == 0 {
+		return
+	}
+	factor := scale / float64(numSamples)
+	for i := range spd.values {
+		spd.values[i] *= factor
 	}
 }
 
@@ -137,14 +150,15 @@ func (spd *SpectralPowerDistribution) Value(wavelength float64) float64 {
 	}
 
 	// Clamp wavelength to valid range
-	if wavelength < spd.wavelengths[0] {
+	if wavelength <= spd.wavelengths[0] {
 		return spd.values[0]
 	}
-	if wavelength > spd.wavelengths[len(spd.wavelengths)-1] {
+	if wavelength >= spd.wavelengths[len(spd.wavelengths)-1] {
 		return spd.values[len(spd.values)-1]
 	}
 
 	// Find the two wavelengths that bracket the input wavelength
+	// This can be optimized with a binary search if wavelengths are not uniform
 	for i := 0; i < len(spd.wavelengths)-1; i++ {
 		w1 := spd.wavelengths[i]
 		w2 := spd.wavelengths[i+1]
@@ -158,7 +172,7 @@ func (spd *SpectralPowerDistribution) Value(wavelength float64) float64 {
 		}
 	}
 
-	// If we get here, wavelength is outside the range
+	// Should not be reached if clamping is correct
 	return 0.0
 }
 
@@ -169,142 +183,63 @@ func SampleWavelength(random float64) float64 {
 	// This samples wavelengths according to human eye sensitivity
 
 	// Find the wavelength that corresponds to the random value
-	// by integrating the CIE Y function
-	total := 0.0
-	for _, y := range cieY {
-		total += y
-	}
-
-	target := random * total
+	// by inverting the cumulative distribution function (CDF) of the CIE Y curve.
+	target := random * cieYIntegral
 	current := 0.0
 
 	for i, y := range cieY {
-		current += y
-		if current >= target {
-			// Interpolate between wavelengths
+		if current+y >= target {
+			// Interpolate between wavelengths for a more accurate sample
 			if i > 0 {
-				prev := current - y
-				t := (target - prev) / (current - prev)
+				prev := current
+				t := (target - prev) / y
 				return cieWavelengths[i-1] + t*(cieWavelengths[i]-cieWavelengths[i-1])
 			}
 			return cieWavelengths[i]
 		}
+		current += y
 	}
 
 	return WavelengthMax
 }
 
-// WavelengthToRGB converts a single wavelength to RGB using CIE color matching functions
-// This is for visualization/debugging, not for the main spectral rendering loop
-func WavelengthToRGB(wavelength float64) (r, g, b float64) {
-	// Clamp wavelength to visible range
-	if wavelength < WavelengthMin {
-		wavelength = WavelengthMin
-	}
-	if wavelength > WavelengthMax {
-		wavelength = WavelengthMax
-	}
-
-	// Find the index in the CIE data
-	index := 0
-	for i, w := range cieWavelengths {
-		if w >= wavelength {
-			index = i
-			break
-		}
-	}
-
-	// Interpolate CIE values
+// SPDToRGB converts a spectral power distribution to sRGB.
+// This version uses the standard, correct methodology.
+func SPDToRGB(spd *SpectralPowerDistribution, exposure float64) (r, g, b float64) {
 	var x, y, z float64
-	if index == 0 {
-		x, y, z = cieX[0], cieY[0], cieZ[0]
-	} else if index >= len(cieWavelengths)-1 {
-		x, y, z = cieX[len(cieX)-1], cieY[len(cieY)-1], cieZ[len(cieZ)-1]
-	} else {
-		// Linear interpolation
-		w1, w2 := cieWavelengths[index-1], cieWavelengths[index]
-		t := (wavelength - w1) / (w2 - w1)
-		x = cieX[index-1] + t*(cieX[index]-cieX[index-1])
-		y = cieY[index-1] + t*(cieY[index]-cieY[index-1])
-		z = cieZ[index-1] + t*(cieZ[index]-cieZ[index-1])
+
+	// Step 1: Integrate the SPD against the unmodified CIE matching functions.
+	// We assume the SPD is sampled at the same wavelengths as our CIE data.
+	// If not, interpolation would be needed inside the loop.
+	for i := range spd.wavelengths {
+		value := spd.values[i]
+		x += value * cieX[i]
+		y += value * cieY[i]
+		z += value * cieZ[i]
 	}
 
-	// Convert XYZ to RGB using sRGB transformation matrix
-	// Using a different matrix that might be more accurate for neutral materials
+	// Step 2: Normalize the integrated XYZ values.
+	// We divide by the integral of the CIE Y curve. This sets the luminance
+	// of a perfect white surface to 1.0.
+	if cieYIntegral > 0 {
+		invY := 1.0 / cieYIntegral
+		x *= invY
+		y *= invY
+		z *= invY
+	}
+
+	// Apply exposure control
+	x *= exposure
+	y *= exposure
+	z *= exposure
+
+	// Step 3: Convert from CIE XYZ to linear sRGB using the standard D65 matrix.
+	// This is the same matrix used in WavelengthToRGB.
 	r = 3.2404542*x - 1.5371385*y - 0.4985314*z
 	g = -0.9692660*x + 1.8760108*y + 0.0415560*z
 	b = 0.0556434*x - 0.2040259*y + 1.0572252*z
 
-	// Clamp to [0,1] - gamma correction should be applied at the end of the pipeline
-	r = math.Max(0, math.Min(1, r))
-	g = math.Max(0, math.Min(1, g))
-	b = math.Max(0, math.Min(1, b))
-
-	return r, g, b
-}
-
-// SPDToRGB converts a spectral power distribution to RGB
-// This is what you'd use at the end of spectral rendering
-func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
-	var x, y, z float64
-
-	// Calculate the sum of CIE functions for normalization
-	sumX := 0.0
-	sumY := 0.0
-	sumZ := 0.0
-	for _, xVal := range cieX {
-		sumX += xVal
-	}
-	for _, yVal := range cieY {
-		sumY += yVal
-	}
-	for _, zVal := range cieZ {
-		sumZ += zVal
-	}
-
-	// Normalize CIE functions to match sRGB white point (D65)
-	// sRGB white point: X=0.95047, Y=1.00000, Z=1.08883
-	// We need to scale our CIE functions so that a neutral material produces these values
-	sRGBWhiteX := 0.95047
-	sRGBWhiteY := 1.00000
-	sRGBWhiteZ := 1.08883
-
-	// Calculate normalization factors to match sRGB white point
-	normX := sRGBWhiteX / sumX
-	normY := sRGBWhiteY / sumY
-	normZ := sRGBWhiteZ / sumZ
-
-	// Integrate SPD with CIE color matching functions
-	for i, wavelength := range spd.wavelengths {
-		if wavelength < WavelengthMin || wavelength > WavelengthMax {
-			continue
-		}
-
-		// Get CIE values for this wavelength
-		cieX, cieY, cieZ := GetCIEValues(wavelength)
-
-		// Multiply SPD value by CIE values and accumulate
-		// Apply normalization so neutral materials produce equal RGB
-		value := spd.values[i]
-		x += value * cieX * normX
-		y += value * cieY * normY
-		z += value * cieZ * normZ
-	}
-
-	// Apply scaling factor to compensate for normalization
-	// We need to scale up significantly for the actual rendering pipeline
-	scale := 80.0
-	x *= scale
-	y *= scale
-	z *= scale
-
-	// Convert XYZ to RGB using an adjusted sRGB transformation matrix
-	// Fine-tuned to address remaining color biases
-	r = 3.04*x - 1.45*y - 0.47*z  // Further increased red to reduce blue tint
-	g = -0.90*x + 1.72*y + 0.04*z // Slightly adjusted green
-	b = 0.05*x - 0.17*y + 0.93*z  // Slightly reduced blue to fix granite teal tint
-
-	// Clamp RGB values to [0,1] range
+	// Step 4: Clamp to [0,1]. Gamma correction should be applied later as a final step.
 	r = math.Max(0, math.Min(1, r))
 	g = math.Max(0, math.Min(1, g))
 	b = math.Max(0, math.Min(1, b))
@@ -314,7 +249,16 @@ func SPDToRGB(spd *SpectralPowerDistribution) (r, g, b float64) {
 
 // GetCIEValues returns the CIE color matching function values for a given wavelength
 func GetCIEValues(wavelength float64) (x, y, z float64) {
-	// Find the index in the CIE data
+	// Clamp to the valid range of our tabulated data
+	if wavelength <= cieWavelengths[0] {
+		return cieX[0], cieY[0], cieZ[0]
+	}
+	if wavelength >= cieWavelengths[len(cieWavelengths)-1] {
+		last := len(cieWavelengths) - 1
+		return cieX[last], cieY[last], cieZ[last]
+	}
+
+	// Find the index in the CIE data. Can be optimized with binary search.
 	index := 0
 	for i, w := range cieWavelengths {
 		if w >= wavelength {
@@ -323,18 +267,28 @@ func GetCIEValues(wavelength float64) (x, y, z float64) {
 		}
 	}
 
-	// Interpolate CIE values
-	if index == 0 {
-		return cieX[0], cieY[0], cieZ[0]
-	} else if index >= len(cieWavelengths)-1 {
-		return cieX[len(cieX)-1], cieY[len(cieY)-1], cieZ[len(cieZ)-1]
-	} else {
-		// Linear interpolation
-		w1, w2 := cieWavelengths[index-1], cieWavelengths[index]
-		t := (wavelength - w1) / (w2 - w1)
-		x = cieX[index-1] + t*(cieX[index]-cieX[index-1])
-		y = cieY[index-1] + t*(cieY[index]-cieY[index-1])
-		z = cieZ[index-1] + t*(cieZ[index]-cieZ[index-1])
-		return x, y, z
-	}
+	// Linear interpolation
+	w1, w2 := cieWavelengths[index-1], cieWavelengths[index]
+	t := (wavelength - w1) / (w2 - w1)
+	x = cieX[index-1] + t*(cieX[index]-cieX[index-1])
+	y = cieY[index-1] + t*(cieY[index]-cieY[index-1])
+	z = cieZ[index-1] + t*(cieZ[index]-cieZ[index-1])
+	return x, y, z
+}
+
+// WavelengthToRGB is kept for debugging purposes.
+func WavelengthToRGB(wavelength float64) (r, g, b float64) {
+	x, y, z := GetCIEValues(wavelength)
+
+	// Convert XYZ to RGB using sRGB transformation matrix
+	r = 3.2404542*x - 1.5371385*y - 0.4985314*z
+	g = -0.9692660*x + 1.8760108*y + 0.0415560*z
+	b = 0.0556434*x - 0.2040259*y + 1.0572252*z
+
+	// Clamp to [0,1]
+	r = math.Max(0, math.Min(1, r))
+	g = math.Max(0, math.Min(1, g))
+	b = math.Max(0, math.Min(1, b))
+
+	return r, g, b
 }
