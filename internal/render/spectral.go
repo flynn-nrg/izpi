@@ -44,7 +44,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 			// Normalise the spectral power distribution
 			col.Normalise(w.numSamples)
 			// Convert to RGB.
-			r, g, b := spectral.SPDToRGB(col)
+			r, g, b := spectral.SPDToRGB(col, 1.0)
 			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: r, G: g, B: b, A: 1.0})
 			if w.preview {
 				tile.Pixels[i] = b
