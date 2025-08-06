@@ -103,7 +103,7 @@ func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom
 	// Normalise the spectral power distribution
 	col.Normalise(s.samplesPerPixel)
 	// Convert to RGB.
-	r, g, b := spectral.SPDToRGB(col, 20.0)
+	r, g, b := spectral.SPDToRGB(col, 50.0)
 
 	return &vec3.Vec3Impl{
 		X: r,
