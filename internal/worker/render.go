@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"fmt"
+	"math"
 	"runtime"
 
 	"github.com/flynn-nrg/izpi/internal/fastrandom"
@@ -87,23 +88,49 @@ func (s *workerServer) renderTileRGB(x, y, nx, ny float64, rand *fastrandom.LCG)
 }
 
 func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom.LCG) *vec3.Vec3Impl {
-	col := spectral.NewEmptyCIESPD()
-	// Use importance sampling based on CIE Y function for better color accuracy
+	// STEP 1: Initialize XYZ accumulators for the pixel
+	var sumX, sumY, sumZ float64
+
 	for sample := 0; sample < s.samplesPerPixel; sample++ {
-		// Choose a wavelength.
-		samplingIndex := int(float64(col.NumWavelengths()) * rand.Float64())
-		lambda := col.Wavelength(samplingIndex)
-		u := (x + rand.Float64()) / nx
-		v := (y + rand.Float64()) / ny
+		// STEP 2: Importance sample a wavelength AND its PDF
+		// Use your GOOD sampler, not the uniform one.
+		lambda, pdf := spectral.SampleWavelength(rand.Float64())
+		if pdf == 0 {
+			continue
+		}
+
+		// Get camera ray for this specific wavelength
+		u := (float64(x) + rand.Float64()) / float64(nx)
+		v := (float64(y) + rand.Float64()) / float64(ny)
 		r := s.scene.Camera.GetRayWithLambda(u, v, lambda)
-		sampled := s.sampler.SampleSpectral(r, s.scene.World, s.scene.Lights, 0, rand)
-		col.AddValue(samplingIndex, sampled)
+
+		// STEP 3: Trace the path to get radiance at this wavelength
+		radiance := s.sampler.SampleSpectral(r, s.scene.World, s.scene.Lights, 0, rand)
+
+		// STEP 4: Convert this single sample to an XYZ contribution
+		// and add it to the pixel's accumulators using the unbiased estimator.
+		cieX_val, cieY_val, cieZ_val := spectral.GetCIEValues(lambda)
+
+		sumX += (radiance * cieX_val) / pdf
+		sumY += (radiance * cieY_val) / pdf
+		sumZ += (radiance * cieZ_val) / pdf
 	}
 
-	// Normalise the spectral power distribution
-	col.Normalise(s.samplesPerPixel)
-	// Convert to RGB.
-	r, g, b := spectral.SPDToRGB(col, 75.0)
+	// STEP 5: Average the accumulated XYZ values
+	invNumSamples := 1.0 / float64(s.samplesPerPixel)
+	finalX := sumX * invNumSamples
+	finalY := sumY * invNumSamples
+	finalZ := sumZ * invNumSamples
+
+	// STEP 6: Convert the final XYZ color to linear sRGB
+	exposure := 1.0 / 15.0 // Your exposure value
+	r := 3.2404542*(finalX*exposure) - 1.5371385*(finalY*exposure) - 0.4985314*(finalZ*exposure)
+	g := -0.9692660*(finalX*exposure) + 1.8760108*(finalY*exposure) + 0.0415560*(finalZ*exposure)
+	b := 0.0556434*(finalX*exposure) - 0.2040259*(finalY*exposure) + 1.0572252*(finalZ*exposure)
+
+	r = math.Max(0, math.Min(1, r))
+	g = math.Max(0, math.Min(1, g))
+	b = math.Max(0, math.Min(1, b))
 
 	return &vec3.Vec3Impl{
 		X: r,
