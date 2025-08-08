@@ -34,6 +34,23 @@ func NewPBR(incomingDir, normal *vec3.Vec3Impl, roughness, metalness float64) *P
 
 // Generate a direction based on the PBR model.
 func (p *PBR_PDF) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
+	// ALWAYS generate a diffuse ray for this test.
+	return p.uvw.Local(vec3.RandomCosineDirection(random))
+}
+
+// Value returns the probability of generating the given direction.
+func (p *PBR_PDF) Value(direction *vec3.Vec3Impl) float64 {
+	cosTheta := vec3.Dot(p.normal, vec3.UnitVector(direction))
+	if cosTheta <= 0 {
+		return 0
+	}
+	// ALWAYS return the diffuse PDF for this test.
+	return cosTheta / math.Pi
+}
+
+/*
+// Generate a direction based on the PBR model.
+func (p *PBR_PDF) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
 	// Probabilistically choose between metallic and dielectric models.
 	if random.Float64() < p.metalness {
 		// --- Metallic Path: Purely specular ---
@@ -91,3 +108,4 @@ func (p *PBR_PDF) Value(direction *vec3.Vec3Impl) float64 {
 	// Final PDF is the weighted average of the individual PDFs
 	return p.metalness*pdfSpecular + (1.0-p.metalness)*((1.0-reflectance)*pdfDiffuse+reflectance*pdfSpecular)
 }
+*/
