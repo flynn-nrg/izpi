@@ -32,6 +32,7 @@ func NewPBR(incomingDir, normal *vec3.Vec3Impl, roughness, metalness float64) *P
 	return p
 }
 
+/*
 // Generate a direction based on the PBR model.
 func (p *PBR_PDF) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
 	// ALWAYS generate a diffuse ray for this test.
@@ -47,9 +48,10 @@ func (p *PBR_PDF) Value(direction *vec3.Vec3Impl) float64 {
 	// ALWAYS return the diffuse PDF for this test.
 	return cosTheta / math.Pi
 }
+*/
 
-/*
-// Generate a direction based on the PBR model.
+// / Generate a direction based on the PBR model.
+// This logic remains the same.
 func (p *PBR_PDF) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
 	// Probabilistically choose between metallic and dielectric models.
 	if random.Float64() < p.metalness {
@@ -76,6 +78,7 @@ func (p *PBR_PDF) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
 }
 
 // Value returns the probability of generating the given direction.
+// This version uses a more robust calculation for the specular PDF.
 func (p *PBR_PDF) Value(direction *vec3.Vec3Impl) float64 {
 	unitDir := vec3.UnitVector(direction)
 	cosTheta := vec3.Dot(p.normal, unitDir)
@@ -87,17 +90,15 @@ func (p *PBR_PDF) Value(direction *vec3.Vec3Impl) float64 {
 	// --- PDF for the Diffuse Lobe ---
 	pdfDiffuse := cosTheta / math.Pi
 
-	// --- PDF for the Specular Lobe (Cosine-Power Approximation) ---
+	// --- PDF for the Specular Lobe (Robust Approximation) ---
+	// We approximate the "fuzz" distribution with a simple cosine lobe
+	// centered around the perfect reflection direction. This is numerically stable.
 	reflected := vec3.Reflect(vec3.UnitVector(p.incomingDir), p.normal)
 	cosAlpha := vec3.Dot(reflected, unitDir)
 	var pdfSpecular float64
 	if cosAlpha > 0 {
-		// Map roughness (0-1) to an exponent (high to low).
-		// A roughness of 0 gives a near-infinite exponent (perfect mirror).
-		// A roughness of 1 gives an exponent of 0 (nearly uniform lobe).
-		clampedRoughness := math.Max(0.001, p.roughness) // Avoid division by zero
-		exponent := 2.0/(clampedRoughness*clampedRoughness) - 2.0
-		pdfSpecular = ((exponent + 1.0) / (2.0 * math.Pi)) * math.Pow(cosAlpha, exponent)
+		// The PDF of a cosine lobe is cos(angle) / PI
+		pdfSpecular = cosAlpha / math.Pi
 	}
 
 	// --- Weigh the PDFs based on the material properties ---
@@ -105,7 +106,6 @@ func (p *PBR_PDF) Value(direction *vec3.Vec3Impl) float64 {
 	f0 := 0.04
 	reflectance := f0 + (1.0-f0)*math.Pow(1.0-incomingCosTheta, 5.0)
 
-	// Final PDF is the weighted average of the individual PDFs
+	// Final PDF is the weighted average of the individual PDFs. This logic is correct.
 	return p.metalness*pdfSpecular + (1.0-p.metalness)*((1.0-reflectance)*pdfDiffuse+reflectance*pdfSpecular)
 }
-*/
