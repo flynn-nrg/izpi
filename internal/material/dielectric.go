@@ -68,7 +68,7 @@ func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *f
 	var ok bool
 	var outwardNormal *vec3.Vec3Impl
 
-	reflected := reflect(r.Direction(), hr.Normal())
+	reflected := vec3.Reflect(r.Direction(), hr.Normal())
 
 	if vec3.Dot(r.Direction(), hr.Normal()) > 0 {
 		outwardNormal = vec3.ScalarMul(hr.Normal(), -1.0)

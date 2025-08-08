@@ -271,3 +271,27 @@ func Equals(v0, v1 *Vec3Impl) bool {
 		v0.Y == v1.Y &&
 		v0.Z == v1.Z
 }
+
+// Negate returns the negation of the supplied vector.
+func Negate(v *Vec3Impl) *Vec3Impl {
+	return &Vec3Impl{
+		X: -v.X,
+		Y: -v.Y,
+		Z: -v.Z,
+	}
+}
+
+func RandomInUnitSphere(random *fastrandom.LCG) *Vec3Impl {
+	for {
+		p := Sub(ScalarMul(&Vec3Impl{X: random.Float64(), Y: random.Float64(), Z: random.Float64()}, 2.0),
+			&Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0})
+		if p.SquaredLength() < 1.0 {
+			return p
+		}
+	}
+}
+
+func Reflect(v *Vec3Impl, n *Vec3Impl) *Vec3Impl {
+	// v - 2*dot(v,n)*n
+	return Sub(v, ScalarMul(n, 2*Dot(v, n)))
+}

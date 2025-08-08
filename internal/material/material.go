@@ -3,24 +3,8 @@ package material
 import (
 	"math"
 
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
-
-func randomInUnitSphere(random *fastrandom.LCG) *vec3.Vec3Impl {
-	for {
-		p := vec3.Sub(vec3.ScalarMul(&vec3.Vec3Impl{X: random.Float64(), Y: random.Float64(), Z: random.Float64()}, 2.0),
-			&vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0})
-		if p.SquaredLength() < 1.0 {
-			return p
-		}
-	}
-}
-
-func reflect(v *vec3.Vec3Impl, n *vec3.Vec3Impl) *vec3.Vec3Impl {
-	// v - 2*dot(v,n)*n
-	return vec3.Sub(v, vec3.ScalarMul(n, 2*vec3.Dot(v, n)))
-}
 
 func refract(v *vec3.Vec3Impl, n *vec3.Vec3Impl, niOverNt float64) (*vec3.Vec3Impl, bool) {
 	uv := vec3.UnitVector(v)

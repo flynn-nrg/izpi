@@ -31,7 +31,7 @@ func NewIsotropic(albedo texture.Texture) *Isotropic {
 
 // Scatter computes how the ray bounces off the surface of a diffuse material.
 func (i *Isotropic) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
-	scattered := ray.New(hr.P(), randomInUnitSphere(random), r.Time())
+	scattered := ray.New(hr.P(), vec3.RandomInUnitSphere(random), r.Time())
 	attenuation := i.albedo.Value(hr.U(), hr.V(), hr.P())
 	pdf := pdf.NewCosine(hr.Normal())
 	scatterRecord := scatterrecord.New(nil, false, attenuation, nil, nil, nil, pdf)
@@ -40,7 +40,7 @@ func (i *Isotropic) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrand
 
 // SpectralScatter computes how the ray bounces off the surface of an isotropic material with spectral properties.
 func (i *Isotropic) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
-	scattered := ray.NewWithLambda(hr.P(), randomInUnitSphere(random), r.Time(), r.Lambda())
+	scattered := ray.NewWithLambda(hr.P(), vec3.RandomInUnitSphere(random), r.Time(), r.Lambda())
 	lambda := r.Lambda()
 	albedo := i.albedo.Value(hr.U(), hr.V(), hr.P()).X // Use red component as approximation
 	pdf := pdf.NewCosine(hr.Normal())
