@@ -179,7 +179,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 						Z: 10,
 					},
 					Radius:       5,
-					MaterialName: "BlueGlass",
+					MaterialName: "RedGlass",
 				},
 			},
 		},
@@ -279,8 +279,8 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 					},
 				},
 			},
-			"BlueGlass": {
-				Name: "BlueGlass",
+			"RedGlass": {
+				Name: "RedGlass",
 				Type: pb_transport.MaterialType_DIELECTRIC,
 				MaterialProperties: &pb_transport.Material_Dielectric{
 					Dielectric: &pb_transport.DielectricMaterial{
@@ -300,9 +300,9 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 							SpectralAbsorptionCoeff: &pb_transport.SpectralConstantTexture{
 								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
 									Gaussian: &pb_transport.GaussianSpectralConstant{
-										PeakValue:        0.5,   // Strong absorption at red wavelengths to allow blue transmission
-										CenterWavelength: 650.0, // Red wavelength (absorb red, transmit blue)
-										Width:            80.0,  // Broad absorption in red-yellow region
+										PeakValue:        0.5,   // Strong absorption at green wavelengths to allow red transmission
+										CenterWavelength: 530.0, // Green wavelength (absorb green, transmit red)
+										Width:            80.0,  // Broad absorption in green region
 									},
 								},
 							},
