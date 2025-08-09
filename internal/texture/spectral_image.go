@@ -131,53 +131,58 @@ func (si *SpectralImage) transformRGBToSpectral() {
 // - Green channel influences medium wavelengths (480-620nm) with peak at 550nm
 // - Blue channel influences shorter wavelengths (380-520nm) with peak at 450nm
 //
-// Note: The red channel has a slight bias (reduced strength by 20%) to compensate for
-// the fact that many PBR materials (like metals, rust, etc.) naturally have strong
-// red components in their albedo textures. Without this bias, the spectral conversion
-// would over-emphasize red, making materials appear too reddish compared to the RGB reference.
-// This bias helps maintain color balance while still preserving the spectral characteristics
-// of the materials.
+// Updated to preserve more brightness for specular reflections by removing red bias
+// and ensuring better coverage across all wavelengths.
 func (si *SpectralImage) rgbToSpectralValue(r, g, b, wavelength float64) float64 {
 	var spectralValue float64
 
-	// Red channel contribution (600-750nm, peak at 650nm) - reduced range
-	if wavelength >= 600.0 && wavelength <= 750.0 {
+	// Red channel contribution (580-750nm, peak at 650nm) - wider range, no bias
+	if wavelength >= 580.0 && wavelength <= 750.0 {
 		// Use a Gaussian-like falloff centered at 650nm
 		center := 650.0
 		distance := math.Abs(wavelength - center)
-		width := 50.0 // Reduced width for less red influence
+		width := 60.0 // Increased width for better coverage
 		falloff := math.Exp(-(distance * distance) / (2.0 * width * width))
-		redContribution := r * falloff * 0.8 // Reduced strength by 20%
+		redContribution := r * falloff // Removed 0.8 bias
 		spectralValue += redContribution
 	}
 
-	// Green channel contribution (480-620nm, peak at 550nm)
+	// Green channel contribution (480-620nm, peak at 550nm) - wider range
 	if wavelength >= 480.0 && wavelength <= 620.0 {
 		// Use a Gaussian-like falloff centered at 550nm
 		center := 550.0
 		distance := math.Abs(wavelength - center)
-		width := 50.0
+		width := 60.0 // Increased width for better coverage
 		falloff := math.Exp(-(distance * distance) / (2.0 * width * width))
 		greenContribution := g * falloff
 		spectralValue += greenContribution
 	}
 
-	// Blue channel contribution (380-520nm, peak at 450nm)
+	// Blue channel contribution (380-520nm, peak at 450nm) - wider range
 	if wavelength >= 380.0 && wavelength <= 520.0 {
 		// Use a Gaussian-like falloff centered at 450nm
 		center := 450.0
 		distance := math.Abs(wavelength - center)
-		width := 50.0
+		width := 60.0 // Increased width for better coverage
 		falloff := math.Exp(-(distance * distance) / (2.0 * width * width))
 		blueContribution := b * falloff
 		spectralValue += blueContribution
 	}
 
 	// For neutral colors (when r ≈ g ≈ b), ensure truly neutral response
-	// by adding a small constant across all wavelengths
-	if math.Abs(r-g) < 0.1 && math.Abs(g-b) < 0.1 && math.Abs(r-b) < 0.1 {
-		// This is a neutral color, preserve more brightness for specular highlights
-		spectralValue = math.Max(spectralValue, r*0.95) // Increased from 0.8 to 0.95
+	// This is critical for bright specular highlights which are often neutral
+	if math.Abs(r-g) < 0.15 && math.Abs(g-b) < 0.15 && math.Abs(r-b) < 0.15 {
+		// This is a neutral color, preserve full brightness for specular highlights
+		maxRGB := math.Max(r, math.Max(g, b))
+		spectralValue = math.Max(spectralValue, maxRGB)
+	}
+
+	// Ensure minimum brightness preservation for bright pixels
+	// This helps maintain specular highlight brightness
+	maxRGB := math.Max(r, math.Max(g, b))
+	if maxRGB > 0.7 && spectralValue < maxRGB*0.8 {
+		// For bright pixels, ensure we preserve at least 80% of the brightness
+		spectralValue = math.Max(spectralValue, maxRGB*0.8)
 	}
 
 	// Clamp to [0, 1]
