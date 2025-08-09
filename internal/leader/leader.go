@@ -2,7 +2,6 @@ package leader
 
 import (
 	"context"
-	"fmt"
 	"image"
 	"strings"
 	"sync"
@@ -64,7 +63,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		}
 	*/
 
-	protoScene = scenes.CornellBoxPBRSpectral(aspectRatio)
+	protoScene = scenes.CornellBoxPBRColouredGlassSpectral(aspectRatio)
 
 	// Override the colour sampler if the scene is spectral.
 	if protoScene.GetColourRepresentation() == pb_transport.ColourRepresentation_SPECTRAL && cfg.Sampler == "colour" {
@@ -88,7 +87,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		t.Channels = 4
 	}
 
-	t := transport.NewTransport(aspectRatio, protoScene, nil, textures)
+	t := transport.NewTransport(aspectRatio, protoScene, nil, textures, int(cfg.NumWorkers))
 	sceneData, err = t.ToScene()
 	if err != nil {
 		log.Fatalf("Error loading scene: %v", err)
@@ -113,7 +112,6 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	// Free up resources
 	protoScene = nil
 
-	fmt.Println("Rendering scene, sampler type: ", cfg.Sampler)
 	r := render.New(
 		sceneData,
 		int(cfg.XSize), int(cfg.YSize),
