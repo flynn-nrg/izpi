@@ -300,9 +300,9 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 							SpectralAbsorptionCoeff: &pb_transport.SpectralConstantTexture{
 								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
 									Gaussian: &pb_transport.GaussianSpectralConstant{
-										PeakValue:        0.1,   // Moderate absorption at blue wavelengths
-										CenterWavelength: 480.0, // Blue wavelength
-										Width:            60.0,  // Broad absorption in blue region
+										PeakValue:        0.5,   // Strong absorption at red wavelengths to allow blue transmission
+										CenterWavelength: 650.0, // Red wavelength (absorb red, transmit blue)
+										Width:            80.0,  // Broad absorption in red-yellow region
 									},
 								},
 							},

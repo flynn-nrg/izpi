@@ -59,7 +59,8 @@ func NewSpectralColoredDielectric(spectralRefIdx texture.SpectralTexture, spectr
 }
 
 // scatterCommon contains the common scattering logic for both RGB and spectral rendering
-func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG, refIdx float64) (*ray.RayImpl, bool) {
+// Returns the scattered ray and a boolean indicating if it was reflected (true) or transmitted (false)
+func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG, refIdx float64) (*ray.RayImpl, bool, bool) {
 	var niOverNt float64
 	var cosine float64
 	var reflectProb float64
@@ -67,6 +68,7 @@ func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *f
 	var refracted *vec3.Vec3Impl
 	var ok bool
 	var outwardNormal *vec3.Vec3Impl
+	var isReflected bool
 
 	reflected := reflect(r.Direction(), hr.Normal())
 
@@ -88,10 +90,12 @@ func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *f
 
 	if random.Float64() < reflectProb {
 		scattered = ray.NewWithLambda(hr.P(), reflected, r.Time(), r.Lambda())
+		isReflected = true
 	} else {
 		scattered = ray.NewWithLambda(hr.P(), refracted, r.Time(), r.Lambda())
+		isReflected = false
 	}
-	return scattered, true
+	return scattered, isReflected, true
 }
 
 // calculateBeerLambertAttenuation calculates the Beer-Lambert law attenuation
@@ -147,14 +151,15 @@ func (d *Dielectric) calculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, sca
 
 // Scatter computes how the ray bounces off the surface of a dielectric material.
 func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
-	scattered, ok := d.scatterCommon(r, hr, random, d.refIdx)
+	scattered, isReflected, ok := d.scatterCommon(r, hr, random, d.refIdx)
 	if !ok {
 		return nil, nil, false
 	}
 
 	// Calculate Beer-Lambert attenuation for RGB rendering
 	var attenuation *vec3.Vec3Impl
-	if d.absorptionCoeff != nil {
+	if d.absorptionCoeff != nil && !isReflected {
+		// Only apply absorption to transmitted rays, not reflected rays
 		// Use the new path length calculation with world geometry
 		pathLength := d.calculatePathLength(r, hr, scattered, d.world)
 		// Apply Beer-Lambert law for each RGB component
@@ -164,6 +169,7 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastran
 			Z: math.Exp(-d.absorptionCoeff.Z * pathLength),
 		}
 	} else {
+		// No absorption for reflected rays or clear glass
 		attenuation = &vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0}
 	}
 
@@ -176,15 +182,22 @@ func (d *Dielectric) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random 
 	lambda := r.Lambda()
 	refIdx := d.spectralRefIdx.Value(hr.U(), hr.V(), lambda, hr.P())
 
-	scattered, ok := d.scatterCommon(r, hr, random, refIdx)
+	scattered, isReflected, ok := d.scatterCommon(r, hr, random, refIdx)
 	if !ok {
 		return nil, nil, false
 	}
 
 	// Calculate Beer-Lambert attenuation for spectral rendering
-	// Use the new path length calculation with world geometry
-	pathLength := d.calculatePathLength(r, hr, scattered, d.world)
-	albedo := d.calculateBeerLambertAttenuation(pathLength, lambda, hr.U(), hr.V(), hr.P())
+	var albedo float64
+	if !isReflected {
+		// Only apply absorption to transmitted rays, not reflected rays
+		// Use the new path length calculation with world geometry
+		pathLength := d.calculatePathLength(r, hr, scattered, d.world)
+		albedo = d.calculateBeerLambertAttenuation(pathLength, lambda, hr.U(), hr.V(), hr.P())
+	} else {
+		// No absorption for reflected rays
+		albedo = 1.0
+	}
 
 	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, true, albedo, lambda, nil, 0.0, 0.0, nil)
 	return scattered, scatterRecord, true
