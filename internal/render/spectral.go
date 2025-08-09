@@ -64,7 +64,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 			finalZ := sumZ * invNumSamples
 
 			// STEP 6: Convert the final XYZ color to linear sRGB
-			exposure := 1.0 / 15.0 // Your exposure value
+			exposure := 1.0 // Your exposure value
 			r := 3.2404542*(finalX*exposure) - 1.5371385*(finalY*exposure) - 0.4985314*(finalZ*exposure)
 			g := -0.9692660*(finalX*exposure) + 1.8760108*(finalY*exposure) + 0.0415560*(finalZ*exposure)
 			b := 0.0556434*(finalX*exposure) - 0.2040259*(finalY*exposure) + 1.0572252*(finalZ*exposure)
