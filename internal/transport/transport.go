@@ -2,6 +2,7 @@ package transport
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/flynn-nrg/izpi/internal/camera"
 	"github.com/flynn-nrg/izpi/internal/hitable"
@@ -17,6 +18,7 @@ import (
 
 type Transport struct {
 	aspectOverride       float64
+	numWorkers           int
 	colourRepresentation pb_transport.ColourRepresentation
 	protoScene           *pb_transport.Scene
 	triangles            []*pb_transport.Triangle
@@ -24,13 +26,20 @@ type Transport struct {
 	materials            map[string]material.Material
 }
 
-func NewTransport(aspectOverride float64, protoScene *pb_transport.Scene, triangles []*pb_transport.Triangle, textures map[string]*texture.ImageTxt) *Transport {
+func NewTransport(
+	aspectOverride float64,
+	protoScene *pb_transport.Scene,
+	triangles []*pb_transport.Triangle,
+	textures map[string]*texture.ImageTxt,
+	numWorkers int,
+) *Transport {
 	return &Transport{
 		aspectOverride:       aspectOverride,
 		colourRepresentation: protoScene.GetColourRepresentation(),
 		protoScene:           protoScene,
 		triangles:            triangles,
 		textures:             textures,
+		numWorkers:           numWorkers,
 	}
 }
 
@@ -75,50 +84,122 @@ func (t *Transport) ToScene() (*scene.Scene, error) {
 }
 
 func (t *Transport) toSceneMaterials() (map[string]material.Material, error) {
+	var (
+		mu           sync.Mutex
+		errChan      = make(chan error)
+		materialChan = make(chan *pb_transport.Material)
+	)
+
+	wg := &sync.WaitGroup{}
 	materials := make(map[string]material.Material)
 
+	// Start error collector goroutine
+	var errs []error
+	var errMu sync.Mutex
+	errorCollectorDone := make(chan struct{})
+	go func() {
+		defer close(errorCollectorDone)
+		for err := range errChan {
+			errMu.Lock()
+			errs = append(errs, err)
+			errMu.Unlock()
+		}
+	}()
+
+	// Spin up workers
+	for range t.numWorkers {
+		wg.Add(1)
+		go t.toSceneMaterial(materialChan, materials, errChan, wg, &mu)
+	}
+
 	for _, material := range t.protoScene.GetMaterials() {
+		materialChan <- material
+	}
+
+	close(materialChan)
+
+	wg.Wait()
+
+	close(errChan)
+
+	<-errorCollectorDone
+
+	if len(errs) > 0 {
+		return nil, fmt.Errorf("errors converting materials: %v", errs)
+	}
+
+	return materials, nil
+}
+
+func (t *Transport) toSceneMaterial(
+	materialChan chan *pb_transport.Material,
+	materials map[string]material.Material,
+	errChan chan error,
+	wg *sync.WaitGroup,
+	mu *sync.Mutex,
+) {
+	defer wg.Done()
+
+	for material := range materialChan {
+		fmt.Println("Converting material", material.GetName())
 		switch material.GetType() {
 		case pb_transport.MaterialType_LAMBERT:
 			lambert, err := t.toSceneLambertMaterial(material)
 			if err != nil {
-				return nil, err
+				errChan <- err
+				continue
 			}
+			mu.Lock()
 			materials[material.GetName()] = lambert
+			mu.Unlock()
 		case pb_transport.MaterialType_DIELECTRIC:
 			dielectric, err := t.toSceneDielectricMaterial(material)
 			if err != nil {
-				return nil, err
+				errChan <- err
+				continue
 			}
+			mu.Lock()
 			materials[material.GetName()] = dielectric
+			mu.Unlock()
 		case pb_transport.MaterialType_DIFFUSE_LIGHT:
 			diffuselight, err := t.toSceneDiffuseLightMaterial(material)
 			if err != nil {
-				return nil, err
+				errChan <- err
+				continue
 			}
+			mu.Lock()
 			materials[material.GetName()] = diffuselight
+			mu.Unlock()
 		case pb_transport.MaterialType_METAL:
 			metal, err := t.toSceneMetalMaterial(material)
 			if err != nil {
-				return nil, err
+				errChan <- err
+				continue
 			}
+			mu.Lock()
 			materials[material.GetName()] = metal
+			mu.Unlock()
 		case pb_transport.MaterialType_ISOTROPIC:
 			isotropic, err := t.toSceneIsotropicMaterial(material)
 			if err != nil {
-				return nil, err
+				errChan <- err
+				continue
 			}
+			mu.Lock()
 			materials[material.GetName()] = isotropic
+			mu.Unlock()
 		case pb_transport.MaterialType_PBR:
 			pbr, err := t.toScenePBRMaterial(material)
 			if err != nil {
-				return nil, err
+				errChan <- err
+				continue
 			}
+			mu.Lock()
 			materials[material.GetName()] = pbr
+			mu.Unlock()
+			fmt.Println("Converted material", material.GetName())
 		}
 	}
-
-	return materials, nil
 }
 
 func (t *Transport) toScenePBRMaterial(mat *pb_transport.Material) (material.Material, error) {

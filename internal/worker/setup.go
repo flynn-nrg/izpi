@@ -262,7 +262,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	}
 
 	cameraAspectRatio := float64(req.GetImageResolution().GetWidth()) / float64(req.GetImageResolution().GetHeight())
-	t := transport.NewTransport(cameraAspectRatio, protoScene, triangles, textures)
+	t := transport.NewTransport(cameraAspectRatio, protoScene, triangles, textures, int(s.availableCores))
 
 	scene, err := t.ToScene()
 	if err != nil {
