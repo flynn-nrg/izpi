@@ -121,7 +121,7 @@ func (r *RendererImpl) Render(ctx context.Context) image.Image {
 	totalWorkers := 0
 
 	// Local workers
-	for i := 0; i < r.numWorkers; i++ {
+	for range r.numWorkers {
 		totalWorkers++
 		random := fastrandom.NewWithDefaults()
 		wg.Add(1)
@@ -137,7 +137,7 @@ func (r *RendererImpl) Render(ctx context.Context) image.Image {
 
 	// Remote workers
 	for _, worker := range r.remoteWorkers {
-		for i := 0; i < worker.NumCores; i++ {
+		for range worker.NumCores {
 			totalWorkers++
 			wg.Add(1)
 			go remoteWorker(ctx, queue, quit, wg, worker)
