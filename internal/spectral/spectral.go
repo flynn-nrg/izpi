@@ -7,12 +7,12 @@ import (
 const (
 	WavelengthMin = 380
 	WavelengthMax = 750
-	// CIE 1931 color matching functions are defined from 360-830nm
-	// but we focus on visible range 380-750nm
 )
 
 // CIE 1931 color matching functions (simplified, tabulated data)
 // These are the actual CIE x̄(λ), ȳ(λ), z̄(λ) functions
+// wikipedia: https://en.wikipedia.org/wiki/CIE_1931_color_space
+// We only cover the 380-750nm range.
 var cieX = []float64{
 	0.0014, 0.0022, 0.0042, 0.0076, 0.0143, 0.0232, 0.0435, 0.0776, 0.1344, 0.2148,
 	0.2839, 0.3285, 0.3483, 0.3481, 0.3362, 0.3187, 0.2908, 0.2511, 0.1954, 0.1421,
@@ -121,18 +121,6 @@ func (spd *SpectralPowerDistribution) Normalise(numSamples int) {
 	}
 }
 
-// NormaliseAndScale normalises the spectral power distribution by dividing by numSamples
-// and then applies a scale factor in a single pass for efficiency
-func (spd *SpectralPowerDistribution) NormaliseAndScale(numSamples int, scale float64) {
-	if numSamples == 0 {
-		return
-	}
-	factor := scale / float64(numSamples)
-	for i := range spd.values {
-		spd.values[i] *= factor
-	}
-}
-
 // Wavelengths returns the wavelengths array
 func (spd *SpectralPowerDistribution) Wavelengths() []float64 {
 	return spd.wavelengths
@@ -193,25 +181,20 @@ func SampleWavelength(random float64) (lambda, pdf float64) {
 				prev := current
 				t := (target - prev) / y
 				lambda = cieWavelengths[i-1] + t*(cieWavelengths[i]-cieWavelengths[i-1])
-
-				// --- NEW CODE START ---
-				// Calculate the PDF for the sampled wavelength.
-				// 1. First, find the interpolated height of the Y-curve at this point.
 				interpolatedY := cieY[i-1] + t*(cieY[i]-cieY[i-1])
-				// 2. The PDF is this height divided by the total area under the curve.
 				if cieYIntegral > 0 {
 					pdf = interpolatedY / cieYIntegral
 				}
-				// --- NEW CODE END ---
 
-				return lambda, pdf // Return both values
+				return lambda, pdf
 			}
 
 			lambda = cieWavelengths[i]
 			if cieYIntegral > 0 {
-				pdf = y / cieYIntegral // PDF for the non-interpolated case
+				pdf = y / cieYIntegral
 			}
-			return lambda, pdf // Return both values
+
+			return lambda, pdf
 		}
 		current += y
 	}
@@ -221,51 +204,7 @@ func SampleWavelength(random float64) (lambda, pdf float64) {
 	if cieYIntegral > 0 {
 		pdf = cieY[len(cieY)-1] / cieYIntegral
 	}
-	return lambda, pdf // Return both values
-}
-
-// SPDToRGB converts a spectral power distribution to sRGB.
-// This version uses the standard, correct methodology.
-func SPDToRGB(spd *SpectralPowerDistribution, exposure float64) (r, g, b float64) {
-	var x, y, z float64
-
-	// Step 1: Integrate the SPD against the unmodified CIE matching functions.
-	// We assume the SPD is sampled at the same wavelengths as our CIE data.
-	// If not, interpolation would be needed inside the loop.
-	for i := range spd.wavelengths {
-		value := spd.values[i]
-		x += value * cieX[i]
-		y += value * cieY[i]
-		z += value * cieZ[i]
-	}
-
-	// Step 2: Normalize the integrated XYZ values.
-	// We divide by the integral of the CIE Y curve. This sets the luminance
-	// of a perfect white surface to 1.0.
-	if cieYIntegral > 0 {
-		invY := 1.0 / cieYIntegral
-		x *= invY
-		y *= invY
-		z *= invY
-	}
-
-	// Apply exposure control
-	x *= exposure
-	y *= exposure
-	z *= exposure
-
-	// Step 3: Convert from CIE XYZ to linear sRGB using the standard D65 matrix.
-	// This is the same matrix used in WavelengthToRGB.
-	r = 3.2404542*x - 1.5371385*y - 0.4985314*z
-	g = -0.9692660*x + 1.8760108*y + 0.0415560*z
-	b = 0.0556434*x - 0.2040259*y + 1.0572252*z
-
-	// Step 4: Clamp to [0,1]. Gamma correction should be applied later as a final step.
-	r = math.Max(0, math.Min(1, r))
-	g = math.Max(0, math.Min(1, g))
-	b = math.Max(0, math.Min(1, b))
-
-	return r, g, b
+	return lambda, pdf
 }
 
 // GetCIEValues returns the CIE color matching function values for a given wavelength

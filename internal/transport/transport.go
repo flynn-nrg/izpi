@@ -141,7 +141,6 @@ func (t *Transport) toSceneMaterial(
 	defer wg.Done()
 
 	for material := range materialChan {
-		fmt.Println("Converting material", material.GetName())
 		switch material.GetType() {
 		case pb_transport.MaterialType_LAMBERT:
 			lambert, err := t.toSceneLambertMaterial(material)
@@ -197,7 +196,6 @@ func (t *Transport) toSceneMaterial(
 			mu.Lock()
 			materials[material.GetName()] = pbr
 			mu.Unlock()
-			fmt.Println("Converted material", material.GetName())
 		}
 	}
 }
