@@ -48,20 +48,21 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
 					MaterialName: "White",
 				},
-				// Floor (White)
+				// Floor (White) - Triangle 1: covers left half
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
 					MaterialName: "White",
 				},
-				// Additional floor triangle
+				// Floor (White) - Triangle 2: covers right half
 				{
-					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
 					MaterialName: "White",
 				},
+
 				// Ceiling triangles
 				{
 					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},

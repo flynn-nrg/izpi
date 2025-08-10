@@ -178,10 +178,10 @@ objects: {
     material_name: "White"
   }
   triangles: {
-    vertex0: {
+    vertex0: {}
+    vertex1: {
       z: 100
     }
-    vertex1: {}
     vertex2: {
       x: 100
       z: 100
@@ -189,17 +189,16 @@ objects: {
     material_name: "White"
   }
   triangles: {
-    vertex0: {
-      x: 100
-    }
-    vertex1: {}
-    vertex2: {
+    vertex0: {}
+    vertex1: {
       x: 100
       z: 100
     }
+    vertex2: {
+      x: 100
+    }
     material_name: "White"
   }
-
   triangles: {
     vertex0: {
       y: 100
