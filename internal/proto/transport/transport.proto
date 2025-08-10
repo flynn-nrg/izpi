@@ -70,9 +70,6 @@ message Camera {
 }
 
 
-// Texture definitions (can be embedded directly)
-
-// Represents different types of textures.
 message Texture {
   string name = 1;
   TextureType type = 2;
@@ -120,26 +117,26 @@ message SpectralConstantTexture {
 
 // Represents a Gaussian spectral response.
 message GaussianSpectralConstant {
-  float peak_value = 1;        // Maximum reflectance (0.0 to 1.0)
-  float center_wavelength = 2; // Wavelength where response is maximum (380-750nm)
-  float width = 3;             // Width of the response curve
+  float peak_value = 1;
+  float center_wavelength = 2;
+  float width = 3;
 }
 
 // Represents a tabulated spectral response.
 message TabulatedSpectralConstant {
-  repeated float wavelengths = 1; // Array of wavelengths in nanometers
-  repeated float values = 2;      // Array of spectral values at each wavelength
+  repeated float wavelengths = 1;
+  repeated float values = 2;
 }
 
 // Represents a neutral spectral response (white, gray, black).
 message NeutralSpectralConstant {
-  float reflectance = 1; // Reflectance value (0.0 to 1.0)
+  float reflectance = 1;
 }
 
 // Represents a spectral checker texture.
 message SpectralCheckerTexture {
-  SpectralConstantTexture odd = 1;  // Spectral texture for odd squares
-  SpectralConstantTexture even = 2; // Spectral texture for even squares
+  SpectralConstantTexture odd = 1;
+  SpectralConstantTexture even = 2;
 }
 
 
@@ -147,7 +144,7 @@ message SpectralCheckerTexture {
 
 // Represents different types of materials.
 message Material {
-  string name = 1; // Material name, used as key in the scene's materials map
+  string name = 1;
   MaterialType type = 2;
   oneof material_properties {
     DielectricMaterial dielectric = 3;
@@ -173,10 +170,9 @@ message DielectricMaterial {
     float refidx = 1;
     SpectralConstantTexture spectral_refidx = 2;
   }
-  // Optional absorption properties for colored glass
   oneof absorption_properties {
-    Vec3 absorption_coeff = 3; // RGB absorption coefficient
-    SpectralConstantTexture spectral_absorption_coeff = 4; // Spectral absorption coefficient
+    Vec3 absorption_coeff = 3;
+    SpectralConstantTexture spectral_absorption_coeff = 4;
   }
 }
 
@@ -198,7 +194,7 @@ message IsotropicMaterial {
 
 // Represents a Metal material.
 message MetalMaterial {
-  Vec3 albedo = 1; // Direct embedding of Texture
+  Vec3 albedo = 1;
   float fuzz = 2;
 }
 
@@ -208,7 +204,7 @@ message PBRMaterial {
   Texture roughness = 2;
   Texture metalness = 3;
   Texture normal_map = 4;
-  Texture sss = 5; // Subsurface Scattering
+  Texture sss = 5;
   float sss_radius = 6;
 }
 
@@ -245,9 +241,6 @@ message SceneObjects {
 }
 
 
-// Scene Root
-
-// The root message describing the entire scene.
 message Scene {
   string name = 1;
   string version = 2;
@@ -258,56 +251,37 @@ message Scene {
   SceneObjects objects = 7;
   bool stream_triangles = 8;
   uint64 total_triangles = 9;
-  // Spectral background for spectral rendering
   TabulatedSpectralConstant spectral_background = 10;
 }
 
-// --- Service Definition ---
-
-// Service for transporting scene data and associated resources.
 service SceneTransportService {
-  // A unary RPC to retrieve the entire scene graph.
-  // The request can include a scene identifier (e.g., name or ID).
   rpc GetScene (GetSceneRequest) returns (Scene);
-
-  // A streaming RPC to retrieve the binary content of a texture file.
-  // The client requests the texture by its filename, and the server streams chunks of the file data.
   rpc StreamTextureFile (StreamTextureFileRequest) returns (stream StreamTextureFileResponse);
-
-  // Streaming RPC to retrieve triangle data in batches.
   rpc StreamTriangles (StreamTrianglesRequest) returns (stream StreamTrianglesResponse);
 }
 
-// --- RPC Request/Response Messages ---
-
-// Request to retrieve a specific scene.
 message GetSceneRequest {
-  string scene_name = 1; // Identifier for the scene to retrieve.
+  string scene_name = 1;
 }
 
-
-// Request to stream the content of a texture file.
 message StreamTextureFileRequest {
-  string filename = 1; // The path/name of the texture file to stream.
-  uint64 offset = 2;   // The starting byte offset in the file to begin streaming from.
-  uint32 chunk_size = 3; // The maximum size of each chunk to stream in bytes.
+  string filename = 1;
+  uint64 offset = 2;
+  uint32 chunk_size = 3;
 }
 
-// A chunk of binary data for a streamed texture file.
 message StreamTextureFileResponse {
-  bytes chunk = 1; // A segment of the texture file's binary data.
-  uint64 size = 2; // The size of the returned chunk.
+  bytes chunk = 1;
+  uint64 size = 2;
 }
 
-// Request to stream triangle data.
 message StreamTrianglesRequest {
-  string scene_name = 1; // The name of the scene the triangles belong to.
-  uint32 batch_size = 2; // The number of triangles to return in each batch.
-  uint64 offset = 3;     // Renamed from offset_bytes. This is the starting triangle index.
+  string scene_name = 1;
+  uint32 batch_size = 2;
+  uint64 offset = 3;
 }
 
-// Response containing a batch of triangles.
 message StreamTrianglesResponse {
-  repeated Triangle triangles = 1; // A batch of Triangle objects.
-  // uint64 total_triangles = 2; // Moved to Scene message
+  repeated Triangle triangles = 1;
+  uint64 total_triangles = 2;
 }
