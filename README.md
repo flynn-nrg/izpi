@@ -23,7 +23,12 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
 
  - [X] Support for [PBR](https://en.wikipedia.org/wiki/Physically_based_rendering) materials.
  - [X] Distributed Rendering.
- - [ ] Spectral Sampler to accurately simulate dispersion.
+ - [X] Spectral Sampler to accurately simulate dispersion.
+ - [ ] Nested dielectrics.
+ - [ ] Physically correct light sources library.
+ - [ ] Materials library.
+ - [ ] Water material.
+ - [ ] Sky simulation.
  - [ ] Scene conversion tool by implementing Go bindings for [Open Asset Import Library](https://assimp.org).
  - [ ] Implement [Metropolis light transport](https://en.wikipedia.org/wiki/Metropolis_light_transport).
 
@@ -57,3 +62,7 @@ A demonstration of the effect of [displacement mapping](https://en.wikipedia.org
 A [Cornell box](https://en.wikipedia.org/wiki/Cornell_box) showcasing various [PBR](https://en.wikipedia.org/wiki/Physically_based_rendering) materials from [Free PBR](https://freepbr.com).
 
 ![Different PBR materials in a  Cornell box](./images/pbr.png "PBR materials")
+
+A demonstration of the [dispersion](https://en.wikipedia.org/wiki/Dispersion_(optics)) phenomenon reproduced accurately by the spectral sampler
+
+![Cornell Box with transparent glass spheres](./images/glass_pyramid_spectral.png)
