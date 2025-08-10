@@ -64,6 +64,6 @@ A [Cornell box](https://en.wikipedia.org/wiki/Cornell_box) showcasing various [P
 
 ![Different PBR materials in a  Cornell box](./images/pbr.png "PBR materials")
 
-A demonstration of the [dispersion](https://en.wikipedia.org/wiki/Dispersion_(optics)) phenomenon reproduced accurately by the spectral sampler.
+A demonstration of the [dispersion](https://en.wikipedia.org/wiki/Dispersion_(optics)) phenomenon calculated by the spectral sampler.
 
 ![Cornell Box with transparent glass spheres](./images/glass_pyramid_spectral.png)

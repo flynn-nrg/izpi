@@ -2306,17 +2306,11 @@ func CornellBoxPrismSpectral(aspect float64) *pb_transport.Scene {
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
 					MaterialName: "White",
 				},
-				// Additional floor triangles
+				// Additional floor triangle
 				{
 					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
 					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
-					MaterialName: "White",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
 					MaterialName: "White",
 				},
 				// Ceiling triangles
@@ -2676,17 +2670,11 @@ func CornellBoxPrismSpectralEnhanced(aspect float64) *pb_transport.Scene {
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
 					MaterialName: "White",
 				},
-				// Additional floor triangles
+				// Additional floor triangle
 				{
 					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
 					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
-					MaterialName: "White",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
 					MaterialName: "White",
 				},
 				// Ceiling triangles
@@ -2989,17 +2977,11 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
 					MaterialName: "White",
 				},
-				// Additional floor triangles
+				// Additional floor triangle
 				{
 					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
 					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
-					MaterialName: "White",
-				},
-				{
-					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
 					MaterialName: "White",
 				},
 				// Ceiling triangles
