@@ -16,11 +16,14 @@ import (
 // Ensure interface compliance.
 var _ Material = (*Lambertian)(nil)
 
-// Lambertian represents a diffuse material.
+// Lambertian represents a lambertian material.
 type Lambertian struct {
 	nonPBR
 	nonEmitter
-	albedo texture.Texture
+	nonPathLength
+	nonWorldSetter
+	albedo         texture.Texture
+	spectralAlbedo texture.SpectralTexture
 }
 
 // NewLambertian returns an instance of the Lambert material.
@@ -30,15 +33,38 @@ func NewLambertian(albedo texture.Texture) *Lambertian {
 	}
 }
 
-// Scatter computes how the ray bounces off the surface of a diffuse material.
-func (l *Lambertian) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+// NewSpectralLambertian returns an instance of the Lambert material with spectral support.
+func NewSpectralLambertian(spectralAlbedo texture.SpectralTexture) *Lambertian {
+	return &Lambertian{
+		spectralAlbedo: spectralAlbedo,
+	}
+}
+
+// scatterCommon contains the common scattering logic for both RGB and spectral rendering
+func (l *Lambertian) scatterCommon(hr *hitrecord.HitRecord, random *fastrandom.LCG, time float64) (*ray.RayImpl, *pdf.Cosine) {
 	uvw := onb.New()
 	uvw.BuildFromW(hr.Normal())
 	direction := uvw.Local(vec3.RandomCosineDirection(random))
-	scattered := ray.New(hr.P(), vec3.UnitVector(direction), r.Time())
-	albedo := l.albedo.Value(hr.U(), hr.V(), hr.P())
+	scattered := ray.New(hr.P(), vec3.UnitVector(direction), time)
 	pdf := pdf.NewCosine(hr.Normal())
+	return scattered, pdf
+}
+
+// Scatter computes how the ray bounces off the surface of a diffuse material.
+func (l *Lambertian) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+	scattered, pdf := l.scatterCommon(hr, random, r.Time())
+	albedo := l.albedo.Value(hr.U(), hr.V(), hr.P())
 	scatterRecord := scatterrecord.New(nil, false, albedo, nil, nil, nil, pdf)
+	return scattered, scatterRecord, true
+}
+
+// SpectralScatter computes how the ray bounces off the surface of a diffuse material with spectral properties.
+func (l *Lambertian) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
+	scattered, pdf := l.scatterCommon(hr, random, r.Time())
+	lambda := r.Lambda()
+	albedo := l.spectralAlbedo.Value(hr.U(), hr.V(), lambda, hr.P())
+	scatterRecord := scatterrecord.NewSpectralScatterRecord(nil, false, albedo, lambda, nil, 0.0, 0.0, pdf)
+
 	return scattered, scatterRecord, true
 }
 
@@ -54,4 +80,9 @@ func (l *Lambertian) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered
 
 func (l *Lambertian) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return l.albedo.Value(u, v, p)
+}
+
+// SpectralAlbedo returns the spectral albedo at the given wavelength.
+func (l *Lambertian) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+	return l.spectralAlbedo.Value(u, v, lambda, p)
 }

@@ -15,17 +15,19 @@ var _ Sampler = (*WireFrame)(nil)
 
 // WireFrame represents a WireFrame sampler.
 type WireFrame struct {
-	numRays *uint64
-	paper   *vec3.Vec3Impl
-	ink     *vec3.Vec3Impl
+	NonSpectral // Embed to get SampleSpectral method
+	numRays     *uint64
+	paper       *vec3.Vec3Impl
+	ink         *vec3.Vec3Impl
 }
 
 // NewWireFrame returns a new wireframe sampler with the provided colour.
 func NewWireFrame(paper, ink *vec3.Vec3Impl, numRays *uint64) *WireFrame {
 	return &WireFrame{
-		numRays: numRays,
-		paper:   paper,
-		ink:     ink,
+		NonSpectral: *NewNonSpectral(), // Initialize embedded struct
+		numRays:     numRays,
+		paper:       paper,
+		ink:         ink,
 	}
 }
 

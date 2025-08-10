@@ -23,8 +23,8 @@ const (
 	defaultYSize            = "500"
 	defaultSamples          = "1000"
 	defaultMaxDepth         = "50"
-	defaultOutputFile       = "output.png"
-	defaultSceneFile        = "examples/cornell_box.izpi"
+	defaultOutputFile       = "output.exr"
+	defaultSceneFile        = "examples/cornell_box_transparent_pyramid_spectral.pbtxt"
 	defaultDiscoveryTimeout = "3"
 )
 
@@ -35,9 +35,9 @@ var flags struct {
 	XSize            int64  `name:"x" help:"Output image x size" default:"${defaultXSize}"`
 	YSize            int64  `name:"y" help:"Output image y size" default:"${defaultYSize}"`
 	Samples          int64  `name:"samples" help:"Number of samples per ray" default:"${defaultSamples}"`
-	Sampler          string `name:"sampler-type" help:"Sampler function to use: colour, albedo, normal, wireframe" default:"colour"`
+	Sampler          string `name:"sampler-type" help:"Sampler function to use: spectral, colour, albedo, normal, wireframe" default:"colour"`
 	Depth            int64  `name:"max-depth" help:"Maximum depth" default:"${defaultMaxDepth}"`
-	OutputMode       string `name:"output-mode" help:"Output mode: png, exr, hdr or pfm" default:"png"`
+	OutputMode       string `name:"output-mode" help:"Output mode: png, exr, hdr or pfm" default:"exr"`
 	OutputFile       string `type:"file" name:"output-file" help:"Output file." default:"${defaultOutputFile}"`
 	Verbose          bool   `name:"v" help:"Print rendering progress bar" default:"true"`
 	Preview          bool   `name:"p" help:"Display rendering progress in a window" default:"true"`

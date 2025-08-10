@@ -1,3 +1,0 @@
-package material
-
-// ... existing code ...

@@ -10,6 +10,8 @@ enum TextureType {
   CHECKER = 2;
   IMAGE = 3;
   NOISE = 4;
+  SPECTRAL_CONSTANT = 5;
+  SPECTRAL_CHECKER = 6;
 }
 
 enum TexturePixelFormat {
@@ -35,6 +37,11 @@ enum MaterialType {
   PBR = 6;
 }
 
+enum ColourRepresentation {
+  COLOUR_REPRESENTATION_UNSPECIFIED = 0;
+  RGB = 1;
+  SPECTRAL = 2;
+}
 
 // Represents a 3D vector or point with float components.
 message Vec3 {
@@ -63,9 +70,6 @@ message Camera {
 }
 
 
-// Texture definitions (can be embedded directly)
-
-// Represents different types of textures.
 message Texture {
   string name = 1;
   TextureType type = 2;
@@ -74,6 +78,8 @@ message Texture {
     CheckerTexture checker = 4;
     ImageTexture image = 5;
     NoiseTexture noise = 6;
+    SpectralConstantTexture spectral_constant = 7;
+    SpectralCheckerTexture spectral_checker = 8;
   }
 }
 
@@ -98,12 +104,47 @@ message NoiseTexture {
   float scale = 1;
 }
 
+// Spectral texture definitions
+
+// Represents a spectral constant texture with Gaussian or tabulated response.
+message SpectralConstantTexture {
+  oneof spectral_properties {
+    GaussianSpectralConstant gaussian = 1;
+    TabulatedSpectralConstant tabulated = 2;
+    NeutralSpectralConstant neutral = 3;
+  }
+}
+
+// Represents a Gaussian spectral response.
+message GaussianSpectralConstant {
+  float peak_value = 1;
+  float center_wavelength = 2;
+  float width = 3;
+}
+
+// Represents a tabulated spectral response.
+message TabulatedSpectralConstant {
+  repeated float wavelengths = 1;
+  repeated float values = 2;
+}
+
+// Represents a neutral spectral response (white, gray, black).
+message NeutralSpectralConstant {
+  float reflectance = 1;
+}
+
+// Represents a spectral checker texture.
+message SpectralCheckerTexture {
+  SpectralConstantTexture odd = 1;
+  SpectralConstantTexture even = 2;
+}
+
 
 // Material definitions
 
 // Represents different types of materials.
 message Material {
-  string name = 1; // Material name, used as key in the scene's materials map
+  string name = 1;
   MaterialType type = 2;
   oneof material_properties {
     DielectricMaterial dielectric = 3;
@@ -117,27 +158,43 @@ message Material {
 
 // Represents a Lambertian material.
 message LambertMaterial {
-  Texture albedo = 1;
+  oneof albedo_properties {
+    Texture albedo = 1;
+    SpectralConstantTexture spectral_albedo = 2;
+  }
 }
 
 // Represents a Dielectric material.
 message DielectricMaterial {
-  float refidx = 1;
+  oneof refractive_index_properties {
+    float refidx = 1;
+    SpectralConstantTexture spectral_refidx = 2;
+  }
+  oneof absorption_properties {
+    Vec3 absorption_coeff = 3;
+    SpectralConstantTexture spectral_absorption_coeff = 4;
+  }
 }
 
 // Represents a Diffuse Light material.
 message DiffuseLightMaterial {
-  Texture emit = 1; // Direct embedding of Texture
+  oneof emission_properties {
+    Texture emit = 1;
+    SpectralConstantTexture spectral_emit = 2;
+  }
 }
 
 // Represents an Isotropic material.
 message IsotropicMaterial {
-  Texture albedo = 1; // Direct embedding of Texture
+  oneof albedo_properties {
+    Texture albedo = 1;
+    SpectralConstantTexture spectral_albedo = 2;
+  }
 }
 
 // Represents a Metal material.
 message MetalMaterial {
-  Vec3 albedo = 1; // Direct embedding of Texture
+  Vec3 albedo = 1;
   float fuzz = 2;
 }
 
@@ -147,7 +204,7 @@ message PBRMaterial {
   Texture roughness = 2;
   Texture metalness = 3;
   Texture normal_map = 4;
-  Texture sss = 5; // Subsurface Scattering
+  Texture sss = 5;
   float sss_radius = 6;
 }
 
@@ -184,66 +241,47 @@ message SceneObjects {
 }
 
 
-// Scene Root
-
-// The root message describing the entire scene.
 message Scene {
   string name = 1;
   string version = 2;
-  Camera camera = 3;
-  map<string, Material> materials = 4;
-  map<string, ImageTextureMetadata> image_textures = 5;
-  SceneObjects objects = 6;
-  bool stream_triangles = 7;
-  uint64 total_triangles = 8;
+  ColourRepresentation colour_representation = 3;
+  Camera camera = 4;
+  map<string, Material> materials = 5;
+  map<string, ImageTextureMetadata> image_textures = 6;
+  SceneObjects objects = 7;
+  bool stream_triangles = 8;
+  uint64 total_triangles = 9;
+  TabulatedSpectralConstant spectral_background = 10;
 }
 
-// --- Service Definition ---
-
-// Service for transporting scene data and associated resources.
 service SceneTransportService {
-  // A unary RPC to retrieve the entire scene graph.
-  // The request can include a scene identifier (e.g., name or ID).
   rpc GetScene (GetSceneRequest) returns (Scene);
-
-  // A streaming RPC to retrieve the binary content of a texture file.
-  // The client requests the texture by its filename, and the server streams chunks of the file data.
   rpc StreamTextureFile (StreamTextureFileRequest) returns (stream StreamTextureFileResponse);
-
-  // Streaming RPC to retrieve triangle data in batches.
   rpc StreamTriangles (StreamTrianglesRequest) returns (stream StreamTrianglesResponse);
 }
 
-// --- RPC Request/Response Messages ---
-
-// Request to retrieve a specific scene.
 message GetSceneRequest {
-  string scene_name = 1; // Identifier for the scene to retrieve.
+  string scene_name = 1;
 }
 
-
-// Request to stream the content of a texture file.
 message StreamTextureFileRequest {
-  string filename = 1; // The path/name of the texture file to stream.
-  uint64 offset = 2;   // The starting byte offset in the file to begin streaming from.
-  uint32 chunk_size = 3; // The maximum size of each chunk to stream in bytes.
+  string filename = 1;
+  uint64 offset = 2;
+  uint32 chunk_size = 3;
 }
 
-// A chunk of binary data for a streamed texture file.
 message StreamTextureFileResponse {
-  repeated double chunk = 1; // A segment of the texture file's binary data.
-  uint64 size = 2; // The size of the returned chunk.
+  bytes chunk = 1;
+  uint64 size = 2;
 }
 
-// Request to stream triangle data.
 message StreamTrianglesRequest {
-  string scene_name = 1; // The name of the scene the triangles belong to.
-  uint32 batch_size = 2; // The number of triangles to return in each batch.
-  uint64 offset = 3;     // Renamed from offset_bytes. This is the starting triangle index.
+  string scene_name = 1;
+  uint32 batch_size = 2;
+  uint64 offset = 3;
 }
 
-// Response containing a batch of triangles.
 message StreamTrianglesResponse {
-  repeated Triangle triangles = 1; // A batch of Triangle objects.
-  // uint64 total_triangles = 2; // Moved to Scene message
+  repeated Triangle triangles = 1;
+  uint64 total_triangles = 2;
 }

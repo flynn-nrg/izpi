@@ -8,6 +8,7 @@ import (
 	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
+	"github.com/flynn-nrg/izpi/internal/render"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 	"github.com/pbnjay/memory"
 	log "github.com/sirupsen/logrus"
@@ -39,15 +40,14 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 				log.Warnf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
 				return stream.Context().Err()
 			default:
-				col := &vec3.Vec3Impl{}
-				for sample := 0; sample < s.samplesPerPixel; sample++ {
-					u := (float64(x) + rand.Float64()) / nx
-					v := (float64(y) + rand.Float64()) / ny
-					r := s.scene.Camera.GetRay(u, v)
-					col = vec3.Add(col, vec3.DeNAN(s.sampler.Sample(r, s.scene.World, s.scene.Lights, 0, rand)))
+				var col *vec3.Vec3Impl
+				switch s.samplerType {
+				case pb_control.SamplerType_COLOUR, pb_control.SamplerType_NORMAL, pb_control.SamplerType_WIRE_FRAME, pb_control.SamplerType_ALBEDO:
+					col = s.renderTileRGB(float64(x), float64(y), nx, ny, rand)
+				case pb_control.SamplerType_SPECTRAL:
+					col = s.renderTileSpectral(float64(x), float64(y), nx, ny, rand)
 				}
 
-				col = vec3.ScalarDiv(col, float64(s.samplesPerPixel))
 				pixels[i] = col.Z
 				pixels[i+1] = col.Y
 				pixels[i+2] = col.X
@@ -72,6 +72,28 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	}
 
 	return nil
+}
+
+func (s *workerServer) renderTileRGB(x, y, nx, ny float64, rand *fastrandom.LCG) *vec3.Vec3Impl {
+	col := &vec3.Vec3Impl{}
+	for sample := 0; sample < s.samplesPerPixel; sample++ {
+		u := (float64(x) + rand.Float64()) / nx
+		v := (float64(y) + rand.Float64()) / ny
+		r := s.scene.Camera.GetRay(u, v)
+		col = vec3.Add(col, vec3.DeNAN(s.sampler.Sample(r, s.scene.World, s.scene.Lights, 0, rand)))
+	}
+
+	return vec3.ScalarDiv(col, float64(s.samplesPerPixel))
+}
+
+func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom.LCG) *vec3.Vec3Impl {
+	r, g, b := render.RenderPixelSpectral(s.samplesPerPixel, int(x), int(y), int(nx), int(ny), s.scene, s.sampler, rand)
+
+	return &vec3.Vec3Impl{
+		X: r,
+		Y: g,
+		Z: b,
+	}
 }
 
 func (s *workerServer) RenderEnd(ctx context.Context, req *pb_control.RenderEndRequest) (*pb_control.RenderEndResponse, error) {

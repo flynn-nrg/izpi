@@ -64,6 +64,17 @@ func (c *Camera) GetRay(s float64, t float64) *ray.RayImpl {
 			vec3.ScalarMul(c.vertical, t)), c.origin, offset), time)
 }
 
+// GetRayWithLambda returns the ray associated for the supplied u and v with a specific wavelength.
+func (c *Camera) GetRayWithLambda(s float64, t float64, lambda float64) *ray.RayImpl {
+	rd := vec3.ScalarMul(randomInUnitDisc(), c.lensRadius)
+	offset := vec3.Add(vec3.ScalarMul(c.u, rd.X), vec3.ScalarMul(c.v, rd.Y))
+	time := c.time0 + rand.Float64()*(c.time1-c.time0)
+	return ray.NewWithLambda(vec3.Add(c.origin, offset),
+		// lowerLeftCorner + s*horizontal + t*vertical - origin - offset
+		vec3.Sub(vec3.Add(c.lowerLeftCorner, vec3.ScalarMul(c.horizontal, s),
+			vec3.ScalarMul(c.vertical, t)), c.origin, offset), time, lambda)
+}
+
 func randomInUnitDisc() *vec3.Vec3Impl {
 	for {
 		p := vec3.Sub(vec3.ScalarMul(&vec3.Vec3Impl{X: rand.Float64(), Y: rand.Float64()}, 2.0), &vec3.Vec3Impl{X: 1.0, Y: 1.0})

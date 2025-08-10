@@ -15,7 +15,10 @@ var _ Material = (*DiffuseLight)(nil)
 // DiffuseLight represents a diffuse light material.
 type DiffuseLight struct {
 	nonPBR
-	emit texture.Texture
+	nonPathLength
+	nonWorldSetter
+	emit         texture.Texture
+	spectralEmit texture.SpectralTexture
 }
 
 // NewDiffuseLight returns an instance of a diffuse light.
@@ -25,8 +28,20 @@ func NewDiffuseLight(emit texture.Texture) *DiffuseLight {
 	}
 }
 
+// NewSpectralDiffuseLight returns an instance of a diffuse light with spectral emission.
+func NewSpectralDiffuseLight(spectralEmit texture.SpectralTexture) *DiffuseLight {
+	return &DiffuseLight{
+		spectralEmit: spectralEmit,
+	}
+}
+
 // Scatter returns false for diffuse light materials.
 func (dl *DiffuseLight) Scatter(_ ray.Ray, _ *hitrecord.HitRecord, _ *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+	return nil, nil, false
+}
+
+// SpectralScatter returns false for diffuse light materials.
+func (dl *DiffuseLight) SpectralScatter(_ ray.Ray, _ *hitrecord.HitRecord, _ *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
 	return nil, nil, false
 }
 
@@ -37,6 +52,14 @@ func (dl *DiffuseLight) Emitted(rIn ray.Ray, rec *hitrecord.HitRecord, u float64
 	}
 
 	return &vec3.Vec3Impl{}
+}
+
+// EmittedSpectral returns the spectral emission at the given wavelength for diffuse lights.
+func (dl *DiffuseLight) EmittedSpectral(rIn ray.Ray, rec *hitrecord.HitRecord, u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+	if vec3.Dot(rec.Normal(), rIn.Direction()) < 0.0 {
+		return dl.spectralEmit.Value(u, v, lambda, p)
+	}
+	return 0.0
 }
 
 // ScatteringPDF implements the probability distribution function for diffuse lights.
@@ -50,4 +73,9 @@ func (dl *DiffuseLight) IsEmitter() bool {
 
 func (dl *DiffuseLight) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return dl.emit.Value(u, v, p)
+}
+
+// SpectralAlbedo returns the spectral albedo at the given wavelength.
+func (dl *DiffuseLight) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+	return dl.emit.Value(u, v, p).X // Use red component as approximation
 }

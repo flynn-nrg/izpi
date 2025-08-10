@@ -40,6 +40,7 @@ type workerServer struct {
 
 	scene            *scene.Scene
 	sampler          sampler.Sampler
+	samplerType      pb_control.SamplerType
 	samplesPerPixel  int
 	numRays          uint64
 	maxDepth         int

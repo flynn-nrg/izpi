@@ -1,0 +1,488 @@
+name: "Cornell Box Transparent Pyramid Spectral"
+version: "1.0.0"
+colour_representation: SPECTRAL
+camera: {
+  lookfrom: {
+    x: 50
+    y: 50
+    z: -120
+  }
+  lookat: {
+    x: 50
+    y: 50
+    z: 50
+  }
+  vup: {
+    y: 1
+  }
+  vfov: 35
+  aspect: 1
+  focusdist: 10
+  time1: 1
+}
+materials: {
+  key: "Green"
+  value: {
+    name: "Green"
+    type: LAMBERT
+    lambert: {
+      spectral_albedo: {
+        gaussian: {
+          peak_value: 0.9
+          center_wavelength: 540
+          width: 40
+        }
+      }
+    }
+  }
+}
+materials: {
+  key: "Red"
+  value: {
+    name: "Red"
+    type: LAMBERT
+    lambert: {
+      spectral_albedo: {
+        gaussian: {
+          peak_value: 0.9
+          center_wavelength: 640
+          width: 40
+        }
+      }
+    }
+  }
+}
+materials: {
+  key: "Transparent"
+  value: {
+    name: "Transparent"
+    type: DIELECTRIC
+    dielectric: {
+      spectral_refidx: {
+        tabulated: {
+          wavelengths: 380
+          wavelengths: 400
+          wavelengths: 420
+          wavelengths: 440
+          wavelengths: 460
+          wavelengths: 480
+          wavelengths: 500
+          wavelengths: 520
+          wavelengths: 540
+          wavelengths: 560
+          wavelengths: 580
+          wavelengths: 600
+          wavelengths: 620
+          wavelengths: 640
+          wavelengths: 660
+          wavelengths: 680
+          wavelengths: 700
+          wavelengths: 720
+          wavelengths: 740
+          wavelengths: 750
+          values: 1.52
+          values: 1.51
+          values: 1.51
+          values: 1.5
+          values: 1.5
+          values: 1.49
+          values: 1.49
+          values: 1.48
+          values: 1.48
+          values: 1.47
+          values: 1.47
+          values: 1.46
+          values: 1.46
+          values: 1.45
+          values: 1.45
+          values: 1.44
+          values: 1.44
+          values: 1.43
+          values: 1.43
+          values: 1.42
+        }
+      }
+      spectral_absorption_coeff: {
+        neutral: {
+          reflectance: 0.01
+        }
+      }
+    }
+  }
+}
+materials: {
+  key: "White"
+  value: {
+    name: "White"
+    type: LAMBERT
+    lambert: {
+      spectral_albedo: {
+        neutral: {
+          reflectance: 0.73
+        }
+      }
+    }
+  }
+}
+materials: {
+  key: "white_light"
+  value: {
+    name: "white_light"
+    type: DIFFUSE_LIGHT
+    diffuselight: {
+      spectral_emit: {
+        neutral: {
+          reflectance: 1
+        }
+      }
+    }
+  }
+}
+objects: {
+  triangles: {
+    vertex0: {
+      x: 100
+      z: 100
+    }
+    vertex1: {
+      z: 100
+    }
+    vertex2: {
+      x: 100
+      y: 100
+      z: 100
+    }
+    uv0: {}
+    uv1: {
+      u: 1
+    }
+    uv2: {
+      u: 1
+      v: 1
+    }
+    material_name: "White"
+  }
+  triangles: {
+    vertex0: {
+      x: 100
+      y: 100
+      z: 100
+    }
+    vertex1: {
+      z: 100
+    }
+    vertex2: {
+      y: 100
+      z: 100
+    }
+    material_name: "White"
+  }
+  triangles: {
+    vertex0: {}
+    vertex1: {
+      z: 100
+    }
+    vertex2: {
+      x: 100
+      z: 100
+    }
+    material_name: "White"
+  }
+  triangles: {
+    vertex0: {}
+    vertex1: {
+      x: 100
+      z: 100
+    }
+    vertex2: {
+      x: 100
+    }
+    material_name: "White"
+  }
+  triangles: {
+    vertex0: {
+      y: 100
+    }
+    vertex1: {
+      x: 100
+      y: 100
+    }
+    vertex2: {
+      x: 100
+      y: 100
+      z: 100
+    }
+    material_name: "White"
+  }
+  triangles: {
+    vertex0: {
+      y: 100
+      z: 100
+    }
+    vertex1: {
+      y: 100
+    }
+    vertex2: {
+      x: 100
+      y: 100
+      z: 100
+    }
+    material_name: "White"
+  }
+  triangles: {
+    vertex0: {
+      x: 33
+      y: 99
+      z: 33
+    }
+    vertex1: {
+      x: 66
+      y: 99
+      z: 33
+    }
+    vertex2: {
+      x: 66
+      y: 99
+      z: 66
+    }
+    material_name: "white_light"
+  }
+  triangles: {
+    vertex0: {
+      x: 33
+      y: 99
+      z: 33
+    }
+    vertex1: {
+      x: 66
+      y: 99
+      z: 66
+    }
+    vertex2: {
+      x: 33
+      y: 99
+      z: 66
+    }
+    material_name: "white_light"
+  }
+  triangles: {
+    vertex0: {
+      y: 100
+      z: 100
+    }
+    vertex1: {}
+    vertex2: {
+      y: 100
+    }
+    material_name: "Green"
+  }
+  triangles: {
+    vertex0: {
+      y: 100
+      z: 100
+    }
+    vertex1: {
+      z: 100
+    }
+    vertex2: {}
+    material_name: "Green"
+  }
+  triangles: {
+    vertex0: {
+      x: 100
+    }
+    vertex1: {
+      x: 100
+      y: 100
+      z: 100
+    }
+    vertex2: {
+      x: 100
+      y: 100
+    }
+    material_name: "Red"
+  }
+  triangles: {
+    vertex0: {
+      x: 100
+    }
+    vertex1: {
+      x: 100
+      z: 100
+    }
+    vertex2: {
+      x: 100
+      y: 100
+      z: 100
+    }
+    material_name: "Red"
+  }
+  spheres: {
+    center: {
+      x: 30
+      y: 15
+      z: 30
+    }
+    radius: 10
+    material_name: "Transparent"
+  }
+  spheres: {
+    center: {
+      x: 50
+      y: 15
+      z: 30
+    }
+    radius: 10
+    material_name: "Transparent"
+  }
+  spheres: {
+    center: {
+      x: 70
+      y: 15
+      z: 30
+    }
+    radius: 10
+    material_name: "Transparent"
+  }
+  spheres: {
+    center: {
+      x: 40
+      y: 15
+      z: 50
+    }
+    radius: 10
+    material_name: "Transparent"
+  }
+  spheres: {
+    center: {
+      x: 60
+      y: 15
+      z: 50
+    }
+    radius: 10
+    material_name: "Transparent"
+  }
+  spheres: {
+    center: {
+      x: 50
+      y: 15
+      z: 70
+    }
+    radius: 10
+    material_name: "Transparent"
+  }
+  spheres: {
+    center: {
+      x: 40
+      y: 28
+      z: 40
+    }
+    radius: 10
+    material_name: "Transparent"
+  }
+  spheres: {
+    center: {
+      x: 60
+      y: 28
+      z: 40
+    }
+    radius: 10
+    material_name: "Transparent"
+  }
+  spheres: {
+    center: {
+      x: 50
+      y: 28
+      z: 60
+    }
+    radius: 10
+    material_name: "Transparent"
+  }
+  spheres: {
+    center: {
+      x: 50
+      y: 42
+      z: 50
+    }
+    radius: 10
+    material_name: "Transparent"
+  }
+}
+spectral_background: {
+  wavelengths: 380
+  wavelengths: 390
+  wavelengths: 400
+  wavelengths: 410
+  wavelengths: 420
+  wavelengths: 430
+  wavelengths: 440
+  wavelengths: 450
+  wavelengths: 460
+  wavelengths: 470
+  wavelengths: 480
+  wavelengths: 490
+  wavelengths: 500
+  wavelengths: 510
+  wavelengths: 520
+  wavelengths: 530
+  wavelengths: 540
+  wavelengths: 550
+  wavelengths: 560
+  wavelengths: 570
+  wavelengths: 580
+  wavelengths: 590
+  wavelengths: 600
+  wavelengths: 610
+  wavelengths: 620
+  wavelengths: 630
+  wavelengths: 640
+  wavelengths: 650
+  wavelengths: 660
+  wavelengths: 670
+  wavelengths: 680
+  wavelengths: 690
+  wavelengths: 700
+  wavelengths: 710
+  wavelengths: 720
+  wavelengths: 730
+  wavelengths: 740
+  wavelengths: 750
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+  values: 0
+}

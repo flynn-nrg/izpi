@@ -30,6 +30,7 @@ const (
 	SamplerType_NORMAL                   SamplerType = 2
 	SamplerType_WIRE_FRAME               SamplerType = 3 // Using snake_case for enum value
 	SamplerType_COLOUR                   SamplerType = 4
+	SamplerType_SPECTRAL                 SamplerType = 5
 )
 
 // Enum value maps for SamplerType.
@@ -40,6 +41,7 @@ var (
 		2: "NORMAL",
 		3: "WIRE_FRAME",
 		4: "COLOUR",
+		5: "SPECTRAL",
 	}
 	SamplerType_value = map[string]int32{
 		"SAMPLER_TYPE_UNSPECIFIED": 0,
@@ -47,6 +49,7 @@ var (
 		"NORMAL":                   2,
 		"WIRE_FRAME":               3,
 		"COLOUR":                   4,
+		"SPECTRAL":                 5,
 	}
 )
 
@@ -200,6 +203,142 @@ func (x *Vec3) GetZ() float64 {
 	return 0
 }
 
+// Represents a tabulated spectral response for spectral backgrounds.
+type TabulatedSpectralConstant struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Wavelengths   []float64              `protobuf:"fixed64,1,rep,packed,name=wavelengths,proto3" json:"wavelengths,omitempty"` // Array of wavelengths in nanometers
+	Values        []float64              `protobuf:"fixed64,2,rep,packed,name=values,proto3" json:"values,omitempty"`           // Array of spectral values at each wavelength
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TabulatedSpectralConstant) Reset() {
+	*x = TabulatedSpectralConstant{}
+	mi := &file_control_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TabulatedSpectralConstant) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TabulatedSpectralConstant) ProtoMessage() {}
+
+func (x *TabulatedSpectralConstant) ProtoReflect() protoreflect.Message {
+	mi := &file_control_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TabulatedSpectralConstant.ProtoReflect.Descriptor instead.
+func (*TabulatedSpectralConstant) Descriptor() ([]byte, []int) {
+	return file_control_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *TabulatedSpectralConstant) GetWavelengths() []float64 {
+	if x != nil {
+		return x.Wavelengths
+	}
+	return nil
+}
+
+func (x *TabulatedSpectralConstant) GetValues() []float64 {
+	if x != nil {
+		return x.Values
+	}
+	return nil
+}
+
+// Represents a spectral background with different types of spectral responses.
+type SpectralBackground struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to SpectralProperties:
+	//
+	//	*SpectralBackground_Tabulated
+	//	*SpectralBackground_NeutralValue
+	SpectralProperties isSpectralBackground_SpectralProperties `protobuf_oneof:"spectral_properties"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *SpectralBackground) Reset() {
+	*x = SpectralBackground{}
+	mi := &file_control_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SpectralBackground) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SpectralBackground) ProtoMessage() {}
+
+func (x *SpectralBackground) ProtoReflect() protoreflect.Message {
+	mi := &file_control_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SpectralBackground.ProtoReflect.Descriptor instead.
+func (*SpectralBackground) Descriptor() ([]byte, []int) {
+	return file_control_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *SpectralBackground) GetSpectralProperties() isSpectralBackground_SpectralProperties {
+	if x != nil {
+		return x.SpectralProperties
+	}
+	return nil
+}
+
+func (x *SpectralBackground) GetTabulated() *TabulatedSpectralConstant {
+	if x != nil {
+		if x, ok := x.SpectralProperties.(*SpectralBackground_Tabulated); ok {
+			return x.Tabulated
+		}
+	}
+	return nil
+}
+
+func (x *SpectralBackground) GetNeutralValue() float64 {
+	if x != nil {
+		if x, ok := x.SpectralProperties.(*SpectralBackground_NeutralValue); ok {
+			return x.NeutralValue
+		}
+	}
+	return 0
+}
+
+type isSpectralBackground_SpectralProperties interface {
+	isSpectralBackground_SpectralProperties()
+}
+
+type SpectralBackground_Tabulated struct {
+	Tabulated *TabulatedSpectralConstant `protobuf:"bytes,1,opt,name=tabulated,proto3,oneof"` // Tabulated spectral data
+}
+
+type SpectralBackground_NeutralValue struct {
+	NeutralValue float64 `protobuf:"fixed64,2,opt,name=neutral_value,json=neutralValue,proto3,oneof"` // Neutral (white/gray) spectral value
+}
+
+func (*SpectralBackground_Tabulated) isSpectralBackground_SpectralProperties() {}
+
+func (*SpectralBackground_NeutralValue) isSpectralBackground_SpectralProperties() {}
+
 // Represents the width and height of an image or tile.
 type ImageResolution struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -211,7 +350,7 @@ type ImageResolution struct {
 
 func (x *ImageResolution) Reset() {
 	*x = ImageResolution{}
-	mi := &file_control_proto_msgTypes[1]
+	mi := &file_control_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -223,7 +362,7 @@ func (x *ImageResolution) String() string {
 func (*ImageResolution) ProtoMessage() {}
 
 func (x *ImageResolution) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[1]
+	mi := &file_control_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -236,7 +375,7 @@ func (x *ImageResolution) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImageResolution.ProtoReflect.Descriptor instead.
 func (*ImageResolution) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{1}
+	return file_control_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ImageResolution) GetWidth() uint32 {
@@ -255,24 +394,25 @@ func (x *ImageResolution) GetHeight() uint32 {
 
 // Request to configure a worker node for rendering.
 type RenderSetupRequest struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	SceneName       string                 `protobuf:"bytes,1,opt,name=scene_name,json=sceneName,proto3" json:"scene_name,omitempty"`                      // The name of the scene to be rendered.
-	JobId           string                 `protobuf:"bytes,2,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`                                  // The ID of the job to be rendered.
-	NumCores        uint32                 `protobuf:"varint,3,opt,name=num_cores,json=numCores,proto3" json:"num_cores,omitempty"`                        // Number of CPU cores the worker should use for rendering.
-	SamplesPerPixel uint32                 `protobuf:"varint,4,opt,name=samples_per_pixel,json=samplesPerPixel,proto3" json:"samples_per_pixel,omitempty"` // Number of samples to take per pixel.
-	Sampler         SamplerType            `protobuf:"varint,5,opt,name=sampler,proto3,enum=control.SamplerType" json:"sampler,omitempty"`                 // The type of sampler (render mode) to use.
-	ImageResolution *ImageResolution       `protobuf:"bytes,6,opt,name=image_resolution,json=imageResolution,proto3" json:"image_resolution,omitempty"`    // The overall image resolution.
-	MaxDepth        uint32                 `protobuf:"varint,7,opt,name=max_depth,json=maxDepth,proto3" json:"max_depth,omitempty"`                        // Maximum recursion depth for path tracing.
-	BackgroundColor *Vec3                  `protobuf:"bytes,8,opt,name=background_color,json=backgroundColor,proto3" json:"background_color,omitempty"`    // The background color of the scene.
-	InkColor        *Vec3                  `protobuf:"bytes,9,opt,name=ink_color,json=inkColor,proto3" json:"ink_color,omitempty"`                         // The ink color of the scene.
-	AssetProvider   string                 `protobuf:"bytes,10,opt,name=asset_provider,json=assetProvider,proto3" json:"asset_provider,omitempty"`         // NEW: The network address (host:port) of the asset transport server (e.g., leader).
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	SceneName          string                 `protobuf:"bytes,1,opt,name=scene_name,json=sceneName,proto3" json:"scene_name,omitempty"`                             // The name of the scene to be rendered.
+	JobId              string                 `protobuf:"bytes,2,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`                                         // The ID of the job to be rendered.
+	NumCores           uint32                 `protobuf:"varint,3,opt,name=num_cores,json=numCores,proto3" json:"num_cores,omitempty"`                               // Number of CPU cores the worker should use for rendering.
+	SamplesPerPixel    uint32                 `protobuf:"varint,4,opt,name=samples_per_pixel,json=samplesPerPixel,proto3" json:"samples_per_pixel,omitempty"`        // Number of samples to take per pixel.
+	Sampler            SamplerType            `protobuf:"varint,5,opt,name=sampler,proto3,enum=control.SamplerType" json:"sampler,omitempty"`                        // The type of sampler (render mode) to use.
+	ImageResolution    *ImageResolution       `protobuf:"bytes,6,opt,name=image_resolution,json=imageResolution,proto3" json:"image_resolution,omitempty"`           // The overall image resolution.
+	MaxDepth           uint32                 `protobuf:"varint,7,opt,name=max_depth,json=maxDepth,proto3" json:"max_depth,omitempty"`                               // Maximum recursion depth for path tracing.
+	BackgroundColor    *Vec3                  `protobuf:"bytes,8,opt,name=background_color,json=backgroundColor,proto3" json:"background_color,omitempty"`           // The background color of the scene (for RGB rendering).
+	InkColor           *Vec3                  `protobuf:"bytes,9,opt,name=ink_color,json=inkColor,proto3" json:"ink_color,omitempty"`                                // The ink color of the scene.
+	AssetProvider      string                 `protobuf:"bytes,10,opt,name=asset_provider,json=assetProvider,proto3" json:"asset_provider,omitempty"`                // NEW: The network address (host:port) of the asset transport server (e.g., leader).
+	SpectralBackground *SpectralBackground    `protobuf:"bytes,11,opt,name=spectral_background,json=spectralBackground,proto3" json:"spectral_background,omitempty"` // Spectral background for spectral rendering.
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *RenderSetupRequest) Reset() {
 	*x = RenderSetupRequest{}
-	mi := &file_control_proto_msgTypes[2]
+	mi := &file_control_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -284,7 +424,7 @@ func (x *RenderSetupRequest) String() string {
 func (*RenderSetupRequest) ProtoMessage() {}
 
 func (x *RenderSetupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[2]
+	mi := &file_control_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -297,7 +437,7 @@ func (x *RenderSetupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderSetupRequest.ProtoReflect.Descriptor instead.
 func (*RenderSetupRequest) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{2}
+	return file_control_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *RenderSetupRequest) GetSceneName() string {
@@ -370,6 +510,13 @@ func (x *RenderSetupRequest) GetAssetProvider() string {
 	return ""
 }
 
+func (x *RenderSetupRequest) GetSpectralBackground() *SpectralBackground {
+	if x != nil {
+		return x.SpectralBackground
+	}
+	return nil
+}
+
 // Response containing status updates during the RenderConfiguration process.
 type RenderSetupResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -381,7 +528,7 @@ type RenderSetupResponse struct {
 
 func (x *RenderSetupResponse) Reset() {
 	*x = RenderSetupResponse{}
-	mi := &file_control_proto_msgTypes[3]
+	mi := &file_control_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -393,7 +540,7 @@ func (x *RenderSetupResponse) String() string {
 func (*RenderSetupResponse) ProtoMessage() {}
 
 func (x *RenderSetupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[3]
+	mi := &file_control_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -406,7 +553,7 @@ func (x *RenderSetupResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderSetupResponse.ProtoReflect.Descriptor instead.
 func (*RenderSetupResponse) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{3}
+	return file_control_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *RenderSetupResponse) GetStatus() RenderSetupStatus {
@@ -438,7 +585,7 @@ type RenderTileRequest struct {
 
 func (x *RenderTileRequest) Reset() {
 	*x = RenderTileRequest{}
-	mi := &file_control_proto_msgTypes[4]
+	mi := &file_control_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -450,7 +597,7 @@ func (x *RenderTileRequest) String() string {
 func (*RenderTileRequest) ProtoMessage() {}
 
 func (x *RenderTileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[4]
+	mi := &file_control_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -463,7 +610,7 @@ func (x *RenderTileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderTileRequest.ProtoReflect.Descriptor instead.
 func (*RenderTileRequest) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{4}
+	return file_control_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *RenderTileRequest) GetStripHeight() uint32 {
@@ -505,19 +652,21 @@ func (x *RenderTileRequest) GetY1() uint32 {
 // The client will receive multiple RenderTileResponse messages for a single RenderTileRequest,
 // which it can assemble to form the complete tile.
 type RenderTileResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Width         uint32                 `protobuf:"varint,1,opt,name=width,proto3" json:"width,omitempty"`           // Width of this specific pixel chunk (sub-tile).
-	Height        uint32                 `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`         // Height of this specific pixel chunk (sub-tile).
-	PosX          uint32                 `protobuf:"varint,3,opt,name=pos_x,json=posX,proto3" json:"pos_x,omitempty"` // X-coordinate of the top-left pixel of this chunk (relative to overall image origin).
-	PosY          uint32                 `protobuf:"varint,4,opt,name=pos_y,json=posY,proto3" json:"pos_y,omitempty"` // Y-coordinate of the top-left pixel of this chunk (relative to overall image origin).
-	Pixels        []float64              `protobuf:"fixed64,5,rep,packed,name=pixels,proto3" json:"pixels,omitempty"` // Flat array of pixel values (e.g., RGBA as [R1, G1, B1, A1, R2, G2, B2, A2...])
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Width  uint32                 `protobuf:"varint,1,opt,name=width,proto3" json:"width,omitempty"`           // Width of this specific pixel chunk (sub-tile).
+	Height uint32                 `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`         // Height of this specific pixel chunk (sub-tile).
+	PosX   uint32                 `protobuf:"varint,3,opt,name=pos_x,json=posX,proto3" json:"pos_x,omitempty"` // X-coordinate of the top-left pixel of this chunk (relative to overall image origin).
+	PosY   uint32                 `protobuf:"varint,4,opt,name=pos_y,json=posY,proto3" json:"pos_y,omitempty"` // Y-coordinate of the top-left pixel of this chunk (relative to overall image origin).
+	// Flat array of pixel values (e.g., RGBA as [R1, G1, B1, A1, R2, G2, B2, A2...])
+	// For spectral rendering, the pixels are the spectral value for the sampled wavelength.
+	Pixels        []float64 `protobuf:"fixed64,5,rep,packed,name=pixels,proto3" json:"pixels,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RenderTileResponse) Reset() {
 	*x = RenderTileResponse{}
-	mi := &file_control_proto_msgTypes[5]
+	mi := &file_control_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -529,7 +678,7 @@ func (x *RenderTileResponse) String() string {
 func (*RenderTileResponse) ProtoMessage() {}
 
 func (x *RenderTileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[5]
+	mi := &file_control_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -542,7 +691,7 @@ func (x *RenderTileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderTileResponse.ProtoReflect.Descriptor instead.
 func (*RenderTileResponse) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{5}
+	return file_control_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *RenderTileResponse) GetWidth() uint32 {
@@ -590,7 +739,7 @@ type RenderEndRequest struct {
 
 func (x *RenderEndRequest) Reset() {
 	*x = RenderEndRequest{}
-	mi := &file_control_proto_msgTypes[6]
+	mi := &file_control_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -602,7 +751,7 @@ func (x *RenderEndRequest) String() string {
 func (*RenderEndRequest) ProtoMessage() {}
 
 func (x *RenderEndRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[6]
+	mi := &file_control_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -615,7 +764,7 @@ func (x *RenderEndRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderEndRequest.ProtoReflect.Descriptor instead.
 func (*RenderEndRequest) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{6}
+	return file_control_proto_rawDescGZIP(), []int{8}
 }
 
 // Response containing statistics after rendering is complete.
@@ -628,7 +777,7 @@ type RenderEndResponse struct {
 
 func (x *RenderEndResponse) Reset() {
 	*x = RenderEndResponse{}
-	mi := &file_control_proto_msgTypes[7]
+	mi := &file_control_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -640,7 +789,7 @@ func (x *RenderEndResponse) String() string {
 func (*RenderEndResponse) ProtoMessage() {}
 
 func (x *RenderEndResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[7]
+	mi := &file_control_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -653,7 +802,7 @@ func (x *RenderEndResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderEndResponse.ProtoReflect.Descriptor instead.
 func (*RenderEndResponse) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{7}
+	return file_control_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *RenderEndResponse) GetTotalRaysTraced() uint64 {
@@ -671,10 +820,17 @@ const file_control_proto_rawDesc = "" +
 	"\x04Vec3\x12\f\n" +
 	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
 	"\x01y\x18\x02 \x01(\x01R\x01y\x12\f\n" +
-	"\x01z\x18\x03 \x01(\x01R\x01z\"?\n" +
+	"\x01z\x18\x03 \x01(\x01R\x01z\"U\n" +
+	"\x19TabulatedSpectralConstant\x12 \n" +
+	"\vwavelengths\x18\x01 \x03(\x01R\vwavelengths\x12\x16\n" +
+	"\x06values\x18\x02 \x03(\x01R\x06values\"\x96\x01\n" +
+	"\x12SpectralBackground\x12B\n" +
+	"\ttabulated\x18\x01 \x01(\v2\".control.TabulatedSpectralConstantH\x00R\ttabulated\x12%\n" +
+	"\rneutral_value\x18\x02 \x01(\x01H\x00R\fneutralValueB\x15\n" +
+	"\x13spectral_properties\"?\n" +
 	"\x0fImageResolution\x12\x14\n" +
 	"\x05width\x18\x01 \x01(\rR\x05width\x12\x16\n" +
-	"\x06height\x18\x02 \x01(\rR\x06height\"\xb2\x03\n" +
+	"\x06height\x18\x02 \x01(\rR\x06height\"\x80\x04\n" +
 	"\x12RenderSetupRequest\x12\x1d\n" +
 	"\n" +
 	"scene_name\x18\x01 \x01(\tR\tsceneName\x12\x15\n" +
@@ -687,7 +843,8 @@ const file_control_proto_rawDesc = "" +
 	"\x10background_color\x18\b \x01(\v2\r.control.Vec3R\x0fbackgroundColor\x12*\n" +
 	"\tink_color\x18\t \x01(\v2\r.control.Vec3R\binkColor\x12%\n" +
 	"\x0easset_provider\x18\n" +
-	" \x01(\tR\rassetProvider\"n\n" +
+	" \x01(\tR\rassetProvider\x12L\n" +
+	"\x13spectral_background\x18\v \x01(\v2\x1b.control.SpectralBackgroundR\x12spectralBackground\"n\n" +
 	"\x13RenderSetupResponse\x122\n" +
 	"\x06status\x18\x01 \x01(\x0e2\x1a.control.RenderSetupStatusR\x06status\x12#\n" +
 	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"v\n" +
@@ -705,7 +862,7 @@ const file_control_proto_rawDesc = "" +
 	"\x06pixels\x18\x05 \x03(\x01R\x06pixels\"\x12\n" +
 	"\x10RenderEndRequest\"?\n" +
 	"\x11RenderEndResponse\x12*\n" +
-	"\x11total_rays_traced\x18\x01 \x01(\x04R\x0ftotalRaysTraced*_\n" +
+	"\x11total_rays_traced\x18\x01 \x01(\x04R\x0ftotalRaysTraced*m\n" +
 	"\vSamplerType\x12\x1c\n" +
 	"\x18SAMPLER_TYPE_UNSPECIFIED\x10\x00\x12\n" +
 	"\n" +
@@ -715,7 +872,8 @@ const file_control_proto_rawDesc = "" +
 	"\n" +
 	"WIRE_FRAME\x10\x03\x12\n" +
 	"\n" +
-	"\x06COLOUR\x10\x04*\xb3\x01\n" +
+	"\x06COLOUR\x10\x04\x12\f\n" +
+	"\bSPECTRAL\x10\x05*\xb3\x01\n" +
 	"\x11RenderSetupStatus\x12\x1f\n" +
 	"\x1bRENDER_SETUP_STATUS_UNKNOWN\x10\x00\x12\x11\n" +
 	"\rLOADING_SCENE\x10\x01\x12\x16\n" +
@@ -744,36 +902,40 @@ func file_control_proto_rawDescGZIP() []byte {
 }
 
 var file_control_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_control_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_control_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_control_proto_goTypes = []any{
-	(SamplerType)(0),            // 0: control.SamplerType
-	(RenderSetupStatus)(0),      // 1: control.RenderSetupStatus
-	(*Vec3)(nil),                // 2: control.Vec3
-	(*ImageResolution)(nil),     // 3: control.ImageResolution
-	(*RenderSetupRequest)(nil),  // 4: control.RenderSetupRequest
-	(*RenderSetupResponse)(nil), // 5: control.RenderSetupResponse
-	(*RenderTileRequest)(nil),   // 6: control.RenderTileRequest
-	(*RenderTileResponse)(nil),  // 7: control.RenderTileResponse
-	(*RenderEndRequest)(nil),    // 8: control.RenderEndRequest
-	(*RenderEndResponse)(nil),   // 9: control.RenderEndResponse
+	(SamplerType)(0),                  // 0: control.SamplerType
+	(RenderSetupStatus)(0),            // 1: control.RenderSetupStatus
+	(*Vec3)(nil),                      // 2: control.Vec3
+	(*TabulatedSpectralConstant)(nil), // 3: control.TabulatedSpectralConstant
+	(*SpectralBackground)(nil),        // 4: control.SpectralBackground
+	(*ImageResolution)(nil),           // 5: control.ImageResolution
+	(*RenderSetupRequest)(nil),        // 6: control.RenderSetupRequest
+	(*RenderSetupResponse)(nil),       // 7: control.RenderSetupResponse
+	(*RenderTileRequest)(nil),         // 8: control.RenderTileRequest
+	(*RenderTileResponse)(nil),        // 9: control.RenderTileResponse
+	(*RenderEndRequest)(nil),          // 10: control.RenderEndRequest
+	(*RenderEndResponse)(nil),         // 11: control.RenderEndResponse
 }
 var file_control_proto_depIdxs = []int32{
-	0, // 0: control.RenderSetupRequest.sampler:type_name -> control.SamplerType
-	3, // 1: control.RenderSetupRequest.image_resolution:type_name -> control.ImageResolution
-	2, // 2: control.RenderSetupRequest.background_color:type_name -> control.Vec3
-	2, // 3: control.RenderSetupRequest.ink_color:type_name -> control.Vec3
-	1, // 4: control.RenderSetupResponse.status:type_name -> control.RenderSetupStatus
-	4, // 5: control.RenderControlService.RenderSetup:input_type -> control.RenderSetupRequest
-	6, // 6: control.RenderControlService.RenderTile:input_type -> control.RenderTileRequest
-	8, // 7: control.RenderControlService.RenderEnd:input_type -> control.RenderEndRequest
-	5, // 8: control.RenderControlService.RenderSetup:output_type -> control.RenderSetupResponse
-	7, // 9: control.RenderControlService.RenderTile:output_type -> control.RenderTileResponse
-	9, // 10: control.RenderControlService.RenderEnd:output_type -> control.RenderEndResponse
-	8, // [8:11] is the sub-list for method output_type
-	5, // [5:8] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	3,  // 0: control.SpectralBackground.tabulated:type_name -> control.TabulatedSpectralConstant
+	0,  // 1: control.RenderSetupRequest.sampler:type_name -> control.SamplerType
+	5,  // 2: control.RenderSetupRequest.image_resolution:type_name -> control.ImageResolution
+	2,  // 3: control.RenderSetupRequest.background_color:type_name -> control.Vec3
+	2,  // 4: control.RenderSetupRequest.ink_color:type_name -> control.Vec3
+	4,  // 5: control.RenderSetupRequest.spectral_background:type_name -> control.SpectralBackground
+	1,  // 6: control.RenderSetupResponse.status:type_name -> control.RenderSetupStatus
+	6,  // 7: control.RenderControlService.RenderSetup:input_type -> control.RenderSetupRequest
+	8,  // 8: control.RenderControlService.RenderTile:input_type -> control.RenderTileRequest
+	10, // 9: control.RenderControlService.RenderEnd:input_type -> control.RenderEndRequest
+	7,  // 10: control.RenderControlService.RenderSetup:output_type -> control.RenderSetupResponse
+	9,  // 11: control.RenderControlService.RenderTile:output_type -> control.RenderTileResponse
+	11, // 12: control.RenderControlService.RenderEnd:output_type -> control.RenderEndResponse
+	10, // [10:13] is the sub-list for method output_type
+	7,  // [7:10] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_control_proto_init() }
@@ -781,13 +943,17 @@ func file_control_proto_init() {
 	if File_control_proto != nil {
 		return
 	}
+	file_control_proto_msgTypes[2].OneofWrappers = []any{
+		(*SpectralBackground_Tabulated)(nil),
+		(*SpectralBackground_NeutralValue)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_control_proto_rawDesc), len(file_control_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

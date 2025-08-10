@@ -4,19 +4,18 @@ option go_package = "github.com/flynn-nrg/izpi/internal/proto/discovery;discover
 
 package discovery;
 
-// Enum to describe the current rendering status of a worker.
 enum WorkerStatus {
-  WORKER_STATUS_UNSPECIFIED = 0; // Default zero value, should not be used
-  FREE = 1;                     // Worker is idle and available for tasks
-  ALLOCATED = 2;                // Worker is allocated to a task
-  BUSY_RENDER_SETUP = 3;        // Worker is busy with render setup
-  BUSY_RENDERING = 4;           // Worker is currently rendering a task
-  BUSY_OTHER = 5;               // Worker is busy with non-rendering tasks (e.g., texture streaming)
-  OFFLINE = 6;                  // Worker is not responding (this state would be inferred by the leader)
+  WORKER_STATUS_UNSPECIFIED = 0;
+  FREE = 1;
+  ALLOCATED = 2;
+  BUSY_RENDER_SETUP = 3;
+  BUSY_RENDERING = 4;
+  BUSY_OTHER = 5;
+  OFFLINE = 6;
 }
 
 enum Endianness {
-  UNKNOWN_ENDIAN = 0; // Default zero value
+  UNKNOWN_ENDIAN = 0;
   LITTLE_ENDIAN = 1;
   BIG_ENDIAN = 2;
 }
@@ -25,12 +24,12 @@ message QueryWorkerStatusRequest {
 }
 
 message QueryWorkerStatusResponse {
-  string node_name = 1;          // Name of the worker node (e.g., hostname)
-  uint32 available_cores = 2;    // Number of CPU cores available to the worker
-  uint64 total_memory_bytes = 3; // Total physical memory in bytes
-  uint64 free_memory_bytes = 4;  // Available physical memory in bytes
-  WorkerStatus status = 5;       // Current status of the worker (e.g., FREE, BUSY_RENDERING)
-  Endianness endianness = 6;     // Endianness of the worker's CPU
+  string node_name = 1;
+  uint32 available_cores = 2;
+  uint64 total_memory_bytes = 3;
+  uint64 free_memory_bytes = 4;
+  WorkerStatus status = 5;
+  Endianness endianness = 6;
 }
 
 service WorkerDiscoveryService {

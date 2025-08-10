@@ -9,6 +9,7 @@ var _ Ray = (*RayImpl)(nil)
 type RayImpl struct {
 	origin    *vec3.Vec3Impl
 	direction *vec3.Vec3Impl
+	lambda    float64
 	time      float64
 }
 
@@ -17,6 +18,16 @@ func New(origin *vec3.Vec3Impl, direction *vec3.Vec3Impl, time float64) *RayImpl
 	return &RayImpl{
 		origin:    origin,
 		direction: direction,
+		time:      time,
+	}
+}
+
+// NewWithLambda returns a new ray with the supplied origin and direction vectors, time, and wavelength.
+func NewWithLambda(origin *vec3.Vec3Impl, direction *vec3.Vec3Impl, time float64, lambda float64) *RayImpl {
+	return &RayImpl{
+		origin:    origin,
+		direction: direction,
+		lambda:    lambda,
 		time:      time,
 	}
 }
@@ -39,4 +50,14 @@ func (r *RayImpl) PointAtParameter(t float64) *vec3.Vec3Impl {
 // Time returns the time associated with this ray.
 func (r *RayImpl) Time() float64 {
 	return r.time
+}
+
+// Lambda returns the wavelength associated with this ray.
+func (r *RayImpl) Lambda() float64 {
+	return r.lambda
+}
+
+// SetLambda sets the wavelength associated with this ray.
+func (r *RayImpl) SetLambda(lambda float64) {
+	r.lambda = lambda
 }

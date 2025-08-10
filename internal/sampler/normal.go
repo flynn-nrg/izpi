@@ -14,12 +14,14 @@ import (
 var _ Sampler = (*Normal)(nil)
 
 type Normal struct {
-	numRays *uint64
+	NonSpectral // Embed to get SampleSpectral method
+	numRays     *uint64
 }
 
 func NewNormal(numRays *uint64) *Normal {
 	return &Normal{
-		numRays: numRays,
+		NonSpectral: *NewNonSpectral(), // Initialize embedded struct
+		numRays:     numRays,
 	}
 }
 

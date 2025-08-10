@@ -10,6 +10,7 @@ import (
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
 	"github.com/flynn-nrg/izpi/internal/sampler"
+	"github.com/flynn-nrg/izpi/internal/spectral"
 	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/transport"
 	"github.com/flynn-nrg/izpi/internal/vec3"
@@ -261,7 +262,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	}
 
 	cameraAspectRatio := float64(req.GetImageResolution().GetWidth()) / float64(req.GetImageResolution().GetHeight())
-	t := transport.NewTransport(cameraAspectRatio, protoScene, triangles, textures)
+	t := transport.NewTransport(cameraAspectRatio, protoScene, triangles, textures, int(s.availableCores))
 
 	scene, err := t.ToScene()
 	if err != nil {
@@ -280,11 +281,55 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 	s.imageResolutionX = int(req.GetImageResolution().GetWidth())
 	s.imageResolutionY = int(req.GetImageResolution().GetHeight())
 
-	switch req.GetSampler() {
+	s.samplerType = req.GetSampler()
+
+	switch s.samplerType {
 	case pb_control.SamplerType_ALBEDO:
 		s.sampler = sampler.NewAlbedo(&s.numRays)
 	case pb_control.SamplerType_COLOUR:
 		s.sampler = sampler.NewColour(s.maxDepth, s.background, &s.numRays)
+	case pb_control.SamplerType_SPECTRAL:
+		// Use the spectral background from the request
+		var spectralBackground *spectral.SpectralPowerDistribution
+
+		if req.GetSpectralBackground() != nil {
+			switch req.GetSpectralBackground().GetSpectralProperties().(type) {
+			case *pb_control.SpectralBackground_Tabulated:
+				tabulated := req.GetSpectralBackground().GetTabulated()
+				wavelengths := make([]float64, len(tabulated.GetWavelengths()))
+				values := make([]float64, len(tabulated.GetValues()))
+
+				for i, w := range tabulated.GetWavelengths() {
+					wavelengths[i] = w
+				}
+				for i, v := range tabulated.GetValues() {
+					values[i] = v
+				}
+
+				spectralBackground = spectral.NewSPD(wavelengths, values)
+			case *pb_control.SpectralBackground_NeutralValue:
+				neutralValue := req.GetSpectralBackground().GetNeutralValue()
+				// Create a neutral spectral background with uniform response using CIE wavelengths
+				spectralBackground = spectral.NewEmptyCIESPD()
+				for i := range spectralBackground.Values() {
+					spectralBackground.SetValue(i, neutralValue)
+				}
+			default:
+				// Fallback to neutral gray if no spectral background is provided
+				spectralBackground = spectral.NewEmptyCIESPD()
+				for i := range spectralBackground.Values() {
+					spectralBackground.SetValue(i, 0.5) // Neutral gray values
+				}
+			}
+		} else {
+			// Fallback to neutral gray if no spectral background is provided
+			spectralBackground = spectral.NewEmptyCIESPD()
+			for i := range spectralBackground.Values() {
+				spectralBackground.SetValue(i, 0.5) // Neutral gray values
+			}
+		}
+
+		s.sampler = sampler.NewSpectral(s.maxDepth, spectralBackground, &s.numRays)
 	case pb_control.SamplerType_NORMAL:
 		s.sampler = sampler.NewNormal(&s.numRays)
 	case pb_control.SamplerType_WIRE_FRAME:
