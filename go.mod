@@ -18,10 +18,10 @@ require (
 	github.com/holoplot/go-avahi v1.0.1
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/sirupsen/logrus v1.9.3
+	github.com/stretchr/testify v1.10.0
 	github.com/veandco/go-sdl2 v0.4.40
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -57,7 +57,6 @@ require (
 	github.com/rymdport/portal v0.4.2 // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
-	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/yuin/goldmark v1.7.12 // indirect
 	golang.org/x/image v0.28.0 // indirect
 	golang.org/x/mod v0.25.0 // indirect
@@ -67,4 +66,5 @@ require (
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250707201910-8d1bb00bc6a7 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

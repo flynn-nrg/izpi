@@ -147,6 +147,7 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	scattered := ray.New(hr.P(), finalDir, r.Time())
 
 	// Create PDF for importance sampling
+	// TODO: Use a more accurate PDF for PBR materials.
 	pdf := pdf.NewCosine(normal)
 
 	scatterRecord := scatterrecord.New(scattered, isSpecular, albedo, nil, nil, nil, pdf)
@@ -247,6 +248,7 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	scattered := ray.NewWithLambda(hr.P(), finalDir, r.Time(), lambda)
 
 	// Create PDF for importance sampling
+	// TODO: Use a more accurate PDF for PBR materials.
 	pdf := pdf.NewCosine(normal)
 
 	// Boost specular reflection brightness to match RGB reference
