@@ -165,7 +165,7 @@ func TestSpectralColoredGlassScattering(t *testing.T) {
 	// Test multiple times to account for random reflection/transmission
 	foundAttenuation := false
 	foundNoAttenuation := false
-	
+
 	for i := 0; i < 100; i++ {
 		scattered, scatterRecord, ok := dielectric.SpectralScatter(r, hr, random)
 
@@ -188,7 +188,7 @@ func TestSpectralColoredGlassScattering(t *testing.T) {
 		if attenuation >= 1.0 {
 			foundNoAttenuation = true
 		}
-		
+
 		// If we found both cases, we can break early
 		if foundAttenuation && foundNoAttenuation {
 			break
