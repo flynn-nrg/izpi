@@ -4468,7 +4468,7 @@ func CornellBoxTransparentPyramidSpectral(aspect float64) *pb_transport.Scene {
 							SpectralEmit: &pb_transport.SpectralConstantTexture{
 								SpectralProperties: &pb_transport.SpectralConstantTexture_Neutral{
 									Neutral: &pb_transport.NeutralSpectralConstant{
-										Reflectance: 15.0,
+										Reflectance: 1.0,
 									},
 								},
 							},
