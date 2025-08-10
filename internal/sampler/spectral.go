@@ -58,8 +58,6 @@ func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightS
 		emitted := mat.EmittedSpectral(r, rec, rec.U(), rec.V(), r.Lambda(), rec.P())
 		if depth < s.maxDepth && ok {
 			if srec.IsSpecular() {
-				// For dielectric materials with absorption, the path length calculation
-				// is now handled internally by the material using the stored world reference
 				return srec.Attenuation() * s.SampleSpectral(srec.SpecularRay(), world, lightShape, depth+1, random)
 			} else {
 				pLight := pdf.NewHitable(lightShape, rec.P())
