@@ -2262,7 +2262,7 @@ type Scene struct {
 	Camera               *Camera                          `protobuf:"bytes,4,opt,name=camera,proto3" json:"camera,omitempty"`
 	Materials            map[string]*Material             `protobuf:"bytes,5,rep,name=materials,proto3" json:"materials,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	ImageTextures        map[string]*ImageTextureMetadata `protobuf:"bytes,6,rep,name=image_textures,json=imageTextures,proto3" json:"image_textures,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	DisplacementMaps     map[string]*ImageTexture         `protobuf:"bytes,7,rep,name=displacement_maps,json=displacementMaps,proto3" json:"displacement_maps,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	DisplacementMaps     map[string]*ImageTextureMetadata `protobuf:"bytes,7,rep,name=displacement_maps,json=displacementMaps,proto3" json:"displacement_maps,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	Objects              *SceneObjects                    `protobuf:"bytes,8,opt,name=objects,proto3" json:"objects,omitempty"`
 	StreamTriangles      bool                             `protobuf:"varint,9,opt,name=stream_triangles,json=streamTriangles,proto3" json:"stream_triangles,omitempty"`
 	TotalTriangles       uint64                           `protobuf:"varint,10,opt,name=total_triangles,json=totalTriangles,proto3" json:"total_triangles,omitempty"`
@@ -2343,7 +2343,7 @@ func (x *Scene) GetImageTextures() map[string]*ImageTextureMetadata {
 	return nil
 }
 
-func (x *Scene) GetDisplacementMaps() map[string]*ImageTexture {
+func (x *Scene) GetDisplacementMaps() map[string]*ImageTextureMetadata {
 	if x != nil {
 		return x.DisplacementMaps
 	}
@@ -2779,7 +2779,7 @@ const file_transport_proto_rawDesc = "" +
 	"\rmaterial_name\x18\x03 \x01(\tR\fmaterialName\"n\n" +
 	"\fSceneObjects\x121\n" +
 	"\ttriangles\x18\x01 \x03(\v2\x13.transport.TriangleR\ttriangles\x12+\n" +
-	"\aspheres\x18\x02 \x03(\v2\x11.transport.SphereR\aspheres\"\x88\a\n" +
+	"\aspheres\x18\x02 \x03(\v2\x11.transport.SphereR\aspheres\"\x90\a\n" +
 	"\x05Scene\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\tR\aversion\x12T\n" +
@@ -2798,10 +2798,10 @@ const file_transport_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\v2\x13.transport.MaterialR\x05value:\x028\x01\x1aa\n" +
 	"\x12ImageTexturesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x125\n" +
-	"\x05value\x18\x02 \x01(\v2\x1f.transport.ImageTextureMetadataR\x05value:\x028\x01\x1a\\\n" +
+	"\x05value\x18\x02 \x01(\v2\x1f.transport.ImageTextureMetadataR\x05value:\x028\x01\x1ad\n" +
 	"\x15DisplacementMapsEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12-\n" +
-	"\x05value\x18\x02 \x01(\v2\x17.transport.ImageTextureR\x05value:\x028\x01\"0\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x125\n" +
+	"\x05value\x18\x02 \x01(\v2\x1f.transport.ImageTextureMetadataR\x05value:\x028\x01\"0\n" +
 	"\x0fGetSceneRequest\x12\x1d\n" +
 	"\n" +
 	"scene_name\x18\x01 \x01(\tR\tsceneName\"m\n" +
@@ -2975,7 +2975,7 @@ var file_transport_proto_depIdxs = []int32{
 	27, // 62: transport.StreamTrianglesResponse.triangles:type_name -> transport.Triangle
 	20, // 63: transport.Scene.MaterialsEntry.value:type_name -> transport.Material
 	5,  // 64: transport.Scene.ImageTexturesEntry.value:type_name -> transport.ImageTextureMetadata
-	13, // 65: transport.Scene.DisplacementMapsEntry.value:type_name -> transport.ImageTexture
+	5,  // 65: transport.Scene.DisplacementMapsEntry.value:type_name -> transport.ImageTextureMetadata
 	31, // 66: transport.SceneTransportService.GetScene:input_type -> transport.GetSceneRequest
 	32, // 67: transport.SceneTransportService.StreamTextureFile:input_type -> transport.StreamTextureFileRequest
 	34, // 68: transport.SceneTransportService.StreamTriangles:input_type -> transport.StreamTrianglesRequest

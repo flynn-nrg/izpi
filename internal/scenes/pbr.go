@@ -1219,16 +1219,19 @@ func CornellBoxEmptySpectral(aspect float64) *pb_transport.Scene {
 				},
 				// Floor (White)
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Uv0:          &pb_transport.Vec2{U: 0, V: 1},
+					Uv1:          &pb_transport.Vec2{U: 0, V: 0},
+					Uv2:          &pb_transport.Vec2{U: 1, V: 0},
 					MaterialName: "White",
 				},
 				// Additional floor triangle
 				{
-					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
 					MaterialName: "White",
 				},
 				// Ceiling triangles

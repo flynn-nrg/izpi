@@ -264,7 +264,7 @@ message Scene {
   Camera camera = 4;
   map<string, Material> materials = 5;
   map<string, ImageTextureMetadata> image_textures = 6;
-  map<string, ImageTexture> displacement_maps = 7;
+  map<string, ImageTextureMetadata> displacement_maps = 7;
   SceneObjects objects = 8;
   bool stream_triangles = 9;
   uint64 total_triangles = 10;
