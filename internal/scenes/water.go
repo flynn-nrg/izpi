@@ -76,13 +76,14 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
 					Uv1:          &pb_transport.Vec2{U: 0, V: 1},
 					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
-					MaterialName: "White",
-					Operator:     pb_transport.GeometryOperator_DISPLACE,
+					MaterialName: "Water",
+
+					Operator: pb_transport.GeometryOperator_DISPLACE,
 					OperatorProperties: &pb_transport.Triangle_Displace{
 						Displace: &pb_transport.DisplaceOperator{
-							DisplacementMap: "water.png",
-							Min:             -1,
-							Max:             1,
+							DisplacementMap: "water_128b.png",
+							Min:             -.1,
+							Max:             0,
 						},
 					},
 				},
@@ -93,15 +94,29 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
 					Uv1:          &pb_transport.Vec2{U: 1, V: 1},
 					Uv2:          &pb_transport.Vec2{U: 1, V: 0},
-					MaterialName: "White",
-					Operator:     pb_transport.GeometryOperator_DISPLACE,
+					MaterialName: "Water",
+
+					Operator: pb_transport.GeometryOperator_DISPLACE,
 					OperatorProperties: &pb_transport.Triangle_Displace{
 						Displace: &pb_transport.DisplaceOperator{
-							DisplacementMap: "water.png",
-							Min:             -1,
-							Max:             1,
+							DisplacementMap: "water_128b.png",
+							Min:             -.1,
+							Max:             0,
 						},
 					},
+				},
+				// Water box front face (up to 45% height)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 45, Z: 0},
+					MaterialName: "Water",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 45, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 45, Z: 0},
+					MaterialName: "Water",
 				},
 				// Ceiling triangles
 				{
@@ -236,6 +251,7 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 					},
 				},
 			},
+
 			"white_light": {
 				Name: "white_light",
 				Type: pb_transport.MaterialType_DIFFUSE_LIGHT,
@@ -258,11 +274,11 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 			},
 		},
 		DisplacementMaps: map[string]*pb_transport.ImageTextureMetadata{
-			"water.png": {
-				Filename:    "water.png",
-				Width:       1024,
-				Height:      1024,
-				Channels:    3,
+			"water_128b.png": {
+				Filename:    "water_128b.png",
+				Width:       130,
+				Height:      130,
+				Channels:    4,
 				PixelFormat: pb_transport.TexturePixelFormat_FLOAT64,
 			},
 		},

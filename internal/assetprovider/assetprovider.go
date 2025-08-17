@@ -61,9 +61,10 @@ func New(scene *pb_transport.Scene, textures map[string]*texture.ImageTxt, displ
 
 	grpcServer := grpc.NewServer()
 	serverImpl := &assetProviderServer{
-		scene:     scene,
-		textures:  textures,
-		triangles: triangles,
+		scene:            scene,
+		textures:         textures,
+		displacementMaps: displacementMaps,
+		triangles:        triangles,
 	}
 
 	pb_transport.RegisterSceneTransportServiceServer(grpcServer, serverImpl)
@@ -121,6 +122,8 @@ func (s *assetProviderServer) GetScene(ctx context.Context, req *pb_transport.Ge
 func (s *assetProviderServer) StreamTextureFile(req *pb_transport.StreamTextureFileRequest, stream pb_transport.SceneTransportService_StreamTextureFileServer) error {
 	log.Infof("AssetProvider: StreamTextureFile called for '%s' (offset: %d, chunk_size: %d)",
 		req.GetFilename(), req.GetOffset(), req.GetChunkSize())
+	log.Infof("AssetProvider: Textures: %v", s.textures)
+	log.Infof("AssetProvider: Displacement maps: %v", s.displacementMaps)
 
 	// We check both textures and displacement maps
 	imageText, ok := s.textures[req.GetFilename()]
