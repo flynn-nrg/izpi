@@ -43,6 +43,17 @@ enum ColourRepresentation {
   SPECTRAL = 2;
 }
 
+enum GeometryOperator {
+  GEOMETRY_OPERATOR_UNSPECIFIED = 0;
+  DISPLACE = 1;
+}
+
+message DisplaceOperator {
+  double min = 1;
+  double max = 2;
+  string displacement_map = 3;
+}
+
 // Represents a 3D vector or point with float components.
 message Vec3 {
   float x = 1;
@@ -225,6 +236,11 @@ message Triangle {
   Vec3 normal1 = 8;
   Vec3 normal2 = 9;
   string material_name = 10; // Reference material by name
+
+  GeometryOperator operator = 11;
+  oneof operator_properties {
+    DisplaceOperator displace = 12;
+  }
 }
 
 // Represents a sphere object.
@@ -248,10 +264,11 @@ message Scene {
   Camera camera = 4;
   map<string, Material> materials = 5;
   map<string, ImageTextureMetadata> image_textures = 6;
-  SceneObjects objects = 7;
-  bool stream_triangles = 8;
-  uint64 total_triangles = 9;
-  TabulatedSpectralConstant spectral_background = 10;
+  map<string, ImageTexture> displacement_maps = 7;
+  SceneObjects objects = 8;
+  bool stream_triangles = 9;
+  uint64 total_triangles = 10;
+  TabulatedSpectralConstant spectral_background = 11;
 }
 
 service SceneTransportService {
