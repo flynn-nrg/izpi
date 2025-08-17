@@ -68,11 +68,11 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
 					MaterialName: "White",
 				},
-				// Water surface triangles (40% of box height, slightly wider than box)
+				// Water surface triangles (40% of box height, aligned with water box front)
 				{
-					Vertex0:      &pb_transport.Vec3{X: -5, Y: 40, Z: -5},
-					Vertex1:      &pb_transport.Vec3{X: -5, Y: 40, Z: 105},
-					Vertex2:      &pb_transport.Vec3{X: 105, Y: 40, Z: 105},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 40, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 40, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 40, Z: 100},
 					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
 					Uv1:          &pb_transport.Vec2{U: 0, V: 1},
 					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
@@ -88,9 +88,9 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 					},
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: -5, Y: 40, Z: -5},
-					Vertex1:      &pb_transport.Vec3{X: 105, Y: 40, Z: 105},
-					Vertex2:      &pb_transport.Vec3{X: 105, Y: 40, Z: -5},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 40, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 40, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 40, Z: 0},
 					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
 					Uv1:          &pb_transport.Vec2{U: 1, V: 1},
 					Uv2:          &pb_transport.Vec2{U: 1, V: 0},
@@ -105,17 +105,17 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 						},
 					},
 				},
-				// Water box front face (up to 45% height)
+				// Water box front face (up to 40% height, aligned with water surface)
 				{
 					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
 					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
-					Vertex2:      &pb_transport.Vec3{X: 100, Y: 45, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 40, Z: 0},
 					MaterialName: "Water",
 				},
 				{
 					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex1:      &pb_transport.Vec3{X: 100, Y: 45, Z: 0},
-					Vertex2:      &pb_transport.Vec3{X: 0, Y: 45, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 40, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 40, Z: 0},
 					MaterialName: "Water",
 				},
 				// Ceiling triangles
