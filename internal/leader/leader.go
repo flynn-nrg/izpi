@@ -123,7 +123,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	var remoteWorkers []*render.RemoteWorkerConfig
 
 	if !standalone {
-		remoteWorkers, err = setupWorkers(ctx, cfg, protoScene, textures)
+		remoteWorkers, err = setupWorkers(ctx, cfg, protoScene, textures, displacementMaps)
 		if err != nil {
 			log.Fatalf("failed to setup workers: %v", err)
 		}

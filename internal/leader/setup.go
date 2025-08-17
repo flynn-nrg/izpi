@@ -19,7 +19,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func setupWorkers(ctx context.Context, cfg *config.Config, protoScene *pb_transport.Scene, textures map[string]*texture.ImageTxt) ([]*render.RemoteWorkerConfig, error) {
+func setupWorkers(ctx context.Context, cfg *config.Config, protoScene *pb_transport.Scene, textures map[string]*texture.ImageTxt, displacementMaps map[string]*texture.ImageTxt) ([]*render.RemoteWorkerConfig, error) {
 	jobID := uuid.New().String()
 
 	remoteWorkers := make([]*render.RemoteWorkerConfig, 0)
@@ -45,7 +45,7 @@ func setupWorkers(ctx context.Context, cfg *config.Config, protoScene *pb_transp
 		protoScene.Objects.Triangles = nil
 	}
 
-	assetProvider, assetProviderAddress, err := assetprovider.New(protoScene, textures, trianglesToStream)
+	assetProvider, assetProviderAddress, err := assetprovider.New(protoScene, textures, displacementMaps, trianglesToStream)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create asset provider: %w", err)
 	}
