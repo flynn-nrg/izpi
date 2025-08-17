@@ -49,17 +49,20 @@ type Triangle struct {
 	v2 float64
 	// Bounding box
 	bb *aabb.AABB
+	// Nested dielectric priority
+	priority int
 }
 
 // NewTriangle returns a new untextured triangle.
-func NewTriangle(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
-	mat material.Material) *Triangle {
-	return NewTriangleWithUV(vertex0, vertex1, vertex2, 0, 0, 0, 0, 0, 0, mat)
+func NewTriangle(
+	vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
+	mat material.Material, priority int) *Triangle {
+	return NewTriangleWithUV(vertex0, vertex1, vertex2, 0, 0, 0, 0, 0, 0, mat, priority)
 }
 
 // NewTriangleWithUV returns a new texture triangle.
 func NewTriangleWithUV(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
-	u0, v0, u1, v1, u2, v2 float64, mat material.Material) *Triangle {
+	u0, v0, u1, v1, u2, v2 float64, mat material.Material, priority int) *Triangle {
 	edge1 := vec3.Sub(vertex1, vertex0)
 	edge2 := vec3.Sub(vertex2, vertex0)
 
@@ -67,12 +70,12 @@ func NewTriangleWithUV(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *
 	normal.MakeUnitVector()
 
 	return NewTriangleWithUVAndNormal(vertex0, vertex1, vertex2,
-		normal, u0, v0, u1, v1, u2, v2, mat)
+		normal, u0, v0, u1, v1, u2, v2, mat, priority)
 }
 
 // NewTriangleWithUV returns a new texture triangle.
 func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
-	normal *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64, mat material.Material) *Triangle {
+	normal *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64, mat material.Material, priority int) *Triangle {
 
 	deltaU1 := u1 - u0
 	deltaU2 := u2 - u0
@@ -141,7 +144,7 @@ func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, 
 // NewTriangleWithUVAndVertexNormals returns a new textured triangle with per vertex normals.
 func NewTriangleWithUVAndVertexNormals(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
 	vn0 *vec3.Vec3Impl, vn1 *vec3.Vec3Impl, vn2 *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64,
-	mat material.Material) *Triangle {
+	mat material.Material, priority int) *Triangle {
 
 	deltaU1 := u1 - u0
 	deltaU2 := u2 - u0
@@ -196,6 +199,7 @@ func NewTriangleWithUVAndVertexNormals(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec
 		v1:               v1,
 		v2:               v2,
 		bb:               aabb.New(min, max),
+		priority:         priority,
 	}
 }
 

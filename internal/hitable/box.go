@@ -14,13 +14,14 @@ var _ Hitable = (*Box)(nil)
 
 // Box represents a box.
 type Box struct {
-	sides HitableSlice
-	mat   material.Material
-	pMin  *vec3.Vec3Impl
-	pMax  *vec3.Vec3Impl
+	sides    HitableSlice
+	priority int
+	mat      material.Material
+	pMin     *vec3.Vec3Impl
+	pMax     *vec3.Vec3Impl
 }
 
-func NewBox(p0 *vec3.Vec3Impl, p1 *vec3.Vec3Impl, mat material.Material) *Box {
+func NewBox(p0 *vec3.Vec3Impl, p1 *vec3.Vec3Impl, mat material.Material, priority int) *Box {
 	pMin := p0
 	pMax := p1
 
@@ -34,10 +35,11 @@ func NewBox(p0 *vec3.Vec3Impl, p1 *vec3.Vec3Impl, mat material.Material) *Box {
 	}
 
 	return &Box{
-		sides: *NewSlice(box),
-		mat:   mat,
-		pMin:  pMin,
-		pMax:  pMax,
+		sides:    *NewSlice(box),
+		priority: priority,
+		mat:      mat,
+		pMin:     pMin,
+		pMax:     pMax,
 	}
 }
 
