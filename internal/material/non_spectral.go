@@ -21,7 +21,7 @@ func (ns *nonSpectral) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, rando
 
 // SpectralAlbedo provides a stub implementation that converts RGB albedo to spectral
 // by using the average of the RGB components as a neutral spectral response
-func (ns *nonSpectral) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+func (ns *nonSpectral) SpectralAlbedo(u float32, v float32, lambda float32, p *vec3.Vec3Impl) float32 {
 	// This is a fallback that converts RGB to neutral spectral response
 	// In practice, spectral materials should override this method
 	return 0.5 // Default neutral response

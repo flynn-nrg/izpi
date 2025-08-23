@@ -30,8 +30,8 @@ func NewSpectralChecker(odd SpectralTexture, even SpectralTexture) *SpectralChec
 // Value returns the spectral response at the given position and wavelength.
 // The checkerboard pattern is determined by the 3D position (p),
 // and the spectral response depends on the wavelength (lambda).
-func (c *SpectralChecker) Value(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
-	sines := math.Sin(10.0*p.X) * math.Sin(10.0*p.Y) * math.Sin(10.0*p.Z)
+func (c *SpectralChecker) Value(u float32, v float32, lambda float32, p *vec3.Vec3Impl) float32 {
+	sines := float32(math.Sin(float64(10.0*p.X)) * math.Sin(float64(10.0*p.Y)) * math.Sin(float64(10.0*p.Z)))
 	if sines < 0 {
 		return c.odd.Value(u, v, lambda, p)
 	}

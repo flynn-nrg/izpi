@@ -39,12 +39,12 @@ func NewNonSpectral() *NonSpectral {
 
 // SampleSpectral implements the Sampler interface for RGB samplers
 // Returns a neutral value (0.5) since RGB samplers don't support spectral rendering
-func (ns *NonSpectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) float64 {
+func (ns *NonSpectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) float32 {
 	// Return neutral value for RGB samplers that don't support spectral rendering
 	return 0.5
 }
 
-func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) float64 {
+func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) float32 {
 	if depth >= s.maxDepth {
 		// Return the background spectral power distribution at the wavelength of the ray
 		return s.background.Value(r.Lambda())
@@ -53,7 +53,7 @@ func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightS
 	atomic.AddUint64(s.numRays, 1)
 
 	// L(λ) = Le(λ) + ∫ f(λ) * L(λ) * cos(θ) / p(ω) dω
-	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
+	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat32); ok {
 		_, srec, ok := mat.SpectralScatter(r, rec, random)
 		emitted := mat.EmittedSpectral(r, rec, rec.U(), rec.V(), r.Lambda(), rec.P())
 		if depth < s.maxDepth && ok {
@@ -86,7 +86,7 @@ func (s *Spectral) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hit
 	// if it doesn't already have one (depth 0 means it's a primary ray from camera)
 	if depth == 0 && r.Lambda() == 0.0 {
 		// Sample a wavelength according to CIE Y function (importance sampling)
-		wavelength, _ := spectral.SampleWavelength(random.Float64())
+		wavelength, _ := spectral.SampleWavelength(random.Float32())
 		r.SetLambda(wavelength)
 	}
 

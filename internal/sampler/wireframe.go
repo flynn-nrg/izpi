@@ -33,7 +33,7 @@ func NewWireFrame(paper, ink *vec3.Vec3Impl, numRays *uint64) *WireFrame {
 
 func (w *WireFrame) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) *vec3.Vec3Impl {
 	atomic.AddUint64(w.numRays, 1)
-	if _, _, ok := world.HitEdge(r, 0.001, math.MaxFloat64); ok {
+	if _, _, ok := world.HitEdge(r, 0.001, math.MaxFloat32); ok {
 		return w.ink
 	}
 	return w.paper

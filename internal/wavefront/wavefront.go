@@ -64,14 +64,14 @@ type WavefrontObj struct {
 // Material represents a material defined in a .mtl file.
 type Material struct {
 	Name      string
-	Kd        []float64
-	Ka        []float64
-	Ks        []float64
-	Ns        float64
-	Ni        float64
-	Sharpness int64
-	D         float64
-	Illum     int64
+	Kd        []float32
+	Ka        []float32
+	Ks        []float32
+	Ns        float32
+	Ni        float32
+	Sharpness int32
+	D         float32
+	Illum     int32
 }
 
 // VertexIndices represents the indices used by a vertex.
@@ -303,7 +303,7 @@ func (wo *WavefrontObj) groupToTrianglesWithCustomMaterial(g *Group, mat materia
 }
 
 // GroupToHitablesWithCustomMaterialAndDisplacement returns a slice of displaced hitables with the supplied material.
-func (wo *WavefrontObj) GroupToHitablesWithCustomMaterialAndDisplacement(index int, mat material.Material, displacementMap texture.Texture, min, max float64) ([]hitable.Hitable, error) {
+func (wo *WavefrontObj) GroupToHitablesWithCustomMaterialAndDisplacement(index int, mat material.Material, displacementMap texture.Texture, min, max float32) ([]hitable.Hitable, error) {
 	g := wo.Groups[index]
 	switch g.FaceType {
 	case OBJ_FACE_TYPE_POLYGON:
@@ -313,7 +313,7 @@ func (wo *WavefrontObj) GroupToHitablesWithCustomMaterialAndDisplacement(index i
 	}
 }
 
-func (wo *WavefrontObj) groupToTrianglesWithCustomMaterialAndDisplacement(g *Group, mat material.Material, displacementMap texture.Texture, min, max float64) ([]hitable.Hitable, error) {
+func (wo *WavefrontObj) groupToTrianglesWithCustomMaterialAndDisplacement(g *Group, mat material.Material, displacementMap texture.Texture, min, max float32) ([]hitable.Hitable, error) {
 	hitables := []hitable.Hitable{}
 	for _, face := range g.Faces {
 		tris := wo.triangulate(face, mat)
@@ -407,14 +407,14 @@ func (wo *WavefrontObj) Scale(scale *vec3.Vec3Impl) {
 	}
 }
 
-func parseFloats(s []string) ([]float64, error) {
-	res := []float64{}
+func parseFloats(s []string) ([]float32, error) {
+	res := []float32{}
 	for _, i := range s {
-		f, err := strconv.ParseFloat(i, 64)
+		f, err := strconv.ParseFloat(i, 32)
 		if err != nil {
 			return res, err
 		}
-		res = append(res, f)
+		res = append(res, float32(f))
 	}
 	return res, nil
 }
@@ -505,7 +505,7 @@ func parseMaterialFile(fileName string) (map[string]*Material, error) {
 			if err != nil {
 				return nil, err
 			}
-			currentMaterial.Ns = ns
+			currentMaterial.Ns = float32(ns)
 			continue
 		}
 		if strings.HasPrefix(s, "Ni") {
@@ -514,7 +514,7 @@ func parseMaterialFile(fileName string) (map[string]*Material, error) {
 			if err != nil {
 				return nil, err
 			}
-			currentMaterial.Ni = ni
+			currentMaterial.Ni = float32(ni)
 			continue
 		}
 		if strings.HasPrefix(s, "d") {
@@ -523,7 +523,7 @@ func parseMaterialFile(fileName string) (map[string]*Material, error) {
 			if err != nil {
 				return nil, err
 			}
-			currentMaterial.D = d
+			currentMaterial.D = float32(d)
 			continue
 		}
 		if strings.HasPrefix(s, "illum") {
@@ -532,7 +532,7 @@ func parseMaterialFile(fileName string) (map[string]*Material, error) {
 			if err != nil {
 				return nil, err
 			}
-			currentMaterial.Illum = illum
+			currentMaterial.Illum = int32(illum)
 		}
 		if strings.HasPrefix(s, "Ka") {
 			kaStr := strings.Split(s, " ")

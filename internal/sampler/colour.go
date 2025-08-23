@@ -37,7 +37,7 @@ func (cs *Colour) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hita
 
 	atomic.AddUint64(cs.numRays, 1)
 
-	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
+	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat32); ok {
 		_, srec, ok := mat.Scatter(r, rec, random)
 		emitted := mat.Emitted(r, rec, rec.U(), rec.V(), rec.P())
 		if depth < cs.maxDepth && ok {

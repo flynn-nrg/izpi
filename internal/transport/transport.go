@@ -17,7 +17,7 @@ import (
 )
 
 type Transport struct {
-	aspectOverride       float64
+	aspectOverride       float32
 	numWorkers           int
 	colourRepresentation pb_transport.ColourRepresentation
 	protoScene           *pb_transport.Scene
@@ -27,7 +27,7 @@ type Transport struct {
 }
 
 func NewTransport(
-	aspectOverride float64,
+	aspectOverride float32,
 	protoScene *pb_transport.Scene,
 	triangles []*pb_transport.Triangle,
 	textures map[string]*texture.ImageTxt,
@@ -228,7 +228,7 @@ func (t *Transport) toScenePBRMaterial(mat *pb_transport.Material) (material.Mat
 		return nil, err
 	}
 
-	sssRadius := float64(pbr.GetSssRadius())
+	sssRadius := pbr.GetSssRadius()
 
 	// Check if we need spectral rendering
 	if t.colourRepresentation == pb_transport.ColourRepresentation_SPECTRAL {
@@ -248,12 +248,12 @@ func (t *Transport) toSceneMetalMaterial(mat *pb_transport.Material) (material.M
 	metal := mat.GetMetal()
 
 	albedo := &vec3.Vec3Impl{
-		X: float64(metal.GetAlbedo().GetX()),
-		Y: float64(metal.GetAlbedo().GetY()),
-		Z: float64(metal.GetAlbedo().GetZ()),
+		X: metal.GetAlbedo().GetX(),
+		Y: metal.GetAlbedo().GetY(),
+		Z: metal.GetAlbedo().GetZ(),
 	}
 
-	fuzz := float64(metal.GetFuzz())
+	fuzz := metal.GetFuzz()
 
 	return material.NewMetal(albedo, fuzz), nil
 }
@@ -306,13 +306,13 @@ func (t *Transport) toSceneDielectricMaterial(mat *pb_transport.Material) (mater
 	dielectric := mat.GetDielectric()
 
 	// Handle refractive index properties
-	var refIdx float64
+	var refIdx float32
 	var spectralRefIdx texture.SpectralTexture
 	var err error
 
 	switch dielectric.GetRefractiveIndexProperties().(type) {
 	case *pb_transport.DielectricMaterial_Refidx:
-		refIdx = float64(dielectric.GetRefidx())
+		refIdx = dielectric.GetRefidx()
 	case *pb_transport.DielectricMaterial_SpectralRefidx:
 		spectralRefIdx, err = t.toSceneSpectralTexture(dielectric.GetSpectralRefidx())
 		if err != nil {
@@ -330,9 +330,9 @@ func (t *Transport) toSceneDielectricMaterial(mat *pb_transport.Material) (mater
 	case *pb_transport.DielectricMaterial_AbsorptionCoeff:
 		abs := dielectric.GetAbsorptionCoeff()
 		absorptionCoeff = &vec3.Vec3Impl{
-			X: float64(abs.GetX()),
-			Y: float64(abs.GetY()),
-			Z: float64(abs.GetZ()),
+			X: abs.GetX(),
+			Y: abs.GetY(),
+			Z: abs.GetZ(),
 		}
 	case *pb_transport.DielectricMaterial_SpectralAbsorptionCoeff:
 		spectralAbsorptionCoeff, err = t.toSceneSpectralTexture(dielectric.GetSpectralAbsorptionCoeff())
@@ -406,9 +406,9 @@ func (t *Transport) toSceneConstantTexture(text *pb_transport.Texture) (texture.
 	constant := text.GetConstant()
 
 	return texture.NewConstant(&vec3.Vec3Impl{
-		X: float64(constant.GetValue().GetX()),
-		Y: float64(constant.GetValue().GetY()),
-		Z: float64(constant.GetValue().GetZ()),
+		X: constant.GetValue().GetX(),
+		Y: constant.GetValue().GetY(),
+		Z: constant.GetValue().GetZ(),
 	}), nil
 }
 
@@ -428,27 +428,27 @@ func (t *Transport) toSceneSpectralTexture(spectralText *pb_transport.SpectralCo
 	case *pb_transport.SpectralConstantTexture_Gaussian:
 		gaussian := spectralText.GetGaussian()
 		return texture.NewSpectralConstant(
-			float64(gaussian.GetPeakValue()),
-			float64(gaussian.GetCenterWavelength()),
-			float64(gaussian.GetWidth()),
+			gaussian.GetPeakValue(),
+			gaussian.GetCenterWavelength(),
+			gaussian.GetWidth(),
 		), nil
 	case *pb_transport.SpectralConstantTexture_Tabulated:
 		tabulated := spectralText.GetTabulated()
-		wavelengths := make([]float64, len(tabulated.GetWavelengths()))
-		values := make([]float64, len(tabulated.GetValues()))
+		wavelengths := make([]float32, len(tabulated.GetWavelengths()))
+		values := make([]float32, len(tabulated.GetValues()))
 
 		for i, w := range tabulated.GetWavelengths() {
-			wavelengths[i] = float64(w)
+			wavelengths[i] = w
 		}
 		for i, v := range tabulated.GetValues() {
-			values[i] = float64(v)
+			values[i] = v
 		}
 
 		spd := spectral.NewSPD(wavelengths, values)
 		return texture.NewSpectralConstantFromSPD(spd), nil
 	case *pb_transport.SpectralConstantTexture_Neutral:
 		neutral := spectralText.GetNeutral()
-		return texture.NewSpectralNeutral(float64(neutral.GetReflectance())), nil
+		return texture.NewSpectralNeutral(neutral.GetReflectance()), nil
 	default:
 		return nil, fmt.Errorf("unknown spectral texture type: %T", spectralText.GetSpectralProperties())
 	}
@@ -485,40 +485,40 @@ func (t *Transport) textureToSpectralTexture(tex texture.Texture) (texture.Spect
 	return texture.NewSpectralNeutral(0.5), nil
 }
 
-func (t *Transport) toSceneCamera(aspectOverride float64) *camera.Camera {
+func (t *Transport) toSceneCamera(aspectOverride float32) *camera.Camera {
 	protoCamera := t.protoScene.GetCamera()
 
 	lookFrom := &vec3.Vec3Impl{
-		X: float64(protoCamera.GetLookfrom().GetX()),
-		Y: float64(protoCamera.GetLookfrom().GetY()),
-		Z: float64(protoCamera.GetLookfrom().GetZ()),
+		X: protoCamera.GetLookfrom().GetX(),
+		Y: protoCamera.GetLookfrom().GetY(),
+		Z: protoCamera.GetLookfrom().GetZ(),
 	}
 
 	lookAt := &vec3.Vec3Impl{
-		X: float64(protoCamera.GetLookat().GetX()),
-		Y: float64(protoCamera.GetLookat().GetY()),
-		Z: float64(protoCamera.GetLookat().GetZ()),
+		X: protoCamera.GetLookat().GetX(),
+		Y: protoCamera.GetLookat().GetY(),
+		Z: protoCamera.GetLookat().GetZ(),
 	}
 
 	vup := &vec3.Vec3Impl{
-		X: float64(protoCamera.GetVup().GetX()),
-		Y: float64(protoCamera.GetVup().GetY()),
-		Z: float64(protoCamera.GetVup().GetZ()),
+		X: protoCamera.GetVup().GetX(),
+		Y: protoCamera.GetVup().GetY(),
+		Z: protoCamera.GetVup().GetZ(),
 	}
 
-	vfov := float64(protoCamera.GetVfov())
+	vfov := protoCamera.GetVfov()
 
-	var aspect float64
+	var aspect float32
 	if aspectOverride != 0.0 {
 		aspect = aspectOverride
 	} else {
-		aspect = float64(protoCamera.GetAspect())
+		aspect = protoCamera.GetAspect()
 	}
 
-	aperture := float64(protoCamera.GetAperture())
-	focusDist := float64(protoCamera.GetFocusdist())
-	time0 := float64(protoCamera.GetTime0())
-	time1 := float64(protoCamera.GetTime1())
+	aperture := protoCamera.GetAperture()
+	focusDist := protoCamera.GetFocusdist()
+	time0 := protoCamera.GetTime0()
+	time1 := protoCamera.GetTime1()
 
 	return camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, focusDist, time0, time1)
 }
@@ -572,29 +572,29 @@ func (t *Transport) toSceneTriangle(triangle *pb_transport.Triangle) (*hitable.T
 	}
 
 	vertex0 := &vec3.Vec3Impl{
-		X: float64(triangle.GetVertex0().GetX()),
-		Y: float64(triangle.GetVertex0().GetY()),
-		Z: float64(triangle.GetVertex0().GetZ()),
+		X: triangle.GetVertex0().GetX(),
+		Y: triangle.GetVertex0().GetY(),
+		Z: triangle.GetVertex0().GetZ(),
 	}
 
 	vertex1 := &vec3.Vec3Impl{
-		X: float64(triangle.GetVertex1().GetX()),
-		Y: float64(triangle.GetVertex1().GetY()),
-		Z: float64(triangle.GetVertex1().GetZ()),
+		X: triangle.GetVertex1().GetX(),
+		Y: triangle.GetVertex1().GetY(),
+		Z: triangle.GetVertex1().GetZ(),
 	}
 
 	vertex2 := &vec3.Vec3Impl{
-		X: float64(triangle.GetVertex2().GetX()),
-		Y: float64(triangle.GetVertex2().GetY()),
-		Z: float64(triangle.GetVertex2().GetZ()),
+		X: triangle.GetVertex2().GetX(),
+		Y: triangle.GetVertex2().GetY(),
+		Z: triangle.GetVertex2().GetZ(),
 	}
 
-	u0 := float64(triangle.GetUv0().GetU())
-	v0 := float64(triangle.GetUv0().GetV())
-	u1 := float64(triangle.GetUv1().GetU())
-	v1 := float64(triangle.GetUv1().GetV())
-	u2 := float64(triangle.GetUv2().GetU())
-	v2 := float64(triangle.GetUv2().GetV())
+	u0 := triangle.GetUv0().GetU()
+	v0 := triangle.GetUv0().GetV()
+	u1 := triangle.GetUv1().GetU()
+	v1 := triangle.GetUv1().GetV()
+	u2 := triangle.GetUv2().GetU()
+	v2 := triangle.GetUv2().GetV()
 
 	tri := hitable.NewTriangleWithUV(vertex0, vertex1, vertex2, u0, v0, u1, v1, u2, v2, material)
 
@@ -622,12 +622,12 @@ func (t *Transport) toSceneSphere(sphere *pb_transport.Sphere) (*hitable.Sphere,
 	}
 
 	center := &vec3.Vec3Impl{
-		X: float64(sphere.GetCenter().GetX()),
-		Y: float64(sphere.GetCenter().GetY()),
-		Z: float64(sphere.GetCenter().GetZ()),
+		X: sphere.GetCenter().GetX(),
+		Y: sphere.GetCenter().GetY(),
+		Z: sphere.GetCenter().GetZ(),
 	}
 
-	radius := float64(sphere.GetRadius())
+	radius := sphere.GetRadius()
 
 	return hitable.NewSphere(center, center, 0, 1, radius, material), nil
 }
@@ -637,6 +637,6 @@ type sceneGeometryAdapter struct {
 	world *hitable.HitableSlice
 }
 
-func (sga *sceneGeometryAdapter) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+func (sga *sceneGeometryAdapter) Hit(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, material.Material, bool) {
 	return sga.world.Hit(r, tMin, tMax)
 }

@@ -9,21 +9,21 @@ import (
 
 // Vec3Impl defines a vector with its position and colour.
 type Vec3Impl struct {
-	X float64
-	Y float64
-	Z float64
-	R float64
-	G float64
-	B float64
+	X float32
+	Y float32
+	Z float32
+	R float32
+	G float32
+	B float32
 }
 
 // Length returns the length of this vector.
-func (v *Vec3Impl) Length() float64 {
-	return math.Sqrt((v.X * v.X) + (v.Y * v.Y) + (v.Z * v.Z))
+func (v *Vec3Impl) Length() float32 {
+	return float32(math.Sqrt(float64((v.X * v.X) + (v.Y * v.Y) + (v.Z * v.Z))))
 }
 
 // SquaredLength returns the squared length of this vector.
-func (v *Vec3Impl) SquaredLength() float64 {
+func (v *Vec3Impl) SquaredLength() float32 {
 	return (v.X * v.X) + (v.Y * v.Y) + (v.Z * v.Z)
 }
 
@@ -88,7 +88,7 @@ func Div(v1 *Vec3Impl, v2 *Vec3Impl) *Vec3Impl {
 }
 
 // ScalarMul returns the scalar multiplication of the given vector and scalar values.
-func ScalarMul(v1 *Vec3Impl, t float64) *Vec3Impl {
+func ScalarMul(v1 *Vec3Impl, t float32) *Vec3Impl {
 	return &Vec3Impl{
 		X: v1.X * t,
 		Y: v1.Y * t,
@@ -97,7 +97,7 @@ func ScalarMul(v1 *Vec3Impl, t float64) *Vec3Impl {
 }
 
 // ScalarMul returns the scalar division of the given vector and scalar values.
-func ScalarDiv(v1 *Vec3Impl, t float64) *Vec3Impl {
+func ScalarDiv(v1 *Vec3Impl, t float32) *Vec3Impl {
 	return &Vec3Impl{
 		X: v1.X / t,
 		Y: v1.Y / t,
@@ -106,7 +106,7 @@ func ScalarDiv(v1 *Vec3Impl, t float64) *Vec3Impl {
 }
 
 // Dot computes the dot product of the two supplied vectors.
-func Dot(v1 *Vec3Impl, v2 *Vec3Impl) float64 {
+func Dot(v1 *Vec3Impl, v2 *Vec3Impl) float32 {
 	return (v1.X * v2.X) + (v1.Y * v2.Y) + (v1.Z * v2.Z)
 }
 
@@ -126,23 +126,23 @@ func UnitVector(v *Vec3Impl) *Vec3Impl {
 
 // RandomCosineDirection returns a vector with a random cosine direction.
 func RandomCosineDirection(random *fastrandom.LCG) *Vec3Impl {
-	r1 := random.Float64()
-	r2 := random.Float64()
-	z := math.Sqrt(1 - r2)
+	r1 := random.Float32()
+	r2 := random.Float32()
+	z := float32(math.Sqrt(float64(1 - r2)))
 	phi := 2 * math.Pi * r1
-	x := math.Cos(phi) * 2 * math.Sqrt(r2)
-	y := math.Sin(phi) * 2 * math.Sqrt(r2)
+	x := float32(math.Cos(float64(phi)) * 2 * math.Sqrt(float64(r2)))
+	y := float32(math.Sin(float64(phi)) * 2 * math.Sqrt(float64(r2)))
 	return &Vec3Impl{X: x, Y: y, Z: z}
 }
 
 // RandomToSphere returns a new random sphere of the given radius at the given distance.
-func RandomToSphere(radius float64, distanceSquared float64, random *fastrandom.LCG) *Vec3Impl {
-	r1 := random.Float64()
-	r2 := random.Float64()
-	z := 1 + r2*(math.Sqrt(1-radius*radius/distanceSquared)-1)
+func RandomToSphere(radius float32, distanceSquared float32, random *fastrandom.LCG) *Vec3Impl {
+	r1 := random.Float32()
+	r2 := random.Float32()
+	z := 1 + r2*(float32(math.Sqrt(float64(1-radius*radius/distanceSquared)))-1)
 	phi := 2 * math.Pi * r1
-	x := math.Cos(phi) * math.Sqrt(1-z*z)
-	y := math.Sin(phi) * math.Sqrt(1-z*z)
+	x := float32(math.Cos(float64(phi)) * math.Sqrt(float64(1-z*z)))
+	y := float32(math.Sin(float64(phi)) * math.Sqrt(float64(1-z*z)))
 	return &Vec3Impl{X: x, Y: y, Z: z}
 }
 
@@ -151,15 +151,15 @@ func DeNAN(v *Vec3Impl) *Vec3Impl {
 	x := v.X
 	y := v.Y
 	z := v.Z
-	if math.IsNaN(x) || math.IsInf(x, -1) || math.IsInf(x, 1) {
+	if math.IsNaN(float64(x)) || math.IsInf(float64(x), -1) || math.IsInf(float64(x), 1) {
 		x = 0
 	}
 
-	if math.IsNaN(y) || math.IsInf(y, -1) || math.IsInf(y, 1) {
+	if math.IsNaN(float64(y)) || math.IsInf(float64(y), -1) || math.IsInf(float64(y), 1) {
 		y = 0
 	}
 
-	if math.IsNaN(z) || math.IsInf(z, -1) || math.IsInf(z, 1) {
+	if math.IsNaN(float64(z)) || math.IsInf(float64(z), -1) || math.IsInf(float64(z), 1) {
 		z = 0
 	}
 
@@ -168,9 +168,9 @@ func DeNAN(v *Vec3Impl) *Vec3Impl {
 
 // Min3 returns a new vector with the minimum coordinates among the supplied ones.
 func Min3(v0 *Vec3Impl, v1 *Vec3Impl, v2 *Vec3Impl) *Vec3Impl {
-	xMin := math.MaxFloat64
-	yMin := math.MaxFloat64
-	zMin := math.MaxFloat64
+	xMin := float32(math.MaxFloat32)
+	yMin := float32(math.MaxFloat32)
+	zMin := float32(math.MaxFloat32)
 
 	if v0.X < xMin {
 		xMin = v0.X
@@ -213,9 +213,9 @@ func Min3(v0 *Vec3Impl, v1 *Vec3Impl, v2 *Vec3Impl) *Vec3Impl {
 
 // Max3 returns a new vector with the maximum coordinates among the supplied ones.
 func Max3(v0 *Vec3Impl, v1 *Vec3Impl, v2 *Vec3Impl) *Vec3Impl {
-	xMax := -math.MaxFloat64
-	yMax := -math.MaxFloat64
-	zMax := -math.MaxFloat64
+	xMax := float32(-math.MaxFloat32)
+	yMax := float32(-math.MaxFloat32)
+	zMax := float32(-math.MaxFloat32)
 
 	if v0.X > xMax {
 		xMax = v0.X
@@ -257,7 +257,7 @@ func Max3(v0 *Vec3Impl, v1 *Vec3Impl, v2 *Vec3Impl) *Vec3Impl {
 }
 
 // Lerp performs a linear interpolation between the two provided vectors.
-func Lerp(v0, v1 *Vec3Impl, t float64) *Vec3Impl {
+func Lerp(v0, v1 *Vec3Impl, t float32) *Vec3Impl {
 	return &Vec3Impl{
 		X: (1-t)*v0.X + t*v1.X,
 		Y: (1-t)*v0.Y + t*v1.Y,

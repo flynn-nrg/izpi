@@ -17,7 +17,7 @@ func NewConstant(color *vec3.Vec3Impl) *Constant {
 	}
 }
 
-func (c *Constant) Value(_ float64, _ float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (c *Constant) Value(_ float32, _ float32, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
 	col := *c.color
 	return &col
 }

@@ -107,7 +107,7 @@ func TestPBRMaterialTransformation(t *testing.T) {
 	pbrMat := spectralMat.(*material.PBR)
 
 	// Test spectral albedo values at different wavelengths
-	testWavelengths := []float64{380, 550, 650}
+	testWavelengths := []float32{380, 550, 650}
 	for _, lambda := range testWavelengths {
 		value := pbrMat.SpectralAlbedo(0.5, 0.5, lambda, &vec3.Vec3Impl{})
 		if value < 0.0 || value > 1.0 {

@@ -23,7 +23,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 			Width:  w.x1 - w.x0 + 1,
 			Height: 1,
 			PosX:   w.x0,
-			Pixels: make([]float64, (w.x1-w.x0+1)*4),
+			Pixels: make([]float32, (w.x1-w.x0+1)*4),
 		}
 	}
 
@@ -33,7 +33,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 		for x := w.x0; x <= w.x1; x++ {
 			r, g, b := RenderPixelSpectral(w.numSamples, x, y, nx, ny, w.scene, w.sampler, random)
 
-			w.canvas.Set(x, ny-y, colour.Float64NRGBA{R: r, G: g, B: b, A: 1.0})
+			w.canvas.Set(x, ny-y, colour.Float32NRGBA{R: r, G: g, B: b, A: 1.0})
 			if w.preview {
 				tile.Pixels[i] = b
 				tile.Pixels[i+1] = g
@@ -63,20 +63,20 @@ func workerSpectral(input chan workUnit, quit chan struct{}, random *fastrandom.
 	}
 }
 
-func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, sampler sampler.Sampler, random *fastrandom.LCG) (float64, float64, float64) {
+func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, sampler sampler.Sampler, random *fastrandom.LCG) (float32, float32, float32) {
 	// Initialize XYZ accumulators for the pixel
-	var sumX, sumY, sumZ float64
+	var sumX, sumY, sumZ float32
 
 	for range numSamples {
 		// Importance sample a wavelength AND its PDF
-		lambda, pdf := spectral.SampleWavelength(rand.Float64())
+		lambda, pdf := spectral.SampleWavelength(rand.Float32())
 		if pdf == 0 {
 			continue
 		}
 
 		// Get camera ray for this specific wavelength
-		u := (float64(x) + rand.Float64()) / float64(nx)
-		v := (float64(y) + rand.Float64()) / float64(ny)
+		u := (float32(x) + rand.Float32()) / float32(nx)
+		v := (float32(y) + rand.Float32()) / float32(ny)
 		r := scene.Camera.GetRayWithLambda(u, v, lambda)
 
 		// Trace the path to get radiance at this wavelength
@@ -92,13 +92,13 @@ func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, s
 	}
 
 	// Average the accumulated XYZ values
-	invNumSamples := 1.0 / float64(numSamples)
+	invNumSamples := 1.0 / float32(numSamples)
 	finalX := sumX * invNumSamples
 	finalY := sumY * invNumSamples
 	finalZ := sumZ * invNumSamples
 
 	// Convert the final XYZ color to linear sRGB
-	exposure := 1.0
+	exposure := float32(1.0)
 	r := 3.2404542*(finalX*exposure) - 1.5371385*(finalY*exposure) - 0.4985314*(finalZ*exposure)
 	g := -0.9692660*(finalX*exposure) + 1.8760108*(finalY*exposure) + 0.0415560*(finalZ*exposure)
 	b := 0.0556434*(finalX*exposure) - 0.2040259*(finalY*exposure) + 1.0572252*(finalZ*exposure)

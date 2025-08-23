@@ -48,7 +48,7 @@ func TestBeerLambertAttenuation(t *testing.T) {
 
 	// Test at the peak wavelength (480nm)
 	attenuation := dielectric.calculateBeerLambertAttenuation(1.0, 480.0, 0.0, 0.0, &vec3.Vec3Impl{})
-	expected := 0.6065 // exp(-0.5 * 1.0)
+	expected := float32(0.6065) // exp(-0.5 * 1.0)
 
 	if abs(attenuation-expected) > 0.001 {
 		t.Errorf("Expected attenuation %f, got %f", expected, attenuation)
@@ -92,7 +92,7 @@ func TestPathLengthCalculation(t *testing.T) {
 // mockSceneGeometry is a simple mock for testing
 type mockSceneGeometry struct{}
 
-func (m *mockSceneGeometry) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, Material, bool) {
+func (m *mockSceneGeometry) Hit(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, Material, bool) {
 	// Return a mock exit point for testing
 	exitPoint := &vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 1.5}
 	normal := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
@@ -205,7 +205,7 @@ func TestSpectralColoredGlassScattering(t *testing.T) {
 }
 
 // Helper function for floating point comparison
-func abs(x float64) float64 {
+func abs(x float32) float32 {
 	if x < 0 {
 		return -x
 	}

@@ -4,15 +4,15 @@ package mat3
 import "github.com/flynn-nrg/izpi/internal/vec3"
 
 type Mat3 struct {
-	A11 float64
-	A12 float64
-	A13 float64
-	A21 float64
-	A22 float64
-	A23 float64
-	A31 float64
-	A32 float64
-	A33 float64
+	A11 float32
+	A12 float32
+	A13 float32
+	A21 float32
+	A22 float32
+	A23 float32
+	A31 float32
+	A32 float32
+	A33 float32
 }
 
 // NewTBN returns a new matrix made from the supplied tagent, bitangent and normal vectors.

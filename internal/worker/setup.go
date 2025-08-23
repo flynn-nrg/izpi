@@ -45,7 +45,12 @@ func (s *workerServer) getScene(ctx context.Context, transportClient pb_transpor
 	return scene, nil
 }
 
-func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb_transport.SceneTransportServiceClient, filename string, expectedTotalSize uint64) ([]float64, error) {
+func (s *workerServer) streamTextureFile(
+	ctx context.Context,
+	transportClient pb_transport.SceneTransportServiceClient,
+	filename string,
+	expectedTotalSize uint64,
+) ([]float32, error) {
 	req := &pb_transport.StreamTextureFileRequest{
 		Filename:  filename,
 		Offset:    0,
@@ -89,9 +94,9 @@ func (s *workerServer) streamTextureFile(ctx context.Context, transportClient pb
 		return nil, fmt.Errorf("texture '%s' stream ended prematurely. Expected %d bytes, got %d", filename, expectedTotalSize, receivedBytes)
 	}
 
-	float64Data := unsafe.Slice((*float64)(unsafe.Pointer(&textureData[0])), len(textureData)/int(unsafe.Sizeof(float64(0))))
+	float32Data := unsafe.Slice((*float32)(unsafe.Pointer(&textureData[0])), len(textureData)/int(unsafe.Sizeof(float32(0))))
 
-	return float64Data, nil
+	return float32Data, nil
 }
 
 func (s *workerServer) streamTriangles(ctx context.Context, transportClient pb_transport.SceneTransportServiceClient, sceneName string, totalTriangles uint64, batchSize uint32) ([]*pb_transport.Triangle, error) {
@@ -261,7 +266,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		return status.Error(codes.Internal, fmt.Sprintf("failed to send BUILDING_ACCELERATION_STRUCTURE status: %v", err))
 	}
 
-	cameraAspectRatio := float64(req.GetImageResolution().GetWidth()) / float64(req.GetImageResolution().GetHeight())
+	cameraAspectRatio := float32(req.GetImageResolution().GetWidth()) / float32(req.GetImageResolution().GetHeight())
 	t := transport.NewTransport(cameraAspectRatio, protoScene, triangles, textures, int(s.availableCores))
 
 	scene, err := t.ToScene()
@@ -296,8 +301,8 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 			switch req.GetSpectralBackground().GetSpectralProperties().(type) {
 			case *pb_control.SpectralBackground_Tabulated:
 				tabulated := req.GetSpectralBackground().GetTabulated()
-				wavelengths := make([]float64, len(tabulated.GetWavelengths()))
-				values := make([]float64, len(tabulated.GetValues()))
+				wavelengths := make([]float32, len(tabulated.GetWavelengths()))
+				values := make([]float32, len(tabulated.GetValues()))
 
 				for i, w := range tabulated.GetWavelengths() {
 					wavelengths[i] = w

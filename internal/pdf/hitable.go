@@ -23,7 +23,7 @@ func NewHitable(p hitabletarget.HitableTarget, origin *vec3.Vec3Impl) *Hitable {
 	}
 }
 
-func (h *Hitable) Value(direction *vec3.Vec3Impl) float64 {
+func (h *Hitable) Value(direction *vec3.Vec3Impl) float32 {
 	return h.hitable.PDFValue(h.o, direction)
 }
 

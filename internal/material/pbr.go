@@ -27,11 +27,11 @@ type PBR struct {
 	roughness      texture.Texture
 	metalness      texture.Texture
 	sss            texture.Texture // Subsurface scattering strength
-	sssRadius      float64         // Subsurface scattering radius
+	sssRadius      float32         // Subsurface scattering radius
 }
 
 // NewPBR returns a new PBR material with the supplied textures.
-func NewPBR(albedo, normalMap, roughness, metalness, sss texture.Texture, sssRadius float64) *PBR {
+func NewPBR(albedo, normalMap, roughness, metalness, sss texture.Texture, sssRadius float32) *PBR {
 	return &PBR{
 		albedo:    albedo,
 		normalMap: normalMap,
@@ -43,7 +43,7 @@ func NewPBR(albedo, normalMap, roughness, metalness, sss texture.Texture, sssRad
 }
 
 // NewPBRWithSpectralAlbedo returns a new PBR material with spectral albedo support.
-func NewPBRWithSpectralAlbedo(albedo texture.Texture, spectralAlbedo texture.SpectralTexture, normalMap, roughness, metalness, sss texture.Texture, sssRadius float64) *PBR {
+func NewPBRWithSpectralAlbedo(albedo texture.Texture, spectralAlbedo texture.SpectralTexture, normalMap, roughness, metalness, sss texture.Texture, sssRadius float32) *PBR {
 	return &PBR{
 		albedo:         albedo,
 		spectralAlbedo: spectralAlbedo,
@@ -120,8 +120,8 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	var isSpecular bool
 
 	// Calculate Fresnel effect (simplified)
-	cosTheta := math.Abs(vec3.Dot(vec3.UnitVector(r.Direction()), normal))
-	fresnel := 0.04 + (1.0-0.04)*math.Pow(1.0-cosTheta, 5.0)
+	cosTheta := float32(math.Abs(float64(vec3.Dot(vec3.UnitVector(r.Direction()), normal))))
+	fresnel := float32(0.04 + (1.0-0.04)*math.Pow(float64(1.0-cosTheta), 5.0))
 
 	// Adjust fresnel based on metalness
 	fresnel = fresnel + (metalnessValue * 0.5)
@@ -130,9 +130,9 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	// Lower roughness = higher chance of specular reflection
 	specularProbability := fresnel * (1.0 - roughnessValue)
 
-	if random.Float64() < specularProbability {
+	if random.Float32() < specularProbability {
 		// Specular reflection
-		roughnessFactor := math.Max(0.01, roughnessValue*0.3)
+		roughnessFactor := float32(math.Max(0.01, float64(roughnessValue*0.3)))
 		randomDir := randomInUnitSphere(random)
 		specularDir := vec3.Add(reflected, vec3.ScalarMul(randomDir, roughnessFactor))
 		finalDir = vec3.UnitVector(specularDir)
@@ -221,8 +221,8 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	var isSpecular bool
 
 	// Calculate Fresnel effect (simplified)
-	cosTheta := math.Abs(vec3.Dot(vec3.UnitVector(r.Direction()), normal))
-	fresnel := 0.04 + (1.0-0.04)*math.Pow(1.0-cosTheta, 5.0)
+	cosTheta := float32(math.Abs(float64(vec3.Dot(vec3.UnitVector(r.Direction()), normal))))
+	fresnel := float32(0.04 + (1.0-0.04)*math.Pow(float64(1.0-cosTheta), 5.0))
 
 	// Adjust fresnel based on metalness
 	fresnel = fresnel + (metalnessValue * 0.5)
@@ -231,9 +231,9 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	// Lower roughness = higher chance of specular reflection
 	specularProbability := fresnel * (1.0 - roughnessValue)
 
-	if random.Float64() < specularProbability {
+	if random.Float32() < specularProbability {
 		// Specular reflection
-		roughnessFactor := math.Max(0.01, roughnessValue*0.3)
+		roughnessFactor := float32(math.Max(0.01, float64(roughnessValue*0.3)))
 		randomDir := randomInUnitSphere(random)
 		specularDir := vec3.Add(reflected, vec3.ScalarMul(randomDir, roughnessFactor))
 		finalDir = vec3.UnitVector(specularDir)
@@ -252,7 +252,7 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	pdf := pdf.NewCosine(normal)
 
 	// Boost specular reflection brightness to match RGB reference
-	var finalAlbedo float64
+	var finalAlbedo float32
 	if isSpecular {
 		// Increase the brightness of specular reflections specifically
 		finalAlbedo = albedo * 1.5 // 50% boost for specular reflections
@@ -265,7 +265,7 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 }
 
 // ScatteringPDF implements the probability distribution function for PBR materials.
-func (pbr *PBR) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
+func (pbr *PBR) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float32 {
 	cosine := vec3.Dot(hr.Normal(), vec3.UnitVector(scattered.Direction()))
 	if cosine < 0 {
 		cosine = 0
@@ -279,12 +279,12 @@ func (pbr *PBR) NormalMap() texture.Texture {
 	return pbr.normalMap
 }
 
-func (pbr *PBR) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (pbr *PBR) Albedo(u float32, v float32, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return pbr.albedo.Value(u, v, p)
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
-func (pbr *PBR) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+func (pbr *PBR) SpectralAlbedo(u float32, v float32, lambda float32, p *vec3.Vec3Impl) float32 {
 	if pbr.spectralAlbedo != nil {
 		return pbr.spectralAlbedo.Value(u, v, lambda, p)
 	}

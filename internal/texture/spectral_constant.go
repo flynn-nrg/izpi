@@ -13,9 +13,9 @@ var _ SpectralTexture = (*SpectralConstant)(nil)
 // SpectralConstant represents a spectral texture with either Gaussian or tabulated response.
 // This texture provides wavelength-dependent responses for realistic colored materials.
 type SpectralConstant struct {
-	peakValue        float64                             // Maximum reflectance at the center wavelength (for Gaussian)
-	centerWavelength float64                             // Wavelength where response is maximum (for Gaussian)
-	width            float64                             // Width of the Gaussian curve (for Gaussian)
+	peakValue        float32                             // Maximum reflectance at the center wavelength (for Gaussian)
+	centerWavelength float32                             // Wavelength where response is maximum (for Gaussian)
+	width            float32                             // Width of the Gaussian curve (for Gaussian)
 	spd              *spectral.SpectralPowerDistribution // Tabulated spectral response
 	useTabulated     bool                                // Whether to use tabulated data or Gaussian
 }
@@ -24,7 +24,7 @@ type SpectralConstant struct {
 // peakValue: maximum reflectance (0.0 to 1.0)
 // centerWavelength: wavelength where response is maximum (380-750nm)
 // width: width of the response curve (smaller = narrower, larger = broader)
-func NewSpectralConstant(peakValue, centerWavelength, width float64) *SpectralConstant {
+func NewSpectralConstant(peakValue, centerWavelength, width float32) *SpectralConstant {
 	return &SpectralConstant{
 		peakValue:        peakValue,
 		centerWavelength: centerWavelength,
@@ -44,10 +44,10 @@ func NewSpectralConstantFromSPD(spd *spectral.SpectralPowerDistribution) *Spectr
 
 // NewSpectralNeutral returns a spectral texture for neutral materials (white, gray, black).
 // This creates a truly neutral response with constant reflectance across all wavelengths.
-func NewSpectralNeutral(reflectance float64) *SpectralConstant {
+func NewSpectralNeutral(reflectance float32) *SpectralConstant {
 	// Create a tabulated SPD with constant value across all wavelengths
-	wavelengths := []float64{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750}
-	values := make([]float64, len(wavelengths))
+	wavelengths := []float32{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750}
+	values := make([]float32, len(wavelengths))
 	for i := range values {
 		values[i] = reflectance
 	}
@@ -62,19 +62,19 @@ func NewSpectralNeutral(reflectance float64) *SpectralConstant {
 // Value returns the spectral response at the given wavelength.
 // For tabulated data: interpolates between the nearest wavelength values
 // For Gaussian: uses the Gaussian function centered at centerWavelength
-func (c *SpectralConstant) Value(_ float64, _ float64, lambda float64, _ *vec3.Vec3Impl) float64 {
+func (c *SpectralConstant) Value(_ float32, _ float32, lambda float32, _ *vec3.Vec3Impl) float32 {
 	if c.useTabulated {
 		return c.interpolateSPD(lambda)
 	}
 
 	// Gaussian response: peakValue * exp(-((lambda - centerWavelength) / width)^2)
-	exponent := -math.Pow((lambda-c.centerWavelength)/c.width, 2)
-	return c.peakValue * math.Exp(exponent)
+	exponent := -math.Pow(float64((lambda-c.centerWavelength)/c.width), 2)
+	return c.peakValue * float32(math.Exp(exponent))
 }
 
 // interpolateSPD interpolates the spectral response at the given wavelength
 // using the tabulated SpectralPowerDistribution data
-func (c *SpectralConstant) interpolateSPD(lambda float64) float64 {
+func (c *SpectralConstant) interpolateSPD(lambda float32) float32 {
 	if c.spd == nil || len(c.spd.Wavelengths()) == 0 {
 		return 0.0
 	}

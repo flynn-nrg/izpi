@@ -41,7 +41,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 
 	protoScene := &pb_transport.Scene{}
 
-	aspectRatio := float64(cfg.XSize) / float64(cfg.YSize)
+	aspectRatio := float32(cfg.XSize) / float32(cfg.YSize)
 
 	sceneFile, err := os.Open(cfg.Scene)
 	if err != nil {

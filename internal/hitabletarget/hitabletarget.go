@@ -9,6 +9,6 @@ import (
 
 // HitableTarget defines the methods used to embed hitables in a PDF.
 type HitableTarget interface {
-	PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64
+	PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32
 	Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl
 }

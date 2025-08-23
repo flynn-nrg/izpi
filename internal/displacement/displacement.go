@@ -24,12 +24,12 @@ type minimalTriangle struct {
 	// Material
 	material material.Material
 	// Texture coordinates
-	u0 float64
-	u1 float64
-	u2 float64
-	v0 float64
-	v1 float64
-	v2 float64
+	u0 float32
+	u1 float32
+	u2 float32
+	v0 float32
+	v1 float32
+	v2 float32
 }
 
 // tessellate splits a triangle in four smaller triangles.
@@ -100,17 +100,17 @@ func tessellate(in *minimalTriangle) []*minimalTriangle {
 
 }
 
-func isTessellatedEnough(tri *minimalTriangle, maxDeltaU float64, maxDeltaV float64) bool {
-	return math.Abs(tri.u1-tri.u0) <= maxDeltaU &&
-		math.Abs(tri.u2-tri.u1) <= maxDeltaU &&
-		math.Abs(tri.u0-tri.u2) <= maxDeltaU &&
-		math.Abs(tri.v1-tri.v0) <= maxDeltaV &&
-		math.Abs(tri.v2-tri.v1) <= maxDeltaV &&
-		math.Abs(tri.v0-tri.v2) <= maxDeltaV
+func isTessellatedEnough(tri *minimalTriangle, maxDeltaU float32, maxDeltaV float32) bool {
+	return math.Abs(float64(tri.u1-tri.u0)) <= float64(maxDeltaU) &&
+		math.Abs(float64(tri.u2-tri.u1)) <= float64(maxDeltaU) &&
+		math.Abs(float64(tri.u0-tri.u2)) <= float64(maxDeltaU) &&
+		math.Abs(float64(tri.v1-tri.v0)) <= float64(maxDeltaV) &&
+		math.Abs(float64(tri.v2-tri.v1)) <= float64(maxDeltaV) &&
+		math.Abs(float64(tri.v0-tri.v2)) <= float64(maxDeltaV)
 }
 
 // ApplyDisplacementMap tessellates the triangles and applies the displacement map to all of them.
-func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture.Texture, min, max float64) ([]*hitable.Triangle, error) {
+func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture.Texture, min, max float32) ([]*hitable.Triangle, error) {
 	var resU, resV int
 
 	if displacementTexture, ok := displacementMap.(*texture.ImageTxt); !ok {
@@ -137,14 +137,14 @@ func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture
 		})
 	}
 
-	maxDeltaU := 1.0 / float64(resU-1)
-	maxDeltaV := 1.0 / float64(resV-1)
+	maxDeltaU := (1.0 / float32(resU-1))
+	maxDeltaV := (1.0 / float32(resV-1))
 	tessellated := applyTessellation(in, maxDeltaU, maxDeltaV)
 
 	return applyDisplacement(tessellated, displacementMap, min, max), nil
 }
 
-func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float64) []*minimalTriangle {
+func applyTessellation(in []*minimalTriangle, maxDeltaU float32, maxDeltaV float32) []*minimalTriangle {
 	out := []*minimalTriangle{}
 
 	log.Info("Applying tessellation")
@@ -172,7 +172,7 @@ func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float
 	}
 }
 
-func applyDisplacement(in []*minimalTriangle, displacementMap texture.Texture, min, max float64) []*hitable.Triangle {
+func applyDisplacement(in []*minimalTriangle, displacementMap texture.Texture, min, max float32) []*hitable.Triangle {
 	displaced := []*hitable.Triangle{}
 
 	log.Info("Applying displacement")

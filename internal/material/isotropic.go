@@ -49,15 +49,15 @@ func (i *Isotropic) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *
 }
 
 // ScatteringPDF implements the probability distribution function for isotropic materials.
-func (i *Isotropic) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
+func (i *Isotropic) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float32 {
 	return 0
 }
 
-func (i *Isotropic) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (i *Isotropic) Albedo(u float32, v float32, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return i.albedo.Value(u, v, p)
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
-func (i *Isotropic) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+func (i *Isotropic) SpectralAlbedo(u float32, v float32, lambda float32, p *vec3.Vec3Impl) float32 {
 	return i.albedo.Value(u, v, p).X // Use red component as approximation
 }

@@ -29,25 +29,25 @@ func RandomScene() *hitable.HitableSlice {
 	for a := -11; a < 11; a++ {
 		for b := -11; b < 11; b++ {
 			chooseMat := rand.Float64()
-			center := &vec3.Vec3Impl{X: float64(a) + 0.9*rand.Float64(), Y: 0.2, Z: float64(b) + 0.9*rand.Float64()}
+			center := &vec3.Vec3Impl{X: float32(a) + 0.9*rand.Float32(), Y: 0.2, Z: float32(b) + 0.9*rand.Float32()}
 			if vec3.Sub(center, &vec3.Vec3Impl{X: 4, Y: 0.2, Z: 0}).Length() > 0.9 {
 				if chooseMat < 0.8 {
 					// diffuse
 					spheres = append(spheres, hitable.NewSphere(center,
-						vec3.Add(center, &vec3.Vec3Impl{Y: 0.5 * rand.Float64()}), 0.0, 1.0, 0.2,
+						vec3.Add(center, &vec3.Vec3Impl{Y: 0.5 * rand.Float32()}), 0.0, 1.0, 0.2,
 						material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{
-							X: rand.Float64() * rand.Float64(),
-							Y: rand.Float64() * rand.Float64(),
-							Z: rand.Float64() * rand.Float64(),
+							X: rand.Float32() * rand.Float32(),
+							Y: rand.Float32() * rand.Float32(),
+							Z: rand.Float32() * rand.Float32(),
 						}))))
 				} else if chooseMat < 0.95 {
 					// metal
 					spheres = append(spheres, hitable.NewSphere(center, center, 0.0, 1.0, 0.2,
 						material.NewMetal(&vec3.Vec3Impl{
-							X: 0.5 * (1.0 - rand.Float64()),
-							Y: 0.5 * (1.0 - rand.Float64()),
-							Z: 0.5 * (1.0 - rand.Float64()),
-						}, 0.2*rand.Float64())))
+							X: 0.5 * (1.0 - rand.Float32()),
+							Y: 0.5 * (1.0 - rand.Float32()),
+							Z: 0.5 * (1.0 - rand.Float32()),
+						}, 0.2*rand.Float32())))
 				} else {
 					// glass
 					spheres = append(spheres, hitable.NewSphere(center, center, 0.0, 1.0, 0.2, material.NewDielectric(1.5)))
@@ -117,7 +117,7 @@ func SimpleLight() *hitable.HitableSlice {
 }
 
 // CornellBox returns a scene recreating the Cornell box.
-func CornellBox(aspect float64) *scene.Scene {
+func CornellBox(aspect float32) *scene.Scene {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
@@ -144,18 +144,18 @@ func CornellBox(aspect float64) *scene.Scene {
 	lookFrom := &vec3.Vec3Impl{X: 278.0, Y: 278.0, Z: -800.0}
 	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
 	vup := &vec3.Vec3Impl{Y: 1}
-	distToFocus := 10.0
-	aperture := 0.0
-	vfov := float64(40.0)
-	time0 := 0.0
-	time1 := 1.0
+	distToFocus := float32(10.0)
+	aperture := float32(0.0)
+	vfov := float32(40.0)
+	time0 := float32(0.0)
+	time1 := float32(1.0)
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam)
 }
 
 // Final returns the scene from the last chapter in the book.
-func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
+func Final(aspect float32) (*hitable.HitableSlice, *camera.Camera) {
 	nb := 20
 	list := []hitable.Hitable{}
 	boxList := []hitable.Hitable{}
@@ -166,12 +166,12 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 
 	for i := 0; i < nb; i++ {
 		for j := 0; j < nb; j++ {
-			w := float64(100)
-			x0 := -1000.0 + float64(i)*w
-			z0 := -1000.0 + float64(j)*w
-			y0 := float64(0)
+			w := float32(100)
+			x0 := -1000.0 + float32(i)*w
+			z0 := -1000.0 + float32(j)*w
+			y0 := float32(0)
 			x1 := x0 + w
-			y1 := 100.0 * (rand.Float64() + 0.01)
+			y1 := 100.0 * (rand.Float32() + 0.01)
 			z1 := z0 + w
 			boxList = append(boxList, hitable.NewBox(&vec3.Vec3Impl{X: x0, Y: y0, Z: z0}, &vec3.Vec3Impl{X: x1, Y: y1, Z: z1}, ground))
 		}
@@ -209,7 +209,7 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 
 	ns := 1000
 	for j := 0; j < ns; j++ {
-		center := &vec3.Vec3Impl{X: 165 * rand.Float64(), Y: 165 * rand.Float64(), Z: 165 * rand.Float64()}
+		center := &vec3.Vec3Impl{X: 165 * rand.Float32(), Y: 165 * rand.Float32(), Z: 165 * rand.Float32()}
 		boxList2 = append(boxList2, hitable.NewSphere(center, center, 0, 1, 10, white))
 	}
 
@@ -218,18 +218,18 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 	lookFrom := &vec3.Vec3Impl{X: 478.0, Y: 278.0, Z: -600.0}
 	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
 	vup := &vec3.Vec3Impl{Y: 1}
-	distToFocus := 10.0
-	aperture := 0.0
-	vfov := float64(40.0)
-	time0 := 0.0
-	time1 := 1.0
+	distToFocus := float32(10.0)
+	aperture := float32(0.0)
+	vfov := float32(40.0)
+	time0 := float32(0.0)
+	time1 := float32(1.0)
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
 
 	return hitable.NewSlice(list), cam
 }
 
 // Environment returns a scene that tests the sky dome and HDR textures functionality.
-func Environment(aspect float64) *scene.Scene {
+func Environment(aspect float32) *scene.Scene {
 	dome, err := hitable.NewSkyDome(&vec3.Vec3Impl{}, 100, "decor_shop_4k.hdr")
 	if err != nil {
 		log.Fatal(err)
@@ -251,11 +251,11 @@ func Environment(aspect float64) *scene.Scene {
 	lookFrom := &vec3.Vec3Impl{X: 0, Y: 0, Z: 10}
 	lookAt := &vec3.Vec3Impl{X: -20, Y: 0, Z: -1}
 	vup := &vec3.Vec3Impl{Y: 1}
-	distToFocus := 10.0
-	aperture := 0.0
-	vfov := float64(60.0)
-	time0 := 0.0
-	time1 := 1.0
+	distToFocus := float32(10.0)
+	aperture := float32(0.0)
+	vfov := float32(60.0)
+	time0 := float32(0.0)
+	time1 := float32(1.0)
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam)
@@ -263,7 +263,7 @@ func Environment(aspect float64) *scene.Scene {
 }
 
 // CornellBox returns a scene recreating the Cornell box.
-func CornellBoxObj(aspect float64) (*scene.Scene, error) {
+func CornellBoxObj(aspect float32) (*scene.Scene, error) {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
@@ -325,17 +325,17 @@ func CornellBoxObj(aspect float64) (*scene.Scene, error) {
 	lookFrom := &vec3.Vec3Impl{X: 278.0, Y: 278.0, Z: -800.0}
 	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
 	vup := &vec3.Vec3Impl{Y: 1}
-	distToFocus := 10.0
-	aperture := 0.0
-	vfov := float64(40.0)
-	time0 := 0.0
-	time1 := 1.0
+	distToFocus := float32(10.0)
+	aperture := float32(0.0)
+	vfov := float32(40.0)
+	time0 := float32(0.0)
+	time1 := float32(1.0)
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }
 
-func TVSet(aspect float64) (*scene.Scene, error) {
+func TVSet(aspect float32) (*scene.Scene, error) {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	tvTextFile, err := os.Open("Television_01_diff_4k.png")
@@ -394,17 +394,17 @@ func TVSet(aspect float64) (*scene.Scene, error) {
 	lookFrom := &vec3.Vec3Impl{X: 278.0, Y: 278.0, Z: -800.0}
 	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
 	vup := &vec3.Vec3Impl{Y: 1}
-	distToFocus := 10.0
-	aperture := 0.0
-	vfov := float64(40.0)
-	time0 := 0.0
-	time1 := 1.0
+	distToFocus := float32(10.0)
+	aperture := float32(0.0)
+	vfov := float32(40.0)
+	time0 := float32(0.0)
+	time1 := float32(1.0)
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }
 
-func SWHangar(aspect float64) (*scene.Scene, error) {
+func SWHangar(aspect float32) (*scene.Scene, error) {
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	glass := material.NewDielectric(1.5)
 
@@ -445,18 +445,18 @@ func SWHangar(aspect float64) (*scene.Scene, error) {
 	lookFrom := &vec3.Vec3Impl{X: 0.0, Y: 33.0, Z: 30.0}
 	lookAt := &vec3.Vec3Impl{X: -1, Y: 33, Z: 31}
 	vup := &vec3.Vec3Impl{Y: 1}
-	distToFocus := 10.0
-	aperture := 0.0
-	vfov := float64(100.0)
-	time0 := 0.0
-	time1 := 1.0
+	distToFocus := float32(10.0)
+	aperture := float32(0.0)
+	vfov := float32(100.0)
+	time0 := float32(0.0)
+	time1 := float32(1.0)
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }
 
 // DisplacementTest returns a scene recreating the Cornell box and a displacement map applied to the floor.
-func DisplacementTest(aspect float64) (*scene.Scene, error) {
+func DisplacementTest(aspect float32) (*scene.Scene, error) {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
@@ -528,18 +528,18 @@ func DisplacementTest(aspect float64) (*scene.Scene, error) {
 	lookFrom := &vec3.Vec3Impl{X: 278.0, Y: 278.0, Z: -800.0}
 	lookAt := &vec3.Vec3Impl{X: 278, Y: 278, Z: 0}
 	vup := &vec3.Vec3Impl{Y: 1}
-	distToFocus := 10.0
-	aperture := 0.0
-	vfov := float64(40.0)
-	time0 := 0.0
-	time1 := 1.0
+	distToFocus := float32(10.0)
+	aperture := float32(0.0)
+	vfov := float32(40.0)
+	time0 := float32(0.0)
+	time1 := float32(1.0)
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }
 
 // VWBeetle returns a scene that tests the sky dome and HDR textures functionality.
-func VWBeetle(aspect float64) (*scene.Scene, error) {
+func VWBeetle(aspect float32) (*scene.Scene, error) {
 	dome, err := hitable.NewSkyDome(&vec3.Vec3Impl{}, 100, "OutdoorHDRI019_4K-HDR.hdr")
 	if err != nil {
 		return nil, err
@@ -585,11 +585,11 @@ func VWBeetle(aspect float64) (*scene.Scene, error) {
 	//lookFrom := &vec3.Vec3Impl{X: 2.0, Y: 0.6, Z: 2.0}
 	//lookAt := &vec3.Vec3Impl{X: .4, Y: 0, Z: 1}
 	vup := &vec3.Vec3Impl{Y: 1}
-	distToFocus := 10.0
-	aperture := 0.0
-	vfov := float64(60.0)
-	time0 := 0.0
-	time1 := 1.0
+	distToFocus := float32(10.0)
+	aperture := float32(0.0)
+	vfov := float32(60.0)
+	time0 := float32(0.0)
+	time1 := float32(1.0)
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
@@ -597,7 +597,7 @@ func VWBeetle(aspect float64) (*scene.Scene, error) {
 }
 
 // Challenger returns a scene that tests the sky dome and HDR textures functionality.
-func Challenger(aspect float64) ([]byte, error) {
+func Challenger(aspect float32) ([]byte, error) {
 	// https://www.cgtrader.com/free-3d-models/car/sport-car/dodge-challenger-87e47a62-3aaf-4d8f-84c9-6af70b9792b0
 
 	challengerFile, err := os.Open("challenger_tri.obj")
@@ -848,7 +848,7 @@ func Challenger(aspect float64) ([]byte, error) {
 
 }
 
-func CornellBoxPB(aspect float64) *pb_transport.Scene {
+func CornellBoxPB(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:    "Cornell Box",
 		Version: "1.0.0",

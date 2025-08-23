@@ -19,12 +19,12 @@ var _ Hitable = (*ConstantMedium)(nil)
 // ConstantMedium represents a medium with constant density.
 type ConstantMedium struct {
 	hitable       Hitable
-	density       float64
+	density       float32
 	phaseFunction material.Material
 }
 
 // NewConstantMedium returns a new instance of the constant medium hitable.
-func NewConstantMedium(hitable Hitable, density float64, a texture.Texture) *ConstantMedium {
+func NewConstantMedium(hitable Hitable, density float32, a texture.Texture) *ConstantMedium {
 	return &ConstantMedium{
 		hitable:       hitable,
 		density:       density,
@@ -32,9 +32,9 @@ func NewConstantMedium(hitable Hitable, density float64, a texture.Texture) *Con
 	}
 }
 
-func (cm *ConstantMedium) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
-	if rec1, _, ok := cm.hitable.Hit(r, -math.MaxFloat64, math.MaxFloat64); ok {
-		if rec2, _, ok := cm.hitable.Hit(r, rec1.T()+0.0001, math.MaxFloat64); ok {
+func (cm *ConstantMedium) Hit(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, material.Material, bool) {
+	if rec1, _, ok := cm.hitable.Hit(r, -math.MaxFloat32, math.MaxFloat32); ok {
+		if rec2, _, ok := cm.hitable.Hit(r, rec1.T()+0.0001, math.MaxFloat32); ok {
 			rec1t := rec1.T()
 			rec2t := rec2.T()
 			if rec1t < tMin {
@@ -51,7 +51,7 @@ func (cm *ConstantMedium) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord
 			}
 
 			distanceInsideBoundary := (rec2t - rec1t) * r.Direction().Length()
-			hitDistance := -(1 / cm.density) * math.Log(rand.Float64())
+			hitDistance := -(1 / cm.density) * float32(math.Log(rand.Float64()))
 			if hitDistance < distanceInsideBoundary {
 				t := rec1t + hitDistance/r.Direction().Length()
 				// arbitrary
@@ -65,15 +65,15 @@ func (cm *ConstantMedium) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord
 	return nil, nil, false
 }
 
-func (cm *ConstantMedium) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+func (cm *ConstantMedium) HitEdge(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, bool, bool) {
 	return nil, false, false
 }
 
-func (cm *ConstantMedium) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
+func (cm *ConstantMedium) BoundingBox(time0 float32, time1 float32) (*aabb.AABB, bool) {
 	return cm.hitable.BoundingBox(time0, time1)
 }
 
-func (cm *ConstantMedium) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (cm *ConstantMedium) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
 	return 0.0
 }
 
