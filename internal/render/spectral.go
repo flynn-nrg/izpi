@@ -1,7 +1,6 @@
 package render
 
 import (
-	"math/rand/v2"
 	"sync"
 
 	"github.com/flynn-nrg/floatimage/colour"
@@ -69,14 +68,14 @@ func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, s
 
 	for range numSamples {
 		// Importance sample a wavelength AND its PDF
-		lambda, pdf := spectral.SampleWavelength(rand.Float64())
+		lambda, pdf := spectral.SampleWavelength(random.Float64())
 		if pdf == 0 {
 			continue
 		}
 
 		// Get camera ray for this specific wavelength
-		u := (float64(x) + rand.Float64()) / float64(nx)
-		v := (float64(y) + rand.Float64()) / float64(ny)
+		u := (float64(x) + random.Float64()) / float64(nx)
+		v := (float64(y) + random.Float64()) / float64(ny)
 		r := scene.Camera.GetRayWithLambda(u, v, lambda)
 
 		// Trace the path to get radiance at this wavelength
