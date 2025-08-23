@@ -1,8 +1,6 @@
 package hitable
 
 import (
-	//	"math/rand"
-	"math/rand"
 	"sort"
 	"time"
 
@@ -31,7 +29,7 @@ type BVHNode struct {
 func NewBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
 	log.Infof("Building BVH with %v elements", len(hitables))
 	startTime := time.Now()
-	randomFunc := rand.Float64
+	randomFunc := fastrandom.NewWithDefaults().Float64
 	bvh := newBVH(hitables, randomFunc, time0, time1)
 	log.Infof("Completed BVH construction in %v", time.Since(startTime))
 	return bvh

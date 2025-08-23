@@ -1,8 +1,6 @@
 package pdf
 
 import (
-	"math/rand"
-
 	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
@@ -27,7 +25,7 @@ func (m *Mixture) Value(direction *vec3.Vec3Impl) float64 {
 }
 
 func (m *Mixture) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
-	if rand.Float64() < 0.5 {
+	if random.Float64() < 0.5 {
 		return m.p[0].Generate(random)
 	}
 

@@ -1,7 +1,6 @@
 package render
 
 import (
-	"math/rand/v2"
 	"sync"
 
 	"github.com/flynn-nrg/floatimage/colour"
@@ -31,8 +30,8 @@ func renderRectRGB(w workUnit, random *fastrandom.LCG) {
 		for x := w.x0; x <= w.x1; x++ {
 			col := &vec3.Vec3Impl{}
 			for s := 0; s < w.numSamples; s++ {
-				u := (float64(x) + rand.Float64()) / float64(nx)
-				v := (float64(y) + rand.Float64()) / float64(ny)
+				u := (float64(x) + random.Float64()) / float64(nx)
+				v := (float64(y) + random.Float64()) / float64(ny)
 				r := w.scene.Camera.GetRay(u, v)
 				col = vec3.Add(col, vec3.DeNAN(w.sampler.Sample(r, w.scene.World, w.scene.Lights, 0, random)))
 			}
