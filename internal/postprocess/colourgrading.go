@@ -32,18 +32,18 @@ func NewColourGradingFromCube(r io.Reader) (*ColourGrading, error) {
 }
 
 func (cg *ColourGrading) Apply(i image.Image, _ *scene.Scene) error {
-	im, ok := i.(*floatimage.FloatNRGBA)
+	im, ok := i.(*floatimage.Float64NRGBA)
 	if !ok {
-		return errors.New("only FloatNRGBA image format is supported")
+		return errors.New("only Float64NRGBA image format is supported")
 	}
 	for y := i.Bounds().Min.Y; y <= i.Bounds().Max.Y; y++ {
 		for x := i.Bounds().Min.X; x <= i.Bounds().Max.X; x++ {
-			pixel := im.FloatNRGBAAt(x, y)
+			pixel := im.Float64NRGBAAt(x, y)
 			rgb, err := cg.g.LookUp(pixel.R, pixel.G, pixel.B)
 			if err != nil {
 				return err
 			}
-			im.Set(x, y, colour.FloatNRGBA{
+			im.Set(x, y, colour.Float64NRGBA{
 				R: rgb[0],
 				G: rgb[1],
 				B: rgb[2],

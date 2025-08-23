@@ -7,7 +7,7 @@ import (
 	"io"
 
 	"github.com/flynn-nrg/floatimage/floatimage"
-	"github.com/flynn-nrg/go-oiio/oiio"
+	"github.com/flynn-nrg/go-vfx/go-oiio/oiio"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
@@ -22,14 +22,14 @@ type ImageTxt struct {
 }
 
 func NewFromRawData(width int, height int, data []float64) *ImageTxt {
-	img := floatimage.NewFloatNRGBA(image.Rect(0, 0, width, height), data)
+	img := floatimage.NewFloat64NRGBA(image.Rect(0, 0, width, height), data)
 
 	return &ImageTxt{sizeX: width, sizeY: height, data: img}
 }
 
 // NewFromFile returns a new ImageTxt instance by using the supplied file path.
 func NewFromFile(path string) (*ImageTxt, error) {
-	img, err := oiio.ReadImage(path)
+	img, err := oiio.ReadImage64(path)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func NewFromPNG(r io.Reader) (*ImageTxt, error) {
 
 // NewFromHDR returns a new ImageTxt instance by using the supplied HDR data.
 func NewFromHDR(fileName string) (*ImageTxt, error) {
-	img, err := oiio.ReadImage(fileName)
+	img, err := oiio.ReadImage64(fileName)
 	if err != nil {
 		return nil, err
 	}
@@ -88,8 +88,8 @@ func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl
 		j = it.sizeY - 1
 	}
 
-	if img, ok := it.data.(*floatimage.FloatNRGBA); ok {
-		pixel := img.FloatNRGBAAt(i, j)
+	if img, ok := it.data.(*floatimage.Float64NRGBA); ok {
+		pixel := img.Float64NRGBAAt(i, j)
 		return &vec3.Vec3Impl{X: pixel.R, Y: pixel.G, Z: pixel.B}
 	}
 
@@ -102,7 +102,7 @@ func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl
 
 // FlipY() flips the image upside down.
 func (it *ImageTxt) FlipY() {
-	im, ok := it.data.(*floatimage.FloatNRGBA)
+	im, ok := it.data.(*floatimage.Float64NRGBA)
 	if !ok {
 		return
 	}
@@ -118,7 +118,7 @@ func (it *ImageTxt) FlipY() {
 
 // FlipX() flips the image from left to right.
 func (it *ImageTxt) FlipX() {
-	im, ok := it.data.(*floatimage.FloatNRGBA)
+	im, ok := it.data.(*floatimage.Float64NRGBA)
 	if !ok {
 		return
 	}

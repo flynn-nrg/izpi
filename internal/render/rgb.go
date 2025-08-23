@@ -39,7 +39,7 @@ func renderRectRGB(w workUnit, random *fastrandom.LCG) {
 
 			// Linear colour space.
 			col = vec3.ScalarDiv(col, float64(w.numSamples))
-			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
+			w.canvas.Set(x, ny-y, colour.Float64NRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
 			if w.preview {
 				tile.Pixels[i] = col.Z
 				tile.Pixels[i+1] = col.Y

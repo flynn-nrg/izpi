@@ -25,14 +25,14 @@ func NewClamp(max float64) *Clamp {
 }
 
 func (c *Clamp) Apply(i image.Image, _ *scene.Scene) error {
-	im, ok := i.(*floatimage.FloatNRGBA)
+	im, ok := i.(*floatimage.Float64NRGBA)
 	if !ok {
-		return errors.New("only FloatNRGBA image format is supported")
+		return errors.New("only Float64NRGBA image format is supported")
 	}
 	for y := i.Bounds().Min.Y; y <= i.Bounds().Max.Y; y++ {
 		for x := i.Bounds().Min.X; x <= i.Bounds().Max.X; x++ {
-			pixel := im.FloatNRGBAAt(x, y)
-			im.Set(x, y, colour.FloatNRGBA{
+			pixel := im.Float64NRGBAAt(x, y)
+			im.Set(x, y, colour.Float64NRGBA{
 				R: clamp(pixel.R, c.max),
 				G: clamp(pixel.G, c.max),
 				B: clamp(pixel.B, c.max),

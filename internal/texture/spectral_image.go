@@ -8,7 +8,7 @@ import (
 	"math"
 
 	"github.com/flynn-nrg/floatimage/floatimage"
-	"github.com/flynn-nrg/go-oiio/oiio"
+	"github.com/flynn-nrg/go-vfx/go-oiio/oiio"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
@@ -28,13 +28,13 @@ type SpectralImage struct {
 
 // NewSpectralImageFromRawData returns a new SpectralImage instance from raw float data.
 func NewSpectralImageFromRawData(width int, height int, data []float64) *SpectralImage {
-	img := floatimage.NewFloatNRGBA(image.Rect(0, 0, width, height), data)
+	img := floatimage.NewFloat64NRGBA(image.Rect(0, 0, width, height), data)
 	return NewSpectralImageFromImage(img)
 }
 
 // NewSpectralImageFromFile returns a new SpectralImage instance by using the supplied file path.
 func NewSpectralImageFromFile(path string) (*SpectralImage, error) {
-	img, err := oiio.ReadImage(path)
+	img, err := oiio.ReadImage64(path)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func NewSpectralImageFromPNG(r io.Reader) (*SpectralImage, error) {
 
 // NewSpectralImageFromHDR returns a new SpectralImage instance by using the supplied HDR data.
 func NewSpectralImageFromHDR(fileName string) (*SpectralImage, error) {
-	img, err := oiio.ReadImage(fileName)
+	img, err := oiio.ReadImage64(fileName)
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +104,8 @@ func (si *SpectralImage) transformRGBToSpectral() {
 
 			// Get RGB value at this pixel
 			var r, g, b float64
-			if img, ok := si.data.(*floatimage.FloatNRGBA); ok {
-				pixel := img.FloatNRGBAAt(x, y)
+			if img, ok := si.data.(*floatimage.Float64NRGBA); ok {
+				pixel := img.Float64NRGBAAt(x, y)
 				r, g, b = pixel.R, pixel.G, pixel.B
 			} else {
 				pixel := color.NRGBAModel.Convert(si.data.At(x, y)).(color.NRGBA)
@@ -247,7 +247,7 @@ func (si *SpectralImage) findWavelengthIndex(lambda float64) int {
 // FlipY() flips the spectral image upside down.
 func (si *SpectralImage) FlipY() {
 	// Flip the underlying image data
-	if im, ok := si.data.(*floatimage.FloatNRGBA); ok {
+	if im, ok := si.data.(*floatimage.Float64NRGBA); ok {
 		for y := si.data.Bounds().Min.Y; y <= si.data.Bounds().Max.Y/2; y++ {
 			for x := si.data.Bounds().Min.X; x <= si.data.Bounds().Max.X; x++ {
 				c1 := si.data.At(x, y)
@@ -265,7 +265,7 @@ func (si *SpectralImage) FlipY() {
 // FlipX() flips the spectral image from left to right.
 func (si *SpectralImage) FlipX() {
 	// Flip the underlying image data
-	if im, ok := si.data.(*floatimage.FloatNRGBA); ok {
+	if im, ok := si.data.(*floatimage.Float64NRGBA); ok {
 		for y := si.data.Bounds().Min.Y; y <= si.data.Bounds().Max.Y; y++ {
 			for x := si.data.Bounds().Min.X; x <= si.data.Bounds().Max.X/2; x++ {
 				c1 := si.data.At(x, y)

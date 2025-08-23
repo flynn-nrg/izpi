@@ -33,7 +33,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 		for x := w.x0; x <= w.x1; x++ {
 			r, g, b := RenderPixelSpectral(w.numSamples, x, y, nx, ny, w.scene, w.sampler, random)
 
-			w.canvas.Set(x, ny-y, colour.FloatNRGBA{R: r, G: g, B: b, A: 1.0})
+			w.canvas.Set(x, ny-y, colour.Float64NRGBA{R: r, G: g, B: b, A: 1.0})
 			if w.preview {
 				tile.Pixels[i] = b
 				tile.Pixels[i+1] = g
