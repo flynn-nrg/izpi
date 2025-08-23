@@ -129,7 +129,7 @@ func (s *assetProviderServer) StreamTextureFile(req *pb_transport.StreamTextureF
 	var totalSize uint64
 	var rawData []float64
 
-	if textureData, ok := imageText.GetData().(*floatimage.FloatNRGBA); ok {
+	if textureData, ok := imageText.GetData().(*floatimage.Float64NRGBA); ok {
 		rawData = textureData.Pix
 		totalSize = uint64(imageText.GetData().Bounds().Dx() * imageText.GetData().Bounds().Dy() * 4 * int(unsafe.Sizeof(float64(0))))
 	} else {

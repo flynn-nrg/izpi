@@ -8,8 +8,9 @@ require (
 	fyne.io/fyne/v2 v2.6.1
 	github.com/alecthomas/kong v1.12.0
 	github.com/cheggaaa/pb/v3 v3.1.7
-	github.com/flynn-nrg/floatimage v0.0.0-20250505155730-d5a716d7266a
+	github.com/flynn-nrg/floatimage v0.0.0-20250823091259-aa26060097d4
 	github.com/flynn-nrg/go-oiio v0.0.0-20250708193558-2d45b288bd9c
+	github.com/flynn-nrg/go-vfx/go-oiio v0.0.0-20250823100644-216bb2227e44
 	github.com/flynn-nrg/gube v1.0.3
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/google/go-cmp v0.7.0
@@ -18,7 +19,6 @@ require (
 	github.com/holoplot/go-avahi v1.0.1
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/sirupsen/logrus v1.9.3
-	github.com/stretchr/testify v1.10.0
 	github.com/veandco/go-sdl2 v0.4.40
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6
@@ -57,6 +57,7 @@ require (
 	github.com/rymdport/portal v0.4.2 // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/yuin/goldmark v1.7.12 // indirect
 	golang.org/x/image v0.28.0 // indirect
 	golang.org/x/mod v0.25.0 // indirect
