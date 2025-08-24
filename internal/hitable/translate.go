@@ -57,7 +57,7 @@ func (tr *Translate) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
 	return tr.hitable.PDFValue(o, v)
 }
 
-func (tr *Translate) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (tr *Translate) Random(o *vec3.Vec3Impl, random *fastrandom.XorShift) *vec3.Vec3Impl {
 	return tr.hitable.Random(o, random)
 }
 

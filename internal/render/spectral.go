@@ -12,7 +12,7 @@ import (
 	"github.com/flynn-nrg/izpi/internal/spectral"
 )
 
-func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
+func renderRectSpectral(w workUnit, random *fastrandom.XorShift) {
 	var tile display.DisplayTile
 
 	nx := w.canvas.Bounds().Max.X
@@ -51,7 +51,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 	}
 }
 
-func workerSpectral(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg *sync.WaitGroup) {
+func workerSpectral(input chan workUnit, quit chan struct{}, random *fastrandom.XorShift, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		select {
@@ -63,7 +63,7 @@ func workerSpectral(input chan workUnit, quit chan struct{}, random *fastrandom.
 	}
 }
 
-func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, sampler sampler.Sampler, random *fastrandom.LCG) (float32, float32, float32) {
+func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, sampler sampler.Sampler, random *fastrandom.XorShift) (float32, float32, float32) {
 	// Initialize XYZ accumulators for the pixel
 	var sumX, sumY, sumZ float32
 

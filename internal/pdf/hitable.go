@@ -27,6 +27,6 @@ func (h *Hitable) Value(direction *vec3.Vec3Impl) float32 {
 	return h.hitable.PDFValue(h.o, direction)
 }
 
-func (h *Hitable) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
+func (h *Hitable) Generate(random *fastrandom.XorShift) *vec3.Vec3Impl {
 	return h.hitable.Random(h.o, random)
 }

@@ -102,7 +102,7 @@ func (hs *HitableSlice) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
 	return sum
 }
 
-func (hs *HitableSlice) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (hs *HitableSlice) Random(o *vec3.Vec3Impl, random *fastrandom.XorShift) *vec3.Vec3Impl {
 	index := int(random.Float32() * float32(len(hs.hitables)))
 	return hs.hitables[index].Random(o, random)
 }

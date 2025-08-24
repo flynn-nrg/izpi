@@ -20,7 +20,7 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	x1 := req.GetX1()
 	y1 := req.GetY1()
 
-	rand := s.randPool.Get().(*fastrandom.LCG)
+	rand := s.randPool.Get().(*fastrandom.XorShift)
 	defer s.randPool.Put(rand)
 
 	stripSize := req.GetStripHeight() * 4 * (x1 - x0 + 1)
@@ -74,7 +74,7 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	return nil
 }
 
-func (s *workerServer) renderTileRGB(x, y, nx, ny float32, rand *fastrandom.LCG) *vec3.Vec3Impl {
+func (s *workerServer) renderTileRGB(x, y, nx, ny float32, rand *fastrandom.XorShift) *vec3.Vec3Impl {
 	col := &vec3.Vec3Impl{}
 	for sample := 0; sample < s.samplesPerPixel; sample++ {
 		u := (float32(x) + rand.Float32()) / nx
@@ -86,7 +86,7 @@ func (s *workerServer) renderTileRGB(x, y, nx, ny float32, rand *fastrandom.LCG)
 	return vec3.ScalarDiv(col, float32(s.samplesPerPixel))
 }
 
-func (s *workerServer) renderTileSpectral(x, y, nx, ny float32, rand *fastrandom.LCG) *vec3.Vec3Impl {
+func (s *workerServer) renderTileSpectral(x, y, nx, ny float32, rand *fastrandom.XorShift) *vec3.Vec3Impl {
 	r, g, b := render.RenderPixelSpectral(s.samplesPerPixel, int(x), int(y), int(nx), int(ny), s.scene, s.sampler, rand)
 
 	return &vec3.Vec3Impl{

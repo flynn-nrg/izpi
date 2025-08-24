@@ -323,7 +323,7 @@ func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 }
 */
 
-func (tri *Triangle) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (tri *Triangle) Random(o *vec3.Vec3Impl, random *fastrandom.XorShift) *vec3.Vec3Impl {
 	t1 := random.Float32()
 	randomPoint01 := vec3.Lerp(tri.vertex0, tri.vertex1, t1)
 	t2 := random.Float32()

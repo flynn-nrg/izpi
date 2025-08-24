@@ -30,7 +30,7 @@ func NewColour(maxDepth int, background *vec3.Vec3Impl, numRays *uint64) *Colour
 	}
 }
 
-func (cs *Colour) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (cs *Colour) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.XorShift) *vec3.Vec3Impl {
 	if depth >= cs.maxDepth {
 		return &vec3.Vec3Impl{Z: 1.0}
 	}

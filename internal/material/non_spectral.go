@@ -15,7 +15,7 @@ type nonSpectral struct{}
 
 // SpectralScatter provides a stub implementation that returns false
 // indicating that this material doesn't support spectral scattering
-func (ns *nonSpectral) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
+func (ns *nonSpectral) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
 	return nil, nil, false
 }
 

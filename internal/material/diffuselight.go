@@ -36,12 +36,12 @@ func NewSpectralDiffuseLight(spectralEmit texture.SpectralTexture) *DiffuseLight
 }
 
 // Scatter returns false for diffuse light materials.
-func (dl *DiffuseLight) Scatter(_ ray.Ray, _ *hitrecord.HitRecord, _ *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (dl *DiffuseLight) Scatter(_ ray.Ray, _ *hitrecord.HitRecord, _ *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	return nil, nil, false
 }
 
 // SpectralScatter returns false for diffuse light materials.
-func (dl *DiffuseLight) SpectralScatter(_ ray.Ray, _ *hitrecord.HitRecord, _ *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
+func (dl *DiffuseLight) SpectralScatter(_ ray.Ray, _ *hitrecord.HitRecord, _ *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
 	return nil, nil, false
 }
 

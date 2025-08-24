@@ -56,7 +56,7 @@ func NewPBRWithSpectralAlbedo(albedo texture.Texture, spectralAlbedo texture.Spe
 }
 
 // Scatter computes how the ray bounces off the surface of a PBR material.
-func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	albedo := pbr.albedo.Value(hr.U(), hr.V(), hr.P())
 
 	// Handle normal map - convert from tangent space to world space
@@ -155,7 +155,7 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 }
 
 // SpectralScatter computes how the ray bounces off the surface of a PBR material with spectral properties.
-func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
+func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
 	// Use spectral albedo if available, otherwise fall back to RGB albedo
 	lambda := r.Lambda()
 	albedo := pbr.SpectralAlbedo(hr.U(), hr.V(), lambda, hr.P())

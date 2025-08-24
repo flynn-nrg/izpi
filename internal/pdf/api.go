@@ -11,5 +11,5 @@ type PDF interface {
 	// Value computes the probability density function at a given point.
 	Value(direction *vec3.Vec3Impl) float32
 	// Generate generates a probability density function.
-	Generate(random *fastrandom.LCG) *vec3.Vec3Impl
+	Generate(random *fastrandom.XorShift) *vec3.Vec3Impl
 }

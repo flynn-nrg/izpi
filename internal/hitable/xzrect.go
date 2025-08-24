@@ -115,7 +115,7 @@ func (xzr *XZRect) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
 	return 0
 }
 
-func (xzr *XZRect) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (xzr *XZRect) Random(o *vec3.Vec3Impl, random *fastrandom.XorShift) *vec3.Vec3Impl {
 	randomPoint := &vec3.Vec3Impl{
 		X: xzr.x0 + random.Float32()*(xzr.x1-xzr.x0),
 		Y: xzr.k,

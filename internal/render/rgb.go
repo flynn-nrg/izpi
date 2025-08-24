@@ -10,7 +10,7 @@ import (
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
-func renderRectRGB(w workUnit, random *fastrandom.LCG) {
+func renderRectRGB(w workUnit, random *fastrandom.XorShift) {
 	var tile display.DisplayTile
 
 	nx := w.canvas.Bounds().Max.X
@@ -57,7 +57,7 @@ func renderRectRGB(w workUnit, random *fastrandom.LCG) {
 	}
 }
 
-func workerRGB(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg *sync.WaitGroup) {
+func workerRGB(input chan workUnit, quit chan struct{}, random *fastrandom.XorShift, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		select {

@@ -24,7 +24,7 @@ func (m *Mixture) Value(direction *vec3.Vec3Impl) float32 {
 	return 0.5*m.p[0].Value(direction) + 0.5*m.p[1].Value(direction)
 }
 
-func (m *Mixture) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
+func (m *Mixture) Generate(random *fastrandom.XorShift) *vec3.Vec3Impl {
 	if random.Float32() < 0.5 {
 		return m.p[0].Generate(random)
 	}

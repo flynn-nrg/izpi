@@ -125,7 +125,7 @@ func UnitVector(v *Vec3Impl) *Vec3Impl {
 }
 
 // RandomCosineDirection returns a vector with a random cosine direction.
-func RandomCosineDirection(random *fastrandom.LCG) *Vec3Impl {
+func RandomCosineDirection(random *fastrandom.XorShift) *Vec3Impl {
 	r1 := random.Float32()
 	r2 := random.Float32()
 	z := float32(math.Sqrt(float64(1 - r2)))
@@ -136,7 +136,7 @@ func RandomCosineDirection(random *fastrandom.LCG) *Vec3Impl {
 }
 
 // RandomToSphere returns a new random sphere of the given radius at the given distance.
-func RandomToSphere(radius float32, distanceSquared float32, random *fastrandom.LCG) *Vec3Impl {
+func RandomToSphere(radius float32, distanceSquared float32, random *fastrandom.XorShift) *Vec3Impl {
 	r1 := random.Float32()
 	r2 := random.Float32()
 	z := 1 + r2*(float32(math.Sqrt(float64(1-radius*radius/distanceSquared)))-1)

@@ -39,12 +39,12 @@ func NewNonSpectral() *NonSpectral {
 
 // SampleSpectral implements the Sampler interface for RGB samplers
 // Returns a neutral value (0.5) since RGB samplers don't support spectral rendering
-func (ns *NonSpectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) float32 {
+func (ns *NonSpectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.XorShift) float32 {
 	// Return neutral value for RGB samplers that don't support spectral rendering
 	return 0.5
 }
 
-func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) float32 {
+func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.XorShift) float32 {
 	if depth >= s.maxDepth {
 		// Return the background spectral power distribution at the wavelength of the ray
 		return s.background.Value(r.Lambda())
@@ -81,7 +81,7 @@ func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightS
 
 // Sample implements the Sampler interface for RGB rendering
 // For stochastic spectral sampling, we need to assign a wavelength to the ray
-func (s *Spectral) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (s *Spectral) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.XorShift) *vec3.Vec3Impl {
 	// For stochastic spectral sampling, assign a random wavelength to the ray
 	// if it doesn't already have one (depth 0 means it's a primary ray from camera)
 	if depth == 0 && r.Lambda() == 0.0 {

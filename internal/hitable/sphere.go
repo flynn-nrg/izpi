@@ -136,7 +136,7 @@ func (s *Sphere) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
 	return 0.0
 }
 
-func (s *Sphere) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (s *Sphere) Random(o *vec3.Vec3Impl, random *fastrandom.XorShift) *vec3.Vec3Impl {
 	direction := vec3.Sub(s.center0, o)
 	distanceSquared := direction.SquaredLength()
 	uvw := onb.New()

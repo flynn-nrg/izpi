@@ -7,7 +7,7 @@ import (
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
-func randomInUnitSphere(random *fastrandom.LCG) *vec3.Vec3Impl {
+func randomInUnitSphere(random *fastrandom.XorShift) *vec3.Vec3Impl {
 	for {
 		p := vec3.Sub(vec3.ScalarMul(&vec3.Vec3Impl{X: random.Float32(), Y: random.Float32(), Z: random.Float32()}, 2.0),
 			&vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0})

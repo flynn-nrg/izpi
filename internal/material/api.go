@@ -17,8 +17,8 @@ type SceneGeometry interface {
 
 // Material defines the methods to handle materials.
 type Material interface {
-	Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool)
-	SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool)
+	Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool)
+	SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool)
 	NormalMap() texture.Texture
 	Albedo(u float32, v float32, p *vec3.Vec3Impl) *vec3.Vec3Impl
 	SpectralAlbedo(u float32, v float32, lambda float32, p *vec3.Vec3Impl) float32

@@ -31,7 +31,7 @@ func NewMetal(albedo *vec3.Vec3Impl, fuzz float32) *Metal {
 }
 
 // Scatter computes how the ray bounces off the surface of a metallic object.
-func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	reflected := reflect(vec3.UnitVector(r.Direction()), hr.Normal())
 	specular := ray.New(hr.P(), vec3.Add(reflected, vec3.ScalarMul(randomInUnitSphere(random), m.fuzz)), r.Time())
 	attenuation := m.albedo

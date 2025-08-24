@@ -186,7 +186,7 @@ func (bn *BVHNode) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
 	return 0.0
 }
 
-func (bn *BVHNode) Random(o *vec3.Vec3Impl, _ *fastrandom.LCG) *vec3.Vec3Impl {
+func (bn *BVHNode) Random(o *vec3.Vec3Impl, _ *fastrandom.XorShift) *vec3.Vec3Impl {
 	return &vec3.Vec3Impl{X: 1}
 }
 

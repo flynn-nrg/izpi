@@ -60,7 +60,7 @@ func NewSpectralColoredDielectric(spectralRefIdx texture.SpectralTexture, spectr
 
 // scatterCommon contains the common scattering logic for both RGB and spectral rendering
 // Returns the scattered ray and a boolean indicating if it was reflected (true) or transmitted (false)
-func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG, refIdx float32) (*ray.RayImpl, bool, bool) {
+func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift, refIdx float32) (*ray.RayImpl, bool, bool) {
 	var niOverNt float32
 	var cosine float32
 	var reflectProb float32
@@ -150,7 +150,7 @@ func (d *Dielectric) calculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, sca
 }
 
 // Scatter computes how the ray bounces off the surface of a dielectric material.
-func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	scattered, isReflected, ok := d.scatterCommon(r, hr, random, d.refIdx)
 	if !ok {
 		return nil, nil, false
@@ -178,7 +178,7 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastran
 }
 
 // SpectralScatter computes how the ray bounces off the surface of a dielectric material with spectral properties.
-func (d *Dielectric) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
+func (d *Dielectric) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
 	lambda := r.Lambda()
 	refIdx := d.spectralRefIdx.Value(hr.U(), hr.V(), lambda, hr.P())
 
