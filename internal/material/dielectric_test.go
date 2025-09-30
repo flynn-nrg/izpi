@@ -120,24 +120,46 @@ func TestColoredGlassScattering(t *testing.T) {
 
 	random := fastrandom.NewWithDefaults()
 
-	scattered, scatterRecord, ok := dielectric.Scatter(r, hr, random)
+	// Test multiple times to account for random reflection/transmission
+	foundAttenuation := false
+	foundNoAttenuation := false
 
-	if !ok {
-		t.Error("Expected scattering to succeed")
+	for i := 0; i < 100; i++ {
+		scattered, scatterRecord, ok := dielectric.Scatter(r, hr, random)
+
+		if !ok {
+			t.Error("Expected scattering to succeed")
+		}
+
+		if scattered == nil {
+			t.Error("Expected scattered ray to be non-nil")
+		}
+
+		if scatterRecord == nil {
+			t.Error("Expected scatter record to be non-nil")
+		}
+
+		// Check attenuation values
+		attenuation := scatterRecord.Attenuation()
+		if attenuation.X < 1.0 || attenuation.Y < 1.0 || attenuation.Z < 1.0 {
+			foundAttenuation = true
+		}
+		if attenuation.X >= 1.0 && attenuation.Y >= 1.0 && attenuation.Z >= 1.0 {
+			foundNoAttenuation = true
+		}
+
+		// If we found both cases, we can break early
+		if foundAttenuation && foundNoAttenuation {
+			break
+		}
 	}
 
-	if scattered == nil {
-		t.Error("Expected scattered ray to be non-nil")
+	// Check that we found both attenuated (transmitted) and non-attenuated (reflected) rays
+	if !foundAttenuation {
+		t.Error("Expected to find some transmitted rays with attenuation < 1.0 for colored glass")
 	}
-
-	if scatterRecord == nil {
-		t.Error("Expected scatter record to be non-nil")
-	}
-
-	// Check that attenuation is applied (should be less than 1.0 for colored glass)
-	attenuation := scatterRecord.Attenuation()
-	if attenuation.X >= 1.0 || attenuation.Y >= 1.0 || attenuation.Z >= 1.0 {
-		t.Error("Expected attenuation to be less than 1.0 for colored glass")
+	if !foundNoAttenuation {
+		t.Error("Expected to find some reflected rays with attenuation = 1.0")
 	}
 }
 

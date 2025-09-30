@@ -47,8 +47,9 @@ func NewSpectralDielectric(spectralRefIdx texture.SpectralTexture, computeBeerLa
 // NewColoredDielectric returns an instance of a dielectric material with absorption for colored glass.
 func NewColoredDielectric(refIdx float64, absorptionCoeff *vec3.Vec3Impl) *Dielectric {
 	return &Dielectric{
-		refIdx:          refIdx,
-		absorptionCoeff: absorptionCoeff,
+		refIdx:                        refIdx,
+		absorptionCoeff:               absorptionCoeff,
+		computeBeerLambertAttenuation: true,
 	}
 }
 

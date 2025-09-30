@@ -34,8 +34,8 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 			Triangles: []*pb_transport.Triangle{
 				// Back wall (White)
 				{
-					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: -0.1, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: -0.1, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
 					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
 					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
@@ -44,15 +44,15 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 				},
 				{
 					Vertex0:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: -0.1, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
 					MaterialName: "White",
 				},
-				// Floor (White)
+				// Floor (White) - Positioned slightly below water (Y=-0.1) to allow caustics to form
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
-					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: -0.1, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: -0.1, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: -0.1, Z: 100},
 					Uv0:          &pb_transport.Vec2{U: 0, V: 1},
 					Uv1:          &pb_transport.Vec2{U: 0, V: 0},
 					Uv2:          &pb_transport.Vec2{U: 1, V: 0},
@@ -60,9 +60,9 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 				},
 				// Additional floor triangle
 				{
-					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
-					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
-					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: -0.1, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: -0.1, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: -0.1, Z: 0},
 					Uv0:          &pb_transport.Vec2{U: 0, V: 1},
 					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
 					Uv2:          &pb_transport.Vec2{U: 1, V: 1},
@@ -118,6 +118,58 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 					Vertex2:      &pb_transport.Vec3{X: 0, Y: 40, Z: 0},
 					MaterialName: "Water",
 				},
+				// Water box back face (at Z=100)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 40, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 40, Z: 100},
+					MaterialName: "Water",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 40, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "Water",
+				},
+				// Water box left face (at X=0)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 40, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 40, Z: 100},
+					MaterialName: "Water",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 40, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					MaterialName: "Water",
+				},
+				// Water box right face (at X=100)
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 40, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 40, Z: 0},
+					MaterialName: "Water",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 40, Z: 100},
+					MaterialName: "Water",
+				},
+				// Water box bottom face (at Y=0) - CRITICAL FOR CAUSTICS
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					MaterialName: "Water",
+				},
+				{
+					Vertex0:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					MaterialName: "Water",
+				},
 				// Ceiling triangles
 				{
 					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
@@ -134,27 +186,27 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 				// Left wall (Green)
 				{
 					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: -0.1, Z: 0},
 					Vertex2:      &pb_transport.Vec3{X: 0, Y: 100, Z: 0},
 					MaterialName: "Green",
 				},
 				{
 					Vertex0:      &pb_transport.Vec3{X: 0, Y: 100, Z: 100},
-					Vertex1:      &pb_transport.Vec3{X: 0, Y: 0, Z: 100},
-					Vertex2:      &pb_transport.Vec3{X: 0, Y: 0, Z: 0},
+					Vertex1:      &pb_transport.Vec3{X: 0, Y: -0.1, Z: 100},
+					Vertex2:      &pb_transport.Vec3{X: 0, Y: -0.1, Z: 0},
 					MaterialName: "Green",
 				},
 				// Right wall (Red)
 				{
-					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: -0.1, Z: 0},
 					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
 					Vertex2:      &pb_transport.Vec3{X: 100, Y: 100, Z: 0},
 					MaterialName: "Red",
 				},
 				{
-					Vertex0:      &pb_transport.Vec3{X: 100, Y: 0, Z: 100},
+					Vertex0:      &pb_transport.Vec3{X: 100, Y: -0.1, Z: 100},
 					Vertex1:      &pb_transport.Vec3{X: 100, Y: 100, Z: 100},
-					Vertex2:      &pb_transport.Vec3{X: 100, Y: 0, Z: 0},
+					Vertex2:      &pb_transport.Vec3{X: 100, Y: -0.1, Z: 0},
 					Uv0:          &pb_transport.Vec2{U: 0, V: 0},
 					Uv1:          &pb_transport.Vec2{U: 1, V: 0},
 					Uv2:          &pb_transport.Vec2{U: 1, V: 1},

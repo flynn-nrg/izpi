@@ -100,16 +100,48 @@ func tessellate(in *minimalTriangle) []*minimalTriangle {
 
 }
 
-func isTessellatedEnough(tri *minimalTriangle, maxDeltaU float64, maxDeltaV float64) bool {
-	return math.Abs(tri.u1-tri.u0) <= maxDeltaU &&
+// getDisplacementVariation calculates the variation in displacement values at the triangle vertices
+func getDisplacementVariation(tri *minimalTriangle, displacementMap texture.Texture) float64 {
+	// Sample displacement at each vertex (we only care about the Z component)
+	d0 := displacementMap.Value(tri.u0, tri.v0, nil).Z
+	d1 := displacementMap.Value(tri.u1, tri.v1, nil).Z
+	d2 := displacementMap.Value(tri.u2, tri.v2, nil).Z
+
+	// Calculate range (max - min) of displacement values
+	minDisp := math.Min(d0, math.Min(d1, d2))
+	maxDisp := math.Max(d0, math.Max(d1, d2))
+
+	return maxDisp - minDisp
+}
+
+func isTessellatedEnough(tri *minimalTriangle, maxDeltaU float64, maxDeltaV float64, displacementMap texture.Texture, min, max, adaptiveThreshold float64) bool {
+	// Check UV coordinate constraints (minimum tessellation)
+	uvTessellated := math.Abs(tri.u1-tri.u0) <= maxDeltaU &&
 		math.Abs(tri.u2-tri.u1) <= maxDeltaU &&
 		math.Abs(tri.u0-tri.u2) <= maxDeltaU &&
 		math.Abs(tri.v1-tri.v0) <= maxDeltaV &&
 		math.Abs(tri.v2-tri.v1) <= maxDeltaV &&
 		math.Abs(tri.v0-tri.v2) <= maxDeltaV
+
+	// If UV tessellation is not satisfied, we must subdivide
+	if !uvTessellated {
+		return false
+	}
+
+	// Check displacement variation (adaptive tessellation)
+	// If the displacement variation is small, we can stop tessellating
+	variation := getDisplacementVariation(tri, displacementMap)
+	displacementRange := math.Abs(max - min)
+
+	// Normalize variation by the displacement range
+	normalizedVariation := variation * displacementRange
+
+	// Stop tessellating if variation is below threshold
+	return normalizedVariation <= adaptiveThreshold
 }
 
 // ApplyDisplacementMap tessellates the triangles and applies the displacement map to all of them.
+// It uses adaptive tessellation that only subdivides areas with significant displacement variation.
 func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture.Texture, min, max float64) ([]*hitable.Triangle, error) {
 	var resU, resV int
 
@@ -137,30 +169,42 @@ func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture
 		})
 	}
 
-	maxDeltaU := 1.0 / float64(resU-1)
-	maxDeltaV := 1.0 / float64(resV-1)
-	tessellated := applyTessellation(in, maxDeltaU, maxDeltaV)
+	// Use coarser UV tessellation limits (4x the texture pixel size)
+	// This allows adaptive tessellation to take over for detail
+	tessellationFactor := 4.0
+	maxDeltaU := tessellationFactor / float64(resU-1)
+	maxDeltaV := tessellationFactor / float64(resV-1)
+
+	// Adaptive threshold: stop tessellating when displacement variation is less than this
+	// This is in world space units. Smaller values = more tessellation for finer detail.
+	// For water surfaces, we can use a higher threshold since smooth waves don't need extreme detail
+	adaptiveThreshold := 2.0 // Adjust this based on your scene scale and desired quality
+
+	tessellated := applyTessellation(in, maxDeltaU, maxDeltaV, displacementMap, min, max, adaptiveThreshold)
 
 	return applyDisplacement(tessellated, displacementMap, min, max), nil
 }
 
-func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float64) []*minimalTriangle {
+func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float64, displacementMap texture.Texture, min, max, adaptiveThreshold float64) []*minimalTriangle {
 	out := []*minimalTriangle{}
 
-	log.Info("Applying tessellation")
+	log.Info("Applying adaptive tessellation")
+	log.Infof("Tessellation parameters: UV delta=%.6f, adaptive threshold=%.3f", maxDeltaU, adaptiveThreshold)
 	startTime := time.Now()
 
+	iterations := 0
 	for {
 		if len(in) == 0 {
-			log.Infof("Tessellation completed. Created %v triangles in %v", len(out), time.Since(startTime))
+			log.Infof("Adaptive tessellation completed. Created %v triangles in %v iterations over %v", len(out), iterations, time.Since(startTime))
 			return out
 		}
 
+		iterations++
 		toIn := []*minimalTriangle{}
 		for _, triangle := range in {
 			newTriangles := tessellate(triangle)
 			for _, tessellated := range newTriangles {
-				if isTessellatedEnough(tessellated, maxDeltaU, maxDeltaV) {
+				if isTessellatedEnough(tessellated, maxDeltaU, maxDeltaV, displacementMap, min, max, adaptiveThreshold) {
 					out = append(out, tessellated)
 				} else {
 					toIn = append(toIn, tessellated)

@@ -143,7 +143,12 @@ func TestApplyTessellation(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			maxDeltaU := 1.0 / float64(test.resU-1)
 			maxDeltaV := 1.0 / float64(test.resV-1)
-			got := applyTessellation(test.input, maxDeltaU, maxDeltaV)
+			// Create a flat displacement map (constant value) for predictable testing
+			// With no variation, adaptive tessellation will stop at UV limits
+			flatDisplacement := texture.NewConstant(&vec3.Vec3Impl{Z: 0.5})
+			min, max := 0.0, 1.0
+			adaptiveThreshold := 0.01 // Small threshold, but flat map has 0 variation
+			got := applyTessellation(test.input, maxDeltaU, maxDeltaV, flatDisplacement, min, max, adaptiveThreshold)
 			if len(got) != test.wantNumTriangles {
 				t.Errorf("applyTessellation() mismatch: expected %v triangles, got %v\n", test.wantNumTriangles, len(got))
 			}
