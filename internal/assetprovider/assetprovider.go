@@ -32,10 +32,11 @@ const (
 type assetProviderServer struct {
 	pb_transport.UnimplementedSceneTransportServiceServer
 
-	scene       *pb_transport.Scene          // The main scene graph
-	textures    map[string]*texture.ImageTxt // Map of filename to texture data
-	triangles   []*pb_transport.Triangle     // Slice of all triangles for streaming
-	trianglesMu sync.RWMutex                 // Mutex for triangles access if concurrency is needed (not strictly for this simple server)
+	scene            *pb_transport.Scene          // The main scene graph
+	textures         map[string]*texture.ImageTxt // Map of filename to texture data
+	displacementMaps map[string]*texture.ImageTxt // Map of filename to displacement map data
+	triangles        []*pb_transport.Triangle     // Slice of all triangles for streaming
+	trianglesMu      sync.RWMutex                 // Mutex for triangles access if concurrency is needed (not strictly for this simple server)
 }
 
 // AssetProvider manages the gRPC server for serving assets.
@@ -50,7 +51,7 @@ type AssetProvider struct {
 // New creates a new AssetProvider, initializes its gRPC server,
 // and starts serving assets in a new goroutine.
 // It returns the listener address (target) and an error if initialization fails.
-func New(scene *pb_transport.Scene, textures map[string]*texture.ImageTxt, triangles []*pb_transport.Triangle) (*AssetProvider, string, error) {
+func New(scene *pb_transport.Scene, textures map[string]*texture.ImageTxt, displacementMaps map[string]*texture.ImageTxt, triangles []*pb_transport.Triangle) (*AssetProvider, string, error) {
 	// If no port is specified, gRPC will pick a random available port.
 	// We listen on "0.0.0.0:0" to bind to all available interfaces on a random port.
 	lis, err := net.Listen("tcp", "0.0.0.0:0")
@@ -60,9 +61,10 @@ func New(scene *pb_transport.Scene, textures map[string]*texture.ImageTxt, trian
 
 	grpcServer := grpc.NewServer()
 	serverImpl := &assetProviderServer{
-		scene:     scene,
-		textures:  textures,
-		triangles: triangles,
+		scene:            scene,
+		textures:         textures,
+		displacementMaps: displacementMaps,
+		triangles:        triangles,
 	}
 
 	pb_transport.RegisterSceneTransportServiceServer(grpcServer, serverImpl)
@@ -120,8 +122,17 @@ func (s *assetProviderServer) GetScene(ctx context.Context, req *pb_transport.Ge
 func (s *assetProviderServer) StreamTextureFile(req *pb_transport.StreamTextureFileRequest, stream pb_transport.SceneTransportService_StreamTextureFileServer) error {
 	log.Infof("AssetProvider: StreamTextureFile called for '%s' (offset: %d, chunk_size: %d)",
 		req.GetFilename(), req.GetOffset(), req.GetChunkSize())
+	log.Infof("AssetProvider: Textures: %v", s.textures)
+	log.Infof("AssetProvider: Displacement maps: %v", s.displacementMaps)
 
+	// We check both textures and displacement maps
 	imageText, ok := s.textures[req.GetFilename()]
+	if !ok {
+		imageText, ok = s.displacementMaps[req.GetFilename()]
+		if !ok {
+			return status.Errorf(codes.NotFound, "texture file '%s' not found", req.GetFilename())
+		}
+	}
 	if !ok {
 		return status.Errorf(codes.NotFound, "texture file '%s' not found", req.GetFilename())
 	}

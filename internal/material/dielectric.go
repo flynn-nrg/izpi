@@ -22,8 +22,9 @@ type Dielectric struct {
 	refIdx         float64
 	spectralRefIdx texture.SpectralTexture
 	// Absorption properties for colored glass
-	absorptionCoeff         *vec3.Vec3Impl          // RGB absorption coefficient (for RGB rendering)
-	spectralAbsorptionCoeff texture.SpectralTexture // Spectral absorption coefficient (for spectral rendering)
+	computeBeerLambertAttenuation bool
+	absorptionCoeff               *vec3.Vec3Impl          // RGB absorption coefficient (for RGB rendering)
+	spectralAbsorptionCoeff       texture.SpectralTexture // Spectral absorption coefficient (for spectral rendering)
 	// World reference for path length calculation
 	world SceneGeometry
 }
@@ -36,17 +37,19 @@ func NewDielectric(reIdx float64) *Dielectric {
 }
 
 // NewSpectralDielectric returns an instance of a dielectric material with spectral refractive index.
-func NewSpectralDielectric(spectralRefIdx texture.SpectralTexture) *Dielectric {
+func NewSpectralDielectric(spectralRefIdx texture.SpectralTexture, computeBeerLambertAttenuation bool) *Dielectric {
 	return &Dielectric{
-		spectralRefIdx: spectralRefIdx,
+		spectralRefIdx:                spectralRefIdx,
+		computeBeerLambertAttenuation: computeBeerLambertAttenuation,
 	}
 }
 
 // NewColoredDielectric returns an instance of a dielectric material with absorption for colored glass.
 func NewColoredDielectric(refIdx float64, absorptionCoeff *vec3.Vec3Impl) *Dielectric {
 	return &Dielectric{
-		refIdx:          refIdx,
-		absorptionCoeff: absorptionCoeff,
+		refIdx:                        refIdx,
+		absorptionCoeff:               absorptionCoeff,
+		computeBeerLambertAttenuation: true,
 	}
 }
 
@@ -158,7 +161,7 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastran
 
 	// Calculate Beer-Lambert attenuation for RGB rendering
 	var attenuation *vec3.Vec3Impl
-	if d.absorptionCoeff != nil && !isReflected {
+	if d.computeBeerLambertAttenuation && d.absorptionCoeff != nil && !isReflected {
 		// Only apply absorption to transmitted rays, not reflected rays
 		// Use the new path length calculation with world geometry
 		pathLength := d.calculatePathLength(r, hr, scattered, d.world)

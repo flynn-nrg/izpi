@@ -96,7 +96,18 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		t.Channels = 4
 	}
 
-	t := transport.NewTransport(aspectRatio, protoScene, nil, textures, int(cfg.NumWorkers))
+	// Load displacement maps
+	displacementMaps := make(map[string]*texture.ImageTxt)
+	for _, t := range protoScene.GetDisplacementMaps() {
+		log.Infof("Loading displacement map %s", t.GetFilename())
+		imageText, err := texture.NewFromFile(t.GetFilename())
+		if err != nil {
+			log.Fatalf("Error loading displacement map %s: %v", t.GetFilename(), err)
+		}
+		displacementMaps[t.GetFilename()] = imageText
+	}
+
+	t := transport.NewTransport(aspectRatio, protoScene, nil, textures, displacementMaps, int(cfg.NumWorkers))
 	sceneData, err = t.ToScene()
 	if err != nil {
 		log.Fatalf("Error loading scene: %v", err)
@@ -112,7 +123,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	var remoteWorkers []*render.RemoteWorkerConfig
 
 	if !standalone {
-		remoteWorkers, err = setupWorkers(ctx, cfg, protoScene, textures)
+		remoteWorkers, err = setupWorkers(ctx, cfg, protoScene, textures, displacementMaps)
 		if err != nil {
 			log.Fatalf("failed to setup workers: %v", err)
 		}

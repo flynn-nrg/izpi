@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/flynn-nrg/izpi/internal/camera"
+	"github.com/flynn-nrg/izpi/internal/displacement"
 	"github.com/flynn-nrg/izpi/internal/hitable"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/material"
@@ -24,6 +25,7 @@ type Transport struct {
 	triangles            []*pb_transport.Triangle
 	textures             map[string]*texture.ImageTxt
 	materials            map[string]material.Material
+	displacementMaps     map[string]*texture.ImageTxt
 }
 
 func NewTransport(
@@ -31,6 +33,7 @@ func NewTransport(
 	protoScene *pb_transport.Scene,
 	triangles []*pb_transport.Triangle,
 	textures map[string]*texture.ImageTxt,
+	displacementMaps map[string]*texture.ImageTxt,
 	numWorkers int,
 ) *Transport {
 	return &Transport{
@@ -39,6 +42,7 @@ func NewTransport(
 		protoScene:           protoScene,
 		triangles:            triangles,
 		textures:             textures,
+		displacementMaps:     displacementMaps,
 		numWorkers:           numWorkers,
 	}
 }
@@ -341,12 +345,14 @@ func (t *Transport) toSceneDielectricMaterial(mat *pb_transport.Material) (mater
 		}
 	}
 
+	computeBeerLambertAttenuation := dielectric.GetComputeBeerLambertAttenuation()
+
 	// Create the appropriate dielectric material based on available properties
 	if spectralRefIdx != nil {
 		if spectralAbsorptionCoeff != nil {
 			return material.NewSpectralColoredDielectric(spectralRefIdx, spectralAbsorptionCoeff), nil
 		} else {
-			return material.NewSpectralDielectric(spectralRefIdx), nil
+			return material.NewSpectralDielectric(spectralRefIdx, computeBeerLambertAttenuation), nil
 		}
 	} else {
 		if absorptionCoeff != nil {
@@ -550,7 +556,10 @@ func (t *Transport) toSceneTriangles() ([]hitable.Hitable, error) {
 		if err != nil {
 			return nil, err
 		}
-		hitables = append(hitables, tri)
+
+		for _, t := range tri {
+			hitables = append(hitables, t)
+		}
 	}
 
 	// Streamed triangles
@@ -559,13 +568,17 @@ func (t *Transport) toSceneTriangles() ([]hitable.Hitable, error) {
 		if err != nil {
 			return nil, err
 		}
-		hitables = append(hitables, tri)
+
+		for _, t := range tri {
+			hitables = append(hitables, t)
+		}
 	}
 
 	return hitables, nil
 }
 
-func (t *Transport) toSceneTriangle(triangle *pb_transport.Triangle) (*hitable.Triangle, error) {
+// Certain operators may return multiple triangles, so we return a slice of triangles
+func (t *Transport) toSceneTriangle(triangle *pb_transport.Triangle) ([]*hitable.Triangle, error) {
 	material, ok := t.materials[triangle.GetMaterialName()]
 	if !ok {
 		return nil, fmt.Errorf("material %s not found", triangle.GetMaterialName())
@@ -598,7 +611,22 @@ func (t *Transport) toSceneTriangle(triangle *pb_transport.Triangle) (*hitable.T
 
 	tri := hitable.NewTriangleWithUV(vertex0, vertex1, vertex2, u0, v0, u1, v1, u2, v2, material)
 
-	return tri, nil
+	// Apply operator
+	switch triangle.GetOperator() {
+	case pb_transport.GeometryOperator_DISPLACE:
+		displace := triangle.GetDisplace()
+		displacementMap, ok := t.displacementMaps[displace.GetDisplacementMap()]
+		if !ok {
+			return nil, fmt.Errorf("displacement map %s not found", displace.GetDisplacementMap())
+		}
+		tris, err := displacement.ApplyDisplacementMap([]*hitable.Triangle{tri}, displacementMap, displace.GetMin(), displace.GetMax())
+		if err != nil {
+			return nil, err
+		}
+		return tris, nil
+	}
+
+	return []*hitable.Triangle{tri}, nil
 }
 
 func (t *Transport) toSceneSpheres() ([]hitable.Hitable, error) {

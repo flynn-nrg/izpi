@@ -222,7 +222,7 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 		return status.Error(codes.Internal, fmt.Sprintf("failed to send STREAMING_TEXTURES status: %v", err))
 	}
 
-	log.Infof("RenderSetup: Streaming textures from '%s'...", assetProviderAddr)
+	log.Infof("RenderSetup: Streaming textures and displacement maps from '%s'...", assetProviderAddr)
 
 	textureFetchStart := time.Now()
 
@@ -256,13 +256,45 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 	log.Infof("RenderSetup: Finished streaming %d unique textures in %s.", len(textures), time.Since(textureFetchStart))
 
+	displacementFetchStart := time.Now()
+
+	// Collect all unique ImageTexture filenames from displacement maps
+	displacementMapsToFetch := protoScene.GetDisplacementMaps()
+
+	displacementMaps := make(map[string]*texture.ImageTxt)
+
+	for filename, textureMetadata := range displacementMapsToFetch {
+		var pixelSize uint32
+		switch textureMetadata.GetPixelFormat() {
+		case pb_transport.TexturePixelFormat_FLOAT64:
+			pixelSize = 8 * textureMetadata.GetChannels()
+		default:
+			return status.Errorf(codes.InvalidArgument, "unsupported texture pixel format: %s", textureMetadata.GetPixelFormat().String())
+		}
+
+		textureSize := uint64(textureMetadata.GetWidth() * textureMetadata.GetHeight() * pixelSize)
+		log.Infof("RenderSetup: Fetching displacement map '%s' (expected size: %d bytes)...", filename, textureSize)
+		texData, err := s.streamTextureFile(ctx, transportClient, filename, textureSize)
+		if err != nil {
+			errMsg := fmt.Sprintf("Failed to load displacement map '%s': %v", filename, err)
+			s.sendStatus(stream, pb_control.RenderSetupStatus_FAILED, errMsg)
+			return status.Error(codes.Internal, errMsg)
+		}
+
+		displacementMaps[filename] = texture.NewFromRawData(int(textureMetadata.GetWidth()), int(textureMetadata.GetHeight()), texData)
+
+		log.Infof("RenderSetup: Successfully loaded displacement map '%s'", filename)
+	}
+
+	log.Infof("RenderSetup: Finished streaming %d unique displacement maps in %s.", len(displacementMaps), time.Since(displacementFetchStart))
+
 	// Step 3: Transform the scene to its internal representation
 	if err := s.sendStatus(stream, pb_control.RenderSetupStatus_BUILDING_ACCELERATION_STRUCTURE, ""); err != nil {
 		return status.Error(codes.Internal, fmt.Sprintf("failed to send BUILDING_ACCELERATION_STRUCTURE status: %v", err))
 	}
 
 	cameraAspectRatio := float64(req.GetImageResolution().GetWidth()) / float64(req.GetImageResolution().GetHeight())
-	t := transport.NewTransport(cameraAspectRatio, protoScene, triangles, textures, int(s.availableCores))
+	t := transport.NewTransport(cameraAspectRatio, protoScene, triangles, textures, displacementMaps, int(s.availableCores))
 
 	scene, err := t.ToScene()
 	if err != nil {
