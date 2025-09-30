@@ -82,7 +82,7 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 					OperatorProperties: &pb_transport.Triangle_Displace{
 						Displace: &pb_transport.DisplaceOperator{
 							DisplacementMap: "water_128b.png",
-							Min:             -.1,
+							Min:             -1,
 							Max:             0,
 						},
 					},
@@ -100,7 +100,7 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 					OperatorProperties: &pb_transport.Triangle_Displace{
 						Displace: &pb_transport.DisplaceOperator{
 							DisplacementMap: "water_128b.png",
-							Min:             -.1,
+							Min:             -1,
 							Max:             0,
 						},
 					},
@@ -248,6 +248,7 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 								},
 							},
 						},
+						//ComputeBeerLambertAttenuation: true,
 					},
 				},
 			},

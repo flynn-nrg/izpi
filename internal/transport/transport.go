@@ -345,12 +345,14 @@ func (t *Transport) toSceneDielectricMaterial(mat *pb_transport.Material) (mater
 		}
 	}
 
+	computeBeerLambertAttenuation := dielectric.GetComputeBeerLambertAttenuation()
+
 	// Create the appropriate dielectric material based on available properties
 	if spectralRefIdx != nil {
 		if spectralAbsorptionCoeff != nil {
 			return material.NewSpectralColoredDielectric(spectralRefIdx, spectralAbsorptionCoeff), nil
 		} else {
-			return material.NewSpectralDielectric(spectralRefIdx), nil
+			return material.NewSpectralDielectric(spectralRefIdx, computeBeerLambertAttenuation), nil
 		}
 	} else {
 		if absorptionCoeff != nil {

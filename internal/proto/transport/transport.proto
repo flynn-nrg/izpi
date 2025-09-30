@@ -181,9 +181,10 @@ message DielectricMaterial {
     float refidx = 1;
     SpectralConstantTexture spectral_refidx = 2;
   }
+  bool compute_beer_lambert_attenuation = 3;
   oneof absorption_properties {
-    Vec3 absorption_coeff = 3;
-    SpectralConstantTexture spectral_absorption_coeff = 4;
+    Vec3 absorption_coeff = 4;
+    SpectralConstantTexture spectral_absorption_coeff = 5;
   }
 }
 
