@@ -84,6 +84,22 @@ func NewEmptyCIESPD() *SpectralPowerDistribution {
 	}
 }
 
+// NewCIESPD creates a new spectral power distribution using CIE wavelengths
+// and the provided values. The values slice must have exactly 75 elements,
+// corresponding to wavelengths from 380nm to 750nm in 5nm steps.
+func NewCIESPD(values []float64) *SpectralPowerDistribution {
+	if len(values) != len(cieWavelengths) {
+		panic("values slice must have exactly 75 elements to match cieWavelengths")
+	}
+	// Make a copy to avoid external modification
+	valuesCopy := make([]float64, len(values))
+	copy(valuesCopy, values)
+	return &SpectralPowerDistribution{
+		wavelengths: cieWavelengths,
+		values:      valuesCopy,
+	}
+}
+
 func (spd *SpectralPowerDistribution) SetValue(index int, value float64) {
 	spd.values[index] = value
 }
