@@ -123,6 +123,7 @@ message SpectralConstantTexture {
     GaussianSpectralConstant gaussian = 1;
     TabulatedSpectralConstant tabulated = 2;
     NeutralSpectralConstant neutral = 3;
+    FromLightSourceLibrary from_light_source_library = 4;
   }
 }
 
@@ -142,6 +143,11 @@ message TabulatedSpectralConstant {
 // Represents a neutral spectral response (white, gray, black).
 message NeutralSpectralConstant {
   float reflectance = 1;
+}
+
+// Represents a spectral response from a light source library.
+message FromLightSourceLibrary {
+  string light_source_name = 1;
 }
 
 // Represents a spectral checker texture.

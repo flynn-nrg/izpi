@@ -84,6 +84,22 @@ func NewEmptyCIESPD() *SpectralPowerDistribution {
 	}
 }
 
+// NewCIESPD creates a new spectral power distribution using CIE wavelengths
+// and the provided values. The values slice must have exactly 75 elements,
+// corresponding to wavelengths from 380nm to 750nm in 5nm steps.
+func NewCIESPD(values []float64) *SpectralPowerDistribution {
+	if len(values) != len(cieWavelengths) {
+		panic("values slice must have exactly 75 elements to match cieWavelengths")
+	}
+	// Make a copy to avoid external modification
+	valuesCopy := make([]float64, len(values))
+	copy(valuesCopy, values)
+	return &SpectralPowerDistribution{
+		wavelengths: cieWavelengths,
+		values:      valuesCopy,
+	}
+}
+
 func (spd *SpectralPowerDistribution) SetValue(index int, value float64) {
 	spd.values[index] = value
 }
@@ -251,4 +267,53 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 	b = math.Max(0, math.Min(1, b))
 
 	return r, g, b
+}
+
+// NewBlackbodySPD creates a spectral power distribution for a blackbody radiator
+// at the given temperature using Planck's law. The SPD is normalized so that
+// the maximum value is 1.0.
+func NewBlackbodySPD(temperature float64) *SpectralPowerDistribution {
+	// Physical constants
+	const (
+		h = 6.62607015e-34 // Planck's constant (J·s)
+		c = 2.99792458e8   // Speed of light (m/s)
+		k = 1.380649e-23   // Boltzmann constant (J/K)
+	)
+
+	// Precompute constants
+	c1 := 2.0 * h * c * c
+	c2 := (h * c) / k
+
+	values := make([]float64, len(cieWavelengths))
+	maxValue := 0.0
+
+	// Calculate Planck's law for each wavelength
+	for i, wavelengthNm := range cieWavelengths {
+		// Convert wavelength from nm to meters
+		wavelengthM := wavelengthNm * 1e-9
+
+		// Planck's law: B(λ, T) = (2hc²/λ⁵) / (exp(hc/λkT) - 1)
+		wavelength5 := wavelengthM * wavelengthM * wavelengthM * wavelengthM * wavelengthM
+		exponent := c2 / (wavelengthM * temperature)
+
+		// Handle potential overflow in exp
+		if exponent > 700 {
+			values[i] = 0.0
+		} else {
+			values[i] = c1 / (wavelength5 * (math.Exp(exponent) - 1.0))
+		}
+
+		if values[i] > maxValue {
+			maxValue = values[i]
+		}
+	}
+
+	// Normalize to [0, 1]
+	if maxValue > 0 {
+		for i := range values {
+			values[i] /= maxValue
+		}
+	}
+
+	return NewCIESPD(values)
 }
