@@ -136,3 +136,139 @@ func TestTextureToSpectralTexture(t *testing.T) {
 		t.Errorf("Spectral texture value is out of range [0,1]: %f", value)
 	}
 }
+
+func TestLightSourceLibraryIntegration(t *testing.T) {
+	trans := &Transport{}
+
+	tests := []struct {
+		name           string
+		lightSourceKey string
+		expectSuccess  bool
+	}{
+		{"Valid LED light source", "hy_cree_llf_tm_30_90", true},
+		{"Valid fluorescent light source", "cie_f4_warm_white_fluorescent", true},
+		{"Valid incandescent light source", "incandescent_2800k", true},
+		{"Invalid light source (fallback to CIE A)", "nonexistent_light_source", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			spectralText := &transport.SpectralConstantTexture{
+				SpectralProperties: &transport.SpectralConstantTexture_FromLightSourceLibrary{
+					FromLightSourceLibrary: &transport.FromLightSourceLibrary{
+						LightSourceName: tt.lightSourceKey,
+					},
+				},
+			}
+
+			spectralTex, err := trans.toSceneSpectralTexture(spectralText)
+			if !tt.expectSuccess && err != nil {
+				// Expected to fail
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("Failed to create spectral texture from light source '%s': %v", tt.lightSourceKey, err)
+			}
+
+			if spectralTex == nil {
+				t.Fatal("Expected non-nil spectral texture")
+			}
+
+			// Test that the spectral texture returns reasonable values
+			testWavelengths := []float64{400, 500, 600, 700}
+			for _, lambda := range testWavelengths {
+				value := spectralTex.Value(0.5, 0.5, lambda, &vec3.Vec3Impl{})
+				if value < 0.0 || value > 1.0 {
+					t.Errorf("Light source '%s': spectral value at %.0fnm is out of range [0,1]: %f",
+						tt.lightSourceKey, lambda, value)
+				}
+			}
+
+			t.Logf("Successfully created spectral texture from light source '%s'", tt.lightSourceKey)
+		})
+	}
+}
+
+func TestSpectralTextureMethods(t *testing.T) {
+	trans := &Transport{}
+
+	tests := []struct {
+		name          string
+		createTexture func() *transport.SpectralConstantTexture
+	}{
+		{
+			"Gaussian spectral texture",
+			func() *transport.SpectralConstantTexture {
+				return &transport.SpectralConstantTexture{
+					SpectralProperties: &transport.SpectralConstantTexture_Gaussian{
+						Gaussian: &transport.GaussianSpectralConstant{
+							PeakValue:        1.0,
+							CenterWavelength: 550,
+							Width:            40,
+						},
+					},
+				}
+			},
+		},
+		{
+			"Neutral spectral texture",
+			func() *transport.SpectralConstantTexture {
+				return &transport.SpectralConstantTexture{
+					SpectralProperties: &transport.SpectralConstantTexture_Neutral{
+						Neutral: &transport.NeutralSpectralConstant{
+							Reflectance: 0.73,
+						},
+					},
+				}
+			},
+		},
+		{
+			"Tabulated spectral texture",
+			func() *transport.SpectralConstantTexture {
+				return &transport.SpectralConstantTexture{
+					SpectralProperties: &transport.SpectralConstantTexture_Tabulated{
+						Tabulated: &transport.TabulatedSpectralConstant{
+							Wavelengths: []float32{380, 500, 600, 750},
+							Values:      []float32{0.1, 0.5, 0.8, 0.3},
+						},
+					},
+				}
+			},
+		},
+		{
+			"Light source from library",
+			func() *transport.SpectralConstantTexture {
+				return &transport.SpectralConstantTexture{
+					SpectralProperties: &transport.SpectralConstantTexture_FromLightSourceLibrary{
+						FromLightSourceLibrary: &transport.FromLightSourceLibrary{
+							LightSourceName: "cie_f7_broadband_daylight",
+						},
+					},
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			spectralText := tt.createTexture()
+			spectralTex, err := trans.toSceneSpectralTexture(spectralText)
+			if err != nil {
+				t.Fatalf("Failed to create spectral texture: %v", err)
+			}
+
+			if spectralTex == nil {
+				t.Fatal("Expected non-nil spectral texture")
+			}
+
+			// Test that the spectral texture returns reasonable values
+			value := spectralTex.Value(0.5, 0.5, 550.0, &vec3.Vec3Impl{})
+			if value < 0.0 {
+				t.Errorf("Spectral texture value at 550nm is negative: %f", value)
+			}
+
+			t.Logf("%s: value at 550nm = %f", tt.name, value)
+		})
+	}
+}

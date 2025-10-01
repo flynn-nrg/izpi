@@ -2,12 +2,14 @@ package transport
 
 import (
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/flynn-nrg/izpi/internal/camera"
 	"github.com/flynn-nrg/izpi/internal/displacement"
 	"github.com/flynn-nrg/izpi/internal/hitable"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
+	"github.com/flynn-nrg/izpi/internal/lightsources"
 	"github.com/flynn-nrg/izpi/internal/material"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
 	"github.com/flynn-nrg/izpi/internal/ray"
@@ -455,6 +457,19 @@ func (t *Transport) toSceneSpectralTexture(spectralText *pb_transport.SpectralCo
 	case *pb_transport.SpectralConstantTexture_Neutral:
 		neutral := spectralText.GetNeutral()
 		return texture.NewSpectralNeutral(float64(neutral.GetReflectance())), nil
+	case *pb_transport.SpectralConstantTexture_FromLightSourceLibrary:
+		fromLibrary := spectralText.GetFromLightSourceLibrary()
+		lightSourceName := fromLibrary.GetLightSourceName()
+
+		// Try to get the light source from the library
+		spd, ok := lightsources.GetLightSource(lightSourceName)
+		if !ok {
+			log.Printf("Warning: Light source '%s' not found in library, defaulting to CIE Illuminant A (2856K)", lightSourceName)
+			// Default to CIE Illuminant A
+			spd, _ = lightsources.GetLightSource("cie_illuminant_a_2856k")
+		}
+
+		return texture.NewSpectralConstantFromSPD(spd), nil
 	default:
 		return nil, fmt.Errorf("unknown spectral texture type: %T", spectralText.GetSpectralProperties())
 	}
