@@ -268,3 +268,52 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 
 	return r, g, b
 }
+
+// NewBlackbodySPD creates a spectral power distribution for a blackbody radiator
+// at the given temperature using Planck's law. The SPD is normalized so that
+// the maximum value is 1.0.
+func NewBlackbodySPD(temperature float64) *SpectralPowerDistribution {
+	// Physical constants
+	const (
+		h = 6.62607015e-34 // Planck's constant (J·s)
+		c = 2.99792458e8   // Speed of light (m/s)
+		k = 1.380649e-23   // Boltzmann constant (J/K)
+	)
+
+	// Precompute constants
+	c1 := 2.0 * h * c * c
+	c2 := (h * c) / k
+
+	values := make([]float64, len(cieWavelengths))
+	maxValue := 0.0
+
+	// Calculate Planck's law for each wavelength
+	for i, wavelengthNm := range cieWavelengths {
+		// Convert wavelength from nm to meters
+		wavelengthM := wavelengthNm * 1e-9
+
+		// Planck's law: B(λ, T) = (2hc²/λ⁵) / (exp(hc/λkT) - 1)
+		wavelength5 := wavelengthM * wavelengthM * wavelengthM * wavelengthM * wavelengthM
+		exponent := c2 / (wavelengthM * temperature)
+
+		// Handle potential overflow in exp
+		if exponent > 700 {
+			values[i] = 0.0
+		} else {
+			values[i] = c1 / (wavelength5 * (math.Exp(exponent) - 1.0))
+		}
+
+		if values[i] > maxValue {
+			maxValue = values[i]
+		}
+	}
+
+	// Normalize to [0, 1]
+	if maxValue > 0 {
+		for i := range values {
+			values[i] /= maxValue
+		}
+	}
+
+	return NewCIESPD(values)
+}
