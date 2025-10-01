@@ -25,7 +25,7 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
  - [X] Distributed Rendering.
  - [X] Spectral Sampler to accurately simulate dispersion.
  - [ ] Nested dielectrics.
- - [ ] Physically correct light sources library.
+ - [X] Physically correct light sources library.
  - [ ] Materials library.
  - [ ] Water material.
  - [ ] Sky simulation.
@@ -39,6 +39,7 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
 * Automatic worker node discovery via [Zeroconf](https://en.wikipedia.org/wiki/Zero-configuration_networking), with [Avahi](https://en.wikipedia.org/wiki/Avahi_(software)) integration on Linux and FreeBSD hosts.
 * Network distributed system using [gRPC](https://grpc.io) and [Protocol Buffers](https://protobuf.dev).
 * Spectral rendering with support for dispersion and [Beer-Lambert Law](https://en.wikipedia.org/wiki/Beer–Lambert_law) in dielectric materials.
+* Phyisically correct light sources using [SPDs](https://en.wikipedia.org/wiki/Spectral_power_distribution) from [Michael Royer](https://doi.org/10.6084/m9.figshare.7704566.v1) and the [CIE Standard Illuminant](https://en.wikipedia.org/wiki/Standard_illuminant) F-Series.
 * Rendering into a float64 image buffer.
 * Direct, indirect and image-based lighting.
 * Primitives: Spheres, boxes, rectangles and triangles.
