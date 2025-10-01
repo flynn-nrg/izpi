@@ -131,8 +131,8 @@ materials: {
     type: DIFFUSE_LIGHT
     diffuselight: {
       spectral_emit: {
-        neutral: {
-          reflectance: 1
+        from_light_source_library: {
+          light_source_name: "cie_f8_broadband_cool_white"
         }
       }
     }
