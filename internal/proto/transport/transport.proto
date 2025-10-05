@@ -67,6 +67,21 @@ message Vec2 {
   float v = 2;
 }
 
+message WhiteBalanceFromLightSource {
+  string light_source_name = 1;
+}
+
+message WhiteBalanceFromTemperature {
+  float temperature = 1;
+}
+
+message WhiteBalance {
+  oneof white_balance_properties {
+    WhiteBalanceFromLightSource white_balance_from_light_source = 1;
+    WhiteBalanceFromTemperature white_balance_from_temperature = 2;
+  }
+}
+
 // Represents the camera settings for the scene.
 message Camera {
   Vec3 lookfrom = 1;
@@ -78,6 +93,7 @@ message Camera {
   float focusdist = 7;
   float time0 = 8;
   float time1 = 9;
+  WhiteBalance white_balance = 10;
 }
 
 
