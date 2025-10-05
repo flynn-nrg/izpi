@@ -84,8 +84,8 @@ func TestComputeAdaptedXYZToRGBMatrix(t *testing.T) {
 	matrix := ComputeAdaptedXYZToRGBMatrix(D65)
 
 	// Compare with sRGB D65 matrix
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
+	for i := range 3 {
+		for j := range 3 {
 			if math.Abs(matrix[i][j]-sRGBD65Matrix[i][j]) > 0.0001 {
 				t.Errorf("ComputeAdaptedXYZToRGBMatrix(D65)[%d][%d] = %v, want %v", i, j, matrix[i][j], sRGBD65Matrix[i][j])
 			}
@@ -98,8 +98,8 @@ func TestComputeAdaptedXYZToRGBMatrix(t *testing.T) {
 
 	// The matrix should be different from D65
 	hasDifference := false
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
+	for i := range 3 {
+		for j := range 3 {
 			if math.Abs(incandescentMatrix[i][j]-sRGBD65Matrix[i][j]) > 0.01 {
 				hasDifference = true
 				break
@@ -196,8 +196,8 @@ func TestNewWhiteBalanceDefault(t *testing.T) {
 	}
 
 	// Matrix should be the standard sRGB matrix
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
+	for i := range 3 {
+		for j := range 3 {
 			if math.Abs(config.Matrix[i][j]-sRGBD65Matrix[i][j]) > 0.0001 {
 				t.Errorf("NewWhiteBalanceDefault() matrix[%d][%d] = %v, want %v", i, j, config.Matrix[i][j], sRGBD65Matrix[i][j])
 			}
@@ -210,8 +210,8 @@ func TestChromaticAdaptation(t *testing.T) {
 	adaptMatrix := ComputeChromaticAdaptationMatrix(D65, D65)
 
 	// Should be close to identity matrix
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
+	for i := range 3 {
+		for j := range 3 {
 			expected := 0.0
 			if i == j {
 				expected = 1.0
@@ -228,8 +228,8 @@ func TestChromaticAdaptation(t *testing.T) {
 
 	// Should not be identity
 	isIdentity := true
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
+	for i := range 3 {
+		for j := range 3 {
 			expected := 0.0
 			if i == j {
 				expected = 1.0
