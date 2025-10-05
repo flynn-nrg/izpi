@@ -88,10 +88,10 @@ var bradfordMatrixInv = [3][3]float64{
 // multiplyMatrix3x3 multiplies two 3x3 matrices
 func multiplyMatrix3x3(a, b [3][3]float64) [3][3]float64 {
 	var result [3][3]float64
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
+	for i := range 3 {
+		for j := range 3 {
 			result[i][j] = 0
-			for k := 0; k < 3; k++ {
+			for k := range 3 {
 				result[i][j] += a[i][k] * b[k][j]
 			}
 		}
@@ -163,10 +163,10 @@ func ComputeAdaptedXYZToRGBMatrix(whitePoint WhitePointXYZ) XYZToRGBMatrix {
 	// Combine adaptation matrix with sRGB D65 matrix
 	// result = sRGB * adaptation
 	var result XYZToRGBMatrix
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
+	for i := range 3 {
+		for j := range 3 {
 			result[i][j] = 0
-			for k := 0; k < 3; k++ {
+			for k := range 3 {
 				result[i][j] += sRGBD65Matrix[i][k] * adaptMatrix[k][j]
 			}
 		}

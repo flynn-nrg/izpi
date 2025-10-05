@@ -2,7 +2,6 @@ package transport
 
 import (
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/flynn-nrg/izpi/internal/camera"
@@ -17,6 +16,8 @@ import (
 	"github.com/flynn-nrg/izpi/internal/spectral"
 	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/vec3"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Transport struct {
@@ -471,7 +472,7 @@ func (t *Transport) toSceneSpectralTexture(spectralText *pb_transport.SpectralCo
 		// Try to get the light source from the library
 		spd, ok := lightsources.GetLightSource(lightSourceName)
 		if !ok {
-			log.Printf("Warning: Light source '%s' not found in library, defaulting to CIE Illuminant A (2856K)", lightSourceName)
+			log.Warnf("Light source '%s' not found in library, defaulting to CIE Illuminant A (2856K)", lightSourceName)
 			// Default to CIE Illuminant A
 			spd, _ = lightsources.GetLightSource("cie_illuminant_a_2856k")
 		}
@@ -690,7 +691,7 @@ func (t *Transport) computeWhiteBalance() (*spectral.WhiteBalanceConfig, error) 
 
 	// If no white balance is specified, use default (D65)
 	if whiteBalance == nil {
-		log.Println("Warning: No white balance specified, using D65 default")
+		log.Warn("No white balance specified, using D65 default")
 		return spectral.NewWhiteBalanceDefault(), nil
 	}
 
@@ -701,7 +702,7 @@ func (t *Transport) computeWhiteBalance() (*spectral.WhiteBalanceConfig, error) 
 		// Look up the light source in the library
 		spd, ok := lightsources.GetLightSource(lightSourceName)
 		if !ok {
-			log.Printf("Warning: Light source '%s' not found in library, using D65 default", lightSourceName)
+			log.Warnf("Light source '%s' not found in library, using D65 default", lightSourceName)
 			return spectral.NewWhiteBalanceDefault(), nil
 		}
 
@@ -710,7 +711,7 @@ func (t *Transport) computeWhiteBalance() (*spectral.WhiteBalanceConfig, error) 
 			return nil, fmt.Errorf("failed to compute white balance from light source '%s': %w", lightSourceName, err)
 		}
 
-		log.Printf("White balance set from light source: %s", lightSourceName)
+		log.Infof("White balance set from light source: %s", lightSourceName)
 		return config, nil
 	}
 
@@ -723,12 +724,12 @@ func (t *Transport) computeWhiteBalance() (*spectral.WhiteBalanceConfig, error) 
 			return nil, fmt.Errorf("failed to compute white balance from temperature: %w", err)
 		}
 
-		log.Printf("White balance set from temperature: %.0fK", temperature)
+		log.Infof("White balance set from temperature: %.0fK", temperature)
 		return config, nil
 	}
 
 	// No valid white balance property found
-	log.Println("Warning: White balance specified but no valid property found, using D65 default")
+	log.Warn("White balance specified but no valid property found, using D65 default")
 	return spectral.NewWhiteBalanceDefault(), nil
 }
 
