@@ -26,9 +26,10 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
  - [X] Spectral Sampler to accurately simulate dispersion.
  - [ ] Nested dielectrics.
  - [X] Physically correct light sources library.
+ - [ ] Firefly rejection.
  - [ ] Materials library.
  - [ ] Water material.
- - [ ] Sky simulation.
+ - [ ] Sky simulation with day and night support.
  - [ ] Scene conversion tool by implementing Go bindings for [Open Asset Import Library](https://assimp.org).
  - [ ] Implement [Metropolis light transport](https://en.wikipedia.org/wiki/Metropolis_light_transport).
 
