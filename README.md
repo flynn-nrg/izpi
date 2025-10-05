@@ -27,6 +27,7 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
  - [ ] Nested dielectrics.
  - [X] Physically correct light sources library.
  - [ ] Firefly rejection.
+ - [ ] Implement Bidirectional path tracing.
  - [ ] Materials library.
  - [ ] Water material.
  - [ ] Sky simulation with day and night support.
