@@ -7,8 +7,8 @@ import "github.com/flynn-nrg/izpi/internal/vec3"
 type Ray interface {
 	Origin() *vec3.Vec3Impl
 	Direction() *vec3.Vec3Impl
-	PointAtParameter(t float64) *vec3.Vec3Impl
-	Time() float64
-	Lambda() float64
-	SetLambda(float64)
+	PointAtParameter(t float32) *vec3.Vec3Impl
+	Time() float32
+	Lambda() float32
+	SetLambda(float32)
 }

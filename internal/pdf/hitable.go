@@ -1,7 +1,7 @@
 package pdf
 
 import (
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	https://github.com/flynn-nrg/go-vfx/tree/main/math32
 	"github.com/flynn-nrg/izpi/internal/hitabletarget"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
@@ -23,7 +23,7 @@ func NewHitable(p hitabletarget.HitableTarget, origin *vec3.Vec3Impl) *Hitable {
 	}
 }
 
-func (h *Hitable) Value(direction *vec3.Vec3Impl) float64 {
+func (h *Hitable) Value(direction *vec3.Vec3Impl) float32 {
 	return h.hitable.PDFValue(h.o, direction)
 }
 

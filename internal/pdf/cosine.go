@@ -3,7 +3,7 @@ package pdf
 import (
 	"math"
 
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	https://github.com/flynn-nrg/go-vfx/tree/main/math32
 	"github.com/flynn-nrg/izpi/internal/onb"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
@@ -24,7 +24,7 @@ func NewCosine(w *vec3.Vec3Impl) *Cosine {
 	}
 }
 
-func (c *Cosine) Value(direction *vec3.Vec3Impl) float64 {
+func (c *Cosine) Value(direction *vec3.Vec3Impl) float32 {
 	cosine := vec3.Dot(vec3.UnitVector(direction), c.uvw.W())
 	if cosine > 0 {
 		return cosine / math.Pi

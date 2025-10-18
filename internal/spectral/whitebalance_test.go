@@ -8,9 +8,9 @@ import (
 func TestComputeWhitePointFromTemperature(t *testing.T) {
 	tests := []struct {
 		name        string
-		temperature float64
+		temperature float32
 		wantCloseTo WhitePointXYZ // Approximate expected values
-		tolerance   float64
+		tolerance   float32
 	}{
 		{
 			name:        "D65 (6500K)",
@@ -115,7 +115,7 @@ func TestComputeAdaptedXYZToRGBMatrix(t *testing.T) {
 func TestNewWhiteBalanceFromTemperature(t *testing.T) {
 	tests := []struct {
 		name        string
-		temperature float64
+		temperature float32
 		wantErr     bool
 	}{
 		{

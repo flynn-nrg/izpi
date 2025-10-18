@@ -5,8 +5,6 @@ import (
 	"image"
 	"io"
 
-	"github.com/flynn-nrg/floatimage/colour"
-	"github.com/flynn-nrg/floatimage/floatimage"
 	"github.com/flynn-nrg/gube/gube"
 	"github.com/flynn-nrg/izpi/internal/scene"
 )
@@ -32,18 +30,18 @@ func NewColourGradingFromCube(r io.Reader) (*ColourGrading, error) {
 }
 
 func (cg *ColourGrading) Apply(i image.Image, _ *scene.Scene) error {
-	im, ok := i.(*floatimage.Float64NRGBA)
+	im, ok := i.(*floatimage.float32NRGBA)
 	if !ok {
-		return errors.New("only Float64NRGBA image format is supported")
+		return errors.New("only float32NRGBA image format is supported")
 	}
 	for y := i.Bounds().Min.Y; y <= i.Bounds().Max.Y; y++ {
 		for x := i.Bounds().Min.X; x <= i.Bounds().Max.X; x++ {
-			pixel := im.Float64NRGBAAt(x, y)
+			pixel := im.float32NRGBAAt(x, y)
 			rgb, err := cg.g.LookUp(pixel.R, pixel.G, pixel.B)
 			if err != nil {
 				return err
 			}
-			im.Set(x, y, colour.Float64NRGBA{
+			im.Set(x, y, colour.float32NRGBA{
 				R: rgb[0],
 				G: rgb[1],
 				B: rgb[2],

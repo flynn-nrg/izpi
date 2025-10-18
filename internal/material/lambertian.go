@@ -3,7 +3,7 @@ package material
 import (
 	"math"
 
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	https://github.com/flynn-nrg/go-vfx/tree/main/math32
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/onb"
 	"github.com/flynn-nrg/izpi/internal/pdf"
@@ -41,7 +41,7 @@ func NewSpectralLambertian(spectralAlbedo texture.SpectralTexture) *Lambertian {
 }
 
 // scatterCommon contains the common scattering logic for both RGB and spectral rendering
-func (l *Lambertian) scatterCommon(hr *hitrecord.HitRecord, random *fastrandom.LCG, time float64) (*ray.RayImpl, *pdf.Cosine) {
+func (l *Lambertian) scatterCommon(hr *hitrecord.HitRecord, random *fastrandom.LCG, time float32) (*ray.RayImpl, *pdf.Cosine) {
 	uvw := onb.New()
 	uvw.BuildFromW(hr.Normal())
 	direction := uvw.Local(vec3.RandomCosineDirection(random))
@@ -69,7 +69,7 @@ func (l *Lambertian) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random 
 }
 
 // ScatteringPDF implements the probability distribution function for diffuse materials.
-func (l *Lambertian) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
+func (l *Lambertian) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float32 {
 	cosine := vec3.Dot(hr.Normal(), vec3.UnitVector(scattered.Direction()))
 	if cosine < 0 {
 		cosine = 0
@@ -78,11 +78,11 @@ func (l *Lambertian) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered
 	return cosine / math.Pi
 }
 
-func (l *Lambertian) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (l *Lambertian) Albedo(u float32, v float32, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return l.albedo.Value(u, v, p)
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
-func (l *Lambertian) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+func (l *Lambertian) SpectralAlbedo(u float32, v float32, lambda float32, p *vec3.Vec3Impl) float32 {
 	return l.spectralAlbedo.Value(u, v, lambda, p)
 }

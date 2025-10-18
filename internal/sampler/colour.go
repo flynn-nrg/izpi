@@ -4,7 +4,7 @@ import (
 	"math"
 	"sync/atomic"
 
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	https://github.com/flynn-nrg/go-vfx/tree/main/math32
 	"github.com/flynn-nrg/izpi/internal/hitable"
 	"github.com/flynn-nrg/izpi/internal/pdf"
 	"github.com/flynn-nrg/izpi/internal/ray"
@@ -37,7 +37,7 @@ func (cs *Colour) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hita
 
 	atomic.AddUint64(cs.numRays, 1)
 
-	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
+	if rec, mat, ok := world.Hit(r, 0.001, math.Maxfloat32); ok {
 		_, srec, ok := mat.Scatter(r, rec, random)
 		emitted := mat.Emitted(r, rec, rec.U(), rec.V(), rec.P())
 		if depth < cs.maxDepth && ok {

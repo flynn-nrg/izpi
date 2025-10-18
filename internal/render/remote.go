@@ -22,7 +22,7 @@ func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderC
 			Width:  w.x1 - w.x0 + 1,
 			Height: 1,
 			PosX:   w.x0,
-			Pixels: make([]float64, (w.x1-w.x0+1)*4),
+			Pixels: make([]float32, (w.x1-w.x0+1)*4),
 		}
 	}
 
@@ -61,7 +61,7 @@ func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderC
 
 		i := 0
 		for x := posX; x < posX+width; x++ {
-			w.canvas.Set(x, ny-posY, colour.Float64NRGBA{B: pixels[i], G: pixels[i+1], R: pixels[i+2], A: pixels[i+3]})
+			w.canvas.Set(x, ny-posY, colour.Float32NRGBA{B: pixels[i], G: pixels[i+1], R: pixels[i+2], A: pixels[i+3]})
 			if w.preview {
 				tile.Pixels[i] = pixels[i]
 				tile.Pixels[i+1] = pixels[i+1]

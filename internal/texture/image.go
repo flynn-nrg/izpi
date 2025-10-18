@@ -21,8 +21,8 @@ type ImageTxt struct {
 	data  image.Image
 }
 
-func NewFromRawData(width int, height int, data []float64) *ImageTxt {
-	img := floatimage.NewFloat64NRGBA(image.Rect(0, 0, width, height), data)
+func NewFromRawData(width int, height int, data []float32) *ImageTxt {
+	img := floatimage.Newfloat32NRGBA(image.Rect(0, 0, width, height), data)
 
 	return &ImageTxt{sizeX: width, sizeY: height, data: img}
 }
@@ -70,9 +70,9 @@ func NewFromHDR(fileName string) (*ImageTxt, error) {
 
 }
 
-func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
-	i := int(u * float64(it.sizeX))
-	j := int((1 - v) * (float64(it.sizeY) - 0.001))
+func (it *ImageTxt) Value(u float32, v float32, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
+	i := int(u * float32(it.sizeX))
+	j := int((1 - v) * (float32(it.sizeY) - 0.001))
 
 	if i < 0 {
 		i = 0
@@ -88,8 +88,8 @@ func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl
 		j = it.sizeY - 1
 	}
 
-	if img, ok := it.data.(*floatimage.Float64NRGBA); ok {
-		pixel := img.Float64NRGBAAt(i, j)
+	if img, ok := it.data.(*floatimage.float32NRGBA); ok {
+		pixel := img.float32NRGBAAt(i, j)
 		return &vec3.Vec3Impl{X: pixel.R, Y: pixel.G, Z: pixel.B}
 	}
 
@@ -97,12 +97,12 @@ func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl
 	r := pixel.R
 	g := pixel.G
 	b := pixel.B
-	return &vec3.Vec3Impl{X: float64(r) / 255.0, Y: float64(g) / 255.0, Z: float64(b) / 255.0}
+	return &vec3.Vec3Impl{X: float32(r) / 255.0, Y: float32(g) / 255.0, Z: float32(b) / 255.0}
 }
 
 // FlipY() flips the image upside down.
 func (it *ImageTxt) FlipY() {
-	im, ok := it.data.(*floatimage.Float64NRGBA)
+	im, ok := it.data.(*floatimage.float32NRGBA)
 	if !ok {
 		return
 	}
@@ -118,7 +118,7 @@ func (it *ImageTxt) FlipY() {
 
 // FlipX() flips the image from left to right.
 func (it *ImageTxt) FlipX() {
-	im, ok := it.data.(*floatimage.Float64NRGBA)
+	im, ok := it.data.(*floatimage.float32NRGBA)
 	if !ok {
 		return
 	}

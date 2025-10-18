@@ -22,13 +22,13 @@ type SpectralImage struct {
 	sizeY int
 	data  image.Image
 	// Spectral data organized by wavelength buckets (5nm apart from 380-750nm)
-	spectralData [][]float64 // [wavelength_bucket][pixel_index]
-	wavelengths  []float64   // Wavelength values for each bucket
+	spectralData [][]float32 // [wavelength_bucket][pixel_index]
+	wavelengths  []float32   // Wavelength values for each bucket
 }
 
 // NewSpectralImageFromRawData returns a new SpectralImage instance from raw float data.
-func NewSpectralImageFromRawData(width int, height int, data []float64) *SpectralImage {
-	img := floatimage.NewFloat64NRGBA(image.Rect(0, 0, width, height), data)
+func NewSpectralImageFromRawData(width int, height int, data []float32) *SpectralImage {
+	img := floatimage.Newfloat32NRGBA(image.Rect(0, 0, width, height), data)
 	return NewSpectralImageFromImage(img)
 }
 
@@ -72,7 +72,7 @@ func NewSpectralImageFromImage(img image.Image) *SpectralImage {
 
 	// Initialize spectral data with CIE wavelength buckets (5nm apart from 380-750nm)
 	// Use the same wavelengths as defined in the spectral package
-	si.wavelengths = []float64{
+	si.wavelengths = []float32{
 		380, 385, 390, 395, 400, 405, 410, 415, 420, 425,
 		430, 435, 440, 445, 450, 455, 460, 465, 470, 475,
 		480, 485, 490, 495, 500, 505, 510, 515, 520, 525,
@@ -83,9 +83,9 @@ func NewSpectralImageFromImage(img image.Image) *SpectralImage {
 		730, 735, 740, 745, 750,
 	}
 
-	si.spectralData = make([][]float64, len(si.wavelengths))
+	si.spectralData = make([][]float32, len(si.wavelengths))
 	for i := range si.spectralData {
-		si.spectralData[i] = make([]float64, si.sizeX*si.sizeY)
+		si.spectralData[i] = make([]float32, si.sizeX*si.sizeY)
 	}
 
 	// Transform RGB data to spectral representation
@@ -103,15 +103,15 @@ func (si *SpectralImage) transformRGBToSpectral() {
 			pixelIndex := y*si.sizeX + x
 
 			// Get RGB value at this pixel
-			var r, g, b float64
-			if img, ok := si.data.(*floatimage.Float64NRGBA); ok {
-				pixel := img.Float64NRGBAAt(x, y)
+			var r, g, b float32
+			if img, ok := si.data.(*floatimage.float32NRGBA); ok {
+				pixel := img.float32NRGBAAt(x, y)
 				r, g, b = pixel.R, pixel.G, pixel.B
 			} else {
 				pixel := color.NRGBAModel.Convert(si.data.At(x, y)).(color.NRGBA)
-				r = float64(pixel.R) / 255.0
-				g = float64(pixel.G) / 255.0
-				b = float64(pixel.B) / 255.0
+				r = float32(pixel.R) / 255.0
+				g = float32(pixel.G) / 255.0
+				b = float32(pixel.B) / 255.0
 			}
 
 			// Transform RGB to spectral values
@@ -133,8 +133,8 @@ func (si *SpectralImage) transformRGBToSpectral() {
 //
 // Updated to preserve more brightness for specular reflections by removing red bias
 // and ensuring better coverage across all wavelengths.
-func (si *SpectralImage) rgbToSpectralValue(r, g, b, wavelength float64) float64 {
-	var spectralValue float64
+func (si *SpectralImage) rgbToSpectralValue(r, g, b, wavelength float32) float32 {
+	var spectralValue float32
 
 	// Red channel contribution (580-750nm, peak at 650nm) - wider range, no bias
 	if wavelength >= 580.0 && wavelength <= 750.0 {
@@ -190,10 +190,10 @@ func (si *SpectralImage) rgbToSpectralValue(r, g, b, wavelength float64) float64
 }
 
 // Value returns the spectral value at the given UV coordinates and wavelength.
-func (si *SpectralImage) Value(u float64, v float64, lambda float64, _ *vec3.Vec3Impl) float64 {
+func (si *SpectralImage) Value(u float32, v float32, lambda float32, _ *vec3.Vec3Impl) float32 {
 	// Convert UV to pixel coordinates
-	i := int(u * float64(si.sizeX))
-	j := int((1 - v) * (float64(si.sizeY) - 0.001))
+	i := int(u * float32(si.sizeX))
+	j := int((1 - v) * (float32(si.sizeY) - 0.001))
 
 	// Clamp coordinates
 	if i < 0 {
@@ -225,7 +225,7 @@ func (si *SpectralImage) Value(u float64, v float64, lambda float64, _ *vec3.Vec
 }
 
 // findWavelengthIndex finds the index of the wavelength bucket that contains the given wavelength.
-func (si *SpectralImage) findWavelengthIndex(lambda float64) int {
+func (si *SpectralImage) findWavelengthIndex(lambda float32) int {
 	// Clamp wavelength to valid range
 	if lambda < si.wavelengths[0] {
 		return 0
@@ -247,7 +247,7 @@ func (si *SpectralImage) findWavelengthIndex(lambda float64) int {
 // FlipY() flips the spectral image upside down.
 func (si *SpectralImage) FlipY() {
 	// Flip the underlying image data
-	if im, ok := si.data.(*floatimage.Float64NRGBA); ok {
+	if im, ok := si.data.(*floatimage.float32NRGBA); ok {
 		for y := si.data.Bounds().Min.Y; y <= si.data.Bounds().Max.Y/2; y++ {
 			for x := si.data.Bounds().Min.X; x <= si.data.Bounds().Max.X; x++ {
 				c1 := si.data.At(x, y)
@@ -265,7 +265,7 @@ func (si *SpectralImage) FlipY() {
 // FlipX() flips the spectral image from left to right.
 func (si *SpectralImage) FlipX() {
 	// Flip the underlying image data
-	if im, ok := si.data.(*floatimage.Float64NRGBA); ok {
+	if im, ok := si.data.(*floatimage.float32NRGBA); ok {
 		for y := si.data.Bounds().Min.Y; y <= si.data.Bounds().Max.Y; y++ {
 			for x := si.data.Bounds().Min.X; x <= si.data.Bounds().Max.X/2; x++ {
 				c1 := si.data.At(x, y)
@@ -296,6 +296,6 @@ func (si *SpectralImage) GetData() image.Image {
 }
 
 // GetWavelengths returns the wavelength array.
-func (si *SpectralImage) GetWavelengths() []float64 {
+func (si *SpectralImage) GetWavelengths() []float32 {
 	return si.wavelengths
 }

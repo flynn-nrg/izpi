@@ -14,8 +14,8 @@ func TestNewBVH(t *testing.T) {
 	testData := []struct {
 		name     string
 		hitables []Hitable
-		time0    float64
-		time1    float64
+		time0    float32
+		time1    float32
 		want     *BVHNode
 	}{
 		{
@@ -120,7 +120,7 @@ func TestNewBVH(t *testing.T) {
 		},
 	}
 
-	ramdonFunc := func() float64 { return 0 }
+	ramdonFunc := func() float32 { return 0 }
 	for _, test := range testData {
 		t.Run(test.name, func(t *testing.T) {
 
@@ -136,7 +136,7 @@ func TestNewBVH(t *testing.T) {
 	}
 }
 
-func makeSphere(x float64, y float64, z float64, r float64) *Sphere {
+func makeSphere(x float32, y float32, z float32, r float32) *Sphere {
 	return NewSphere(
 		&vec3.Vec3Impl{
 			X: x,

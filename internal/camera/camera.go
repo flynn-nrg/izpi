@@ -4,7 +4,7 @@ package camera
 import (
 	"math"
 
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	https://github.com/flynn-nrg/go-vfx/tree/main/math32
 	"github.com/flynn-nrg/izpi/internal/ray"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
@@ -12,9 +12,9 @@ import (
 // Camera represents a camera in the world.
 type Camera struct {
 	random          *fastrandom.LCG
-	lensRadius      float64
-	time0           float64
-	time1           float64
+	lensRadius      float32
+	time0           float32
+	time1           float32
 	u               *vec3.Vec3Impl
 	v               *vec3.Vec3Impl
 	origin          *vec3.Vec3Impl
@@ -25,7 +25,7 @@ type Camera struct {
 
 // New returns an instance of a camera.
 func New(lookFrom *vec3.Vec3Impl, lookAt *vec3.Vec3Impl, vup *vec3.Vec3Impl,
-	vfov float64, aspect float64, aperture float64, focusDist float64, time0 float64, time1 float64) *Camera {
+	vfov float32, aspect float32, aperture float32, focusDist float32, time0 float32, time1 float32) *Camera {
 
 	lensRadius := aperture / 2.0
 	theta := vfov * math.Pi / 180
@@ -56,10 +56,10 @@ func New(lookFrom *vec3.Vec3Impl, lookAt *vec3.Vec3Impl, vup *vec3.Vec3Impl,
 }
 
 // GetRay returns the ray associated for the supplied u and v.
-func (c *Camera) GetRay(s float64, t float64) *ray.RayImpl {
+func (c *Camera) GetRay(s float32, t float32) *ray.RayImpl {
 	rd := vec3.ScalarMul(c.randomInUnitDisc(), c.lensRadius)
 	offset := vec3.Add(vec3.ScalarMul(c.u, rd.X), vec3.ScalarMul(c.v, rd.Y))
-	time := c.time0 + c.random.Float64()*(c.time1-c.time0)
+	time := c.time0 + c.random.float32()*(c.time1-c.time0)
 	return ray.New(vec3.Add(c.origin, offset),
 		// lowerLeftCorner + s*horizontal + t*vertical - origin - offset
 		vec3.Sub(vec3.Add(c.lowerLeftCorner, vec3.ScalarMul(c.horizontal, s),
@@ -67,10 +67,10 @@ func (c *Camera) GetRay(s float64, t float64) *ray.RayImpl {
 }
 
 // GetRayWithLambda returns the ray associated for the supplied u and v with a specific wavelength.
-func (c *Camera) GetRayWithLambda(s float64, t float64, lambda float64) *ray.RayImpl {
+func (c *Camera) GetRayWithLambda(s float32, t float32, lambda float32) *ray.RayImpl {
 	rd := vec3.ScalarMul(c.randomInUnitDisc(), c.lensRadius)
 	offset := vec3.Add(vec3.ScalarMul(c.u, rd.X), vec3.ScalarMul(c.v, rd.Y))
-	time := c.time0 + c.random.Float64()*(c.time1-c.time0)
+	time := c.time0 + c.random.float32()*(c.time1-c.time0)
 	return ray.NewWithLambda(vec3.Add(c.origin, offset),
 		// lowerLeftCorner + s*horizontal + t*vertical - origin - offset
 		vec3.Sub(vec3.Add(c.lowerLeftCorner, vec3.ScalarMul(c.horizontal, s),
@@ -79,7 +79,7 @@ func (c *Camera) GetRayWithLambda(s float64, t float64, lambda float64) *ray.Ray
 
 func (c *Camera) randomInUnitDisc() *vec3.Vec3Impl {
 	for {
-		p := vec3.Sub(vec3.ScalarMul(&vec3.Vec3Impl{X: c.random.Float64(), Y: c.random.Float64()}, 2.0), &vec3.Vec3Impl{X: 1.0, Y: 1.0})
+		p := vec3.Sub(vec3.ScalarMul(&vec3.Vec3Impl{X: c.random.float32(), Y: c.random.float32()}, 2.0), &vec3.Vec3Impl{X: 1.0, Y: 1.0})
 		if vec3.Dot(p, p) < 1.0 {
 			return p
 		}

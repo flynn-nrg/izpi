@@ -5,8 +5,6 @@ import (
 	"image"
 	"math"
 
-	"github.com/flynn-nrg/floatimage/colour"
-	"github.com/flynn-nrg/floatimage/floatimage"
 	"github.com/flynn-nrg/izpi/internal/scene"
 )
 
@@ -22,14 +20,14 @@ func NewGamma() *Gamma {
 }
 
 func (g *Gamma) Apply(i image.Image, _ *scene.Scene) error {
-	im, ok := i.(*floatimage.Float64NRGBA)
+	im, ok := i.(*floatimage.float32NRGBA)
 	if !ok {
-		return errors.New("only Float64NRGBA image format is supported")
+		return errors.New("only float32NRGBA image format is supported")
 	}
 	for y := i.Bounds().Min.Y; y <= i.Bounds().Max.Y; y++ {
 		for x := i.Bounds().Min.X; x <= i.Bounds().Max.X; x++ {
-			pixel := im.Float64NRGBAAt(x, y)
-			im.Set(x, y, colour.Float64NRGBA{
+			pixel := im.float32NRGBAAt(x, y)
+			im.Set(x, y, colour.float32NRGBA{
 				R: math.Sqrt(pixel.R),
 				G: math.Sqrt(pixel.G),
 				B: math.Sqrt(pixel.B),

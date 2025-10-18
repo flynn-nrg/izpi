@@ -65,17 +65,17 @@ func setupWorkers(ctx context.Context, cfg *config.Config, protoScene *pb_transp
 			spectralBackground = &pb_control.SpectralBackground{
 				SpectralProperties: &pb_control.SpectralBackground_Tabulated{
 					Tabulated: &pb_control.TabulatedSpectralConstant{
-						Wavelengths: make([]float64, len(protoScene.GetSpectralBackground().GetWavelengths())),
-						Values:      make([]float64, len(protoScene.GetSpectralBackground().GetValues())),
+						Wavelengths: make([]float32, len(protoScene.GetSpectralBackground().GetWavelengths())),
+						Values:      make([]float32, len(protoScene.GetSpectralBackground().GetValues())),
 					},
 				},
 			}
-			// Convert float32 to float64
+			// Convert float32 to float32
 			for i, w := range protoScene.GetSpectralBackground().GetWavelengths() {
-				spectralBackground.GetTabulated().Wavelengths[i] = float64(w)
+				spectralBackground.GetTabulated().Wavelengths[i] = float32(w)
 			}
 			for i, v := range protoScene.GetSpectralBackground().GetValues() {
-				spectralBackground.GetTabulated().Values[i] = float64(v)
+				spectralBackground.GetTabulated().Values[i] = float32(v)
 			}
 		}
 

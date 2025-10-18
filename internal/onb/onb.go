@@ -51,7 +51,7 @@ func (o *Onb) BuildFromW(n *vec3.Vec3Impl) {
 }
 
 // ScalarLocal returns the ortho-normal base local to the supplied position.
-func (o *Onb) ScalarLocal(a, b, c float64) *vec3.Vec3Impl {
+func (o *Onb) ScalarLocal(a, b, c float32) *vec3.Vec3Impl {
 	// a*u + b*v + c*w
 	return vec3.Add(vec3.ScalarMul(o.U(), a),
 		vec3.ScalarMul(o.V(), b),

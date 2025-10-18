@@ -3,7 +3,6 @@ package scenes
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 
@@ -28,26 +27,26 @@ func RandomScene() *hitable.HitableSlice {
 	spheres := []hitable.Hitable{hitable.NewSphere(&vec3.Vec3Impl{X: 0, Y: -1000, Z: 0}, &vec3.Vec3Impl{X: 0, Y: -1000, Z: 0}, 0, 1, 1000, material.NewLambertian(checker))}
 	for a := -11; a < 11; a++ {
 		for b := -11; b < 11; b++ {
-			chooseMat := rand.Float64()
-			center := &vec3.Vec3Impl{X: float64(a) + 0.9*rand.Float64(), Y: 0.2, Z: float64(b) + 0.9*rand.Float64()}
+			chooseMat := rand.float32()
+			center := &vec3.Vec3Impl{X: float32(a) + 0.9*rand.float32(), Y: 0.2, Z: float32(b) + 0.9*rand.float32()}
 			if vec3.Sub(center, &vec3.Vec3Impl{X: 4, Y: 0.2, Z: 0}).Length() > 0.9 {
 				if chooseMat < 0.8 {
 					// diffuse
 					spheres = append(spheres, hitable.NewSphere(center,
-						vec3.Add(center, &vec3.Vec3Impl{Y: 0.5 * rand.Float64()}), 0.0, 1.0, 0.2,
+						vec3.Add(center, &vec3.Vec3Impl{Y: 0.5 * rand.float32()}), 0.0, 1.0, 0.2,
 						material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{
-							X: rand.Float64() * rand.Float64(),
-							Y: rand.Float64() * rand.Float64(),
-							Z: rand.Float64() * rand.Float64(),
+							X: rand.float32() * rand.float32(),
+							Y: rand.float32() * rand.float32(),
+							Z: rand.float32() * rand.float32(),
 						}))))
 				} else if chooseMat < 0.95 {
 					// metal
 					spheres = append(spheres, hitable.NewSphere(center, center, 0.0, 1.0, 0.2,
 						material.NewMetal(&vec3.Vec3Impl{
-							X: 0.5 * (1.0 - rand.Float64()),
-							Y: 0.5 * (1.0 - rand.Float64()),
-							Z: 0.5 * (1.0 - rand.Float64()),
-						}, 0.2*rand.Float64())))
+							X: 0.5 * (1.0 - rand.float32()),
+							Y: 0.5 * (1.0 - rand.float32()),
+							Z: 0.5 * (1.0 - rand.float32()),
+						}, 0.2*rand.float32())))
 				} else {
 					// glass
 					spheres = append(spheres, hitable.NewSphere(center, center, 0.0, 1.0, 0.2, material.NewDielectric(1.5)))
@@ -117,7 +116,7 @@ func SimpleLight() *hitable.HitableSlice {
 }
 
 // CornellBox returns a scene recreating the Cornell box.
-func CornellBox(aspect float64) *scene.Scene {
+func CornellBox(aspect float32) *scene.Scene {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
@@ -146,7 +145,7 @@ func CornellBox(aspect float64) *scene.Scene {
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
-	vfov := float64(40.0)
+	vfov := float32(40.0)
 	time0 := 0.0
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
@@ -155,7 +154,7 @@ func CornellBox(aspect float64) *scene.Scene {
 }
 
 // Final returns the scene from the last chapter in the book.
-func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
+func Final(aspect float32) (*hitable.HitableSlice, *camera.Camera) {
 	nb := 20
 	list := []hitable.Hitable{}
 	boxList := []hitable.Hitable{}
@@ -166,12 +165,12 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 
 	for i := 0; i < nb; i++ {
 		for j := 0; j < nb; j++ {
-			w := float64(100)
-			x0 := -1000.0 + float64(i)*w
-			z0 := -1000.0 + float64(j)*w
-			y0 := float64(0)
+			w := float32(100)
+			x0 := -1000.0 + float32(i)*w
+			z0 := -1000.0 + float32(j)*w
+			y0 := float32(0)
 			x1 := x0 + w
-			y1 := 100.0 * (rand.Float64() + 0.01)
+			y1 := 100.0 * (rand.float32() + 0.01)
 			z1 := z0 + w
 			boxList = append(boxList, hitable.NewBox(&vec3.Vec3Impl{X: x0, Y: y0, Z: z0}, &vec3.Vec3Impl{X: x1, Y: y1, Z: z1}, ground))
 		}
@@ -209,7 +208,7 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 
 	ns := 1000
 	for j := 0; j < ns; j++ {
-		center := &vec3.Vec3Impl{X: 165 * rand.Float64(), Y: 165 * rand.Float64(), Z: 165 * rand.Float64()}
+		center := &vec3.Vec3Impl{X: 165 * rand.float32(), Y: 165 * rand.float32(), Z: 165 * rand.float32()}
 		boxList2 = append(boxList2, hitable.NewSphere(center, center, 0, 1, 10, white))
 	}
 
@@ -220,7 +219,7 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
-	vfov := float64(40.0)
+	vfov := float32(40.0)
 	time0 := 0.0
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
@@ -229,7 +228,7 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 }
 
 // Environment returns a scene that tests the sky dome and HDR textures functionality.
-func Environment(aspect float64) *scene.Scene {
+func Environment(aspect float32) *scene.Scene {
 	dome, err := hitable.NewSkyDome(&vec3.Vec3Impl{}, 100, "decor_shop_4k.hdr")
 	if err != nil {
 		log.Fatal(err)
@@ -253,7 +252,7 @@ func Environment(aspect float64) *scene.Scene {
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
-	vfov := float64(60.0)
+	vfov := float32(60.0)
 	time0 := 0.0
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
@@ -263,7 +262,7 @@ func Environment(aspect float64) *scene.Scene {
 }
 
 // CornellBox returns a scene recreating the Cornell box.
-func CornellBoxObj(aspect float64) (*scene.Scene, error) {
+func CornellBoxObj(aspect float32) (*scene.Scene, error) {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
@@ -327,7 +326,7 @@ func CornellBoxObj(aspect float64) (*scene.Scene, error) {
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
-	vfov := float64(40.0)
+	vfov := float32(40.0)
 	time0 := 0.0
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
@@ -335,7 +334,7 @@ func CornellBoxObj(aspect float64) (*scene.Scene, error) {
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }
 
-func TVSet(aspect float64) (*scene.Scene, error) {
+func TVSet(aspect float32) (*scene.Scene, error) {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	tvTextFile, err := os.Open("Television_01_diff_4k.png")
@@ -396,7 +395,7 @@ func TVSet(aspect float64) (*scene.Scene, error) {
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
-	vfov := float64(40.0)
+	vfov := float32(40.0)
 	time0 := 0.0
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
@@ -404,7 +403,7 @@ func TVSet(aspect float64) (*scene.Scene, error) {
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }
 
-func SWHangar(aspect float64) (*scene.Scene, error) {
+func SWHangar(aspect float32) (*scene.Scene, error) {
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	glass := material.NewDielectric(1.5)
 
@@ -447,7 +446,7 @@ func SWHangar(aspect float64) (*scene.Scene, error) {
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
-	vfov := float64(100.0)
+	vfov := float32(100.0)
 	time0 := 0.0
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
@@ -456,7 +455,7 @@ func SWHangar(aspect float64) (*scene.Scene, error) {
 }
 
 // DisplacementTest returns a scene recreating the Cornell box and a displacement map applied to the floor.
-func DisplacementTest(aspect float64) (*scene.Scene, error) {
+func DisplacementTest(aspect float32) (*scene.Scene, error) {
 	red := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.65, Y: 0.05, Z: 0.05}))
 	white := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.73, Y: 0.73, Z: 0.73}))
 	green := material.NewLambertian(texture.NewConstant(&vec3.Vec3Impl{X: 0.12, Y: 0.45, Z: 0.15}))
@@ -530,7 +529,7 @@ func DisplacementTest(aspect float64) (*scene.Scene, error) {
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
-	vfov := float64(40.0)
+	vfov := float32(40.0)
 	time0 := 0.0
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
@@ -539,7 +538,7 @@ func DisplacementTest(aspect float64) (*scene.Scene, error) {
 }
 
 // VWBeetle returns a scene that tests the sky dome and HDR textures functionality.
-func VWBeetle(aspect float64) (*scene.Scene, error) {
+func VWBeetle(aspect float32) (*scene.Scene, error) {
 	dome, err := hitable.NewSkyDome(&vec3.Vec3Impl{}, 100, "OutdoorHDRI019_4K-HDR.hdr")
 	if err != nil {
 		return nil, err
@@ -587,7 +586,7 @@ func VWBeetle(aspect float64) (*scene.Scene, error) {
 	vup := &vec3.Vec3Impl{Y: 1}
 	distToFocus := 10.0
 	aperture := 0.0
-	vfov := float64(60.0)
+	vfov := float32(60.0)
 	time0 := 0.0
 	time1 := 1.0
 	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
@@ -597,7 +596,7 @@ func VWBeetle(aspect float64) (*scene.Scene, error) {
 }
 
 // Challenger returns a scene that tests the sky dome and HDR textures functionality.
-func Challenger(aspect float64) ([]byte, error) {
+func Challenger(aspect float32) ([]byte, error) {
 	// https://www.cgtrader.com/free-3d-models/car/sport-car/dodge-challenger-87e47a62-3aaf-4d8f-84c9-6af70b9792b0
 
 	challengerFile, err := os.Open("challenger_tri.obj")
@@ -834,7 +833,7 @@ func Challenger(aspect float64) ([]byte, error) {
 		vup := &vec3.Vec3Impl{Y: 1}
 		distToFocus := 10.0
 		aperture := 0.1
-		vfov := float64(75.0)
+		vfov := float32(75.0)
 		time0 := 0.0
 		time1 := 1.0
 		cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
@@ -848,7 +847,7 @@ func Challenger(aspect float64) ([]byte, error) {
 
 }
 
-func CornellBoxPB(aspect float64) *pb_transport.Scene {
+func CornellBoxPB(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:    "Cornell Box",
 		Version: "1.0.0",
@@ -1357,7 +1356,7 @@ func CornellBoxPB(aspect float64) *pb_transport.Scene {
 	return protoScene
 }
 
-func CornellBoxRGB(aspect float64) *pb_transport.Scene {
+func CornellBoxRGB(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:    "Cornell Box",
 		Version: "1.0.0",
@@ -1803,7 +1802,7 @@ func CornellBoxRGB(aspect float64) *pb_transport.Scene {
 	return protoScene
 }
 
-func CornellBoxSpectral(aspect float64) *pb_transport.Scene {
+func CornellBoxSpectral(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box Spectral",
 		Version:              "1.0.0",
@@ -2254,7 +2253,7 @@ func CornellBoxSpectral(aspect float64) *pb_transport.Scene {
 	return protoScene
 }
 
-func CornellBoxPrismSpectral(aspect float64) *pb_transport.Scene {
+func CornellBoxPrismSpectral(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box Prism Spectral",
 		Version:              "1.0.0",
@@ -2617,7 +2616,7 @@ func CornellBoxPrismSpectral(aspect float64) *pb_transport.Scene {
 	return protoScene
 }
 
-func CornellBoxPrismSpectralEnhanced(aspect float64) *pb_transport.Scene {
+func CornellBoxPrismSpectralEnhanced(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box Prism Spectral Enhanced",
 		Version:              "1.0.0",
@@ -2924,7 +2923,7 @@ func CornellBoxPrismSpectralEnhanced(aspect float64) *pb_transport.Scene {
 	return protoScene
 }
 
-func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
+func CornellBoxDiamondsSpectral(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box Diamonds Spectral",
 		Version:              "1.0.0",
@@ -3469,7 +3468,7 @@ func CornellBoxDiamondsSpectral(aspect float64) *pb_transport.Scene {
 
 // CornellBoxColoredGlassSpectral creates a Cornell Box scene with colored glass spheres
 // demonstrating the Beer-Lambert law for spectral absorption
-func CornellBoxColoredGlassSpectral(aspect float64) *pb_transport.Scene {
+func CornellBoxColoredGlassSpectral(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box Colored Glass Spectral",
 		Version:              "1.0.0",
@@ -3828,7 +3827,7 @@ func CornellBoxColoredGlassSpectral(aspect float64) *pb_transport.Scene {
 
 // CornellBoxWaterSpectral creates a Cornell Box scene with water filling 40% of the box
 // and a colored glass sphere floating in it to demonstrate refraction
-func CornellBoxWaterSpectral(aspect float64) *pb_transport.Scene {
+func CornellBoxWaterSpectral(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box Water Spectral",
 		Version:              "1.0.0",
@@ -4205,7 +4204,7 @@ func CornellBoxWaterSpectral(aspect float64) *pb_transport.Scene {
 
 // CornellBoxTransparentPyramidSpectral creates a Cornell Box scene with a floating pyramid
 // of transparent spheres to demonstrate refraction and transparency effects
-func CornellBoxTransparentPyramidSpectral(aspect float64) *pb_transport.Scene {
+func CornellBoxTransparentPyramidSpectral(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box Transparent Pyramid Spectral",
 		Version:              "1.0.0",

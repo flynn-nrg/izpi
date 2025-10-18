@@ -3,7 +3,6 @@ package perlin
 
 import (
 	"math"
-	"math/rand"
 
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
@@ -26,7 +25,7 @@ func New() *Perlin {
 }
 
 // Noise returns the noise value at a given position.
-func (pl *Perlin) Noise(p *vec3.Vec3Impl) float64 {
+func (pl *Perlin) Noise(p *vec3.Vec3Impl) float32 {
 	var c [2][2][2]*vec3.Vec3Impl
 
 	u := p.X - math.Floor(p.X)
@@ -47,13 +46,13 @@ func (pl *Perlin) Noise(p *vec3.Vec3Impl) float64 {
 }
 
 // Turb applies turbulence to this instance of Perlin noise.
-func (pl *Perlin) Turb(p *vec3.Vec3Impl, depth int) float64 {
-	var accum float64
+func (pl *Perlin) Turb(p *vec3.Vec3Impl, depth int) float32 {
+	var accum float32
 
 	tempP := &vec3.Vec3Impl{}
 
 	*tempP = *p
-	weight := float64(1.0)
+	weight := float32(1.0)
 
 	for i := 0; i < depth; i++ {
 		accum += weight * pl.Noise(tempP)
@@ -67,7 +66,7 @@ func (pl *Perlin) Turb(p *vec3.Vec3Impl, depth int) float64 {
 func perlinGenerate() []*vec3.Vec3Impl {
 	p := make([]*vec3.Vec3Impl, 256)
 	for i := range p {
-		p[i] = vec3.UnitVector(&vec3.Vec3Impl{X: -1 + 2*rand.Float64(), Y: -1 + 2*rand.Float64(), Z: -1 + 2*rand.Float64()})
+		p[i] = vec3.UnitVector(&vec3.Vec3Impl{X: -1 + 2*rand.float32(), Y: -1 + 2*rand.float32(), Z: -1 + 2*rand.float32()})
 	}
 
 	return p
@@ -75,7 +74,7 @@ func perlinGenerate() []*vec3.Vec3Impl {
 
 func permute(p []int) []int {
 	for i := (len(p) - 1); i > 0; i-- {
-		target := int(rand.Float64() * float64(i+1))
+		target := int(rand.float32() * float32(i+1))
 		tmp := p[i]
 		p[i] = p[target]
 		p[target] = tmp
@@ -93,8 +92,8 @@ func perlinGeneratePerm() []int {
 	return permute(p)
 }
 
-func trilinearInterp(c [2][2][2]*vec3.Vec3Impl, u float64, v float64, w float64) float64 {
-	var accum float64
+func trilinearInterp(c [2][2][2]*vec3.Vec3Impl, u float32, v float32, w float32) float32 {
+	var accum float32
 
 	uu := u * u * (3 - 2*u)
 	vv := v * v * (3 - 2*v)
@@ -103,10 +102,10 @@ func trilinearInterp(c [2][2][2]*vec3.Vec3Impl, u float64, v float64, w float64)
 	for i := 0; i < 2; i++ {
 		for j := 0; j < 2; j++ {
 			for k := 0; k < 2; k++ {
-				weightV := &vec3.Vec3Impl{X: u - float64(i), Y: v - float64(j), Z: w - float64(k)}
-				accum += (float64(i)*uu + (1.0-float64(i))*(1.0-uu)) *
-					(float64(j)*vv + (1.0-float64(j))*(1.0-vv)) *
-					(float64(k)*ww + (1.0-float64(k))*(1.0-ww)) * vec3.Dot(c[i][j][k], weightV)
+				weightV := &vec3.Vec3Impl{X: u - float32(i), Y: v - float32(j), Z: w - float32(k)}
+				accum += (float32(i)*uu + (1.0-float32(i))*(1.0-uu)) *
+					(float32(j)*vv + (1.0-float32(j))*(1.0-vv)) *
+					(float32(k)*ww + (1.0-float32(k))*(1.0-ww)) * vec3.Dot(c[i][j][k], weightV)
 			}
 		}
 	}

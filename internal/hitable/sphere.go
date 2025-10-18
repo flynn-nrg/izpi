@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/flynn-nrg/izpi/internal/aabb"
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	https://github.com/flynn-nrg/go-vfx/tree/main/math32
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/material"
 	"github.com/flynn-nrg/izpi/internal/onb"
@@ -20,13 +20,13 @@ var _ Hitable = (*Sphere)(nil)
 type Sphere struct {
 	center0  *vec3.Vec3Impl
 	center1  *vec3.Vec3Impl
-	time0    float64
-	time1    float64
-	radius   float64
+	time0    float32
+	time1    float32
+	radius   float32
 	material material.Material
 }
 
-func getSphereUV(p *vec3.Vec3Impl) (float64, float64) {
+func getSphereUV(p *vec3.Vec3Impl) (float32, float32) {
 	phi := math.Atan2(p.Z, p.X)
 	theta := math.Asin(p.Y)
 	u := 1.0 - (phi+math.Pi)/(2.0*math.Pi)
@@ -36,7 +36,7 @@ func getSphereUV(p *vec3.Vec3Impl) (float64, float64) {
 
 // SkyDome is a convenience function to construct a light emitting sphere with inverted normals.
 // For this to work correctly texture file needs to be in HDR (Radiance) format.
-func NewSkyDome(center *vec3.Vec3Impl, radius float64, fileName string) (*FlipNormals, error) {
+func NewSkyDome(center *vec3.Vec3Impl, radius float32, fileName string) (*FlipNormals, error) {
 	texture, err := texture.NewFromHDR(fileName)
 	texture.FlipY()
 	texture.FlipX()
@@ -48,7 +48,7 @@ func NewSkyDome(center *vec3.Vec3Impl, radius float64, fileName string) (*FlipNo
 }
 
 // NewSphere returns a new instance of Sphere.
-func NewSphere(center0 *vec3.Vec3Impl, center1 *vec3.Vec3Impl, time0 float64, time1 float64, radius float64, material material.Material) *Sphere {
+func NewSphere(center0 *vec3.Vec3Impl, center1 *vec3.Vec3Impl, time0 float32, time1 float32, radius float32, material material.Material) *Sphere {
 	return &Sphere{
 		center0:  center0,
 		center1:  center1,
@@ -60,7 +60,7 @@ func NewSphere(center0 *vec3.Vec3Impl, center1 *vec3.Vec3Impl, time0 float64, ti
 }
 
 // Hit computes whether a ray intersects with the defined sphere.
-func (s *Sphere) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+func (s *Sphere) Hit(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, material.Material, bool) {
 	oc := vec3.Sub(r.Origin(), s.center(r.Time()))
 	a := vec3.Dot(r.Direction(), r.Direction())
 	b := vec3.Dot(oc, r.Direction())
@@ -94,7 +94,7 @@ func (s *Sphere) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecor
 	return nil, nil, false
 }
 
-func (s *Sphere) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+func (s *Sphere) HitEdge(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, bool, bool) {
 	rec, _, ok := s.Hit(r, tMin, tMax)
 	if !ok {
 		return nil, false, false
@@ -112,7 +112,7 @@ func (s *Sphere) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	return rec, true, false
 }
 
-func (s *Sphere) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
+func (s *Sphere) BoundingBox(time0 float32, time1 float32) (*aabb.AABB, bool) {
 	box0 := aabb.New(
 		vec3.Sub(s.center0, &vec3.Vec3Impl{X: s.radius, Y: s.radius, Z: s.radius}),
 		vec3.Add(s.center0, &vec3.Vec3Impl{X: s.radius, Y: s.radius, Z: s.radius}))
@@ -122,12 +122,12 @@ func (s *Sphere) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return aabb.SurroundingBox(box0, box1), true
 }
 
-func (s *Sphere) center(time float64) *vec3.Vec3Impl {
+func (s *Sphere) center(time float32) *vec3.Vec3Impl {
 	return vec3.Add(s.center0, vec3.ScalarMul(vec3.Sub(s.center1, s.center0), ((time-s.time0)/(s.time1-s.time0))))
 }
 
-func (s *Sphere) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
-	if _, _, ok := s.Hit((ray.New(o, v, 0)), 0.001, math.MaxFloat64); ok {
+func (s *Sphere) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
+	if _, _, ok := s.Hit((ray.New(o, v, 0)), 0.001, math.Maxfloat32); ok {
 		cosThetaMax := math.Sqrt(1 - s.radius*s.radius/vec3.Sub(s.center0, o).SquaredLength())
 		solidAngle := 2 * math.Pi * (1 - cosThetaMax)
 		return 1 / solidAngle

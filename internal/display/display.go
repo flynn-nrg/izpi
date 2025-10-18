@@ -5,7 +5,7 @@ type DisplayTile struct {
 	Height int
 	PosX   int
 	PosY   int
-	Pixels []float64
+	Pixels []float32
 }
 
 type Display interface {

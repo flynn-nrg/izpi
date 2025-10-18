@@ -149,7 +149,7 @@ func (fd *FyneDisplay) makeBackdrop() {
 	}
 }
 
-func floatToUint8(in float64) uint8 {
+func floatToUint8(in float32) uint8 {
 	// Gamma 2.0
 	in = math.Sqrt(in)
 	p := int(in * 255)

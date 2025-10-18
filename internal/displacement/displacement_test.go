@@ -141,8 +141,8 @@ func TestApplyTessellation(t *testing.T) {
 
 	for _, test := range testData {
 		t.Run(test.name, func(t *testing.T) {
-			maxDeltaU := 1.0 / float64(test.resU-1)
-			maxDeltaV := 1.0 / float64(test.resV-1)
+			maxDeltaU := 1.0 / float32(test.resU-1)
+			maxDeltaV := 1.0 / float32(test.resV-1)
 			// Create a flat displacement map (constant value) for predictable testing
 			// With no variation, adaptive tessellation will stop at UV limits
 			flatDisplacement := texture.NewConstant(&vec3.Vec3Impl{Z: 0.5})
@@ -160,8 +160,8 @@ func TestApplyDisplacement(t *testing.T) {
 	testData := []struct {
 		name    string
 		texture texture.Texture
-		min     float64
-		max     float64
+		min     float32
+		max     float32
 		input   []*minimalTriangle
 		want    []*hitable.Triangle
 	}{

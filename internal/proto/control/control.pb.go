@@ -7,11 +7,12 @@
 package control
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -145,9 +146,9 @@ func (RenderSetupStatus) EnumDescriptor() ([]byte, []int) {
 // Represents a 3D vector or point with float components, also used for colors.
 type Vec3 struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	X             float64                `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
-	Y             float64                `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
-	Z             float64                `protobuf:"fixed64,3,opt,name=z,proto3" json:"z,omitempty"`
+	X             float32                `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y             float32                `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
+	Z             float32                `protobuf:"fixed64,3,opt,name=z,proto3" json:"z,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -182,21 +183,21 @@ func (*Vec3) Descriptor() ([]byte, []int) {
 	return file_control_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Vec3) GetX() float64 {
+func (x *Vec3) GetX() float32 {
 	if x != nil {
 		return x.X
 	}
 	return 0
 }
 
-func (x *Vec3) GetY() float64 {
+func (x *Vec3) GetY() float32 {
 	if x != nil {
 		return x.Y
 	}
 	return 0
 }
 
-func (x *Vec3) GetZ() float64 {
+func (x *Vec3) GetZ() float32 {
 	if x != nil {
 		return x.Z
 	}
@@ -206,8 +207,8 @@ func (x *Vec3) GetZ() float64 {
 // Represents a tabulated spectral response for spectral backgrounds.
 type TabulatedSpectralConstant struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Wavelengths   []float64              `protobuf:"fixed64,1,rep,packed,name=wavelengths,proto3" json:"wavelengths,omitempty"` // Array of wavelengths in nanometers
-	Values        []float64              `protobuf:"fixed64,2,rep,packed,name=values,proto3" json:"values,omitempty"`           // Array of spectral values at each wavelength
+	Wavelengths   []float32              `protobuf:"fixed64,1,rep,packed,name=wavelengths,proto3" json:"wavelengths,omitempty"` // Array of wavelengths in nanometers
+	Values        []float32              `protobuf:"fixed64,2,rep,packed,name=values,proto3" json:"values,omitempty"`           // Array of spectral values at each wavelength
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -242,14 +243,14 @@ func (*TabulatedSpectralConstant) Descriptor() ([]byte, []int) {
 	return file_control_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *TabulatedSpectralConstant) GetWavelengths() []float64 {
+func (x *TabulatedSpectralConstant) GetWavelengths() []float32 {
 	if x != nil {
 		return x.Wavelengths
 	}
 	return nil
 }
 
-func (x *TabulatedSpectralConstant) GetValues() []float64 {
+func (x *TabulatedSpectralConstant) GetValues() []float32 {
 	if x != nil {
 		return x.Values
 	}
@@ -314,7 +315,7 @@ func (x *SpectralBackground) GetTabulated() *TabulatedSpectralConstant {
 	return nil
 }
 
-func (x *SpectralBackground) GetNeutralValue() float64 {
+func (x *SpectralBackground) GetNeutralValue() float32 {
 	if x != nil {
 		if x, ok := x.SpectralProperties.(*SpectralBackground_NeutralValue); ok {
 			return x.NeutralValue
@@ -332,7 +333,7 @@ type SpectralBackground_Tabulated struct {
 }
 
 type SpectralBackground_NeutralValue struct {
-	NeutralValue float64 `protobuf:"fixed64,2,opt,name=neutral_value,json=neutralValue,proto3,oneof"` // Neutral (white/gray) spectral value
+	NeutralValue float32 `protobuf:"fixed64,2,opt,name=neutral_value,json=neutralValue,proto3,oneof"` // Neutral (white/gray) spectral value
 }
 
 func (*SpectralBackground_Tabulated) isSpectralBackground_SpectralProperties() {}
@@ -659,7 +660,7 @@ type RenderTileResponse struct {
 	PosY   uint32                 `protobuf:"varint,4,opt,name=pos_y,json=posY,proto3" json:"pos_y,omitempty"` // Y-coordinate of the top-left pixel of this chunk (relative to overall image origin).
 	// Flat array of pixel values (e.g., RGBA as [R1, G1, B1, A1, R2, G2, B2, A2...])
 	// For spectral rendering, the pixels are the spectral value for the sampled wavelength.
-	Pixels        []float64 `protobuf:"fixed64,5,rep,packed,name=pixels,proto3" json:"pixels,omitempty"`
+	Pixels        []float32 `protobuf:"fixed64,5,rep,packed,name=pixels,proto3" json:"pixels,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -722,7 +723,7 @@ func (x *RenderTileResponse) GetPosY() uint32 {
 	return 0
 }
 
-func (x *RenderTileResponse) GetPixels() []float64 {
+func (x *RenderTileResponse) GetPixels() []float32 {
 	if x != nil {
 		return x.Pixels
 	}

@@ -64,12 +64,12 @@ func (a *AABB) Max() *vec3.Vec3Impl {
 }
 
 // Hit returns true if a ray intersects with the bounding box.
-func (a *AABB) Hit(r ray.Ray, tMin float64, tMax float64) bool {
+func (a *AABB) Hit(r ray.Ray, tMin float32, tMax float32) bool {
 
-	mins := []float64{a.min.X, a.min.Y, a.min.Z}
-	maxs := []float64{a.max.X, a.max.Y, a.max.Z}
-	origs := []float64{r.Origin().X, r.Origin().Y, r.Origin().Z}
-	dirs := []float64{r.Direction().X, r.Direction().Y, r.Direction().Z}
+	mins := []float32{a.min.X, a.min.Y, a.min.Z}
+	maxs := []float32{a.max.X, a.max.Y, a.max.Z}
+	origs := []float32{r.Origin().X, r.Origin().Y, r.Origin().Z}
+	dirs := []float32{r.Direction().X, r.Direction().Y, r.Direction().Z}
 
 	for i := range mins {
 		invD := 1.0 / dirs[i]

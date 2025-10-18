@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/flynn-nrg/izpi/internal/aabb"
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	https://github.com/flynn-nrg/go-vfx/tree/main/math32
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/mat3"
 	"github.com/flynn-nrg/izpi/internal/material"
@@ -37,16 +37,16 @@ type Triangle struct {
 	tangent   *vec3.Vec3Impl
 	bitangent *vec3.Vec3Impl
 	// Area
-	area float64
+	area float32
 	// Material
 	material material.Material
 	// Texture coordinates
-	u0 float64
-	u1 float64
-	u2 float64
-	v0 float64
-	v1 float64
-	v2 float64
+	u0 float32
+	u1 float32
+	u2 float32
+	v0 float32
+	v1 float32
+	v2 float32
 	// Bounding box
 	bb *aabb.AABB
 }
@@ -59,7 +59,7 @@ func NewTriangle(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.V
 
 // NewTriangleWithUV returns a new texture triangle.
 func NewTriangleWithUV(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
-	u0, v0, u1, v1, u2, v2 float64, mat material.Material) *Triangle {
+	u0, v0, u1, v1, u2, v2 float32, mat material.Material) *Triangle {
 	edge1 := vec3.Sub(vertex1, vertex0)
 	edge2 := vec3.Sub(vertex2, vertex0)
 
@@ -72,7 +72,7 @@ func NewTriangleWithUV(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *
 
 // NewTriangleWithUV returns a new texture triangle.
 func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
-	normal *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64, mat material.Material) *Triangle {
+	normal *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float32, mat material.Material) *Triangle {
 
 	deltaU1 := u1 - u0
 	deltaU2 := u2 - u0
@@ -140,7 +140,7 @@ func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, 
 
 // NewTriangleWithUVAndVertexNormals returns a new textured triangle with per vertex normals.
 func NewTriangleWithUVAndVertexNormals(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
-	vn0 *vec3.Vec3Impl, vn1 *vec3.Vec3Impl, vn2 *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64,
+	vn0 *vec3.Vec3Impl, vn1 *vec3.Vec3Impl, vn2 *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float32,
 	mat material.Material) *Triangle {
 
 	deltaU1 := u1 - u0
@@ -199,7 +199,7 @@ func NewTriangleWithUVAndVertexNormals(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec
 	}
 }
 
-func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+func (tri *Triangle) Hit(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, material.Material, bool) {
 	// https://en.wikipedia.org/wiki/Möller–Trumbore_intersection_algorithm
 	// Use a larger epsilon for better numerical stability
 	epsilon := 1e-8
@@ -273,13 +273,13 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	return hitrecord.New(t, uu, vv, r.PointAtParameter(t), newNormal), tri.material, true
 }
 
-func (tri *Triangle) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
+func (tri *Triangle) BoundingBox(time0 float32, time1 float32) (*aabb.AABB, bool) {
 	return tri.bb, true
 }
 
-func (tri *Triangle) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (tri *Triangle) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
 	r := ray.New(o, v, 0)
-	if rec, _, ok := tri.Hit(r, 0.001, math.MaxFloat64); ok {
+	if rec, _, ok := tri.Hit(r, 0.001, math.Maxfloat32); ok {
 		distanceSquared := rec.T() * rec.T() * v.SquaredLength()
 		cosine := math.Abs(vec3.Dot(v, vec3.ScalarDiv(rec.Normal(), v.Length())))
 		return distanceSquared / (cosine * tri.area)
@@ -288,7 +288,7 @@ func (tri *Triangle) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 	return 0
 }
 
-func (tri *Triangle) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+func (tri *Triangle) HitEdge(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, bool, bool) {
 	rec, _, ok := tri.Hit(r, tMin, tMax)
 	if !ok {
 		return nil, false, false
@@ -312,7 +312,7 @@ func (tri *Triangle) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.
 
 /*
 func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
-	r := rand.Float64()
+	r := rand.float32()
 	randomPoint := &vec3.Vec3Impl{
 		X: tri.vertex0.X + r*(tri.vertex1.X-tri.vertex0.X) + (1-r)*(tri.vertex2.X-tri.vertex0.X),
 		Y: tri.vertex0.Y + r*(tri.vertex1.Y-tri.vertex0.Y) + (1-r)*(tri.vertex2.Y-tri.vertex0.Y),
@@ -324,11 +324,11 @@ func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 */
 
 func (tri *Triangle) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
-	t1 := random.Float64()
+	t1 := random.float32()
 	randomPoint01 := vec3.Lerp(tri.vertex0, tri.vertex1, t1)
-	t2 := random.Float64()
+	t2 := random.float32()
 	randomPoint02 := vec3.Lerp(tri.vertex0, tri.vertex2, t2)
-	t3 := random.Float64()
+	t3 := random.float32()
 	randomPoint := vec3.Lerp(randomPoint01, randomPoint02, t3)
 
 	return vec3.Sub(randomPoint, o)
@@ -350,27 +350,27 @@ func (tri *Triangle) Vertex2() vec3.Vec3Impl {
 	return *tri.vertex2
 }
 
-func (tri *Triangle) U0() float64 {
+func (tri *Triangle) U0() float32 {
 	return tri.u0
 }
 
-func (tri *Triangle) U1() float64 {
+func (tri *Triangle) U1() float32 {
 	return tri.u1
 }
 
-func (tri *Triangle) U2() float64 {
+func (tri *Triangle) U2() float32 {
 	return tri.u2
 }
 
-func (tri *Triangle) V0() float64 {
+func (tri *Triangle) V0() float32 {
 	return tri.v0
 }
 
-func (tri *Triangle) V1() float64 {
+func (tri *Triangle) V1() float32 {
 	return tri.v1
 }
 
-func (tri *Triangle) V2() float64 {
+func (tri *Triangle) V2() float32 {
 	return tri.v2
 }
 

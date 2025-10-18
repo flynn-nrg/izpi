@@ -18,12 +18,12 @@ func TestNewTriangleWithUV(t *testing.T) {
 		vertex0 *vec3.Vec3Impl
 		vertex1 *vec3.Vec3Impl
 		vertex2 *vec3.Vec3Impl
-		u0      float64
-		v0      float64
-		u1      float64
-		v1      float64
-		u2      float64
-		v2      float64
+		u0      float32
+		v0      float32
+		u1      float32
+		v1      float32
+		u2      float32
+		v2      float32
 		normal  *vec3.Vec3Impl
 		want    *Triangle
 	}{
@@ -74,8 +74,8 @@ func TestTriangleHit(t *testing.T) {
 		vertex2  *vec3.Vec3Impl
 		material material.Material
 		r        ray.Ray
-		tMin     float64
-		tMax     float64
+		tMin     float32
+		tMax     float32
 		wantHR   *hitrecord.HitRecord
 		wantHit  bool
 	}{
@@ -85,7 +85,7 @@ func TestTriangleHit(t *testing.T) {
 			vertex1: &vec3.Vec3Impl{X: 1, Y: 1, Z: -1},
 			vertex2: &vec3.Vec3Impl{X: 0, Y: 0, Z: -1},
 			r:       ray.New(&vec3.Vec3Impl{Y: -1}, &vec3.Vec3Impl{Y: 1}, 0),
-			tMax:    math.MaxFloat64,
+			tMax:    math.Maxfloat32,
 		},
 		{
 			name:     "Ray is perpendicular and hits triangle",
@@ -94,7 +94,7 @@ func TestTriangleHit(t *testing.T) {
 			vertex2:  &vec3.Vec3Impl{X: -.5, Y: -.5, Z: -10},
 			material: material.NewDielectric(1.0),
 			r:        ray.New(&vec3.Vec3Impl{Z: 1}, &vec3.Vec3Impl{Z: -1}, 0),
-			tMax:     math.MaxFloat64,
+			tMax:     math.Maxfloat32,
 			wantHR:   hitrecord.New(11, 0, 0, &vec3.Vec3Impl{Z: -10}, &vec3.Vec3Impl{Z: 1}),
 			wantHit:  true,
 		},
@@ -104,7 +104,7 @@ func TestTriangleHit(t *testing.T) {
 			vertex1: &vec3.Vec3Impl{X: 0, Y: .5, Z: -10},
 			vertex2: &vec3.Vec3Impl{X: -.5, Y: -.5, Z: -10},
 			r:       ray.New(&vec3.Vec3Impl{X: -1, Y: 0, Z: 1}, &vec3.Vec3Impl{X: -1, Y: 0, Z: -1}, 0),
-			tMax:    math.MaxFloat64,
+			tMax:    math.Maxfloat32,
 		},
 		{
 			name:     "Ray hits triangle at an angle",
@@ -113,7 +113,7 @@ func TestTriangleHit(t *testing.T) {
 			vertex2:  &vec3.Vec3Impl{X: -.5, Y: -.5, Z: -10},
 			material: material.NewDielectric(1.0),
 			r:        ray.New(&vec3.Vec3Impl{Z: 1}, &vec3.Vec3Impl{Z: -1}, 0),
-			tMax:     math.MaxFloat64,
+			tMax:     math.Maxfloat32,
 			wantHR:   hitrecord.New(13.5, 0, 0, &vec3.Vec3Impl{Z: -12.5}, &vec3.Vec3Impl{X: 0.8908708063747479, Y: -0.44543540318737396, Z: 0.0890870806374748}),
 			wantHit:  true,
 		},

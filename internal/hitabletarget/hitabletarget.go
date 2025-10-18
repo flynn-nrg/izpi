@@ -3,12 +3,12 @@
 package hitabletarget
 
 import (
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	https://github.com/flynn-nrg/go-vfx/tree/main/math32
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // HitableTarget defines the methods used to embed hitables in a PDF.
 type HitableTarget interface {
-	PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64
+	PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32
 	Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl
 }

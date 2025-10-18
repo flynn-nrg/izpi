@@ -41,7 +41,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 
 	protoScene := &pb_transport.Scene{}
 
-	aspectRatio := float64(cfg.XSize) / float64(cfg.YSize)
+	aspectRatio := float32(cfg.XSize) / float32(cfg.YSize)
 
 	sceneFile, err := os.Open(cfg.Scene)
 	if err != nil {
@@ -89,10 +89,10 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		}
 		textures[t.GetFilename()] = imageText
 
-		// Update metadata. The pixel format is always float64 with 4 channels.
+		// Update metadata. The pixel format is always float32 with 4 channels.
 		t.Width = uint32(imageText.GetData().Bounds().Dx())
 		t.Height = uint32(imageText.GetData().Bounds().Dy())
-		t.PixelFormat = pb_transport.TexturePixelFormat_FLOAT64
+		t.PixelFormat = pb_transport.TexturePixelFormat_float32
 		t.Channels = 4
 	}
 

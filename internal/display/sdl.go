@@ -211,7 +211,7 @@ func (sd *SDLDisplay) makeBackdrop() {
 
 }
 
-func floatToUint32(in float64) uint32 {
+func floatToUint32(in float32) uint32 {
 	// Gamma 2.0
 	in = math.Sqrt(in)
 	p := int(in * 255)

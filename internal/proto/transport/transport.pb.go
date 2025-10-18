@@ -7,11 +7,12 @@
 package transport
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -86,18 +87,18 @@ type TexturePixelFormat int32
 
 const (
 	TexturePixelFormat_TEXTURE_PIXEL_FORMAT_UNSPECIFIED TexturePixelFormat = 0
-	TexturePixelFormat_FLOAT64                          TexturePixelFormat = 1
+	TexturePixelFormat_float32                          TexturePixelFormat = 1
 )
 
 // Enum value maps for TexturePixelFormat.
 var (
 	TexturePixelFormat_name = map[int32]string{
 		0: "TEXTURE_PIXEL_FORMAT_UNSPECIFIED",
-		1: "FLOAT64",
+		1: "float32",
 	}
 	TexturePixelFormat_value = map[string]int32{
 		"TEXTURE_PIXEL_FORMAT_UNSPECIFIED": 0,
-		"FLOAT64":                          1,
+		"float32":                          1,
 	}
 )
 
@@ -362,8 +363,8 @@ func (x *ImageTextureMetadata) GetPixelFormat() TexturePixelFormat {
 
 type DisplaceOperator struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
-	Min             float64                `protobuf:"fixed64,1,opt,name=min,proto3" json:"min,omitempty"`
-	Max             float64                `protobuf:"fixed64,2,opt,name=max,proto3" json:"max,omitempty"`
+	Min             float32                `protobuf:"fixed64,1,opt,name=min,proto3" json:"min,omitempty"`
+	Max             float32                `protobuf:"fixed64,2,opt,name=max,proto3" json:"max,omitempty"`
 	DisplacementMap string                 `protobuf:"bytes,3,opt,name=displacement_map,json=displacementMap,proto3" json:"displacement_map,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
@@ -399,14 +400,14 @@ func (*DisplaceOperator) Descriptor() ([]byte, []int) {
 	return file_transport_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *DisplaceOperator) GetMin() float64 {
+func (x *DisplaceOperator) GetMin() float32 {
 	if x != nil {
 		return x.Min
 	}
 	return 0
 }
 
-func (x *DisplaceOperator) GetMax() float64 {
+func (x *DisplaceOperator) GetMax() float32 {
 	if x != nil {
 		return x.Max
 	}
@@ -3094,7 +3095,7 @@ const file_transport_proto_rawDesc = "" +
 	"\x10SPECTRAL_CHECKER\x10\x06*G\n" +
 	"\x12TexturePixelFormat\x12$\n" +
 	" TEXTURE_PIXEL_FORMAT_UNSPECIFIED\x10\x00\x12\v\n" +
-	"\aFLOAT64\x10\x01*\x80\x01\n" +
+	"\afloat32\x10\x01*\x80\x01\n" +
 	"\fMaterialType\x12\x1d\n" +
 	"\x19MATERIAL_TYPE_UNSPECIFIED\x10\x00\x12\x0e\n" +
 	"\n" +

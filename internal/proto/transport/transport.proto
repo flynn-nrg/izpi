@@ -16,7 +16,7 @@ enum TextureType {
 
 enum TexturePixelFormat {
   TEXTURE_PIXEL_FORMAT_UNSPECIFIED = 0;
-  FLOAT64 = 1;
+  float32 = 1;
 }
 
 message ImageTextureMetadata {
