@@ -1,9 +1,8 @@
 package texture
 
 import (
-	"math"
-
-	"github.com/flynn-nrg/izpi/internal/vec3"
+	"github.com/flynn-nrg/go-vfx/math32"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 )
 
 // Ensure interface compliance.
@@ -30,8 +29,8 @@ func NewSpectralChecker(odd SpectralTexture, even SpectralTexture) *SpectralChec
 // Value returns the spectral response at the given position and wavelength.
 // The checkerboard pattern is determined by the 3D position (p),
 // and the spectral response depends on the wavelength (lambda).
-func (c *SpectralChecker) Value(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
-	sines := math.Sin(10.0*p.X) * math.Sin(10.0*p.Y) * math.Sin(10.0*p.Z)
+func (c *SpectralChecker) Value(u float32, v float32, lambda float32, p *vec3.Vec3Impl) float32 {
+	sines := math32.Sin(10.0*p.X) * math32.Sin(10.0*p.Y) * math32.Sin(10.0*p.Z)
 	if sines < 0 {
 		return c.odd.Value(u, v, lambda, p)
 	}

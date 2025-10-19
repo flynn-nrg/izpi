@@ -2,7 +2,7 @@ package scenes
 
 import pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
 
-func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
+func CornellBoxEmptyDisplacementSpectral(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box Empty Displacement Spectral",
 		Version:              "1.0.0",
@@ -332,7 +332,7 @@ func CornellBoxEmptyDisplacementSpectral(aspect float64) *pb_transport.Scene {
 				Width:       130,
 				Height:      130,
 				Channels:    4,
-				PixelFormat: pb_transport.TexturePixelFormat_FLOAT64,
+				PixelFormat: pb_transport.TexturePixelFormat_float32,
 			},
 		},
 		// Spectral background - black (no emission)

@@ -1,16 +1,15 @@
 package material
 
 import (
-	"math"
-
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/onb"
 	"github.com/flynn-nrg/izpi/internal/pdf"
 	"github.com/flynn-nrg/izpi/internal/ray"
 	"github.com/flynn-nrg/izpi/internal/scatterrecord"
 	"github.com/flynn-nrg/izpi/internal/texture"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // Ensure interface compliance.
@@ -27,11 +26,11 @@ type PBR struct {
 	roughness      texture.Texture
 	metalness      texture.Texture
 	sss            texture.Texture // Subsurface scattering strength
-	sssRadius      float64         // Subsurface scattering radius
+	sssRadius      float32         // Subsurface scattering radius
 }
 
 // NewPBR returns a new PBR material with the supplied textures.
-func NewPBR(albedo, normalMap, roughness, metalness, sss texture.Texture, sssRadius float64) *PBR {
+func NewPBR(albedo, normalMap, roughness, metalness, sss texture.Texture, sssRadius float32) *PBR {
 	return &PBR{
 		albedo:    albedo,
 		normalMap: normalMap,
@@ -43,7 +42,7 @@ func NewPBR(albedo, normalMap, roughness, metalness, sss texture.Texture, sssRad
 }
 
 // NewPBRWithSpectralAlbedo returns a new PBR material with spectral albedo support.
-func NewPBRWithSpectralAlbedo(albedo texture.Texture, spectralAlbedo texture.SpectralTexture, normalMap, roughness, metalness, sss texture.Texture, sssRadius float64) *PBR {
+func NewPBRWithSpectralAlbedo(albedo texture.Texture, spectralAlbedo texture.SpectralTexture, normalMap, roughness, metalness, sss texture.Texture, sssRadius float32) *PBR {
 	return &PBR{
 		albedo:         albedo,
 		spectralAlbedo: spectralAlbedo,
@@ -56,7 +55,7 @@ func NewPBRWithSpectralAlbedo(albedo texture.Texture, spectralAlbedo texture.Spe
 }
 
 // Scatter computes how the ray bounces off the surface of a PBR material.
-func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	albedo := pbr.albedo.Value(hr.U(), hr.V(), hr.P())
 
 	// Handle normal map - convert from tangent space to world space
@@ -120,8 +119,8 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	var isSpecular bool
 
 	// Calculate Fresnel effect (simplified)
-	cosTheta := math.Abs(vec3.Dot(vec3.UnitVector(r.Direction()), normal))
-	fresnel := 0.04 + (1.0-0.04)*math.Pow(1.0-cosTheta, 5.0)
+	cosTheta := math32.Abs(vec3.Dot(vec3.UnitVector(r.Direction()), normal))
+	fresnel := 0.04 + (1.0-0.04)*math32.Pow(1.0-cosTheta, 5.0)
 
 	// Adjust fresnel based on metalness
 	fresnel = fresnel + (metalnessValue * 0.5)
@@ -130,9 +129,9 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	// Lower roughness = higher chance of specular reflection
 	specularProbability := fresnel * (1.0 - roughnessValue)
 
-	if random.Float64() < specularProbability {
+	if random.Float32() < specularProbability {
 		// Specular reflection
-		roughnessFactor := math.Max(0.01, roughnessValue*0.3)
+		roughnessFactor := math32.Max(0.01, roughnessValue*0.3)
 		randomDir := randomInUnitSphere(random)
 		specularDir := vec3.Add(reflected, vec3.ScalarMul(randomDir, roughnessFactor))
 		finalDir = vec3.UnitVector(specularDir)
@@ -155,7 +154,7 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 }
 
 // SpectralScatter computes how the ray bounces off the surface of a PBR material with spectral properties.
-func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
+func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
 	// Use spectral albedo if available, otherwise fall back to RGB albedo
 	lambda := r.Lambda()
 	albedo := pbr.SpectralAlbedo(hr.U(), hr.V(), lambda, hr.P())
@@ -221,8 +220,8 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	var isSpecular bool
 
 	// Calculate Fresnel effect (simplified)
-	cosTheta := math.Abs(vec3.Dot(vec3.UnitVector(r.Direction()), normal))
-	fresnel := 0.04 + (1.0-0.04)*math.Pow(1.0-cosTheta, 5.0)
+	cosTheta := math32.Abs(vec3.Dot(vec3.UnitVector(r.Direction()), normal))
+	fresnel := 0.04 + (1.0-0.04)*math32.Pow(1.0-cosTheta, 5.0)
 
 	// Adjust fresnel based on metalness
 	fresnel = fresnel + (metalnessValue * 0.5)
@@ -231,9 +230,9 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	// Lower roughness = higher chance of specular reflection
 	specularProbability := fresnel * (1.0 - roughnessValue)
 
-	if random.Float64() < specularProbability {
+	if random.Float32() < specularProbability {
 		// Specular reflection
-		roughnessFactor := math.Max(0.01, roughnessValue*0.3)
+		roughnessFactor := math32.Max(0.01, roughnessValue*0.3)
 		randomDir := randomInUnitSphere(random)
 		specularDir := vec3.Add(reflected, vec3.ScalarMul(randomDir, roughnessFactor))
 		finalDir = vec3.UnitVector(specularDir)
@@ -252,7 +251,7 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	pdf := pdf.NewCosine(normal)
 
 	// Boost specular reflection brightness to match RGB reference
-	var finalAlbedo float64
+	var finalAlbedo float32
 	if isSpecular {
 		// Increase the brightness of specular reflections specifically
 		finalAlbedo = albedo * 1.5 // 50% boost for specular reflections
@@ -265,13 +264,13 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 }
 
 // ScatteringPDF implements the probability distribution function for PBR materials.
-func (pbr *PBR) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
+func (pbr *PBR) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float32 {
 	cosine := vec3.Dot(hr.Normal(), vec3.UnitVector(scattered.Direction()))
 	if cosine < 0 {
 		cosine = 0
 	}
 
-	return cosine / math.Pi
+	return cosine / math32.Pi
 }
 
 // NormalMap() returns the normal map associated with this material.
@@ -279,12 +278,12 @@ func (pbr *PBR) NormalMap() texture.Texture {
 	return pbr.normalMap
 }
 
-func (pbr *PBR) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (pbr *PBR) Albedo(u float32, v float32, p *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return pbr.albedo.Value(u, v, p)
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
-func (pbr *PBR) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+func (pbr *PBR) SpectralAlbedo(u float32, v float32, lambda float32, p *vec3.Vec3Impl) float32 {
 	if pbr.spectralAlbedo != nil {
 		return pbr.spectralAlbedo.Value(u, v, lambda, p)
 	}

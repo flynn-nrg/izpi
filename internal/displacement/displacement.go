@@ -3,14 +3,14 @@ package displacement
 
 import (
 	"errors"
-	"math"
 	"time"
 
+	"github.com/flynn-nrg/go-vfx/math32"
+	"github.com/flynn-nrg/go-vfx/math32/mat3"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/hitable"
-	"github.com/flynn-nrg/izpi/internal/mat3"
 	"github.com/flynn-nrg/izpi/internal/material"
 	"github.com/flynn-nrg/izpi/internal/texture"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -24,12 +24,12 @@ type minimalTriangle struct {
 	// Material
 	material material.Material
 	// Texture coordinates
-	u0 float64
-	u1 float64
-	u2 float64
-	v0 float64
-	v1 float64
-	v2 float64
+	u0 float32
+	u1 float32
+	u2 float32
+	v0 float32
+	v1 float32
+	v2 float32
 }
 
 // tessellate splits a triangle in four smaller triangles.
@@ -101,27 +101,27 @@ func tessellate(in *minimalTriangle) []*minimalTriangle {
 }
 
 // getDisplacementVariation calculates the variation in displacement values at the triangle vertices
-func getDisplacementVariation(tri *minimalTriangle, displacementMap texture.Texture) float64 {
+func getDisplacementVariation(tri *minimalTriangle, displacementMap texture.Texture) float32 {
 	// Sample displacement at each vertex (we only care about the Z component)
 	d0 := displacementMap.Value(tri.u0, tri.v0, nil).Z
 	d1 := displacementMap.Value(tri.u1, tri.v1, nil).Z
 	d2 := displacementMap.Value(tri.u2, tri.v2, nil).Z
 
 	// Calculate range (max - min) of displacement values
-	minDisp := math.Min(d0, math.Min(d1, d2))
-	maxDisp := math.Max(d0, math.Max(d1, d2))
+	minDisp := math32.Min(d0, math32.Min(d1, d2))
+	maxDisp := math32.Max(d0, math32.Max(d1, d2))
 
 	return maxDisp - minDisp
 }
 
-func isTessellatedEnough(tri *minimalTriangle, maxDeltaU float64, maxDeltaV float64, displacementMap texture.Texture, min, max, adaptiveThreshold float64) bool {
+func isTessellatedEnough(tri *minimalTriangle, maxDeltaU float32, maxDeltaV float32, displacementMap texture.Texture, min, max, adaptiveThreshold float32) bool {
 	// Check UV coordinate constraints (minimum tessellation)
-	uvTessellated := math.Abs(tri.u1-tri.u0) <= maxDeltaU &&
-		math.Abs(tri.u2-tri.u1) <= maxDeltaU &&
-		math.Abs(tri.u0-tri.u2) <= maxDeltaU &&
-		math.Abs(tri.v1-tri.v0) <= maxDeltaV &&
-		math.Abs(tri.v2-tri.v1) <= maxDeltaV &&
-		math.Abs(tri.v0-tri.v2) <= maxDeltaV
+	uvTessellated := math32.Abs(tri.u1-tri.u0) <= maxDeltaU &&
+		math32.Abs(tri.u2-tri.u1) <= maxDeltaU &&
+		math32.Abs(tri.u0-tri.u2) <= maxDeltaU &&
+		math32.Abs(tri.v1-tri.v0) <= maxDeltaV &&
+		math32.Abs(tri.v2-tri.v1) <= maxDeltaV &&
+		math32.Abs(tri.v0-tri.v2) <= maxDeltaV
 
 	// If UV tessellation is not satisfied, we must subdivide
 	if !uvTessellated {
@@ -131,7 +131,7 @@ func isTessellatedEnough(tri *minimalTriangle, maxDeltaU float64, maxDeltaV floa
 	// Check displacement variation (adaptive tessellation)
 	// If the displacement variation is small, we can stop tessellating
 	variation := getDisplacementVariation(tri, displacementMap)
-	displacementRange := math.Abs(max - min)
+	displacementRange := math32.Abs(max - min)
 
 	// Normalize variation by the displacement range
 	normalizedVariation := variation * displacementRange
@@ -142,7 +142,7 @@ func isTessellatedEnough(tri *minimalTriangle, maxDeltaU float64, maxDeltaV floa
 
 // ApplyDisplacementMap tessellates the triangles and applies the displacement map to all of them.
 // It uses adaptive tessellation that only subdivides areas with significant displacement variation.
-func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture.Texture, min, max float64) ([]*hitable.Triangle, error) {
+func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture.Texture, min, max float32) ([]*hitable.Triangle, error) {
 	var resU, resV int
 
 	if displacementTexture, ok := displacementMap.(*texture.ImageTxt); !ok {
@@ -171,21 +171,21 @@ func ApplyDisplacementMap(triangles []*hitable.Triangle, displacementMap texture
 
 	// Use coarser UV tessellation limits (4x the texture pixel size)
 	// This allows adaptive tessellation to take over for detail
-	tessellationFactor := 4.0
-	maxDeltaU := tessellationFactor / float64(resU-1)
-	maxDeltaV := tessellationFactor / float64(resV-1)
+	tessellationFactor := float32(4.0)
+	maxDeltaU := tessellationFactor / float32(resU-1)
+	maxDeltaV := tessellationFactor / float32(resV-1)
 
 	// Adaptive threshold: stop tessellating when displacement variation is less than this
 	// This is in world space units. Smaller values = more tessellation for finer detail.
 	// For water surfaces, we can use a higher threshold since smooth waves don't need extreme detail
-	adaptiveThreshold := 2.0 // Adjust this based on your scene scale and desired quality
+	adaptiveThreshold := float32(2.0) // Adjust this based on your scene scale and desired quality
 
 	tessellated := applyTessellation(in, maxDeltaU, maxDeltaV, displacementMap, min, max, adaptiveThreshold)
 
 	return applyDisplacement(tessellated, displacementMap, min, max), nil
 }
 
-func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float64, displacementMap texture.Texture, min, max, adaptiveThreshold float64) []*minimalTriangle {
+func applyTessellation(in []*minimalTriangle, maxDeltaU float32, maxDeltaV float32, displacementMap texture.Texture, min, max, adaptiveThreshold float32) []*minimalTriangle {
 	out := []*minimalTriangle{}
 
 	log.Info("Applying adaptive tessellation")
@@ -216,7 +216,7 @@ func applyTessellation(in []*minimalTriangle, maxDeltaU float64, maxDeltaV float
 	}
 }
 
-func applyDisplacement(in []*minimalTriangle, displacementMap texture.Texture, min, max float64) []*hitable.Triangle {
+func applyDisplacement(in []*minimalTriangle, displacementMap texture.Texture, min, max float32) []*hitable.Triangle {
 	displaced := []*hitable.Triangle{}
 
 	log.Info("Applying displacement")

@@ -3,7 +3,7 @@ package segment
 import (
 	"testing"
 
-	"github.com/flynn-nrg/izpi/internal/vec3"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/google/go-cmp/cmp"
 )
 

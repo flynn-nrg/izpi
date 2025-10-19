@@ -1,9 +1,9 @@
 package pdf
 
 import (
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/hitabletarget"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // Ensure interface compliance.
@@ -23,10 +23,10 @@ func NewHitable(p hitabletarget.HitableTarget, origin *vec3.Vec3Impl) *Hitable {
 	}
 }
 
-func (h *Hitable) Value(direction *vec3.Vec3Impl) float64 {
+func (h *Hitable) Value(direction *vec3.Vec3Impl) float32 {
 	return h.hitable.PDFValue(h.o, direction)
 }
 
-func (h *Hitable) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
+func (h *Hitable) Generate(random *fastrandom.XorShift) *vec3.Vec3Impl {
 	return h.hitable.Random(h.o, random)
 }

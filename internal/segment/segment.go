@@ -1,8 +1,6 @@
 package segment
 
-import (
-	"github.com/flynn-nrg/izpi/internal/vec3"
-)
+import "github.com/flynn-nrg/go-vfx/math32/vec3"
 
 // Segment represents a segment in the 3d space.
 type Segment struct {

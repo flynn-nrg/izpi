@@ -3,10 +3,10 @@ package displacement
 import (
 	"testing"
 
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/aabb"
 	"github.com/flynn-nrg/izpi/internal/hitable"
 	"github.com/flynn-nrg/izpi/internal/texture"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -141,13 +141,13 @@ func TestApplyTessellation(t *testing.T) {
 
 	for _, test := range testData {
 		t.Run(test.name, func(t *testing.T) {
-			maxDeltaU := 1.0 / float64(test.resU-1)
-			maxDeltaV := 1.0 / float64(test.resV-1)
+			maxDeltaU := 1.0 / float32(test.resU-1)
+			maxDeltaV := 1.0 / float32(test.resV-1)
 			// Create a flat displacement map (constant value) for predictable testing
 			// With no variation, adaptive tessellation will stop at UV limits
 			flatDisplacement := texture.NewConstant(&vec3.Vec3Impl{Z: 0.5})
-			min, max := 0.0, 1.0
-			adaptiveThreshold := 0.01 // Small threshold, but flat map has 0 variation
+			min, max := float32(0.0), float32(1.0)
+			adaptiveThreshold := float32(0.01) // Small threshold, but flat map has 0 variation
 			got := applyTessellation(test.input, maxDeltaU, maxDeltaV, flatDisplacement, min, max, adaptiveThreshold)
 			if len(got) != test.wantNumTriangles {
 				t.Errorf("applyTessellation() mismatch: expected %v triangles, got %v\n", test.wantNumTriangles, len(got))
@@ -160,8 +160,8 @@ func TestApplyDisplacement(t *testing.T) {
 	testData := []struct {
 		name    string
 		texture texture.Texture
-		min     float64
-		max     float64
+		min     float32
+		max     float32
 		input   []*minimalTriangle
 		want    []*hitable.Triangle
 	}{

@@ -19,12 +19,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 type workerServer struct {

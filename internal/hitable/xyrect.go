@@ -1,13 +1,13 @@
 package hitable
 
 import (
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/aabb"
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/material"
 	"github.com/flynn-nrg/izpi/internal/ray"
 	"github.com/flynn-nrg/izpi/internal/segment"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // Ensure interface compliance.
@@ -15,16 +15,16 @@ var _ Hitable = (*XYRect)(nil)
 
 // XYRect represents an axis aligned rectangle.
 type XYRect struct {
-	x0       float64
-	x1       float64
-	y0       float64
-	y1       float64
-	k        float64
+	x0       float32
+	x1       float32
+	y0       float32
+	y1       float32
+	k        float32
 	material material.Material
 }
 
 // NewXYRect returns an instance of an axis aligned rectangle.
-func NewXYRect(x0 float64, x1 float64, y0 float64, y1 float64, k float64, mat material.Material) *XYRect {
+func NewXYRect(x0 float32, x1 float32, y0 float32, y1 float32, k float32, mat material.Material) *XYRect {
 	return &XYRect{
 		x0:       x0,
 		y0:       y0,
@@ -35,7 +35,7 @@ func NewXYRect(x0 float64, x1 float64, y0 float64, y1 float64, k float64, mat ma
 	}
 }
 
-func (xyr *XYRect) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+func (xyr *XYRect) Hit(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, material.Material, bool) {
 	t := (xyr.k - r.Origin().Z) / r.Direction().Z
 	if t < tMin || t > tMax {
 		return nil, nil, false
@@ -52,7 +52,7 @@ func (xyr *XYRect) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 	return hitrecord.New(t, u, v, r.PointAtParameter(t), &vec3.Vec3Impl{Z: 1}), xyr.material, true
 }
 
-func (xyr *XYRect) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+func (xyr *XYRect) HitEdge(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, bool, bool) {
 	rec, _, ok := xyr.Hit(r, tMin, tMax)
 	if !ok {
 		return nil, false, false
@@ -87,7 +87,7 @@ func (xyr *XYRect) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.Hi
 	return nil, true, false
 }
 
-func (xyr *XYRect) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
+func (xyr *XYRect) BoundingBox(time0 float32, time1 float32) (*aabb.AABB, bool) {
 	return aabb.New(
 		&vec3.Vec3Impl{
 			X: xyr.x0,
@@ -101,11 +101,11 @@ func (xyr *XYRect) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) 
 		}), true
 }
 
-func (xyr *XYRect) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (xyr *XYRect) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
 	return 0.0
 }
 
-func (xyr *XYRect) Random(o *vec3.Vec3Impl, _ *fastrandom.LCG) *vec3.Vec3Impl {
+func (xyr *XYRect) Random(o *vec3.Vec3Impl, _ *fastrandom.XorShift) *vec3.Vec3Impl {
 	return &vec3.Vec3Impl{X: 1}
 }
 

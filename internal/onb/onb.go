@@ -2,9 +2,8 @@
 package onb
 
 import (
-	"math"
-
-	"github.com/flynn-nrg/izpi/internal/vec3"
+	"github.com/flynn-nrg/go-vfx/math32"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 )
 
 // Onb represents an ortho-normal base.
@@ -39,7 +38,7 @@ func (o *Onb) BuildFromW(n *vec3.Vec3Impl) {
 	// W
 	o.axis[2] = vec3.UnitVector(n)
 	var a *vec3.Vec3Impl
-	if math.Abs(o.W().X) > 0.9 {
+	if math32.Abs(o.W().X) > 0.9 {
 		a = &vec3.Vec3Impl{Y: 1}
 	} else {
 		a = &vec3.Vec3Impl{X: 1}
@@ -51,7 +50,7 @@ func (o *Onb) BuildFromW(n *vec3.Vec3Impl) {
 }
 
 // ScalarLocal returns the ortho-normal base local to the supplied position.
-func (o *Onb) ScalarLocal(a, b, c float64) *vec3.Vec3Impl {
+func (o *Onb) ScalarLocal(a, b, c float32) *vec3.Vec3Impl {
 	// a*u + b*v + c*w
 	return vec3.Add(vec3.ScalarMul(o.U(), a),
 		vec3.ScalarMul(o.V(), b),

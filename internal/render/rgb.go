@@ -4,12 +4,12 @@ import (
 	"sync"
 
 	"github.com/flynn-nrg/floatimage/colour"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/display"
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
-func renderRectRGB(w workUnit, random *fastrandom.LCG) {
+func renderRectRGB(w workUnit, random *fastrandom.XorShift) {
 	var tile display.DisplayTile
 
 	nx := w.canvas.Bounds().Max.X
@@ -20,7 +20,7 @@ func renderRectRGB(w workUnit, random *fastrandom.LCG) {
 			Width:  w.x1 - w.x0 + 1,
 			Height: 1,
 			PosX:   w.x0,
-			Pixels: make([]float64, (w.x1-w.x0+1)*4),
+			Pixels: make([]float32, (w.x1-w.x0+1)*4),
 		}
 	}
 
@@ -30,15 +30,15 @@ func renderRectRGB(w workUnit, random *fastrandom.LCG) {
 		for x := w.x0; x <= w.x1; x++ {
 			col := &vec3.Vec3Impl{}
 			for s := 0; s < w.numSamples; s++ {
-				u := (float64(x) + random.Float64()) / float64(nx)
-				v := (float64(y) + random.Float64()) / float64(ny)
+				u := (float32(x) + random.Float32()) / float32(nx)
+				v := (float32(y) + random.Float32()) / float32(ny)
 				r := w.scene.Camera.GetRay(u, v)
 				col = vec3.Add(col, vec3.DeNAN(w.sampler.Sample(r, w.scene.World, w.scene.Lights, 0, random)))
 			}
 
 			// Linear colour space.
-			col = vec3.ScalarDiv(col, float64(w.numSamples))
-			w.canvas.Set(x, ny-y, colour.Float64NRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
+			col = vec3.ScalarDiv(col, float32(w.numSamples))
+			w.canvas.Set(x, ny-y, colour.Float32NRGBA{R: col.X, G: col.Y, B: col.Z, A: 1.0})
 			if w.preview {
 				tile.Pixels[i] = col.Z
 				tile.Pixels[i+1] = col.Y
@@ -56,7 +56,7 @@ func renderRectRGB(w workUnit, random *fastrandom.LCG) {
 	}
 }
 
-func workerRGB(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg *sync.WaitGroup) {
+func workerRGB(input chan workUnit, quit chan struct{}, random *fastrandom.XorShift, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		select {

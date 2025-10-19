@@ -31,20 +31,20 @@ enum RenderSetupStatus {
 }
 
 message Vec3 {
-  double x = 1;
-  double y = 2;
-  double z = 3;
+  float x = 1;
+  float y = 2;
+  float z = 3;
 }
 
 message TabulatedSpectralConstant {
-  repeated double wavelengths = 1;
-  repeated double values = 2;
+  repeated float wavelengths = 1;
+  repeated float values = 2;
 }
 
 message SpectralBackground {
   oneof spectral_properties {
     TabulatedSpectralConstant tabulated = 1;
-    double neutral_value = 2;
+    float neutral_value = 2;
   }
 }
 
@@ -85,7 +85,7 @@ message RenderTileResponse {
   uint32 height = 2;
   uint32 pos_x = 3;
   uint32 pos_y = 4;
-  repeated double pixels = 5;
+  repeated float pixels = 5;
 }
 
 message RenderEndRequest {

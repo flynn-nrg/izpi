@@ -1,16 +1,17 @@
 package spectral
 
 import (
-	"math"
 	"testing"
+
+	"github.com/flynn-nrg/go-vfx/math32"
 )
 
 func TestComputeWhitePointFromTemperature(t *testing.T) {
 	tests := []struct {
 		name        string
-		temperature float64
+		temperature float32
 		wantCloseTo WhitePointXYZ // Approximate expected values
-		tolerance   float64
+		tolerance   float32
 	}{
 		{
 			name:        "D65 (6500K)",
@@ -31,13 +32,13 @@ func TestComputeWhitePointFromTemperature(t *testing.T) {
 			got := ComputeWhitePointFromTemperature(tt.temperature)
 
 			// Check Y is normalized to 1.0
-			if math.Abs(got.Y-1.0) > 0.001 {
+			if math32.Abs(got.Y-1.0) > 0.001 {
 				t.Errorf("ComputeWhitePointFromTemperature() Y = %v, want 1.0", got.Y)
 			}
 
 			// Check values are within tolerance
-			xDiff := math.Abs(got.X-tt.wantCloseTo.X) / tt.wantCloseTo.X
-			zDiff := math.Abs(got.Z-tt.wantCloseTo.Z) / math.Max(tt.wantCloseTo.Z, 0.1) // Avoid division by very small numbers
+			xDiff := math32.Abs(got.X-tt.wantCloseTo.X) / tt.wantCloseTo.X
+			zDiff := math32.Abs(got.Z-tt.wantCloseTo.Z) / math32.Max(tt.wantCloseTo.Z, 0.1) // Avoid division by very small numbers
 
 			if xDiff > tt.tolerance {
 				t.Errorf("ComputeWhitePointFromTemperature() X = %v, want approximately %v", got.X, tt.wantCloseTo.X)
@@ -55,12 +56,12 @@ func TestComputeWhitePointFromSPD(t *testing.T) {
 	whitePoint := ComputeWhitePointFromSPD(d65SPD)
 
 	// Y should be normalized to 1.0
-	if math.Abs(whitePoint.Y-1.0) > 0.001 {
+	if math32.Abs(whitePoint.Y-1.0) > 0.001 {
 		t.Errorf("ComputeWhitePointFromSPD() Y = %v, want 1.0", whitePoint.Y)
 	}
 
 	// Should be close to D65
-	if math.Abs(whitePoint.X-D65.X) > 0.1 {
+	if math32.Abs(whitePoint.X-D65.X) > 0.1 {
 		t.Errorf("ComputeWhitePointFromSPD() X = %v, want approximately %v", whitePoint.X, D65.X)
 	}
 }
@@ -73,8 +74,8 @@ func TestXYZToRGBMatrixApply(t *testing.T) {
 	r, g, b := matrix.Apply(D65.X, D65.Y, D65.Z)
 
 	// Check that RGB values are close to 1.0
-	tolerance := 0.05
-	if math.Abs(r-1.0) > tolerance || math.Abs(g-1.0) > tolerance || math.Abs(b-1.0) > tolerance {
+	tolerance := float32(0.05)
+	if math32.Abs(r-1.0) > tolerance || math32.Abs(g-1.0) > tolerance || math32.Abs(b-1.0) > tolerance {
 		t.Errorf("sRGBD65Matrix.Apply(D65) = (%v, %v, %v), want approximately (1.0, 1.0, 1.0)", r, g, b)
 	}
 }
@@ -86,7 +87,7 @@ func TestComputeAdaptedXYZToRGBMatrix(t *testing.T) {
 	// Compare with sRGB D65 matrix
 	for i := range 3 {
 		for j := range 3 {
-			if math.Abs(matrix[i][j]-sRGBD65Matrix[i][j]) > 0.0001 {
+			if math32.Abs(matrix[i][j]-sRGBD65Matrix[i][j]) > 0.0001 {
 				t.Errorf("ComputeAdaptedXYZToRGBMatrix(D65)[%d][%d] = %v, want %v", i, j, matrix[i][j], sRGBD65Matrix[i][j])
 			}
 		}
@@ -100,7 +101,7 @@ func TestComputeAdaptedXYZToRGBMatrix(t *testing.T) {
 	hasDifference := false
 	for i := range 3 {
 		for j := range 3 {
-			if math.Abs(incandescentMatrix[i][j]-sRGBD65Matrix[i][j]) > 0.01 {
+			if math32.Abs(incandescentMatrix[i][j]-sRGBD65Matrix[i][j]) > 0.01 {
 				hasDifference = true
 				break
 			}
@@ -115,7 +116,7 @@ func TestComputeAdaptedXYZToRGBMatrix(t *testing.T) {
 func TestNewWhiteBalanceFromTemperature(t *testing.T) {
 	tests := []struct {
 		name        string
-		temperature float64
+		temperature float32
 		wantErr     bool
 	}{
 		{
@@ -198,7 +199,7 @@ func TestNewWhiteBalanceDefault(t *testing.T) {
 	// Matrix should be the standard sRGB matrix
 	for i := range 3 {
 		for j := range 3 {
-			if math.Abs(config.Matrix[i][j]-sRGBD65Matrix[i][j]) > 0.0001 {
+			if math32.Abs(config.Matrix[i][j]-sRGBD65Matrix[i][j]) > 0.0001 {
 				t.Errorf("NewWhiteBalanceDefault() matrix[%d][%d] = %v, want %v", i, j, config.Matrix[i][j], sRGBD65Matrix[i][j])
 			}
 		}
@@ -212,11 +213,11 @@ func TestChromaticAdaptation(t *testing.T) {
 	// Should be close to identity matrix
 	for i := range 3 {
 		for j := range 3 {
-			expected := 0.0
+			expected := float32(0.0)
 			if i == j {
-				expected = 1.0
+				expected = float32(1.0)
 			}
-			if math.Abs(adaptMatrix[i][j]-expected) > 0.01 {
+			if math32.Abs(adaptMatrix[i][j]-expected) > 0.01 {
 				t.Errorf("ComputeChromaticAdaptationMatrix(D65, D65)[%d][%d] = %v, want %v", i, j, adaptMatrix[i][j], expected)
 			}
 		}
@@ -230,11 +231,11 @@ func TestChromaticAdaptation(t *testing.T) {
 	isIdentity := true
 	for i := range 3 {
 		for j := range 3 {
-			expected := 0.0
+			expected := float32(0.0)
 			if i == j {
-				expected = 1.0
+				expected = float32(1.0)
 			}
-			if math.Abs(adaptMatrix[i][j]-expected) > 0.1 {
+			if math32.Abs(adaptMatrix[i][j]-expected) > 0.1 {
 				isIdentity = false
 				break
 			}

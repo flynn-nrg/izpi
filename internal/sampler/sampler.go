@@ -2,10 +2,10 @@
 package sampler
 
 import (
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/hitable"
 	"github.com/flynn-nrg/izpi/internal/ray"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 type SamplerType int
@@ -28,8 +28,8 @@ var samplerMap = map[string]SamplerType{
 }
 
 type Sampler interface {
-	Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) *vec3.Vec3Impl
-	SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) float64
+	Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.XorShift) *vec3.Vec3Impl
+	SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.XorShift) float32
 }
 
 func StringToType(s string) SamplerType {

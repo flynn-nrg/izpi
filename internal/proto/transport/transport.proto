@@ -16,7 +16,7 @@ enum TextureType {
 
 enum TexturePixelFormat {
   TEXTURE_PIXEL_FORMAT_UNSPECIFIED = 0;
-  FLOAT64 = 1;
+  float32 = 1;
 }
 
 message ImageTextureMetadata {
@@ -49,8 +49,8 @@ enum GeometryOperator {
 }
 
 message DisplaceOperator {
-  double min = 1;
-  double max = 2;
+  float min = 1;
+  float max = 2;
   string displacement_map = 3;
 }
 

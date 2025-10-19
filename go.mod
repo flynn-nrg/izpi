@@ -3,11 +3,12 @@ module github.com/flynn-nrg/izpi
 go 1.25.1
 
 require (
-	fyne.io/fyne/v2 v2.6.3
+	fyne.io/fyne/v2 v2.7.0
 	github.com/alecthomas/kong v1.12.1
 	github.com/cheggaaa/pb/v3 v3.1.7
 	github.com/flynn-nrg/floatimage v0.0.0-20250823091259-aa26060097d4
-	github.com/flynn-nrg/go-vfx/go-oiio v0.0.0-20250823100644-216bb2227e44
+	github.com/flynn-nrg/go-vfx/go-oiio v0.0.0-20251018184632-f1d8c676bffe
+	github.com/flynn-nrg/go-vfx/math32 v0.0.0-20251018184632-f1d8c676bffe
 	github.com/flynn-nrg/gube v1.0.3
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/google/go-cmp v0.7.0
@@ -17,12 +18,12 @@ require (
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/sirupsen/logrus v1.9.3
 	github.com/veandco/go-sdl2 v0.4.40
-	google.golang.org/grpc v1.75.1
+	google.golang.org/grpc v1.76.0
 	google.golang.org/protobuf v1.36.10
 )
 
 require (
-	fyne.io/systray v1.11.0 // indirect
+	fyne.io/systray v1.11.1-0.20250603113521-ca66a66d8b58 // indirect
 	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
@@ -56,13 +57,13 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/yuin/goldmark v1.7.13 // indirect
-	golang.org/x/image v0.31.0 // indirect
-	golang.org/x/mod v0.28.0 // indirect
-	golang.org/x/net v0.44.0 // indirect
+	golang.org/x/image v0.32.0 // indirect
+	golang.org/x/mod v0.29.0 // indirect
+	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/text v0.29.0 // indirect
-	golang.org/x/tools v0.37.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251002232023-7c0ddcbb5797 // indirect
+	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/text v0.30.0 // indirect
+	golang.org/x/tools v0.38.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251014184007-4626949a642f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

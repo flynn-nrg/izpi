@@ -1,15 +1,15 @@
 package material
 
 import (
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/ray"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 type nonEmitter struct{}
 
 // Emitted returns black for non-emitter materials.
-func (ne *nonEmitter) Emitted(_ ray.Ray, _ *hitrecord.HitRecord, _ float64, _ float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (ne *nonEmitter) Emitted(_ ray.Ray, _ *hitrecord.HitRecord, _ float32, _ float32, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
 	return &vec3.Vec3Impl{}
 }
 
@@ -18,6 +18,6 @@ func (ne *nonEmitter) IsEmitter() bool {
 }
 
 // EmittedSpectral returns 0.0 for non-emitter materials.
-func (ne *nonEmitter) EmittedSpectral(_ ray.Ray, _ *hitrecord.HitRecord, _ float64, _ float64, _ float64, _ *vec3.Vec3Impl) float64 {
+func (ne *nonEmitter) EmittedSpectral(_ ray.Ray, _ *hitrecord.HitRecord, _ float32, _ float32, _ float32, _ *vec3.Vec3Impl) float32 {
 	return 0.0
 }

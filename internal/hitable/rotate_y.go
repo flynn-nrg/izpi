@@ -1,14 +1,13 @@
 package hitable
 
 import (
-	"math"
-
+	"github.com/flynn-nrg/go-vfx/math32"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/aabb"
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/material"
 	"github.com/flynn-nrg/izpi/internal/ray"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // Ensure interface compliance.
@@ -16,28 +15,28 @@ var _ Hitable = (*RotateY)(nil)
 
 // RotateY represents a rotation along the Y axis.
 type RotateY struct {
-	sinTheta float64
-	cosTheta float64
+	sinTheta float32
+	cosTheta float32
 	hitable  Hitable
 	bbox     *aabb.AABB
 	hasBox   bool
 }
 
 // NewRotateY returns a new hitable rotated along the Y axis.
-func NewRotateY(hitable Hitable, angle float64) *RotateY {
-	radians := (math.Pi / 180.0) * angle
-	sinTheta := math.Sin(radians)
-	cosTheta := math.Cos(radians)
+func NewRotateY(hitable Hitable, angle float32) *RotateY {
+	radians := (math32.Pi / 180.0) * angle
+	sinTheta := math32.Sin(radians)
+	cosTheta := math32.Cos(radians)
 	bbox, hasBox := hitable.BoundingBox(0, 1)
-	min := &vec3.Vec3Impl{X: math.MaxFloat64, Y: math.MaxFloat64, Z: math.MaxFloat64}
-	max := &vec3.Vec3Impl{X: -math.MaxFloat64, Y: -math.MaxFloat64, Z: -math.MaxFloat64}
+	min := &vec3.Vec3Impl{X: math32.MaxFloat32, Y: math32.MaxFloat32, Z: math32.MaxFloat32}
+	max := &vec3.Vec3Impl{X: -math32.MaxFloat32, Y: -math32.MaxFloat32, Z: -math32.MaxFloat32}
 
 	for i := 0; i < 2; i++ {
 		for j := 0; j < 2; j++ {
 			for k := 0; k < 2; k++ {
-				x := float64(i)*bbox.Max().X + (1.0-float64(i))*bbox.Min().X
-				y := float64(j)*bbox.Max().Y + (1.0-float64(j))*bbox.Min().Y
-				z := float64(k)*bbox.Max().Z + (1.0-float64(k))*bbox.Min().Z
+				x := float32(i)*bbox.Max().X + (1.0-float32(i))*bbox.Min().X
+				y := float32(j)*bbox.Max().Y + (1.0-float32(j))*bbox.Min().Y
+				z := float32(k)*bbox.Max().Z + (1.0-float32(k))*bbox.Min().Z
 				newx := cosTheta*x + sinTheta*z
 				newz := -sinTheta*x + cosTheta*z
 				tester := &vec3.Vec3Impl{X: newx, Y: y, Z: newz}
@@ -78,7 +77,7 @@ func NewRotateY(hitable Hitable, angle float64) *RotateY {
 	}
 }
 
-func (ry *RotateY) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+func (ry *RotateY) Hit(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, material.Material, bool) {
 	origin := &vec3.Vec3Impl{
 		X: ry.cosTheta*r.Origin().X - ry.sinTheta*r.Origin().Z,
 		Y: r.Origin().Y,
@@ -110,7 +109,7 @@ func (ry *RotateY) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 	return nil, nil, false
 }
 
-func (ry *RotateY) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+func (ry *RotateY) HitEdge(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, bool, bool) {
 	origin := &vec3.Vec3Impl{
 		X: ry.cosTheta*r.Origin().X - ry.sinTheta*r.Origin().Z,
 		Y: r.Origin().Y,
@@ -142,15 +141,15 @@ func (ry *RotateY) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.Hi
 	return nil, false, false
 }
 
-func (ry *RotateY) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
+func (ry *RotateY) BoundingBox(time0 float32, time1 float32) (*aabb.AABB, bool) {
 	return ry.bbox, ry.hasBox
 }
 
-func (ry *RotateY) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (ry *RotateY) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
 	return ry.hitable.PDFValue(o, v)
 }
 
-func (ry *RotateY) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (ry *RotateY) Random(o *vec3.Vec3Impl, random *fastrandom.XorShift) *vec3.Vec3Impl {
 	return ry.hitable.Random(o, random)
 }
 

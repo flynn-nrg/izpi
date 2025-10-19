@@ -2,26 +2,26 @@
 package scatterrecord
 
 import (
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/pdf"
 	"github.com/flynn-nrg/izpi/internal/ray"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // SpectralScatterRecord represents a spectral scatter record.
 type SpectralScatterRecord struct {
 	specularRay ray.Ray
 	isSpecular  bool
-	albedo      float64 // Spectral albedo at wavelength lambda
-	lambda      float64 // Wavelength in nanometers
+	albedo      float32 // Spectral albedo at wavelength lambda
+	lambda      float32 // Wavelength in nanometers
 	normal      *vec3.Vec3Impl
-	roughness   float64 // Spectral roughness at wavelength lambda
-	metalness   float64 // Spectral metalness at wavelength lambda
+	roughness   float32 // Spectral roughness at wavelength lambda
+	metalness   float32 // Spectral metalness at wavelength lambda
 	pdf         pdf.PDF
 }
 
 // New returns an instance of a spectral scatter record.
 func NewSpectralScatterRecord(specularRay ray.Ray, isSpecular bool,
-	albedo float64, lambda float64, normal *vec3.Vec3Impl, roughness float64, metalness float64, pdf pdf.PDF) *SpectralScatterRecord {
+	albedo float32, lambda float32, normal *vec3.Vec3Impl, roughness float32, metalness float32, pdf pdf.PDF) *SpectralScatterRecord {
 	return &SpectralScatterRecord{
 		specularRay: specularRay,
 		isSpecular:  isSpecular,
@@ -45,12 +45,12 @@ func (ssr *SpectralScatterRecord) IsSpecular() bool {
 }
 
 // Attenuation returns the spectral attenuation value for this material at wavelength lambda.
-func (ssr *SpectralScatterRecord) Attenuation() float64 {
+func (ssr *SpectralScatterRecord) Attenuation() float32 {
 	return ssr.albedo
 }
 
 // Wavelength returns the wavelength (lambda) associated with this scatter record.
-func (ssr *SpectralScatterRecord) Wavelength() float64 {
+func (ssr *SpectralScatterRecord) Wavelength() float32 {
 	return ssr.lambda
 }
 
@@ -60,12 +60,12 @@ func (ssr *SpectralScatterRecord) Normal() *vec3.Vec3Impl {
 }
 
 // Roughness returns the spectral roughness value for this material at wavelength lambda.
-func (ssr *SpectralScatterRecord) Roughness() float64 {
+func (ssr *SpectralScatterRecord) Roughness() float32 {
 	return ssr.roughness
 }
 
 // Metalness returns the spectral metalness value for this material at wavelength lambda.
-func (ssr *SpectralScatterRecord) Metalness() float64 {
+func (ssr *SpectralScatterRecord) Metalness() float32 {
 	return ssr.metalness
 }
 

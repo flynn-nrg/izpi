@@ -4,12 +4,12 @@ import (
 	"sort"
 	"time"
 
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/aabb"
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/material"
 	"github.com/flynn-nrg/izpi/internal/ray"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -21,21 +21,21 @@ var _ Hitable = (*BVHNode)(nil)
 type BVHNode struct {
 	left  Hitable
 	right Hitable
-	time0 float64
-	time1 float64
+	time0 float32
+	time1 float32
 	box   *aabb.AABB
 }
 
-func NewBVH(hitables []Hitable, time0 float64, time1 float64) *BVHNode {
+func NewBVH(hitables []Hitable, time0 float32, time1 float32) *BVHNode {
 	log.Infof("Building BVH with %v elements", len(hitables))
 	startTime := time.Now()
-	randomFunc := fastrandom.NewWithDefaults().Float64
+	randomFunc := fastrandom.NewWithDefaults().Float32
 	bvh := newBVH(hitables, randomFunc, time0, time1)
 	log.Infof("Completed BVH construction in %v", time.Since(startTime))
 	return bvh
 }
 
-func newBVH(hitables []Hitable, randomFunc func() float64, time0 float64, time1 float64) *BVHNode {
+func newBVH(hitables []Hitable, randomFunc func() float32, time0 float32, time1 float32) *BVHNode {
 	bn := &BVHNode{
 		time0: time0,
 		time1: time1,
@@ -128,7 +128,7 @@ func newBVH(hitables []Hitable, randomFunc func() float64, time0 float64, time1 
 	return bn
 }
 
-func (bn *BVHNode) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+func (bn *BVHNode) Hit(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, material.Material, bool) {
 	if bn.box.Hit(r, tMin, tMax) {
 		leftRec, leftMat, hitLeft := bn.left.Hit(r, tMin, tMax)
 		rightRec, rightMat, hitRight := bn.right.Hit(r, tMin, tMax)
@@ -152,7 +152,7 @@ func (bn *BVHNode) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 	return nil, nil, false
 }
 
-func (bn *BVHNode) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+func (bn *BVHNode) HitEdge(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, bool, bool) {
 	if bn.box.Hit(r, tMin, tMax) {
 		leftRec, hitLeft, hitLeftEdge := bn.left.HitEdge(r, tMin, tMax)
 		rightRec, hitRight, hitRightEdge := bn.right.HitEdge(r, tMin, tMax)
@@ -176,15 +176,15 @@ func (bn *BVHNode) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.Hi
 	return nil, false, false
 }
 
-func (bn *BVHNode) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
+func (bn *BVHNode) BoundingBox(time0 float32, time1 float32) (*aabb.AABB, bool) {
 	return bn.box, true
 }
 
-func (bn *BVHNode) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (bn *BVHNode) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float32 {
 	return 0.0
 }
 
-func (bn *BVHNode) Random(o *vec3.Vec3Impl, _ *fastrandom.LCG) *vec3.Vec3Impl {
+func (bn *BVHNode) Random(o *vec3.Vec3Impl, _ *fastrandom.XorShift) *vec3.Vec3Impl {
 	return &vec3.Vec3Impl{X: 1}
 }
 

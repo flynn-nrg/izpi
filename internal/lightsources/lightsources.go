@@ -11,7 +11,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	// PC (Phosphor Converted): Various NGL models, Maxled, Current GE, Samjin, Green Creative MR16, Soraa MR16, Seoul Sunlike
 	// PCV (Phosphor Converted Violet): Soraa Premium 2700K, Soraa Vivid 2700K
 	// CM (Chip Mix): Acuity Evo, Intense MXRTR2, Lumenetix, Edison Price, Pathway/Lexel
-	"hy_cree_llf_tm_30_90": spectral.NewCIESPD([]float64{
+	"hy_cree_llf_tm_30_90": spectral.NewCIESPD([]float32{
 		0.0032, 0.0032, 0.0032, 0.0032, 0.0032, 0.0032, 0.0032, 0.0059, 0.0200, 0.0415,
 		0.0807, 0.1222, 0.1894, 0.2666, 0.2720, 0.2251, 0.1899, 0.2193, 0.2636, 0.2543,
 		0.2188, 0.1885, 0.1645, 0.1628, 0.1784, 0.2071, 0.2426, 0.2796, 0.3142, 0.3419,
@@ -21,7 +21,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0663, 0.0571, 0.0506, 0.0451, 0.0404, 0.0362, 0.0325, 0.0296, 0.0270, 0.0236,
 		0.0197, 0.0158, 0.0130, 0.0127, 0.0126,
 	}),
-	"hy_ngl_47_tm_30_92": spectral.NewCIESPD([]float64{
+	"hy_ngl_47_tm_30_92": spectral.NewCIESPD([]float32{
 		0.0028, 0.0028, 0.0028, 0.0028, 0.0028, 0.0028, 0.0060, 0.0102, 0.0221, 0.0360,
 		0.0590, 0.0845, 0.1104, 0.1362, 0.1558, 0.1450, 0.1145, 0.0928, 0.0769, 0.0696,
 		0.0623, 0.0692, 0.0806, 0.0920, 0.1065, 0.1421, 0.1777, 0.2082, 0.2360, 0.2615,
@@ -31,7 +31,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0623, 0.0543, 0.0502, 0.0460, 0.0418, 0.0377, 0.0335, 0.0312, 0.0292, 0.0272,
 		0.0252, 0.0231, 0.0213, 0.0197, 0.0181,
 	}),
-	"pc_ngl_124_tm_30_194": spectral.NewCIESPD([]float64{
+	"pc_ngl_124_tm_30_194": spectral.NewCIESPD([]float32{
 		0.0129, 0.0121, 0.0123, 0.0125, 0.0135, 0.0158, 0.0194, 0.0258, 0.0368, 0.0595,
 		0.1048, 0.1870, 0.3186, 0.5537, 0.8715, 0.9411, 0.6796, 0.4618, 0.3485, 0.2570,
 		0.1991, 0.1838, 0.1940, 0.2284, 0.2902, 0.3702, 0.4575, 0.5459, 0.6212, 0.6892,
@@ -41,7 +41,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.5146, 0.4651, 0.4176, 0.3751, 0.3348, 0.2967, 0.2615, 0.2288, 0.1993, 0.1737,
 		0.1508, 0.1306, 0.1130, 0.0972, 0.0843,
 	}),
-	"pc_ngl_308_tm_30_231": spectral.NewCIESPD([]float64{
+	"pc_ngl_308_tm_30_231": spectral.NewCIESPD([]float32{
 		0.0059, 0.0127, 0.0194, 0.0145, 0.0097, 0.0220, 0.0343, 0.0776, 0.1209, 0.2392,
 		0.3576, 0.5468, 0.7361, 0.8681, 1.0000, 0.8005, 0.6009, 0.4435, 0.2861, 0.2194,
 		0.1527, 0.1422, 0.1318, 0.1694, 0.2071, 0.2892, 0.3714, 0.4692, 0.5670, 0.6426,
@@ -51,7 +51,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.1952, 0.1772, 0.1591, 0.1472, 0.1353, 0.1232, 0.1110, 0.0987, 0.0863, 0.0791,
 		0.0718, 0.0609, 0.0499, 0.0448, 0.0398,
 	}),
-	"pcv_soraa_prem_2700_k_tm_30_294": spectral.NewCIESPD([]float64{
+	"pcv_soraa_prem_2700_k_tm_30_294": spectral.NewCIESPD([]float32{
 		0.0078, 0.0095, 0.0118, 0.0182, 0.0393, 0.0951, 0.1996, 0.2897, 0.2995, 0.2690,
 		0.2407, 0.2200, 0.2096, 0.2015, 0.1909, 0.1776, 0.1623, 0.1507, 0.1431, 0.1404,
 		0.1421, 0.1515, 0.1675, 0.1915, 0.2253, 0.2662, 0.3077, 0.3509, 0.3918, 0.4268,
@@ -61,7 +61,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.3464, 0.3046, 0.2694, 0.2350, 0.2054, 0.1782, 0.1550, 0.1342, 0.1158, 0.1003,
 		0.0866, 0.0736, 0.0642, 0.0551, 0.0476,
 	}),
-	"pcv_soraa_vivid_2700_k_tm_30_296": spectral.NewCIESPD([]float64{
+	"pcv_soraa_vivid_2700_k_tm_30_296": spectral.NewCIESPD([]float32{
 		0.0000, 0.0029, 0.0047, 0.0098, 0.0248, 0.0660, 0.1560, 0.2853, 0.3020, 0.2563,
 		0.1943, 0.1504, 0.1241, 0.1222, 0.1217, 0.1318, 0.1395, 0.1614, 0.1860, 0.2211,
 		0.2578, 0.2957, 0.3352, 0.3589, 0.3795, 0.3975, 0.4126, 0.4277, 0.4398, 0.4522,
@@ -71,7 +71,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.6557, 0.6005, 0.5456, 0.4901, 0.4427, 0.3966, 0.3562, 0.3141, 0.2744, 0.2433,
 		0.2131, 0.1862, 0.1646, 0.1434, 0.1241,
 	}),
-	"hy_ge_lumination": spectral.NewCIESPD([]float64{
+	"hy_ge_lumination": spectral.NewCIESPD([]float32{
 		0.0001, 0.0001, 0.0002, 0.0002, 0.0003, 0.0006, 0.0011, 0.0021, 0.0038, 0.0066,
 		0.0101, 0.0142, 0.0198, 0.0256, 0.0278, 0.0226, 0.0169, 0.0131, 0.0103, 0.0086,
 		0.0082, 0.0087, 0.0101, 0.0122, 0.0146, 0.0172, 0.0196, 0.0217, 0.0235, 0.0247,
@@ -81,7 +81,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0044, 0.0038, 0.0034, 0.0029, 0.0025, 0.0022, 0.0019, 0.0017, 0.0015, 0.0013,
 		0.0011, 0.0010, 0.0008, 0.0007, 0.0006,
 	}),
-	"pc_maxled": spectral.NewCIESPD([]float64{
+	"pc_maxled": spectral.NewCIESPD([]float32{
 		0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0002, 0.0003, 0.0005, 0.0010, 0.0017,
 		0.0026, 0.0037, 0.0052, 0.0073, 0.0094, 0.0085, 0.0062, 0.0051, 0.0044, 0.0039,
 		0.0040, 0.0045, 0.0054, 0.0064, 0.0074, 0.0083, 0.0091, 0.0097, 0.0104, 0.0109,
@@ -91,7 +91,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0111, 0.0100, 0.0089, 0.0079, 0.0070, 0.0062, 0.0054, 0.0047, 0.0041, 0.0036,
 		0.0031, 0.0027, 0.0023, 0.0020, 0.0017,
 	}),
-	"hy_cree_module": spectral.NewCIESPD([]float64{
+	"hy_cree_module": spectral.NewCIESPD([]float32{
 		0.0001, 0.0000, 0.0000, 0.0001, 0.0001, 0.0001, 0.0002, 0.0003, 0.0006, 0.0012,
 		0.0019, 0.0028, 0.0040, 0.0053, 0.0073, 0.0088, 0.0088, 0.0080, 0.0073, 0.0065,
 		0.0058, 0.0053, 0.0051, 0.0053, 0.0059, 0.0068, 0.0081, 0.0094, 0.0106, 0.0115,
@@ -101,7 +101,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0024, 0.0021, 0.0019, 0.0017, 0.0015, 0.0013, 0.0011, 0.0010, 0.0009, 0.0008,
 		0.0007, 0.0006, 0.0005, 0.0005, 0.0004,
 	}),
-	"pc_current_ge": spectral.NewCIESPD([]float64{
+	"pc_current_ge": spectral.NewCIESPD([]float32{
 		0.0003, 0.0003, 0.0003, 0.0004, 0.0006, 0.0011, 0.0019, 0.0034, 0.0059, 0.0099,
 		0.0148, 0.0213, 0.0300, 0.0397, 0.0452, 0.0400, 0.0320, 0.0255, 0.0208, 0.0174,
 		0.0159, 0.0158, 0.0171, 0.0199, 0.0236, 0.0278, 0.0322, 0.0363, 0.0401, 0.0432,
@@ -111,7 +111,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0257, 0.0225, 0.0196, 0.0171, 0.0149, 0.0130, 0.0112, 0.0097, 0.0084, 0.0073,
 		0.0063, 0.0055, 0.0047, 0.0041, 0.0035,
 	}),
-	"cm_lumenetix": spectral.NewCIESPD([]float64{
+	"cm_lumenetix": spectral.NewCIESPD([]float32{
 		0.0003, 0.0003, 0.0003, 0.0004, 0.0005, 0.0008, 0.0014, 0.0026, 0.0052, 0.0100,
 		0.0171, 0.0272, 0.0398, 0.0514, 0.0498, 0.0350, 0.0247, 0.0192, 0.0154, 0.0139,
 		0.0148, 0.0170, 0.0206, 0.0250, 0.0296, 0.0339, 0.0376, 0.0409, 0.0440, 0.0468,
@@ -121,7 +121,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0349, 0.0308, 0.0271, 0.0237, 0.0207, 0.0180, 0.0156, 0.0135, 0.0117, 0.0101,
 		0.0087, 0.0075, 0.0064, 0.0055, 0.0047,
 	}),
-	"cm_acuity_evo_4": spectral.NewCIESPD([]float64{
+	"cm_acuity_evo_4": spectral.NewCIESPD([]float32{
 		0.0001, 0.0001, 0.0001, 0.0001, 0.0002, 0.0002, 0.0004, 0.0008, 0.0016, 0.0031,
 		0.0054, 0.0091, 0.0141, 0.0199, 0.0268, 0.0316, 0.0301, 0.0226, 0.0159, 0.0120,
 		0.0094, 0.0076, 0.0072, 0.0077, 0.0093, 0.0116, 0.0145, 0.0176, 0.0201, 0.0225,
@@ -131,7 +131,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0046, 0.0041, 0.0036, 0.0032, 0.0028, 0.0025, 0.0022, 0.0019, 0.0017, 0.0015,
 		0.0013, 0.0012, 0.0010, 0.0009, 0.0008,
 	}),
-	"cm_intense_mxrtr2": spectral.NewCIESPD([]float64{
+	"cm_intense_mxrtr2": spectral.NewCIESPD([]float32{
 		0.0001, 0.0001, 0.0001, 0.0001, 0.0002, 0.0003, 0.0005, 0.0009, 0.0018, 0.0035,
 		0.0060, 0.0099, 0.0147, 0.0205, 0.0265, 0.0304, 0.0282, 0.0207, 0.0147, 0.0110,
 		0.0086, 0.0070, 0.0067, 0.0073, 0.0088, 0.0111, 0.0140, 0.0169, 0.0196, 0.0218,
@@ -141,7 +141,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0045, 0.0040, 0.0035, 0.0031, 0.0028, 0.0025, 0.0022, 0.0019, 0.0017, 0.0015,
 		0.0013, 0.0012, 0.0010, 0.0009, 0.0008,
 	}),
-	"pc_samjin": spectral.NewCIESPD([]float64{
+	"pc_samjin": spectral.NewCIESPD([]float32{
 		0.0007, 0.0007, 0.0008, 0.0010, 0.0013, 0.0018, 0.0030, 0.0057, 0.0113, 0.0224,
 		0.0416, 0.0718, 0.1167, 0.1757, 0.1885, 0.1278, 0.0839, 0.0651, 0.0477, 0.0391,
 		0.0403, 0.0451, 0.0522, 0.0608, 0.0687, 0.0747, 0.0786, 0.0812, 0.0827, 0.0841,
@@ -151,7 +151,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0183, 0.0159, 0.0138, 0.0120, 0.0103, 0.0089, 0.0076, 0.0066, 0.0056, 0.0048,
 		0.0041, 0.0036, 0.0031, 0.0026, 0.0023,
 	}),
-	"cm_edison_price_lumenetix": spectral.NewCIESPD([]float64{
+	"cm_edison_price_lumenetix": spectral.NewCIESPD([]float32{
 		0.0001, 0.0001, 0.0001, 0.0001, 0.0002, 0.0003, 0.0005, 0.0009, 0.0014, 0.0022,
 		0.0037, 0.0066, 0.0109, 0.0163, 0.0212, 0.0211, 0.0149, 0.0093, 0.0062, 0.0045,
 		0.0037, 0.0038, 0.0046, 0.0060, 0.0077, 0.0094, 0.0108, 0.0118, 0.0125, 0.0129,
@@ -161,7 +161,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0017, 0.0014, 0.0012, 0.0011, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005, 0.0005,
 		0.0004, 0.0004, 0.0003, 0.0003, 0.0002,
 	}),
-	"cm_pathway_lexel": spectral.NewCIESPD([]float64{
+	"cm_pathway_lexel": spectral.NewCIESPD([]float32{
 		0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0001, 0.0001, 0.0002, 0.0003, 0.0007,
 		0.0012, 0.0019, 0.0026, 0.0034, 0.0046, 0.0048, 0.0036, 0.0028, 0.0025, 0.0022,
 		0.0022, 0.0025, 0.0030, 0.0037, 0.0048, 0.0062, 0.0079, 0.0098, 0.0110, 0.0113,
@@ -171,7 +171,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.0027, 0.0024, 0.0021, 0.0018, 0.0016, 0.0014, 0.0012, 0.0011, 0.0009, 0.0008,
 		0.0007, 0.0006, 0.0005, 0.0004, 0.0004,
 	}),
-	"pc_green_creative_mr16": spectral.NewCIESPD([]float64{
+	"pc_green_creative_mr16": spectral.NewCIESPD([]float32{
 		0.0270, 0.0280, 0.0320, 0.0370, 0.0480, 0.0780, 0.1270, 0.2160, 0.3690, 0.5880,
 		0.8740, 1.2350, 1.7400, 2.5330, 3.4000, 3.6790, 3.2510, 2.7500, 2.3950, 2.1010,
 		1.9210, 1.8960, 1.9760, 2.1300, 2.3300, 2.5500, 2.7640, 2.9680, 3.1650, 3.3490,
@@ -181,7 +181,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		3.7050, 3.3910, 3.0930, 2.8070, 2.5390, 2.2880, 2.0520, 1.8380, 1.6380, 1.4590,
 		1.2970, 1.1490, 1.0190, 0.9000, 0.7970,
 	}),
-	"pc_soraa_mr16_830": spectral.NewCIESPD([]float64{
+	"pc_soraa_mr16_830": spectral.NewCIESPD([]float32{
 		0.0230, 0.0250, 0.0290, 0.0340, 0.0450, 0.0710, 0.1190, 0.2060, 0.3640, 0.6100,
 		0.9550, 1.3810, 1.8480, 2.3650, 2.6780, 2.3850, 1.8020, 1.4210, 1.1920, 1.0330,
 		0.9970, 1.0690, 1.2170, 1.4350, 1.6840, 1.9470, 2.1970, 2.4300, 2.6460, 2.8480,
@@ -191,7 +191,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		2.2990, 2.0640, 1.8440, 1.6440, 1.4610, 1.2930, 1.1400, 1.0050, 0.8860, 0.7820,
 		0.6880, 0.6060, 0.5300, 0.4640, 0.4070,
 	}),
-	"hy_cree_par38": spectral.NewCIESPD([]float64{
+	"hy_cree_par38": spectral.NewCIESPD([]float32{
 		0.0098, 0.0105, 0.0108, 0.0110, 0.0120, 0.0146, 0.0194, 0.0251, 0.0298, 0.0423,
 		0.0673, 0.1156, 0.1983, 0.3413, 0.5041, 0.5114, 0.3776, 0.2843, 0.2325, 0.1925,
 		0.1815, 0.1992, 0.2360, 0.2873, 0.3491, 0.4127, 0.4698, 0.5171, 0.5544, 0.5831,
@@ -201,7 +201,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 		0.4679, 0.4207, 0.3769, 0.3349, 0.2964, 0.2609, 0.2288, 0.2000, 0.1733, 0.1502,
 		0.1297, 0.1119, 0.0971, 0.0846, 0.0741,
 	}),
-	"pc_seoul_sunlike_3030": spectral.NewCIESPD([]float64{
+	"pc_seoul_sunlike_3030": spectral.NewCIESPD([]float32{
 		0.0000, 0.0000, 0.0000, 0.0000, 0.0001, 0.0003, 0.0002, 0.0002, 0.0001, 0.0001,
 		0.0002, 0.0002, 0.0003, 0.0004, 0.0004, 0.0004, 0.0004, 0.0004, 0.0003, 0.0003,
 		0.0003, 0.0003, 0.0003, 0.0003, 0.0003, 0.0003, 0.0003, 0.0003, 0.0003, 0.0003,
@@ -227,7 +227,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	// Values interpolated to 5nm intervals from 380nm to 750nm
 
 	// F1: Daylight fluorescent (6430K, CRI 76)
-	"cie_f1_daylight_fluorescent": spectral.NewCIESPD([]float64{
+	"cie_f1_daylight_fluorescent": spectral.NewCIESPD([]float32{
 		0.0350, 0.0380, 0.0430, 0.0500, 0.0590, 0.0710, 0.0870, 0.1090, 0.1390, 0.1800,
 		0.2360, 0.3130, 0.4190, 0.5660, 0.7730, 1.0000, 0.9730, 0.7380, 0.5650, 0.4610,
 		0.3990, 0.3620, 0.3410, 0.3310, 0.3280, 0.3300, 0.3360, 0.3450, 0.3570, 0.3710,
@@ -239,7 +239,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F2: Cool white fluorescent (4230K, CRI 64)
-	"cie_f2_cool_white_fluorescent": spectral.NewCIESPD([]float64{
+	"cie_f2_cool_white_fluorescent": spectral.NewCIESPD([]float32{
 		0.0320, 0.0360, 0.0420, 0.0500, 0.0600, 0.0740, 0.0920, 0.1170, 0.1520, 0.2000,
 		0.2660, 0.3580, 0.4860, 0.6660, 0.9180, 1.0000, 0.8130, 0.5200, 0.3680, 0.2950,
 		0.2550, 0.2320, 0.2180, 0.2110, 0.2070, 0.2070, 0.2100, 0.2160, 0.2240, 0.2350,
@@ -251,7 +251,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F3: White fluorescent (3450K, CRI 57)
-	"cie_f3_white_fluorescent": spectral.NewCIESPD([]float64{
+	"cie_f3_white_fluorescent": spectral.NewCIESPD([]float32{
 		0.0290, 0.0340, 0.0410, 0.0510, 0.0640, 0.0820, 0.1060, 0.1390, 0.1840, 0.2460,
 		0.3330, 0.4570, 0.6340, 0.8910, 1.0000, 0.7840, 0.4780, 0.2980, 0.2160, 0.1780,
 		0.1570, 0.1450, 0.1380, 0.1340, 0.1320, 0.1320, 0.1340, 0.1380, 0.1440, 0.1520,
@@ -263,7 +263,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F4: Warm white fluorescent (2940K, CRI 51)
-	"cie_f4_warm_white_fluorescent": spectral.NewCIESPD([]float64{
+	"cie_f4_warm_white_fluorescent": spectral.NewCIESPD([]float32{
 		0.0280, 0.0340, 0.0430, 0.0550, 0.0710, 0.0930, 0.1230, 0.1650, 0.2230, 0.3050,
 		0.4200, 0.5840, 0.8230, 1.0000, 0.8900, 0.5340, 0.3000, 0.1850, 0.1330, 0.1090,
 		0.0960, 0.0890, 0.0850, 0.0830, 0.0820, 0.0820, 0.0840, 0.0870, 0.0910, 0.0970,
@@ -275,7 +275,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F5: Daylight fluorescent (6350K, CRI 72)
-	"cie_f5_daylight_fluorescent": spectral.NewCIESPD([]float64{
+	"cie_f5_daylight_fluorescent": spectral.NewCIESPD([]float32{
 		0.0340, 0.0380, 0.0440, 0.0530, 0.0640, 0.0790, 0.0980, 0.1240, 0.1590, 0.2060,
 		0.2690, 0.3560, 0.4760, 0.6450, 0.8830, 1.0000, 0.9040, 0.6510, 0.4840, 0.3930,
 		0.3390, 0.3070, 0.2880, 0.2780, 0.2740, 0.2750, 0.2790, 0.2870, 0.2970, 0.3100,
@@ -287,7 +287,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F6: Lite white fluorescent (4150K, CRI 59)
-	"cie_f6_lite_white_fluorescent": spectral.NewCIESPD([]float64{
+	"cie_f6_lite_white_fluorescent": spectral.NewCIESPD([]float32{
 		0.0310, 0.0360, 0.0440, 0.0540, 0.0680, 0.0870, 0.1120, 0.1470, 0.1950, 0.2610,
 		0.3540, 0.4860, 0.6760, 0.9480, 1.0000, 0.7260, 0.4100, 0.2550, 0.1840, 0.1510,
 		0.1330, 0.1230, 0.1170, 0.1140, 0.1120, 0.1120, 0.1140, 0.1180, 0.1240, 0.1320,
@@ -299,7 +299,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F7: Broad-band daylight fluorescent (6500K, CRI 90)
-	"cie_f7_broadband_daylight": spectral.NewCIESPD([]float64{
+	"cie_f7_broadband_daylight": spectral.NewCIESPD([]float32{
 		0.1490, 0.1590, 0.1720, 0.1880, 0.2080, 0.2320, 0.2610, 0.2960, 0.3380, 0.3890,
 		0.4510, 0.5260, 0.6170, 0.7260, 0.8580, 1.0000, 0.9930, 0.8870, 0.7700, 0.6660,
 		0.5800, 0.5130, 0.4620, 0.4260, 0.4020, 0.3900, 0.3880, 0.3960, 0.4140, 0.4410,
@@ -311,7 +311,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F8: Broad-band cool white fluorescent (5000K, CRI 95)
-	"cie_f8_broadband_cool_white": spectral.NewCIESPD([]float64{
+	"cie_f8_broadband_cool_white": spectral.NewCIESPD([]float32{
 		0.1410, 0.1520, 0.1660, 0.1830, 0.2040, 0.2300, 0.2610, 0.2990, 0.3450, 0.4020,
 		0.4720, 0.5580, 0.6630, 0.7920, 0.9480, 1.0000, 0.9290, 0.7800, 0.6260, 0.5030,
 		0.4130, 0.3500, 0.3070, 0.2790, 0.2630, 0.2560, 0.2570, 0.2670, 0.2860, 0.3130,
@@ -323,7 +323,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F9: Broad-band cool white deluxe fluorescent (4150K, CRI 90)
-	"cie_f9_broadband_cool_white_deluxe": spectral.NewCIESPD([]float64{
+	"cie_f9_broadband_cool_white_deluxe": spectral.NewCIESPD([]float32{
 		0.1530, 0.1650, 0.1810, 0.2000, 0.2240, 0.2540, 0.2900, 0.3350, 0.3900, 0.4580,
 		0.5430, 0.6470, 0.7740, 0.9300, 1.0000, 0.9470, 0.7960, 0.6190, 0.4700, 0.3600,
 		0.2840, 0.2320, 0.1970, 0.1740, 0.1600, 0.1530, 0.1520, 0.1560, 0.1660, 0.1820,
@@ -335,7 +335,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F10: Three-band fluorescent (5000K, CRI 81)
-	"cie_f10_narrowband_5000k": spectral.NewCIESPD([]float64{
+	"cie_f10_narrowband_5000k": spectral.NewCIESPD([]float32{
 		0.0090, 0.0100, 0.0120, 0.0150, 0.0190, 0.0250, 0.0340, 0.0480, 0.0690, 0.1020,
 		0.1540, 0.2390, 0.3800, 0.6240, 1.0000, 0.9460, 0.5630, 0.2840, 0.1460, 0.0820,
 		0.0510, 0.0360, 0.0280, 0.0230, 0.0210, 0.0200, 0.0200, 0.0210, 0.0230, 0.0260,
@@ -347,7 +347,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F11: Three-band fluorescent (4000K, CRI 83)
-	"cie_f11_narrowband_4000k": spectral.NewCIESPD([]float64{
+	"cie_f11_narrowband_4000k": spectral.NewCIESPD([]float32{
 		0.0100, 0.0120, 0.0150, 0.0190, 0.0250, 0.0340, 0.0470, 0.0680, 0.1010, 0.1540,
 		0.2390, 0.3800, 0.6240, 1.0000, 0.9520, 0.5670, 0.2850, 0.1460, 0.0820, 0.0510,
 		0.0360, 0.0280, 0.0230, 0.0210, 0.0200, 0.0200, 0.0210, 0.0230, 0.0260, 0.0310,
@@ -359,7 +359,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// F12: Three-band fluorescent (3000K, CRI 83)
-	"cie_f12_narrowband_3000k": spectral.NewCIESPD([]float64{
+	"cie_f12_narrowband_3000k": spectral.NewCIESPD([]float32{
 		0.0120, 0.0150, 0.0200, 0.0260, 0.0360, 0.0500, 0.0720, 0.1070, 0.1640, 0.2560,
 		0.4090, 0.6740, 1.0000, 0.9630, 0.5770, 0.2900, 0.1490, 0.0840, 0.0520, 0.0370,
 		0.0280, 0.0240, 0.0210, 0.0210, 0.0210, 0.0210, 0.0230, 0.0260, 0.0310, 0.0380,
@@ -375,7 +375,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	// They have characteristic yellow-orange color and sharp spectral peaks
 
 	// HPS CIE238 - CIE standard high pressure sodium
-	"hps_cie238": spectral.NewCIESPD([]float64{
+	"hps_cie238": spectral.NewCIESPD([]float32{
 		0.0057, 0.0066, 0.0075, 0.0081, 0.0093, 0.0128, 0.0113, 0.0125, 0.0143, 0.0155,
 		0.0176, 0.0221, 0.0236, 0.0170, 0.0385, 0.0200, 0.0128, 0.0621, 0.0388, 0.0209,
 		0.0042, 0.0045, 0.0096, 0.0543, 0.1680, 0.0087, 0.0063, 0.0400, 0.0063, 0.0060,
@@ -387,7 +387,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// HPS C100S54 Standard - 100W standard HPS lamp
-	"hps_c100s54_standard": spectral.NewCIESPD([]float64{
+	"hps_c100s54_standard": spectral.NewCIESPD([]float32{
 		0.0091, 0.0099, 0.0106, 0.0118, 0.0131, 0.0163, 0.0154, 0.0171, 0.0193, 0.0215,
 		0.0238, 0.0311, 0.0308, 0.0271, 0.0473, 0.0297, 0.0212, 0.0696, 0.0608, 0.0262,
 		0.0093, 0.0077, 0.0137, 0.1035, 0.1711, 0.0157, 0.0116, 0.0453, 0.0147, 0.0090,
@@ -399,7 +399,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// HPS SDW-T 100W/LV Super - High performance 100W HPS
-	"hps_sdw_t_100w": spectral.NewCIESPD([]float64{
+	"hps_sdw_t_100w": spectral.NewCIESPD([]float32{
 		0.0123, 0.0196, 0.0247, 0.0265, 0.0316, 0.0409, 0.0443, 0.0535, 0.0663, 0.0739,
 		0.0886, 0.1169, 0.1086, 0.1142, 0.1669, 0.1390, 0.1084, 0.1665, 0.1873, 0.1181,
 		0.0662, 0.0714, 0.0900, 0.1306, 0.2361, 0.1020, 0.1028, 0.2462, 0.1120, 0.1212,
@@ -415,7 +415,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	// Real measurements show subtle differences from idealized blackbody curves
 
 	// Incandescent Halogen - Standard halogen lamp
-	"incandescent_halogen_real": spectral.NewCIESPD([]float64{
+	"incandescent_halogen_real": spectral.NewCIESPD([]float32{
 		0.0277, 0.0358, 0.0372, 0.0412, 0.0479, 0.0542, 0.0626, 0.0704, 0.0756, 0.0821,
 		0.0880, 0.0938, 0.1008, 0.1113, 0.1188, 0.1271, 0.1353, 0.1426, 0.1533, 0.1623,
 		0.1706, 0.1789, 0.1890, 0.1992, 0.2132, 0.2258, 0.2391, 0.2523, 0.2657, 0.2798,
@@ -427,7 +427,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// Incandescent Krypton - Krypton-filled incandescent bulb
-	"incandescent_krypton_real": spectral.NewCIESPD([]float64{
+	"incandescent_krypton_real": spectral.NewCIESPD([]float32{
 		0.0095, 0.0158, 0.0158, 0.0206, 0.0269, 0.0332, 0.0411, 0.0475, 0.0570, 0.0617,
 		0.0680, 0.0759, 0.0839, 0.0918, 0.0997, 0.1092, 0.1171, 0.1266, 0.1361, 0.1472,
 		0.1567, 0.1661, 0.1788, 0.1915, 0.2025, 0.2136, 0.2263, 0.2389, 0.2532, 0.2658,
@@ -439,7 +439,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	}),
 
 	// Incandescent 60W A19 - Standard 60W household bulb
-	"incandescent_60w_a19_real": spectral.NewCIESPD([]float64{
+	"incandescent_60w_a19_real": spectral.NewCIESPD([]float32{
 		0.0207, 0.0236, 0.0246, 0.0367, 0.0456, 0.0538, 0.0613, 0.0702, 0.0761, 0.0827,
 		0.0908, 0.0987, 0.1056, 0.1138, 0.1214, 0.1319, 0.1420, 0.1522, 0.1604, 0.1725,
 		0.1820, 0.1919, 0.2030, 0.2129, 0.2243, 0.2371, 0.2483, 0.2611, 0.2729, 0.2860,
@@ -453,7 +453,7 @@ var lightSources = map[string]*spectral.SpectralPowerDistribution{
 	// Laser Diode - Red laser pointer at 650nm
 	// Extremely narrow-band monochromatic light source
 	// Peak at 650nm (index 54 from 380nm start)
-	"laser_red_650nm": spectral.NewCIESPD([]float64{
+	"laser_red_650nm": spectral.NewCIESPD([]float32{
 		0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000,
 		0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000,
 		0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.5212, 0.0000,
