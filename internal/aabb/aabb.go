@@ -10,12 +10,12 @@ import (
 
 // AABB represents an axis-aligned bounding box.
 type AABB struct {
-	min *vec3.Vec3Impl
-	max *vec3.Vec3Impl
+	min vec3.Vec3Impl
+	max vec3.Vec3Impl
 }
 
 // New returns a new axis-aligned bounding box.
-func New(min *vec3.Vec3Impl, max *vec3.Vec3Impl) *AABB {
+func New(min vec3.Vec3Impl, max vec3.Vec3Impl) *AABB {
 	return &AABB{
 		min: min,
 		max: max,
@@ -24,12 +24,12 @@ func New(min *vec3.Vec3Impl, max *vec3.Vec3Impl) *AABB {
 
 // SurroundingBox computes the box that encloses the two supplied boxes.
 func SurroundingBox(box0 *AABB, box1 *AABB) *AABB {
-	small := &vec3.Vec3Impl{
+	small := vec3.Vec3Impl{
 		X: math.Min(box0.min.X, box1.min.X),
 		Y: math.Min(box0.min.Y, box1.min.Y),
 		Z: math.Min(box0.min.Z, box1.min.Z),
 	}
-	big := &vec3.Vec3Impl{
+	big := vec3.Vec3Impl{
 		X: math.Max(box0.max.X, box1.max.X),
 		Y: math.Max(box0.max.Y, box1.max.Y),
 		Z: math.Max(box0.max.Z, box1.max.Z),
@@ -54,12 +54,12 @@ func BoxLessZ(box0 *AABB, box1 *AABB) bool {
 }
 
 // Min returns the min vector for this bounding box.
-func (a *AABB) Min() *vec3.Vec3Impl {
+func (a *AABB) Min() vec3.Vec3Impl {
 	return a.min
 }
 
 // Max return the max vector for this bounding box.
-func (a *AABB) Max() *vec3.Vec3Impl {
+func (a *AABB) Max() vec3.Vec3Impl {
 	return a.max
 }
 

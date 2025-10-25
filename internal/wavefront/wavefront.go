@@ -52,10 +52,10 @@ type WavefrontObj struct {
 	IgnoreTextures  bool
 	HasNormals      bool
 	HasUV           bool
-	Centre          *vec3.Vec3Impl
+	Centre          vec3.Vec3Impl
 	ObjectName      string
-	Vertices        []*vec3.Vec3Impl
-	VertexNormals   []*vec3.Vec3Impl
+	Vertices        []vec3.Vec3Impl
+	VertexNormals   []vec3.Vec3Impl
 	VertexUV        []*texture.UV
 	MtlLib          map[string]*Material
 	Groups          []*Group
@@ -106,7 +106,7 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 
 	o := &WavefrontObj{
 		// Objects are expected to have their centre at the origin.
-		Centre: &vec3.Vec3Impl{},
+		Centre: vec3.Vec3Impl{},
 	}
 
 	for _, option := range opts {
@@ -143,7 +143,7 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 			if err != nil {
 				return nil, err
 			}
-			o.Vertices = append(o.Vertices, &vec3.Vec3Impl{X: v[0], Y: v[1], Z: v[2]})
+			o.Vertices = append(o.Vertices, vec3.Vec3Impl{X: v[0], Y: v[1], Z: v[2]})
 			continue
 		}
 		if strings.HasPrefix(s, "vn") {
@@ -153,7 +153,7 @@ func NewObjFromReader(r io.Reader, containerDirectory string, opts ...ParseOptio
 			if err != nil {
 				return nil, err
 			}
-			o.VertexNormals = append(o.VertexNormals, &vec3.Vec3Impl{X: vn[0], Y: vn[1], Z: vn[2]})
+			o.VertexNormals = append(o.VertexNormals, vec3.Vec3Impl{X: vn[0], Y: vn[1], Z: vn[2]})
 			continue
 		}
 		if strings.HasPrefix(s, "vt") {
@@ -389,7 +389,7 @@ func (wo *WavefrontObj) triangulate(face *Face, mat material.Material) []*hitabl
 }
 
 // Translate translates all the vertices in this object by the specified amount.
-func (wo *WavefrontObj) Translate(translate *vec3.Vec3Impl) {
+func (wo *WavefrontObj) Translate(translate vec3.Vec3Impl) {
 	wo.Centre = vec3.Add(wo.Centre, translate)
 	for _, v := range wo.Vertices {
 		v.X += translate.X
@@ -399,7 +399,7 @@ func (wo *WavefrontObj) Translate(translate *vec3.Vec3Impl) {
 }
 
 // Scale scales all the vertices in this object by the specified amount.
-func (wo *WavefrontObj) Scale(scale *vec3.Vec3Impl) {
+func (wo *WavefrontObj) Scale(scale vec3.Vec3Impl) {
 	for _, v := range wo.Vertices {
 		v.X = ((v.X - wo.Centre.X) * scale.X) + wo.Centre.X
 		v.Y = ((v.Y - wo.Centre.Y) * scale.Y) + wo.Centre.Y

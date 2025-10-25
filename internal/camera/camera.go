@@ -15,16 +15,16 @@ type Camera struct {
 	lensRadius      float64
 	time0           float64
 	time1           float64
-	u               *vec3.Vec3Impl
-	v               *vec3.Vec3Impl
-	origin          *vec3.Vec3Impl
-	lowerLeftCorner *vec3.Vec3Impl
-	horizontal      *vec3.Vec3Impl
-	vertical        *vec3.Vec3Impl
+	u               vec3.Vec3Impl
+	v               vec3.Vec3Impl
+	origin          vec3.Vec3Impl
+	lowerLeftCorner vec3.Vec3Impl
+	horizontal      vec3.Vec3Impl
+	vertical        vec3.Vec3Impl
 }
 
 // New returns an instance of a camera.
-func New(lookFrom *vec3.Vec3Impl, lookAt *vec3.Vec3Impl, vup *vec3.Vec3Impl,
+func New(lookFrom vec3.Vec3Impl, lookAt vec3.Vec3Impl, vup vec3.Vec3Impl,
 	vfov float64, aspect float64, aperture float64, focusDist float64, time0 float64, time1 float64) *Camera {
 
 	lensRadius := aperture / 2.0
@@ -77,9 +77,9 @@ func (c *Camera) GetRayWithLambda(s float64, t float64, lambda float64) *ray.Ray
 			vec3.ScalarMul(c.vertical, t)), c.origin, offset), time, lambda)
 }
 
-func (c *Camera) randomInUnitDisc() *vec3.Vec3Impl {
+func (c *Camera) randomInUnitDisc() vec3.Vec3Impl {
 	for {
-		p := vec3.Sub(vec3.ScalarMul(&vec3.Vec3Impl{X: c.random.Float64(), Y: c.random.Float64()}, 2.0), &vec3.Vec3Impl{X: 1.0, Y: 1.0})
+		p := vec3.Sub(vec3.ScalarMul(vec3.Vec3Impl{X: c.random.Float64(), Y: c.random.Float64()}, 2.0), vec3.Vec3Impl{X: 1.0, Y: 1.0})
 		if vec3.Dot(p, p) < 1.0 {
 			return p
 		}

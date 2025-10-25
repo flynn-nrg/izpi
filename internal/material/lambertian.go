@@ -54,7 +54,7 @@ func (l *Lambertian) scatterCommon(hr *hitrecord.HitRecord, random *fastrandom.L
 func (l *Lambertian) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	scattered, pdf := l.scatterCommon(hr, random, r.Time())
 	albedo := l.albedo.Value(hr.U(), hr.V(), hr.P())
-	scatterRecord := scatterrecord.New(nil, false, albedo, nil, nil, nil, pdf)
+	scatterRecord := scatterrecord.New(nil, false, albedo, vec3.Vec3Impl{}, vec3.Vec3Impl{}, vec3.Vec3Impl{}, pdf)
 	return scattered, scatterRecord, true
 }
 
@@ -78,11 +78,11 @@ func (l *Lambertian) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered
 	return cosine / math.Pi
 }
 
-func (l *Lambertian) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (l *Lambertian) Albedo(u float64, v float64, p vec3.Vec3Impl) vec3.Vec3Impl {
 	return l.albedo.Value(u, v, p)
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
-func (l *Lambertian) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+func (l *Lambertian) SpectralAlbedo(u float64, v float64, lambda float64, p vec3.Vec3Impl) float64 {
 	return l.spectralAlbedo.Value(u, v, lambda, p)
 }

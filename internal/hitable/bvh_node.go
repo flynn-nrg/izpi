@@ -180,12 +180,12 @@ func (bn *BVHNode) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) 
 	return bn.box, true
 }
 
-func (bn *BVHNode) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (bn *BVHNode) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	return 0.0
 }
 
-func (bn *BVHNode) Random(o *vec3.Vec3Impl, _ *fastrandom.LCG) *vec3.Vec3Impl {
-	return &vec3.Vec3Impl{X: 1}
+func (bn *BVHNode) Random(o vec3.Vec3Impl, _ *fastrandom.LCG) vec3.Vec3Impl {
+	return vec3.Vec3Impl{X: 1}
 }
 
 func (bn *BVHNode) IsEmitter() bool {

@@ -261,7 +261,7 @@ func (t *Transport) toScenePBRMaterial(mat *pb_transport.Material) (material.Mat
 func (t *Transport) toSceneMetalMaterial(mat *pb_transport.Material) (material.Material, error) {
 	metal := mat.GetMetal()
 
-	albedo := &vec3.Vec3Impl{
+	albedo := vec3.Vec3Impl{
 		X: float64(metal.GetAlbedo().GetX()),
 		Y: float64(metal.GetAlbedo().GetY()),
 		Z: float64(metal.GetAlbedo().GetZ()),
@@ -337,13 +337,13 @@ func (t *Transport) toSceneDielectricMaterial(mat *pb_transport.Material) (mater
 	}
 
 	// Handle absorption properties (optional)
-	var absorptionCoeff *vec3.Vec3Impl
+	var absorptionCoeff vec3.Vec3Impl
 	var spectralAbsorptionCoeff texture.SpectralTexture
 
 	switch dielectric.GetAbsorptionProperties().(type) {
 	case *pb_transport.DielectricMaterial_AbsorptionCoeff:
 		abs := dielectric.GetAbsorptionCoeff()
-		absorptionCoeff = &vec3.Vec3Impl{
+		absorptionCoeff = vec3.Vec3Impl{
 			X: float64(abs.GetX()),
 			Y: float64(abs.GetY()),
 			Z: float64(abs.GetZ()),
@@ -365,7 +365,7 @@ func (t *Transport) toSceneDielectricMaterial(mat *pb_transport.Material) (mater
 			return material.NewSpectralDielectric(spectralRefIdx, computeBeerLambertAttenuation), nil
 		}
 	} else {
-		if absorptionCoeff != nil {
+		if absorptionCoeff != (vec3.Vec3Impl{}) {
 			return material.NewColoredDielectric(refIdx, absorptionCoeff), nil
 		} else {
 			return material.NewDielectric(refIdx), nil
@@ -408,11 +408,11 @@ func (t *Transport) toSceneTexture(text *pb_transport.Texture) (texture.Texture,
 			return nil, err
 		}
 		// Create a neutral RGB texture as fallback
-		return texture.NewConstant(&vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5}), nil
+		return texture.NewConstant(vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5}), nil
 	case *pb_transport.Texture_SpectralChecker:
 		// Convert spectral checker to RGB checker for backward compatibility
 		// This is a fallback for RGB rendering when spectral textures are provided
-		return texture.NewConstant(&vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5}), nil
+		return texture.NewConstant(vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5}), nil
 	}
 
 	return nil, fmt.Errorf("unknown texture type: %T", text.GetTextureProperties())
@@ -421,7 +421,7 @@ func (t *Transport) toSceneTexture(text *pb_transport.Texture) (texture.Texture,
 func (t *Transport) toSceneConstantTexture(text *pb_transport.Texture) (texture.Texture, error) {
 	constant := text.GetConstant()
 
-	return texture.NewConstant(&vec3.Vec3Impl{
+	return texture.NewConstant(vec3.Vec3Impl{
 		X: float64(constant.GetValue().GetX()),
 		Y: float64(constant.GetValue().GetY()),
 		Z: float64(constant.GetValue().GetZ()),
@@ -505,7 +505,7 @@ func (t *Transport) textureToSpectralTexture(tex texture.Texture) (texture.Spect
 	// For constant textures, create a neutral spectral texture
 	if constTex, ok := tex.(*texture.Constant); ok {
 		// Get the RGB value and create a spectral constant with proper luminance
-		rgbValue := constTex.Value(0, 0, nil) // UV coordinates don't matter for constant textures
+		rgbValue := constTex.Value(0, 0, vec3.Vec3Impl{}) // UV coordinates don't matter for constant textures
 		luminance := 0.299*rgbValue.X + 0.587*rgbValue.Y + 0.114*rgbValue.Z
 		return texture.NewSpectralNeutral(luminance), nil
 	}
@@ -517,19 +517,19 @@ func (t *Transport) textureToSpectralTexture(tex texture.Texture) (texture.Spect
 func (t *Transport) toSceneCamera(aspectOverride float64) *camera.Camera {
 	protoCamera := t.protoScene.GetCamera()
 
-	lookFrom := &vec3.Vec3Impl{
+	lookFrom := vec3.Vec3Impl{
 		X: float64(protoCamera.GetLookfrom().GetX()),
 		Y: float64(protoCamera.GetLookfrom().GetY()),
 		Z: float64(protoCamera.GetLookfrom().GetZ()),
 	}
 
-	lookAt := &vec3.Vec3Impl{
+	lookAt := vec3.Vec3Impl{
 		X: float64(protoCamera.GetLookat().GetX()),
 		Y: float64(protoCamera.GetLookat().GetY()),
 		Z: float64(protoCamera.GetLookat().GetZ()),
 	}
 
-	vup := &vec3.Vec3Impl{
+	vup := vec3.Vec3Impl{
 		X: float64(protoCamera.GetVup().GetX()),
 		Y: float64(protoCamera.GetVup().GetY()),
 		Z: float64(protoCamera.GetVup().GetZ()),
@@ -607,19 +607,19 @@ func (t *Transport) toSceneTriangle(triangle *pb_transport.Triangle) ([]*hitable
 		return nil, fmt.Errorf("material %s not found", triangle.GetMaterialName())
 	}
 
-	vertex0 := &vec3.Vec3Impl{
+	vertex0 := vec3.Vec3Impl{
 		X: float64(triangle.GetVertex0().GetX()),
 		Y: float64(triangle.GetVertex0().GetY()),
 		Z: float64(triangle.GetVertex0().GetZ()),
 	}
 
-	vertex1 := &vec3.Vec3Impl{
+	vertex1 := vec3.Vec3Impl{
 		X: float64(triangle.GetVertex1().GetX()),
 		Y: float64(triangle.GetVertex1().GetY()),
 		Z: float64(triangle.GetVertex1().GetZ()),
 	}
 
-	vertex2 := &vec3.Vec3Impl{
+	vertex2 := vec3.Vec3Impl{
 		X: float64(triangle.GetVertex2().GetX()),
 		Y: float64(triangle.GetVertex2().GetY()),
 		Z: float64(triangle.GetVertex2().GetZ()),
@@ -672,7 +672,7 @@ func (t *Transport) toSceneSphere(sphere *pb_transport.Sphere) (*hitable.Sphere,
 		return nil, fmt.Errorf("material %s not found", sphere.GetMaterialName())
 	}
 
-	center := &vec3.Vec3Impl{
+	center := vec3.Vec3Impl{
 		X: float64(sphere.GetCenter().GetX()),
 		Y: float64(sphere.GetCenter().GetY()),
 		Z: float64(sphere.GetCenter().GetZ()),

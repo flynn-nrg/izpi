@@ -18,15 +18,15 @@ var _ Hitable = (*Sphere)(nil)
 
 // Sphere represents a sphere in the 3d world.
 type Sphere struct {
-	center0  *vec3.Vec3Impl
-	center1  *vec3.Vec3Impl
+	center0  vec3.Vec3Impl
+	center1  vec3.Vec3Impl
 	time0    float64
 	time1    float64
 	radius   float64
 	material material.Material
 }
 
-func getSphereUV(p *vec3.Vec3Impl) (float64, float64) {
+func getSphereUV(p vec3.Vec3Impl) (float64, float64) {
 	phi := math.Atan2(p.Z, p.X)
 	theta := math.Asin(p.Y)
 	u := 1.0 - (phi+math.Pi)/(2.0*math.Pi)
@@ -36,7 +36,7 @@ func getSphereUV(p *vec3.Vec3Impl) (float64, float64) {
 
 // SkyDome is a convenience function to construct a light emitting sphere with inverted normals.
 // For this to work correctly texture file needs to be in HDR (Radiance) format.
-func NewSkyDome(center *vec3.Vec3Impl, radius float64, fileName string) (*FlipNormals, error) {
+func NewSkyDome(center vec3.Vec3Impl, radius float64, fileName string) (*FlipNormals, error) {
 	texture, err := texture.NewFromHDR(fileName)
 	texture.FlipY()
 	texture.FlipX()
@@ -48,7 +48,7 @@ func NewSkyDome(center *vec3.Vec3Impl, radius float64, fileName string) (*FlipNo
 }
 
 // NewSphere returns a new instance of Sphere.
-func NewSphere(center0 *vec3.Vec3Impl, center1 *vec3.Vec3Impl, time0 float64, time1 float64, radius float64, material material.Material) *Sphere {
+func NewSphere(center0 vec3.Vec3Impl, center1 vec3.Vec3Impl, time0 float64, time1 float64, radius float64, material material.Material) *Sphere {
 	return &Sphere{
 		center0:  center0,
 		center1:  center1,
@@ -114,19 +114,19 @@ func (s *Sphere) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 
 func (s *Sphere) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	box0 := aabb.New(
-		vec3.Sub(s.center0, &vec3.Vec3Impl{X: s.radius, Y: s.radius, Z: s.radius}),
-		vec3.Add(s.center0, &vec3.Vec3Impl{X: s.radius, Y: s.radius, Z: s.radius}))
+		vec3.Sub(s.center0, vec3.Vec3Impl{X: s.radius, Y: s.radius, Z: s.radius}),
+		vec3.Add(s.center0, vec3.Vec3Impl{X: s.radius, Y: s.radius, Z: s.radius}))
 	box1 := aabb.New(
-		vec3.Sub(s.center1, &vec3.Vec3Impl{X: s.radius, Y: s.radius, Z: s.radius}),
-		vec3.Add(s.center1, &vec3.Vec3Impl{X: s.radius, Y: s.radius, Z: s.radius}))
+		vec3.Sub(s.center1, vec3.Vec3Impl{X: s.radius, Y: s.radius, Z: s.radius}),
+		vec3.Add(s.center1, vec3.Vec3Impl{X: s.radius, Y: s.radius, Z: s.radius}))
 	return aabb.SurroundingBox(box0, box1), true
 }
 
-func (s *Sphere) center(time float64) *vec3.Vec3Impl {
+func (s *Sphere) center(time float64) vec3.Vec3Impl {
 	return vec3.Add(s.center0, vec3.ScalarMul(vec3.Sub(s.center1, s.center0), ((time-s.time0)/(s.time1-s.time0))))
 }
 
-func (s *Sphere) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (s *Sphere) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	if _, _, ok := s.Hit((ray.New(o, v, 0)), 0.001, math.MaxFloat64); ok {
 		cosThetaMax := math.Sqrt(1 - s.radius*s.radius/vec3.Sub(s.center0, o).SquaredLength())
 		solidAngle := 2 * math.Pi * (1 - cosThetaMax)
@@ -136,7 +136,7 @@ func (s *Sphere) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 	return 0.0
 }
 
-func (s *Sphere) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (s *Sphere) Random(o vec3.Vec3Impl, random *fastrandom.LCG) vec3.Vec3Impl {
 	direction := vec3.Sub(s.center0, o)
 	distanceSquared := direction.SquaredLength()
 	uvw := onb.New()

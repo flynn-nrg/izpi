@@ -81,7 +81,7 @@ func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightS
 
 // Sample implements the Sampler interface for RGB rendering
 // For stochastic spectral sampling, we need to assign a wavelength to the ray
-func (s *Spectral) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (s *Spectral) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) vec3.Vec3Impl {
 	// For stochastic spectral sampling, assign a random wavelength to the ray
 	// if it doesn't already have one (depth 0 means it's a primary ray from camera)
 	if depth == 0 && r.Lambda() == 0.0 {
@@ -97,7 +97,7 @@ func (s *Spectral) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hit
 	red, green, blue := spectral.WavelengthToRGB(r.Lambda())
 
 	// Scale by the spectral value
-	return &vec3.Vec3Impl{
+	return vec3.Vec3Impl{
 		X: red * spectralValue,
 		Y: green * spectralValue,
 		Z: blue * spectralValue,

@@ -16,11 +16,11 @@ var _ Hitable = (*Box)(nil)
 type Box struct {
 	sides HitableSlice
 	mat   material.Material
-	pMin  *vec3.Vec3Impl
-	pMax  *vec3.Vec3Impl
+	pMin  vec3.Vec3Impl
+	pMax  vec3.Vec3Impl
 }
 
-func NewBox(p0 *vec3.Vec3Impl, p1 *vec3.Vec3Impl, mat material.Material) *Box {
+func NewBox(p0 vec3.Vec3Impl, p1 vec3.Vec3Impl, mat material.Material) *Box {
 	pMin := p0
 	pMax := p1
 
@@ -53,12 +53,12 @@ func (b *Box) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return b.sides.BoundingBox(time0, time1)
 }
 
-func (b *Box) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (b *Box) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	return 0.0
 }
 
-func (b *Box) Random(o *vec3.Vec3Impl, _ *fastrandom.LCG) *vec3.Vec3Impl {
-	return &vec3.Vec3Impl{X: 1}
+func (b *Box) Random(o vec3.Vec3Impl, _ *fastrandom.LCG) vec3.Vec3Impl {
+	return vec3.Vec3Impl{X: 1}
 }
 
 func (b *Box) IsEmitter() bool {

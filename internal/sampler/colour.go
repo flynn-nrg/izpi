@@ -18,10 +18,10 @@ type Colour struct {
 	NonSpectral // Embed to get SampleSpectral method
 	maxDepth    int
 	numRays     *uint64
-	background  *vec3.Vec3Impl
+	background  vec3.Vec3Impl
 }
 
-func NewColour(maxDepth int, background *vec3.Vec3Impl, numRays *uint64) *Colour {
+func NewColour(maxDepth int, background vec3.Vec3Impl, numRays *uint64) *Colour {
 	return &Colour{
 		NonSpectral: *NewNonSpectral(), // Initialize embedded struct
 		maxDepth:    maxDepth,
@@ -30,9 +30,9 @@ func NewColour(maxDepth int, background *vec3.Vec3Impl, numRays *uint64) *Colour
 	}
 }
 
-func (cs *Colour) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (cs *Colour) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) vec3.Vec3Impl {
 	if depth >= cs.maxDepth {
-		return &vec3.Vec3Impl{Z: 1.0}
+		return vec3.Vec3Impl{Z: 1.0}
 	}
 
 	atomic.AddUint64(cs.numRays, 1)
@@ -61,6 +61,5 @@ func (cs *Colour) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hita
 		}
 	}
 
-	b := *cs.background
-	return &b
+	return cs.background
 }

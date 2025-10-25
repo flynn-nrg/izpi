@@ -18,12 +18,12 @@ type Metal struct {
 	nonSpectral
 	nonPathLength
 	nonWorldSetter
-	albedo *vec3.Vec3Impl
+	albedo vec3.Vec3Impl
 	fuzz   float64
 }
 
 // NewMetal returns an instance of the metal material.
-func NewMetal(albedo *vec3.Vec3Impl, fuzz float64) *Metal {
+func NewMetal(albedo vec3.Vec3Impl, fuzz float64) *Metal {
 	return &Metal{
 		albedo: albedo,
 		fuzz:   fuzz,
@@ -35,7 +35,7 @@ func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	reflected := reflect(vec3.UnitVector(r.Direction()), hr.Normal())
 	specular := ray.New(hr.P(), vec3.Add(reflected, vec3.ScalarMul(randomInUnitSphere(random), m.fuzz)), r.Time())
 	attenuation := m.albedo
-	scatterRecord := scatterrecord.New(specular, true, attenuation, nil, nil, nil, nil)
+	scatterRecord := scatterrecord.New(specular, true, attenuation, vec3.Vec3Impl{}, vec3.Vec3Impl{}, vec3.Vec3Impl{}, nil)
 	return nil, scatterRecord, true
 }
 
@@ -44,12 +44,11 @@ func (m *Metal) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.
 	return 0
 }
 
-func (m *Metal) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
-	a := *m.albedo
-	return &a
+func (m *Metal) Albedo(u float64, v float64, p vec3.Vec3Impl) vec3.Vec3Impl {
+	return m.albedo
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
-func (m *Metal) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+func (m *Metal) SpectralAlbedo(u float64, v float64, lambda float64, p vec3.Vec3Impl) float64 {
 	return m.albedo.X // Use red component as approximation
 }

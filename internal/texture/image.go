@@ -70,7 +70,7 @@ func NewFromHDR(fileName string) (*ImageTxt, error) {
 
 }
 
-func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (it *ImageTxt) Value(u float64, v float64, _ vec3.Vec3Impl) vec3.Vec3Impl {
 	i := int(u * float64(it.sizeX))
 	j := int((1 - v) * (float64(it.sizeY) - 0.001))
 
@@ -90,14 +90,14 @@ func (it *ImageTxt) Value(u float64, v float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl
 
 	if img, ok := it.data.(*floatimage.Float64NRGBA); ok {
 		pixel := img.Float64NRGBAAt(i, j)
-		return &vec3.Vec3Impl{X: pixel.R, Y: pixel.G, Z: pixel.B}
+		return vec3.Vec3Impl{X: pixel.R, Y: pixel.G, Z: pixel.B}
 	}
 
 	pixel := color.NRGBAModel.Convert(it.data.At(i, j)).(color.NRGBA)
 	r := pixel.R
 	g := pixel.G
 	b := pixel.B
-	return &vec3.Vec3Impl{X: float64(r) / 255.0, Y: float64(g) / 255.0, Z: float64(b) / 255.0}
+	return vec3.Vec3Impl{X: float64(r) / 255.0, Y: float64(g) / 255.0, Z: float64(b) / 255.0}
 }
 
 // FlipY() flips the image upside down.

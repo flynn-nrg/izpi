@@ -12,10 +12,10 @@ type UV struct {
 // Texture represents a texture.
 type Texture interface {
 	// Value returns the color values at a given point.
-	Value(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl
+	Value(u float64, v float64, p vec3.Vec3Impl) vec3.Vec3Impl
 }
 
 // SpectralTexture represents a spectral texture.
 type SpectralTexture interface {
-	Value(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64
+	Value(u float64, v float64, lambda float64, p vec3.Vec3Impl) float64
 }

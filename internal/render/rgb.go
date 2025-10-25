@@ -28,7 +28,7 @@ func renderRectRGB(w workUnit, random *fastrandom.LCG) {
 		i := 0
 		tile.PosY = ny - y
 		for x := w.x0; x <= w.x1; x++ {
-			col := &vec3.Vec3Impl{}
+			col := vec3.Vec3Impl{}
 			for s := 0; s < w.numSamples; s++ {
 				u := (float64(x) + random.Float64()) / float64(nx)
 				v := (float64(y) + random.Float64()) / float64(ny)

@@ -42,11 +42,11 @@ func (fn *FlipNormals) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bo
 	return fn.hitable.BoundingBox(time0, time1)
 }
 
-func (fn *FlipNormals) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (fn *FlipNormals) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	return fn.hitable.PDFValue(o, v)
 }
 
-func (fn *FlipNormals) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (fn *FlipNormals) Random(o vec3.Vec3Impl, random *fastrandom.LCG) vec3.Vec3Impl {
 	return fn.hitable.Random(o, random)
 }
 

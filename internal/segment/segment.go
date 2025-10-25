@@ -6,11 +6,11 @@ import (
 
 // Segment represents a segment in the 3d space.
 type Segment struct {
-	A *vec3.Vec3Impl
-	B *vec3.Vec3Impl
+	A vec3.Vec3Impl
+	B vec3.Vec3Impl
 }
 
-func Belongs(s *Segment, c *vec3.Vec3Impl) bool {
+func Belongs(s *Segment, c vec3.Vec3Impl) bool {
 	ab := vec3.Sub(s.B, s.A)
 	ac := vec3.Sub(c, s.A)
 

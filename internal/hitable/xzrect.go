@@ -51,7 +51,7 @@ func (xzr *XZRect) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 
 	u := (x - xzr.x0) / (xzr.x1 - xzr.x0)
 	v := (z - xzr.z0) / (xzr.z1 - xzr.z0)
-	return hitrecord.New(t, u, v, r.PointAtParameter(t), &vec3.Vec3Impl{Y: 1}), xzr.material, true
+	return hitrecord.New(t, u, v, r.PointAtParameter(t), vec3.Vec3Impl{Y: 1}), xzr.material, true
 }
 
 func (xzr *XZRect) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
@@ -62,20 +62,20 @@ func (xzr *XZRect) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.Hi
 
 	segments := []*segment.Segment{
 		{
-			A: &vec3.Vec3Impl{X: xzr.x0, Y: xzr.k, Z: xzr.z0},
-			B: &vec3.Vec3Impl{X: xzr.x1, Y: xzr.k, Z: xzr.z0},
+			A: vec3.Vec3Impl{X: xzr.x0, Y: xzr.k, Z: xzr.z0},
+			B: vec3.Vec3Impl{X: xzr.x1, Y: xzr.k, Z: xzr.z0},
 		},
 		{
-			A: &vec3.Vec3Impl{X: xzr.x1, Y: xzr.k, Z: xzr.z0},
-			B: &vec3.Vec3Impl{X: xzr.x1, Y: xzr.k, Z: xzr.z1},
+			A: vec3.Vec3Impl{X: xzr.x1, Y: xzr.k, Z: xzr.z0},
+			B: vec3.Vec3Impl{X: xzr.x1, Y: xzr.k, Z: xzr.z1},
 		},
 		{
-			A: &vec3.Vec3Impl{X: xzr.x1, Y: xzr.k, Z: xzr.z1},
-			B: &vec3.Vec3Impl{X: xzr.x0, Y: xzr.k, Z: xzr.z1},
+			A: vec3.Vec3Impl{X: xzr.x1, Y: xzr.k, Z: xzr.z1},
+			B: vec3.Vec3Impl{X: xzr.x0, Y: xzr.k, Z: xzr.z1},
 		},
 		{
-			A: &vec3.Vec3Impl{X: xzr.x0, Y: xzr.k, Z: xzr.z1},
-			B: &vec3.Vec3Impl{X: xzr.x0, Y: xzr.k, Z: xzr.z0},
+			A: vec3.Vec3Impl{X: xzr.x0, Y: xzr.k, Z: xzr.z1},
+			B: vec3.Vec3Impl{X: xzr.x0, Y: xzr.k, Z: xzr.z0},
 		},
 	}
 
@@ -91,19 +91,19 @@ func (xzr *XZRect) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.Hi
 
 func (xzr *XZRect) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return aabb.New(
-		&vec3.Vec3Impl{
+		vec3.Vec3Impl{
 			X: xzr.x0,
 			Y: xzr.k - 0.0001,
 			Z: xzr.z0,
 		},
-		&vec3.Vec3Impl{
+		vec3.Vec3Impl{
 			X: xzr.x1,
 			Y: xzr.k + 0.001,
 			Z: xzr.z1,
 		}), true
 }
 
-func (xzr *XZRect) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (xzr *XZRect) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	r := ray.New(o, v, 0)
 	if rec, _, ok := xzr.Hit(r, 0.001, math.MaxFloat64); ok {
 		area := (xzr.x1 - xzr.x0) * (xzr.z1 - xzr.z0)
@@ -115,8 +115,8 @@ func (xzr *XZRect) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 	return 0
 }
 
-func (xzr *XZRect) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
-	randomPoint := &vec3.Vec3Impl{
+func (xzr *XZRect) Random(o vec3.Vec3Impl, random *fastrandom.LCG) vec3.Vec3Impl {
+	randomPoint := vec3.Vec3Impl{
 		X: xzr.x0 + random.Float64()*(xzr.x1-xzr.x0),
 		Y: xzr.k,
 		Z: xzr.z0 + random.Float64()*(xzr.z1-xzr.z0),

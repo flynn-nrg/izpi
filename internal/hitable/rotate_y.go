@@ -29,8 +29,8 @@ func NewRotateY(hitable Hitable, angle float64) *RotateY {
 	sinTheta := math.Sin(radians)
 	cosTheta := math.Cos(radians)
 	bbox, hasBox := hitable.BoundingBox(0, 1)
-	min := &vec3.Vec3Impl{X: math.MaxFloat64, Y: math.MaxFloat64, Z: math.MaxFloat64}
-	max := &vec3.Vec3Impl{X: -math.MaxFloat64, Y: -math.MaxFloat64, Z: -math.MaxFloat64}
+	min := vec3.Vec3Impl{X: math.MaxFloat64, Y: math.MaxFloat64, Z: math.MaxFloat64}
+	max := vec3.Vec3Impl{X: -math.MaxFloat64, Y: -math.MaxFloat64, Z: -math.MaxFloat64}
 
 	for i := 0; i < 2; i++ {
 		for j := 0; j < 2; j++ {
@@ -40,7 +40,7 @@ func NewRotateY(hitable Hitable, angle float64) *RotateY {
 				z := float64(k)*bbox.Max().Z + (1.0-float64(k))*bbox.Min().Z
 				newx := cosTheta*x + sinTheta*z
 				newz := -sinTheta*x + cosTheta*z
-				tester := &vec3.Vec3Impl{X: newx, Y: y, Z: newz}
+				tester := vec3.Vec3Impl{X: newx, Y: y, Z: newz}
 
 				if tester.X > max.X {
 					max.X = tester.X
@@ -79,12 +79,12 @@ func NewRotateY(hitable Hitable, angle float64) *RotateY {
 }
 
 func (ry *RotateY) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
-	origin := &vec3.Vec3Impl{
+	origin := vec3.Vec3Impl{
 		X: ry.cosTheta*r.Origin().X - ry.sinTheta*r.Origin().Z,
 		Y: r.Origin().Y,
 		Z: ry.sinTheta*r.Origin().X + ry.cosTheta*r.Origin().Z,
 	}
-	direction := &vec3.Vec3Impl{
+	direction := vec3.Vec3Impl{
 		X: ry.cosTheta*r.Direction().X - ry.sinTheta*r.Direction().Z,
 		Y: r.Direction().Y,
 		Z: ry.sinTheta*r.Direction().X + ry.cosTheta*r.Direction().Z,
@@ -93,12 +93,12 @@ func (ry *RotateY) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 	rotatedRay := ray.New(origin, direction, r.Time())
 
 	if hr, mat, ok := ry.hitable.Hit(rotatedRay, tMin, tMax); ok {
-		p := &vec3.Vec3Impl{
+		p := vec3.Vec3Impl{
 			X: ry.cosTheta*hr.P().X + ry.sinTheta*hr.P().Z,
 			Y: hr.P().Y,
 			Z: -ry.sinTheta*hr.P().X + ry.cosTheta*hr.P().Z,
 		}
-		normal := &vec3.Vec3Impl{
+		normal := vec3.Vec3Impl{
 			X: ry.cosTheta*hr.Normal().X + ry.sinTheta*hr.Normal().Z,
 			Y: hr.Normal().Y,
 			Z: -ry.sinTheta*hr.Normal().X + ry.cosTheta*hr.Normal().Z,
@@ -111,12 +111,12 @@ func (ry *RotateY) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 }
 
 func (ry *RotateY) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
-	origin := &vec3.Vec3Impl{
+	origin := vec3.Vec3Impl{
 		X: ry.cosTheta*r.Origin().X - ry.sinTheta*r.Origin().Z,
 		Y: r.Origin().Y,
 		Z: ry.sinTheta*r.Origin().X + ry.cosTheta*r.Origin().Z,
 	}
-	direction := &vec3.Vec3Impl{
+	direction := vec3.Vec3Impl{
 		X: ry.cosTheta*r.Direction().X - ry.sinTheta*r.Direction().Z,
 		Y: r.Direction().Y,
 		Z: ry.sinTheta*r.Direction().X + ry.cosTheta*r.Direction().Z,
@@ -125,12 +125,12 @@ func (ry *RotateY) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.Hi
 	rotatedRay := ray.New(origin, direction, r.Time())
 
 	if hr, ok, edgeOk := ry.hitable.HitEdge(rotatedRay, tMin, tMax); ok {
-		p := &vec3.Vec3Impl{
+		p := vec3.Vec3Impl{
 			X: ry.cosTheta*hr.P().X + ry.sinTheta*hr.P().Z,
 			Y: hr.P().Y,
 			Z: -ry.sinTheta*hr.P().X + ry.cosTheta*hr.P().Z,
 		}
-		normal := &vec3.Vec3Impl{
+		normal := vec3.Vec3Impl{
 			X: ry.cosTheta*hr.Normal().X + ry.sinTheta*hr.Normal().Z,
 			Y: hr.Normal().Y,
 			Z: -ry.sinTheta*hr.Normal().X + ry.cosTheta*hr.Normal().Z,
@@ -146,11 +146,11 @@ func (ry *RotateY) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) 
 	return ry.bbox, ry.hasBox
 }
 
-func (ry *RotateY) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (ry *RotateY) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	return ry.hitable.PDFValue(o, v)
 }
 
-func (ry *RotateY) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (ry *RotateY) Random(o vec3.Vec3Impl, random *fastrandom.LCG) vec3.Vec3Impl {
 	return ry.hitable.Random(o, random)
 }
 

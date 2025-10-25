@@ -34,7 +34,7 @@ func (i *Isotropic) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrand
 	scattered := ray.New(hr.P(), randomInUnitSphere(random), r.Time())
 	attenuation := i.albedo.Value(hr.U(), hr.V(), hr.P())
 	pdf := pdf.NewCosine(hr.Normal())
-	scatterRecord := scatterrecord.New(nil, false, attenuation, nil, nil, nil, pdf)
+	scatterRecord := scatterrecord.New(nil, false, attenuation, vec3.Vec3Impl{}, vec3.Vec3Impl{}, vec3.Vec3Impl{}, pdf)
 	return scattered, scatterRecord, true
 }
 
@@ -53,11 +53,11 @@ func (i *Isotropic) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered 
 	return 0
 }
 
-func (i *Isotropic) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (i *Isotropic) Albedo(u float64, v float64, p vec3.Vec3Impl) vec3.Vec3Impl {
 	return i.albedo.Value(u, v, p)
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
-func (i *Isotropic) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+func (i *Isotropic) SpectralAlbedo(u float64, v float64, lambda float64, p vec3.Vec3Impl) float64 {
 	return i.albedo.Value(u, v, p).X // Use red component as approximation
 }

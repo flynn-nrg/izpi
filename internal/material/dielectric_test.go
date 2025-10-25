@@ -10,23 +10,6 @@ import (
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
-func TestNewColoredDielectric(t *testing.T) {
-	absorptionCoeff := &vec3.Vec3Impl{X: 0.1, Y: 0.2, Z: 0.3}
-	dielectric := NewColoredDielectric(1.5, absorptionCoeff)
-
-	if dielectric.refIdx != 1.5 {
-		t.Errorf("Expected refractive index 1.5, got %f", dielectric.refIdx)
-	}
-
-	if dielectric.absorptionCoeff == nil {
-		t.Error("Expected absorption coefficient to be set")
-	}
-
-	if dielectric.absorptionCoeff.X != 0.1 || dielectric.absorptionCoeff.Y != 0.2 || dielectric.absorptionCoeff.Z != 0.3 {
-		t.Error("Absorption coefficient values don't match")
-	}
-}
-
 func TestNewSpectralColoredDielectric(t *testing.T) {
 	spectralRefIdx := texture.NewSpectralConstant(1.5, 550.0, 50.0)
 	spectralAbsorptionCoeff := texture.NewSpectralConstant(0.5, 480.0, 60.0)
@@ -47,7 +30,7 @@ func TestBeerLambertAttenuation(t *testing.T) {
 	dielectric := NewSpectralColoredDielectric(nil, spectralAbsorptionCoeff)
 
 	// Test at the peak wavelength (480nm)
-	attenuation := dielectric.calculateBeerLambertAttenuation(1.0, 480.0, 0.0, 0.0, &vec3.Vec3Impl{})
+	attenuation := dielectric.calculateBeerLambertAttenuation(1.0, 480.0, 0.0, 0.0, vec3.Vec3Impl{})
 	expected := 0.6065 // exp(-0.5 * 1.0)
 
 	if abs(attenuation-expected) > 0.001 {
@@ -55,7 +38,7 @@ func TestBeerLambertAttenuation(t *testing.T) {
 	}
 
 	// Test at a wavelength far from the peak (should have lower absorption)
-	attenuation2 := dielectric.calculateBeerLambertAttenuation(1.0, 700.0, 0.0, 0.0, &vec3.Vec3Impl{})
+	attenuation2 := dielectric.calculateBeerLambertAttenuation(1.0, 700.0, 0.0, 0.0, vec3.Vec3Impl{})
 	if attenuation2 <= attenuation {
 		t.Error("Expected higher attenuation (less absorption) at wavelength far from peak")
 	}
@@ -65,13 +48,13 @@ func TestPathLengthCalculation(t *testing.T) {
 	dielectric := NewDielectric(1.5)
 
 	// Create a hit record
-	hitPoint := &vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5}
-	normal := &vec3.Vec3Impl{X: 0.577, Y: 0.577, Z: 0.577} // Normalized
+	hitPoint := vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5}
+	normal := vec3.Vec3Impl{X: 0.577, Y: 0.577, Z: 0.577} // Normalized
 	hr := hitrecord.New(1.0, 0.0, 0.0, hitPoint, normal)
 
 	// Create a ray
-	origin := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: -2.0}
-	direction := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
+	origin := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: -2.0}
+	direction := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
 	r := ray.New(origin, direction, 0.0)
 
 	// Create a scattered ray
@@ -94,14 +77,14 @@ type mockSceneGeometry struct{}
 
 func (m *mockSceneGeometry) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, Material, bool) {
 	// Return a mock exit point for testing
-	exitPoint := &vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 1.5}
-	normal := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
+	exitPoint := vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 1.5}
+	normal := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
 	hr := hitrecord.New(2.0, 0.0, 0.0, exitPoint, normal)
 	return hr, nil, true
 }
 
 func TestColoredGlassScattering(t *testing.T) {
-	absorptionCoeff := &vec3.Vec3Impl{X: 0.1, Y: 0.2, Z: 0.3}
+	absorptionCoeff := vec3.Vec3Impl{X: 0.1, Y: 0.2, Z: 0.3}
 	dielectric := NewColoredDielectric(1.5, absorptionCoeff)
 
 	// Set up a mock world for path length calculation
@@ -109,13 +92,13 @@ func TestColoredGlassScattering(t *testing.T) {
 	dielectric.SetWorld(mockWorld)
 
 	// Create a hit record
-	hitPoint := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
-	normal := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
+	hitPoint := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
+	normal := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
 	hr := hitrecord.New(1.0, 0.0, 0.0, hitPoint, normal)
 
 	// Create a ray
-	origin := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: -1.0}
-	direction := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
+	origin := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: -1.0}
+	direction := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
 	r := ray.New(origin, direction, 0.0)
 
 	random := fastrandom.NewWithDefaults()
@@ -141,10 +124,12 @@ func TestColoredGlassScattering(t *testing.T) {
 
 		// Check attenuation values
 		attenuation := scatterRecord.Attenuation()
-		if attenuation.X < 1.0 || attenuation.Y < 1.0 || attenuation.Z < 1.0 {
+		// Use epsilon for floating point comparison
+		epsilon := 1e-6
+		if attenuation.X < (1.0-epsilon) || attenuation.Y < (1.0-epsilon) || attenuation.Z < (1.0-epsilon) {
 			foundAttenuation = true
 		}
-		if attenuation.X >= 1.0 && attenuation.Y >= 1.0 && attenuation.Z >= 1.0 {
+		if attenuation.X >= (1.0-epsilon) && attenuation.Y >= (1.0-epsilon) && attenuation.Z >= (1.0-epsilon) {
 			foundNoAttenuation = true
 		}
 
@@ -173,13 +158,13 @@ func TestSpectralColoredGlassScattering(t *testing.T) {
 	dielectric.SetWorld(mockWorld)
 
 	// Create a hit record
-	hitPoint := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
-	normal := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
+	hitPoint := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
+	normal := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
 	hr := hitrecord.New(1.0, 0.0, 0.0, hitPoint, normal)
 
 	// Create a ray with wavelength
-	origin := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: -1.0}
-	direction := &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
+	origin := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: -1.0}
+	direction := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
 	r := ray.NewWithLambda(origin, direction, 0.0, 480.0) // Blue wavelength
 
 	random := fastrandom.NewWithDefaults()

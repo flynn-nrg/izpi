@@ -46,8 +46,8 @@ type workerServer struct {
 	maxDepth         int
 	imageResolutionX int
 	imageResolutionY int
-	background       *vec3.Vec3Impl
-	ink              *vec3.Vec3Impl
+	background       vec3.Vec3Impl
+	ink              vec3.Vec3Impl
 
 	randPool sync.Pool
 

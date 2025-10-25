@@ -145,7 +145,7 @@ func TestApplyTessellation(t *testing.T) {
 			maxDeltaV := 1.0 / float64(test.resV-1)
 			// Create a flat displacement map (constant value) for predictable testing
 			// With no variation, adaptive tessellation will stop at UV limits
-			flatDisplacement := texture.NewConstant(&vec3.Vec3Impl{Z: 0.5})
+			flatDisplacement := texture.NewConstant(vec3.Vec3Impl{Z: 0.5})
 			min, max := 0.0, 1.0
 			adaptiveThreshold := 0.01 // Small threshold, but flat map has 0 variation
 			got := applyTessellation(test.input, maxDeltaU, maxDeltaV, flatDisplacement, min, max, adaptiveThreshold)
@@ -178,8 +178,8 @@ func TestApplyDisplacement(t *testing.T) {
 				},
 			},
 			max:     1.0,
-			texture: texture.NewConstant(&vec3.Vec3Impl{Z: 1}),
-			want: []*hitable.Triangle{hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: -1, Y: -1}, &vec3.Vec3Impl{X: 1, Y: -1}, &vec3.Vec3Impl{Y: -1, Z: 1},
+			texture: texture.NewConstant(vec3.Vec3Impl{Z: 1}),
+			want: []*hitable.Triangle{hitable.NewTriangleWithUV(vec3.Vec3Impl{X: -1, Y: -1}, vec3.Vec3Impl{X: 1, Y: -1}, vec3.Vec3Impl{Y: -1, Z: 1},
 				0, 0, 1, 0, 0.5, 1.0, nil)},
 		},
 		{
@@ -196,8 +196,8 @@ func TestApplyDisplacement(t *testing.T) {
 			},
 			min:     -0.5,
 			max:     0.5,
-			texture: texture.NewConstant(&vec3.Vec3Impl{X: 1, Y: 1, Z: 1}),
-			want: []*hitable.Triangle{hitable.NewTriangleWithUV(&vec3.Vec3Impl{X: -1, Y: -.5}, &vec3.Vec3Impl{X: 1, Y: -.5}, &vec3.Vec3Impl{Y: -0.5, Z: 1},
+			texture: texture.NewConstant(vec3.Vec3Impl{X: 1, Y: 1, Z: 1}),
+			want: []*hitable.Triangle{hitable.NewTriangleWithUV(vec3.Vec3Impl{X: -1, Y: -.5}, vec3.Vec3Impl{X: 1, Y: -.5}, vec3.Vec3Impl{Y: -0.5, Z: 1},
 				0, 0, 1, 0, 0.5, 1.0, nil)},
 		},
 	}

@@ -7,11 +7,11 @@ type HitRecord struct {
 	u      float64
 	v      float64
 	t      float64
-	p      *vec3.Vec3Impl
-	normal *vec3.Vec3Impl
+	p      vec3.Vec3Impl
+	normal vec3.Vec3Impl
 }
 
-func New(t float64, u float64, v float64, p *vec3.Vec3Impl, normal *vec3.Vec3Impl) *HitRecord {
+func New(t float64, u float64, v float64, p vec3.Vec3Impl, normal vec3.Vec3Impl) *HitRecord {
 	return &HitRecord{
 		u:      u,
 		v:      v,
@@ -22,12 +22,12 @@ func New(t float64, u float64, v float64, p *vec3.Vec3Impl, normal *vec3.Vec3Imp
 }
 
 // Normal returns the normal vector at the intersection point.
-func (hr *HitRecord) Normal() *vec3.Vec3Impl {
+func (hr *HitRecord) Normal() vec3.Vec3Impl {
 	return hr.normal
 }
 
 // P returns the intersection point.
-func (hr *HitRecord) P() *vec3.Vec3Impl {
+func (hr *HitRecord) P() vec3.Vec3Impl {
 	return hr.p
 }
 
