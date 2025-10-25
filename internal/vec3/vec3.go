@@ -12,9 +12,6 @@ type Vec3Impl struct {
 	X float64
 	Y float64
 	Z float64
-	R float64
-	G float64
-	B float64
 }
 
 // Length returns the length of this vector.
