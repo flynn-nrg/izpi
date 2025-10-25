@@ -60,48 +60,48 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	albedo := pbr.albedo.Value(hr.U(), hr.V(), hr.P())
 
 	// Handle normal map - convert from tangent space to world space
-	var normal *vec3.Vec3Impl
+	var normal vec3.Vec3Impl
+
 	if pbr.normalMap != nil {
 		normalAtUV := pbr.normalMap.Value(hr.U(), hr.V(), hr.P())
-		tangentNormal := &vec3.Vec3Impl{
+		tangentNormal := vec3.Vec3Impl{
 			X: 2.0*normalAtUV.X - 1.0,
 			Y: 2.0*normalAtUV.Y - 1.0,
 			Z: normalAtUV.Z,
 		}
 
 		n := hr.Normal()
-		t := vec3.Cross(n, &vec3.Vec3Impl{X: 0, Y: 1, Z: 0})
+		t := vec3.Cross(n, vec3.Vec3Impl{X: 0, Y: 1, Z: 0})
 		if vec3.Dot(t, t) < 0.001 {
-			t = vec3.Cross(n, &vec3.Vec3Impl{X: 1, Y: 0, Z: 0})
+			t = vec3.Cross(n, vec3.Vec3Impl{X: 1, Y: 0, Z: 0})
 		}
 
-		t.MakeUnitVector()
-		b := vec3.Cross(n, t)
-		b.MakeUnitVector()
+		t = t.MakeUnitVector()
+
+		b := vec3.Cross(n, t).MakeUnitVector()
 
 		// Transform normal from tangent space to world space
-		normal = &vec3.Vec3Impl{
+		normal = vec3.Vec3Impl{
 			X: t.X*tangentNormal.X + b.X*tangentNormal.Y + n.X*tangentNormal.Z,
 			Y: t.Y*tangentNormal.X + b.Y*tangentNormal.Y + n.Y*tangentNormal.Z,
 			Z: t.Z*tangentNormal.X + b.Z*tangentNormal.Y + n.Z*tangentNormal.Z,
-		}
-		normal.MakeUnitVector()
+		}.MakeUnitVector()
 	} else {
 		normal = hr.Normal()
 	}
 
-	var roughness *vec3.Vec3Impl
+	var roughness vec3.Vec3Impl
 	if pbr.roughness != nil {
 		roughness = pbr.roughness.Value(hr.U(), hr.V(), hr.P())
 	} else {
-		roughness = &vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5} // Default to medium roughness
+		roughness = vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5} // Default to medium roughness
 	}
 
-	var metalness *vec3.Vec3Impl
+	var metalness vec3.Vec3Impl
 	if pbr.metalness != nil {
 		metalness = pbr.metalness.Value(hr.U(), hr.V(), hr.P())
 	} else {
-		metalness = &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 0.0} // Default to non-metallic
+		metalness = vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 0.0} // Default to non-metallic
 	}
 
 	// Calculate average values
@@ -116,7 +116,7 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	reflected := reflect(vec3.UnitVector(r.Direction()), normal)
 
 	// Balanced PBR scattering logic using roughness to control specular probability
-	var finalDir *vec3.Vec3Impl
+	var finalDir vec3.Vec3Impl
 	var isSpecular bool
 
 	// Calculate Fresnel effect (simplified)
@@ -150,7 +150,7 @@ func (pbr *PBR) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 	// TODO: Use a more accurate PDF for PBR materials.
 	pdf := pdf.NewCosine(normal)
 
-	scatterRecord := scatterrecord.New(scattered, isSpecular, albedo, nil, nil, nil, pdf)
+	scatterRecord := scatterrecord.New(scattered, isSpecular, albedo, vec3.Vec3Impl{}, vec3.Vec3Impl{}, vec3.Vec3Impl{}, pdf)
 	return scattered, scatterRecord, true
 }
 
@@ -161,48 +161,46 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	albedo := pbr.SpectralAlbedo(hr.U(), hr.V(), lambda, hr.P())
 
 	// Handle normal map - convert from tangent space to world space
-	var normal *vec3.Vec3Impl
+	var normal vec3.Vec3Impl
 	if pbr.normalMap != nil {
 		normalAtUV := pbr.normalMap.Value(hr.U(), hr.V(), hr.P())
-		tangentNormal := &vec3.Vec3Impl{
+		tangentNormal := vec3.Vec3Impl{
 			X: 2.0*normalAtUV.X - 1.0,
 			Y: 2.0*normalAtUV.Y - 1.0,
 			Z: normalAtUV.Z,
 		}
 
 		n := hr.Normal()
-		t := vec3.Cross(n, &vec3.Vec3Impl{X: 0, Y: 1, Z: 0})
+		t := vec3.Cross(n, vec3.Vec3Impl{X: 0, Y: 1, Z: 0})
 		if vec3.Dot(t, t) < 0.001 {
-			t = vec3.Cross(n, &vec3.Vec3Impl{X: 1, Y: 0, Z: 0})
+			t = vec3.Cross(n, vec3.Vec3Impl{X: 1, Y: 0, Z: 0})
 		}
 
-		t.MakeUnitVector()
-		b := vec3.Cross(n, t)
-		b.MakeUnitVector()
+		t = t.MakeUnitVector()
+		b := vec3.Cross(n, t).MakeUnitVector()
 
 		// Transform normal from tangent space to world space
-		normal = &vec3.Vec3Impl{
+		normal = vec3.Vec3Impl{
 			X: t.X*tangentNormal.X + b.X*tangentNormal.Y + n.X*tangentNormal.Z,
 			Y: t.Y*tangentNormal.X + b.Y*tangentNormal.Y + n.Y*tangentNormal.Z,
 			Z: t.Z*tangentNormal.X + b.Z*tangentNormal.Y + n.Z*tangentNormal.Z,
-		}
-		normal.MakeUnitVector()
+		}.MakeUnitVector()
 	} else {
 		normal = hr.Normal()
 	}
 
-	var roughness *vec3.Vec3Impl
+	var roughness vec3.Vec3Impl
 	if pbr.roughness != nil {
 		roughness = pbr.roughness.Value(hr.U(), hr.V(), hr.P())
 	} else {
-		roughness = &vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5} // Default to medium roughness
+		roughness = vec3.Vec3Impl{X: 0.5, Y: 0.5, Z: 0.5} // Default to medium roughness
 	}
 
-	var metalness *vec3.Vec3Impl
+	var metalness vec3.Vec3Impl
 	if pbr.metalness != nil {
 		metalness = pbr.metalness.Value(hr.U(), hr.V(), hr.P())
 	} else {
-		metalness = &vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 0.0} // Default to non-metallic
+		metalness = vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 0.0} // Default to non-metallic
 	}
 
 	// Calculate average values
@@ -217,7 +215,7 @@ func (pbr *PBR) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fast
 	reflected := reflect(vec3.UnitVector(r.Direction()), normal)
 
 	// Balanced PBR scattering logic using roughness to control specular probability
-	var finalDir *vec3.Vec3Impl
+	var finalDir vec3.Vec3Impl
 	var isSpecular bool
 
 	// Calculate Fresnel effect (simplified)
@@ -279,12 +277,12 @@ func (pbr *PBR) NormalMap() texture.Texture {
 	return pbr.normalMap
 }
 
-func (pbr *PBR) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (pbr *PBR) Albedo(u float64, v float64, p vec3.Vec3Impl) vec3.Vec3Impl {
 	return pbr.albedo.Value(u, v, p)
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
-func (pbr *PBR) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+func (pbr *PBR) SpectralAlbedo(u float64, v float64, lambda float64, p vec3.Vec3Impl) float64 {
 	if pbr.spectralAlbedo != nil {
 		return pbr.spectralAlbedo.Value(u, v, lambda, p)
 	}

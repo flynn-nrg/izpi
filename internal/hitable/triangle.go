@@ -19,23 +19,23 @@ var _ Hitable = (*Triangle)(nil)
 // Triangle represents a single triangle in the 3d world.
 type Triangle struct {
 	// Vertices
-	vertex0 *vec3.Vec3Impl
-	vertex1 *vec3.Vec3Impl
-	vertex2 *vec3.Vec3Impl
+	vertex0 vec3.Vec3Impl
+	vertex1 vec3.Vec3Impl
+	vertex2 vec3.Vec3Impl
 	// Vertex normals
 	perVertexNormals bool
-	vn0              *vec3.Vec3Impl
-	vn1              *vec3.Vec3Impl
-	vn2              *vec3.Vec3Impl
+	vn0              vec3.Vec3Impl
+	vn1              vec3.Vec3Impl
+	vn2              vec3.Vec3Impl
 
 	// Edges
-	edge1 *vec3.Vec3Impl
-	edge2 *vec3.Vec3Impl
+	edge1 vec3.Vec3Impl
+	edge2 vec3.Vec3Impl
 	// Normal
-	normal *vec3.Vec3Impl
+	normal vec3.Vec3Impl
 	// Used for normal mapping
-	tangent   *vec3.Vec3Impl
-	bitangent *vec3.Vec3Impl
+	tangent   vec3.Vec3Impl
+	bitangent vec3.Vec3Impl
 	// Area
 	area float64
 	// Material
@@ -52,27 +52,26 @@ type Triangle struct {
 }
 
 // NewTriangle returns a new untextured triangle.
-func NewTriangle(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
+func NewTriangle(vertex0 vec3.Vec3Impl, vertex1 vec3.Vec3Impl, vertex2 vec3.Vec3Impl,
 	mat material.Material) *Triangle {
 	return NewTriangleWithUV(vertex0, vertex1, vertex2, 0, 0, 0, 0, 0, 0, mat)
 }
 
 // NewTriangleWithUV returns a new texture triangle.
-func NewTriangleWithUV(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
+func NewTriangleWithUV(vertex0 vec3.Vec3Impl, vertex1 vec3.Vec3Impl, vertex2 vec3.Vec3Impl,
 	u0, v0, u1, v1, u2, v2 float64, mat material.Material) *Triangle {
 	edge1 := vec3.Sub(vertex1, vertex0)
 	edge2 := vec3.Sub(vertex2, vertex0)
 
-	normal := vec3.Cross(edge1, edge2)
-	normal.MakeUnitVector()
+	normal := vec3.Cross(edge1, edge2).MakeUnitVector()
 
 	return NewTriangleWithUVAndNormal(vertex0, vertex1, vertex2,
 		normal, u0, v0, u1, v1, u2, v2, mat)
 }
 
 // NewTriangleWithUV returns a new texture triangle.
-func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
-	normal *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64, mat material.Material) *Triangle {
+func NewTriangleWithUVAndNormal(vertex0 vec3.Vec3Impl, vertex1 vec3.Vec3Impl, vertex2 vec3.Vec3Impl,
+	normal vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64, mat material.Material) *Triangle {
 
 	deltaU1 := u1 - u0
 	deltaU2 := u2 - u0
@@ -86,21 +85,17 @@ func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, 
 	area := n.Length() / 2.0
 
 	f := 1.0 / (deltaU1*deltaV2 - deltaU2*deltaV1)
-	tanget := &vec3.Vec3Impl{
+	tanget := vec3.Vec3Impl{
 		X: f * (deltaV2*edge1.X - deltaV1*edge2.X),
 		Y: f * (deltaV2*edge1.Y - deltaV1*edge2.Y),
 		Z: f * (deltaV2*edge1.Z - deltaV1*edge2.Z),
-	}
+	}.MakeUnitVector()
 
-	tanget.MakeUnitVector()
-
-	bitangent := &vec3.Vec3Impl{
+	bitangent := vec3.Vec3Impl{
 		X: f * (-deltaU2*edge1.X + deltaU1*edge2.X),
 		Y: f * (-deltaU2*edge1.Y + deltaU1*edge2.Y),
 		Z: f * (-deltaU2*edge1.Z + deltaU1*edge2.Z),
-	}
-
-	bitangent.MakeUnitVector()
+	}.MakeUnitVector()
 
 	// Calculate bounding box with relative epsilon based on triangle size
 	min := vec3.Min3(vertex0, vertex1, vertex2)
@@ -112,7 +107,7 @@ func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, 
 
 	// Use epsilon relative to triangle size, with a minimum value
 	epsilon := math.Max(maxDim*1e-4, 1e-6)
-	delta := &vec3.Vec3Impl{X: epsilon, Y: epsilon, Z: epsilon}
+	delta := vec3.Vec3Impl{X: epsilon, Y: epsilon, Z: epsilon}
 
 	min = vec3.Sub(min, delta)
 	max = vec3.Add(max, delta)
@@ -139,8 +134,8 @@ func NewTriangleWithUVAndNormal(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, 
 }
 
 // NewTriangleWithUVAndVertexNormals returns a new textured triangle with per vertex normals.
-func NewTriangleWithUVAndVertexNormals(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec3Impl, vertex2 *vec3.Vec3Impl,
-	vn0 *vec3.Vec3Impl, vn1 *vec3.Vec3Impl, vn2 *vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64,
+func NewTriangleWithUVAndVertexNormals(vertex0 vec3.Vec3Impl, vertex1 vec3.Vec3Impl, vertex2 vec3.Vec3Impl,
+	vn0 vec3.Vec3Impl, vn1 vec3.Vec3Impl, vn2 vec3.Vec3Impl, u0, v0, u1, v1, u2, v2 float64,
 	mat material.Material) *Triangle {
 
 	deltaU1 := u1 - u0
@@ -155,23 +150,19 @@ func NewTriangleWithUVAndVertexNormals(vertex0 *vec3.Vec3Impl, vertex1 *vec3.Vec
 	area := n.Length() / 2.0
 
 	f := 1.0 / (deltaU1*deltaV2 - deltaU2*deltaV1)
-	tanget := &vec3.Vec3Impl{
+	tanget := vec3.Vec3Impl{
 		X: f * (deltaV2*edge1.X - deltaV1*edge2.X),
 		Y: f * (deltaV2*edge1.Y - deltaV1*edge2.Y),
 		Z: f * (deltaV2*edge1.Z - deltaV1*edge2.Z),
-	}
+	}.MakeUnitVector()
 
-	tanget.MakeUnitVector()
-
-	bitangent := &vec3.Vec3Impl{
+	bitangent := vec3.Vec3Impl{
 		X: f * (-deltaU2*edge1.X + deltaU1*edge2.X),
 		Y: f * (-deltaU2*edge1.Y + deltaU1*edge2.Y),
 		Z: f * (-deltaU2*edge1.Z + deltaU1*edge2.Z),
-	}
+	}.MakeUnitVector()
 
-	bitangent.MakeUnitVector()
-
-	delta := &vec3.Vec3Impl{X: 0.0001, Y: 0.0001, Z: 0.0001}
+	delta := vec3.Vec3Impl{X: 0.0001, Y: 0.0001, Z: 0.0001}
 	min := vec3.Sub(vec3.Min3(vertex0, vertex1, vertex2), delta)
 	max := vec3.Add(vec3.Max3(vertex0, vertex1, vertex2), delta)
 
@@ -243,7 +234,7 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	uu := w*tri.u0 + u*tri.u1 + v*tri.u2
 	vv := w*tri.v0 + u*tri.v1 + v*tri.v2
 
-	var normal *vec3.Vec3Impl
+	var normal vec3.Vec3Impl
 
 	if tri.perVertexNormals {
 		// Interpolate vertex normals
@@ -262,14 +253,14 @@ func (tri *Triangle) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 	}
 
 	// We use OpenGL normal maps.
-	normalTangentSpace := normalMap.Value(uu, vv, nil)
+	normalTangentSpace := normalMap.Value(uu, vv, vec3.Vec3Impl{})
 	normalTangentSpace.X = 2*normalTangentSpace.X - 1.0
 	normalTangentSpace.Y = 2*normalTangentSpace.Y - 1.0
 	normalTangentSpace.Z = 2*normalTangentSpace.Z - 1.0
 
 	tbn := mat3.NewTBN(tri.tangent, tri.bitangent, normal)
-	newNormal := mat3.MatrixVectorMul(tbn, normalTangentSpace)
-	newNormal.MakeUnitVector() // Ensure the final normal is normalized
+	newNormal := mat3.MatrixVectorMul(tbn, normalTangentSpace).MakeUnitVector()
+
 	return hitrecord.New(t, uu, vv, r.PointAtParameter(t), newNormal), tri.material, true
 }
 
@@ -277,7 +268,7 @@ func (tri *Triangle) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool
 	return tri.bb, true
 }
 
-func (tri *Triangle) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (tri *Triangle) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	r := ray.New(o, v, 0)
 	if rec, _, ok := tri.Hit(r, 0.001, math.MaxFloat64); ok {
 		distanceSquared := rec.T() * rec.T() * v.SquaredLength()
@@ -323,7 +314,7 @@ func (tri *Triangle) Random(o *vec3.Vec3Impl) *vec3.Vec3Impl {
 }
 */
 
-func (tri *Triangle) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (tri *Triangle) Random(o vec3.Vec3Impl, random *fastrandom.LCG) vec3.Vec3Impl {
 	t1 := random.Float64()
 	randomPoint01 := vec3.Lerp(tri.vertex0, tri.vertex1, t1)
 	t2 := random.Float64()
@@ -339,15 +330,15 @@ func (tri *Triangle) IsEmitter() bool {
 }
 
 func (tri *Triangle) Vertex0() vec3.Vec3Impl {
-	return *tri.vertex0
+	return tri.vertex0
 }
 
 func (tri *Triangle) Vertex1() vec3.Vec3Impl {
-	return *tri.vertex1
+	return tri.vertex1
 }
 
 func (tri *Triangle) Vertex2() vec3.Vec3Impl {
-	return *tri.vertex2
+	return tri.vertex2
 }
 
 func (tri *Triangle) U0() float64 {

@@ -15,11 +15,11 @@ var _ Hitable = (*Translate)(nil)
 // Translate represents a hitable with its associated translation.
 type Translate struct {
 	hitable Hitable
-	offset  *vec3.Vec3Impl
+	offset  vec3.Vec3Impl
 }
 
 // NewTranslate returns an instance of a translated hitable.
-func NewTranslate(hitable Hitable, offset *vec3.Vec3Impl) *Translate {
+func NewTranslate(hitable Hitable, offset vec3.Vec3Impl) *Translate {
 	return &Translate{
 		hitable: hitable,
 		offset:  offset,
@@ -53,11 +53,11 @@ func (tr *Translate) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool
 	return nil, false
 }
 
-func (tr *Translate) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (tr *Translate) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	return tr.hitable.PDFValue(o, v)
 }
 
-func (tr *Translate) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (tr *Translate) Random(o vec3.Vec3Impl, random *fastrandom.LCG) vec3.Vec3Impl {
 	return tr.hitable.Random(o, random)
 }
 

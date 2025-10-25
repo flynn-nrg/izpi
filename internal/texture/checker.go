@@ -23,7 +23,7 @@ func NewChecker(odd Texture, even Texture) *Checker {
 	}
 }
 
-func (c *Checker) Value(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
+func (c *Checker) Value(u float64, v float64, p vec3.Vec3Impl) vec3.Vec3Impl {
 	sines := math.Sin(10.0*p.X) * math.Sin(10.0*p.Y) * math.Sin(10.0*p.Z)
 	if sines < 0 {
 		return c.odd.Value(u, v, p)

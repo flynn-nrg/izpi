@@ -35,8 +35,8 @@ type RendererImpl struct {
 	canvas             *floatimage.Float64NRGBA
 	previewChan        chan display.DisplayTile
 	maxDepth           int
-	background         *vec3.Vec3Impl
-	ink                *vec3.Vec3Impl
+	background         vec3.Vec3Impl
+	ink                vec3.Vec3Impl
 	spectralBackground *spectral.SpectralPowerDistribution
 	preview            bool
 	samplerType        sampler.SamplerType
@@ -73,7 +73,7 @@ func New(
 	scene *scene.Scene,
 	sizeX int, sizeY int,
 	numSamples int, maxDepth int,
-	background *vec3.Vec3Impl, ink *vec3.Vec3Impl,
+	background vec3.Vec3Impl, ink vec3.Vec3Impl,
 	spectralBackground *spectral.SpectralPowerDistribution,
 	numLocalWorkers int,
 	remoteWorkers []*RemoteWorkerConfig,

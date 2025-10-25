@@ -7,14 +7,14 @@ var _ Ray = (*RayImpl)(nil)
 
 // RayImpl implements the Ray interface.
 type RayImpl struct {
-	origin    *vec3.Vec3Impl
-	direction *vec3.Vec3Impl
+	origin    vec3.Vec3Impl
+	direction vec3.Vec3Impl
 	lambda    float64
 	time      float64
 }
 
 // New returns a new ray with the supplied origin and direction vectors and time.
-func New(origin *vec3.Vec3Impl, direction *vec3.Vec3Impl, time float64) *RayImpl {
+func New(origin vec3.Vec3Impl, direction vec3.Vec3Impl, time float64) *RayImpl {
 	return &RayImpl{
 		origin:    origin,
 		direction: direction,
@@ -23,7 +23,7 @@ func New(origin *vec3.Vec3Impl, direction *vec3.Vec3Impl, time float64) *RayImpl
 }
 
 // NewWithLambda returns a new ray with the supplied origin and direction vectors, time, and wavelength.
-func NewWithLambda(origin *vec3.Vec3Impl, direction *vec3.Vec3Impl, time float64, lambda float64) *RayImpl {
+func NewWithLambda(origin vec3.Vec3Impl, direction vec3.Vec3Impl, time float64, lambda float64) *RayImpl {
 	return &RayImpl{
 		origin:    origin,
 		direction: direction,
@@ -33,17 +33,17 @@ func NewWithLambda(origin *vec3.Vec3Impl, direction *vec3.Vec3Impl, time float64
 }
 
 // Origin returns the origin vector of this ray.
-func (r *RayImpl) Origin() *vec3.Vec3Impl {
+func (r *RayImpl) Origin() vec3.Vec3Impl {
 	return r.origin
 }
 
 // Direction returns the direction vector of this ray.
-func (r *RayImpl) Direction() *vec3.Vec3Impl {
+func (r *RayImpl) Direction() vec3.Vec3Impl {
 	return r.direction
 }
 
 // PointAtParameter is used to traverse the ray.
-func (r *RayImpl) PointAtParameter(t float64) *vec3.Vec3Impl {
+func (r *RayImpl) PointAtParameter(t float64) vec3.Vec3Impl {
 	return vec3.Add(r.origin, vec3.ScalarMul(r.direction, t))
 }
 

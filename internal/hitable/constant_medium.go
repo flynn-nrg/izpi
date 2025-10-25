@@ -55,7 +55,7 @@ func (cm *ConstantMedium) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord
 			if hitDistance < distanceInsideBoundary {
 				t := rec1t + hitDistance/r.Direction().Length()
 				// arbitrary
-				normal := &vec3.Vec3Impl{X: 1}
+				normal := vec3.Vec3Impl{X: 1}
 				hr := hitrecord.New(t, 0, 0, r.PointAtParameter(t), normal)
 				return hr, cm.phaseFunction, true
 			}
@@ -73,12 +73,12 @@ func (cm *ConstantMedium) BoundingBox(time0 float64, time1 float64) (*aabb.AABB,
 	return cm.hitable.BoundingBox(time0, time1)
 }
 
-func (cm *ConstantMedium) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (cm *ConstantMedium) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	return 0.0
 }
 
-func (cm *ConstantMedium) Random(o *vec3.Vec3Impl, _ *fastrandom.LCG) *vec3.Vec3Impl {
-	return &vec3.Vec3Impl{X: 1}
+func (cm *ConstantMedium) Random(o vec3.Vec3Impl, _ *fastrandom.LCG) vec3.Vec3Impl {
+	return vec3.Vec3Impl{X: 1}
 }
 
 func (cm *ConstantMedium) IsEmitter() bool {

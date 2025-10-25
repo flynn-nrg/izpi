@@ -15,7 +15,7 @@ type Hitable interface {
 	Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool)
 	HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool)
 	BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool)
-	PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64
-	Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl
+	PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64
+	Random(o vec3.Vec3Impl, random *fastrandom.LCG) vec3.Vec3Impl
 	IsEmitter() bool
 }

@@ -40,7 +40,7 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 				log.Warnf("RenderTile stream cancelled for tile [%d,%d]: %v", req.GetX0(), req.GetY0(), stream.Context().Err())
 				return stream.Context().Err()
 			default:
-				var col *vec3.Vec3Impl
+				var col vec3.Vec3Impl
 				switch s.samplerType {
 				case pb_control.SamplerType_COLOUR, pb_control.SamplerType_NORMAL, pb_control.SamplerType_WIRE_FRAME, pb_control.SamplerType_ALBEDO:
 					col = s.renderTileRGB(float64(x), float64(y), nx, ny, rand)
@@ -74,8 +74,8 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	return nil
 }
 
-func (s *workerServer) renderTileRGB(x, y, nx, ny float64, rand *fastrandom.LCG) *vec3.Vec3Impl {
-	col := &vec3.Vec3Impl{}
+func (s *workerServer) renderTileRGB(x, y, nx, ny float64, rand *fastrandom.LCG) vec3.Vec3Impl {
+	col := vec3.Vec3Impl{}
 	for sample := 0; sample < s.samplesPerPixel; sample++ {
 		u := (float64(x) + rand.Float64()) / nx
 		v := (float64(y) + rand.Float64()) / ny
@@ -86,10 +86,10 @@ func (s *workerServer) renderTileRGB(x, y, nx, ny float64, rand *fastrandom.LCG)
 	return vec3.ScalarDiv(col, float64(s.samplesPerPixel))
 }
 
-func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom.LCG) *vec3.Vec3Impl {
+func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom.LCG) vec3.Vec3Impl {
 	r, g, b := render.RenderPixelSpectral(s.samplesPerPixel, int(x), int(y), int(nx), int(ny), s.scene, s.sampler, rand)
 
-	return &vec3.Vec3Impl{
+	return vec3.Vec3Impl{
 		X: r,
 		Y: g,
 		Z: b,
@@ -113,8 +113,8 @@ func (s *workerServer) RenderEnd(ctx context.Context, req *pb_control.RenderEndR
 	s.numRays = 0
 	s.imageResolutionX = 0
 	s.imageResolutionY = 0
-	s.background = nil
-	s.ink = nil
+	s.background = vec3.Vec3Impl{}
+	s.ink = vec3.Vec3Impl{}
 	s.samplesPerPixel = 0
 	s.maxDepth = 0
 

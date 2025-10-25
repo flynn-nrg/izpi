@@ -109,7 +109,7 @@ func TestPBRMaterialTransformation(t *testing.T) {
 	// Test spectral albedo values at different wavelengths
 	testWavelengths := []float64{380, 550, 650}
 	for _, lambda := range testWavelengths {
-		value := pbrMat.SpectralAlbedo(0.5, 0.5, lambda, &vec3.Vec3Impl{})
+		value := pbrMat.SpectralAlbedo(0.5, 0.5, lambda, vec3.Vec3Impl{})
 		if value < 0.0 || value > 1.0 {
 			t.Errorf("Spectral albedo value at %.0fnm is out of range [0,1]: %f", lambda, value)
 		}
@@ -120,7 +120,7 @@ func TestTextureToSpectralTexture(t *testing.T) {
 	trans := &Transport{}
 
 	// Test constant texture conversion
-	constantTex := texture.NewConstant(&vec3.Vec3Impl{X: 1.0, Y: 0.5, Z: 0.2})
+	constantTex := texture.NewConstant(vec3.Vec3Impl{X: 1.0, Y: 0.5, Z: 0.2})
 	spectralTex, err := trans.textureToSpectralTexture(constantTex)
 	if err != nil {
 		t.Fatalf("Failed to convert constant texture to spectral: %v", err)
@@ -131,7 +131,7 @@ func TestTextureToSpectralTexture(t *testing.T) {
 	}
 
 	// Test that the spectral texture returns reasonable values
-	value := spectralTex.Value(0.5, 0.5, 550.0, &vec3.Vec3Impl{})
+	value := spectralTex.Value(0.5, 0.5, 550.0, vec3.Vec3Impl{})
 	if value < 0.0 || value > 1.0 {
 		t.Errorf("Spectral texture value is out of range [0,1]: %f", value)
 	}
@@ -178,7 +178,7 @@ func TestLightSourceLibraryIntegration(t *testing.T) {
 			// Test that the spectral texture returns reasonable values
 			testWavelengths := []float64{400, 500, 600, 700}
 			for _, lambda := range testWavelengths {
-				value := spectralTex.Value(0.5, 0.5, lambda, &vec3.Vec3Impl{})
+				value := spectralTex.Value(0.5, 0.5, lambda, vec3.Vec3Impl{})
 				if value < 0.0 || value > 1.0 {
 					t.Errorf("Light source '%s': spectral value at %.0fnm is out of range [0,1]: %f",
 						tt.lightSourceKey, lambda, value)
@@ -263,7 +263,7 @@ func TestSpectralTextureMethods(t *testing.T) {
 			}
 
 			// Test that the spectral texture returns reasonable values
-			value := spectralTex.Value(0.5, 0.5, 550.0, &vec3.Vec3Impl{})
+			value := spectralTex.Value(0.5, 0.5, 550.0, vec3.Vec3Impl{})
 			if value < 0.0 {
 				t.Errorf("Spectral texture value at 550nm is negative: %f", value)
 			}

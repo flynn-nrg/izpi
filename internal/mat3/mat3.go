@@ -16,8 +16,8 @@ type Mat3 struct {
 }
 
 // NewTBN returns a new matrix made from the supplied tagent, bitangent and normal vectors.
-func NewTBN(tangent, bitangent, normal *vec3.Vec3Impl) *Mat3 {
-	return &Mat3{
+func NewTBN(tangent, bitangent, normal vec3.Vec3Impl) Mat3 {
+	return Mat3{
 		A11: tangent.X,
 		A12: bitangent.X,
 		A13: normal.X,
@@ -31,8 +31,8 @@ func NewTBN(tangent, bitangent, normal *vec3.Vec3Impl) *Mat3 {
 }
 
 // MatrixVectorMul returns the result of axv, where a is a matrix and v is a vector.
-func MatrixVectorMul(a *Mat3, v *vec3.Vec3Impl) *vec3.Vec3Impl {
-	return &vec3.Vec3Impl{
+func MatrixVectorMul(a Mat3, v vec3.Vec3Impl) vec3.Vec3Impl {
+	return vec3.Vec3Impl{
 		X: a.A11*v.X + a.A12*v.Y + a.A13*v.Z,
 		Y: a.A21*v.X + a.A22*v.Y + a.A23*v.Z,
 		Z: a.A31*v.X + a.A32*v.Y + a.A33*v.Z,

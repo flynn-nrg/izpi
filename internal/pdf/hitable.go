@@ -11,22 +11,22 @@ var _ PDF = (*Hitable)(nil)
 
 // Hitable represents a hitable PDF.
 type Hitable struct {
-	o       *vec3.Vec3Impl
+	o       vec3.Vec3Impl
 	hitable hitabletarget.HitableTarget
 }
 
 // NewHitable returns an instance of a hitable PDF.
-func NewHitable(p hitabletarget.HitableTarget, origin *vec3.Vec3Impl) *Hitable {
+func NewHitable(p hitabletarget.HitableTarget, origin vec3.Vec3Impl) *Hitable {
 	return &Hitable{
 		o:       origin,
 		hitable: p,
 	}
 }
 
-func (h *Hitable) Value(direction *vec3.Vec3Impl) float64 {
+func (h *Hitable) Value(direction vec3.Vec3Impl) float64 {
 	return h.hitable.PDFValue(h.o, direction)
 }
 
-func (h *Hitable) Generate(random *fastrandom.LCG) *vec3.Vec3Impl {
+func (h *Hitable) Generate(random *fastrandom.LCG) vec3.Vec3Impl {
 	return h.hitable.Random(h.o, random)
 }

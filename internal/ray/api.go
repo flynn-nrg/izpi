@@ -5,9 +5,9 @@ import "github.com/flynn-nrg/izpi/internal/vec3"
 
 // Ray defines the methods used to work with rays.
 type Ray interface {
-	Origin() *vec3.Vec3Impl
-	Direction() *vec3.Vec3Impl
-	PointAtParameter(t float64) *vec3.Vec3Impl
+	Origin() vec3.Vec3Impl
+	Direction() vec3.Vec3Impl
+	PointAtParameter(t float64) vec3.Vec3Impl
 	Time() float64
 	Lambda() float64
 	SetLambda(float64)

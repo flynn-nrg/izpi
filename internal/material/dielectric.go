@@ -23,7 +23,7 @@ type Dielectric struct {
 	spectralRefIdx texture.SpectralTexture
 	// Absorption properties for colored glass
 	computeBeerLambertAttenuation bool
-	absorptionCoeff               *vec3.Vec3Impl          // RGB absorption coefficient (for RGB rendering)
+	absorptionCoeff               vec3.Vec3Impl           // RGB absorption coefficient (for RGB rendering)
 	spectralAbsorptionCoeff       texture.SpectralTexture // Spectral absorption coefficient (for spectral rendering)
 	// World reference for path length calculation
 	world SceneGeometry
@@ -45,7 +45,7 @@ func NewSpectralDielectric(spectralRefIdx texture.SpectralTexture, computeBeerLa
 }
 
 // NewColoredDielectric returns an instance of a dielectric material with absorption for colored glass.
-func NewColoredDielectric(refIdx float64, absorptionCoeff *vec3.Vec3Impl) *Dielectric {
+func NewColoredDielectric(refIdx float64, absorptionCoeff vec3.Vec3Impl) *Dielectric {
 	return &Dielectric{
 		refIdx:                        refIdx,
 		absorptionCoeff:               absorptionCoeff,
@@ -68,9 +68,9 @@ func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *f
 	var cosine float64
 	var reflectProb float64
 	var scattered *ray.RayImpl
-	var refracted *vec3.Vec3Impl
+	var refracted vec3.Vec3Impl
 	var ok bool
-	var outwardNormal *vec3.Vec3Impl
+	var outwardNormal vec3.Vec3Impl
 	var isReflected bool
 
 	reflected := reflect(r.Direction(), hr.Normal())
@@ -103,7 +103,7 @@ func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *f
 
 // calculateBeerLambertAttenuation calculates the Beer-Lambert law attenuation
 // I = I₀ * exp(-α * d) where α is the absorption coefficient and d is the path length
-func (d *Dielectric) calculateBeerLambertAttenuation(pathLength float64, lambda float64, u, v float64, p *vec3.Vec3Impl) float64 {
+func (d *Dielectric) calculateBeerLambertAttenuation(pathLength float64, lambda float64, u, v float64, p vec3.Vec3Impl) float64 {
 	if d.spectralAbsorptionCoeff != nil {
 		// Spectral absorption coefficient
 		absorptionCoeff := d.spectralAbsorptionCoeff.Value(u, v, lambda, p)
@@ -160,23 +160,23 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastran
 	}
 
 	// Calculate Beer-Lambert attenuation for RGB rendering
-	var attenuation *vec3.Vec3Impl
-	if d.computeBeerLambertAttenuation && d.absorptionCoeff != nil && !isReflected {
+	var attenuation vec3.Vec3Impl
+	if d.computeBeerLambertAttenuation && d.absorptionCoeff != (vec3.Vec3Impl{}) && !isReflected {
 		// Only apply absorption to transmitted rays, not reflected rays
 		// Use the new path length calculation with world geometry
 		pathLength := d.calculatePathLength(r, hr, scattered, d.world)
 		// Apply Beer-Lambert law for each RGB component
-		attenuation = &vec3.Vec3Impl{
+		attenuation = vec3.Vec3Impl{
 			X: math.Exp(-d.absorptionCoeff.X * pathLength),
 			Y: math.Exp(-d.absorptionCoeff.Y * pathLength),
 			Z: math.Exp(-d.absorptionCoeff.Z * pathLength),
 		}
 	} else {
 		// No absorption for reflected rays or clear glass
-		attenuation = &vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0}
+		attenuation = vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0}
 	}
 
-	scatterRecord := scatterrecord.New(scattered, true, attenuation, nil, nil, nil, nil)
+	scatterRecord := scatterrecord.New(scattered, true, attenuation, vec3.Vec3Impl{}, vec3.Vec3Impl{}, vec3.Vec3Impl{}, nil)
 	return scattered, scatterRecord, true
 }
 
@@ -216,17 +216,17 @@ func (d *Dielectric) IsEmitter() bool {
 	return true
 }
 
-func (d *Dielectric) Emitted(_ ray.Ray, _ *hitrecord.HitRecord, _ float64, _ float64, _ *vec3.Vec3Impl) *vec3.Vec3Impl {
-	return &vec3.Vec3Impl{}
+func (d *Dielectric) Emitted(_ ray.Ray, _ *hitrecord.HitRecord, _ float64, _ float64, _ vec3.Vec3Impl) vec3.Vec3Impl {
+	return vec3.Vec3Impl{}
 }
 
-func (d *Dielectric) Albedo(u float64, v float64, p *vec3.Vec3Impl) *vec3.Vec3Impl {
-	return &vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0}
+func (d *Dielectric) Albedo(u float64, v float64, p vec3.Vec3Impl) vec3.Vec3Impl {
+	return vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0}
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
 // Dielectrics have no absorption in the visible spectrum, so this returns 1.0.
-func (d *Dielectric) SpectralAlbedo(u float64, v float64, lambda float64, p *vec3.Vec3Impl) float64 {
+func (d *Dielectric) SpectralAlbedo(u float64, v float64, lambda float64, p vec3.Vec3Impl) float64 {
 	return 1.0
 }
 

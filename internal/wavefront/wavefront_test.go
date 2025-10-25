@@ -24,24 +24,24 @@ func TestNewObjFromReader(t *testing.T) {
 				ObjectName: "Cube",
 				HasNormals: true,
 				HasUV:      true,
-				Centre:     &vec3.Vec3Impl{},
-				Vertices: []*vec3.Vec3Impl{
+				Centre:     vec3.Vec3Impl{},
+				Vertices: []vec3.Vec3Impl{
 					{X: -0.5, Y: -0.5, Z: -0.5}, {X: 0.5, Y: -0.5, Z: -0.5},
 					{X: 0.5, Y: -0.5, Z: 0.5}, {X: -0.5, Y: -0.5, Z: 0.5},
 					{X: -0.5, Y: 0.5, Z: -0.5}, {X: 0.5, Y: 0.5, Z: -0.5},
 					{X: 0.5, Y: 0.5, Z: 0.5}, {X: -0.5, Y: 0.5, Z: 0.5},
 				},
-				VertexNormals: []*vec3.Vec3Impl{
+				VertexNormals: []vec3.Vec3Impl{
 					{Y: -1}, {Z: -1}, {X: 1},
 					{Z: 1}, {X: -1}, {Y: 1}},
 				VertexUV: []*texture.UV{
-					{U: 0.25}, {U: 0.5},
-					{U: 0.25, V: 0.333333}, {U: 0.5, V: 0.333333},
-					{U: 1, V: 0.666667}, {U: 0.75, V: 0.666667},
-					{U: 1, V: 0.333333}, {U: 0.75, V: 0.333333},
-					{U: 0.5, V: 0.666667}, {U: 0.25, V: 0.666667},
-					{V: 0.666667}, {V: 0.333333},
-					{U: 0.25, V: 1}, {U: 0.5, V: 1}},
+					&texture.UV{U: 0.25}, &texture.UV{U: 0.5},
+					&texture.UV{U: 0.25, V: 0.333333}, &texture.UV{U: 0.5, V: 0.333333},
+					&texture.UV{U: 1, V: 0.666667}, &texture.UV{U: 0.75, V: 0.666667},
+					&texture.UV{U: 1, V: 0.333333}, &texture.UV{U: 0.75, V: 0.333333},
+					&texture.UV{U: 0.5, V: 0.666667}, &texture.UV{U: 0.25, V: 0.666667},
+					&texture.UV{V: 0.666667}, &texture.UV{V: 0.333333},
+					&texture.UV{U: 0.25, V: 1}, &texture.UV{U: 0.5, V: 1}},
 				MtlLib: map[string]*Material{
 					"Material1": {
 						Name:  "Material1",

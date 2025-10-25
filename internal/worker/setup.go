@@ -307,8 +307,8 @@ func (s *workerServer) RenderSetup(req *pb_control.RenderSetupRequest, stream pb
 
 	// Step 4: Setup render parameters
 	s.maxDepth = int(req.GetMaxDepth())
-	s.background = &vec3.Vec3Impl{X: req.GetBackgroundColor().GetX(), Y: req.GetBackgroundColor().GetY(), Z: req.GetBackgroundColor().GetZ()}
-	s.ink = &vec3.Vec3Impl{X: req.GetInkColor().GetX(), Y: req.GetInkColor().GetY(), Z: req.GetInkColor().GetZ()}
+	s.background = vec3.Vec3Impl{X: req.GetBackgroundColor().GetX(), Y: req.GetBackgroundColor().GetY(), Z: req.GetBackgroundColor().GetZ()}
+	s.ink = vec3.Vec3Impl{X: req.GetInkColor().GetX(), Y: req.GetInkColor().GetY(), Z: req.GetInkColor().GetZ()}
 	s.samplesPerPixel = int(req.GetSamplesPerPixel())
 	s.imageResolutionX = int(req.GetImageResolution().GetWidth())
 	s.imageResolutionY = int(req.GetImageResolution().GetHeight())

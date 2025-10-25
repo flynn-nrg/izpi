@@ -95,7 +95,7 @@ func (hs *HitableSlice) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, b
 	return box, true
 }
 
-func (hs *HitableSlice) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (hs *HitableSlice) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	weight := 1.0 / float64(len(hs.hitables))
 	sum := float64(0)
 	for _, h := range hs.hitables {
@@ -104,7 +104,7 @@ func (hs *HitableSlice) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
 	return sum
 }
 
-func (hs *HitableSlice) Random(o *vec3.Vec3Impl, random *fastrandom.LCG) *vec3.Vec3Impl {
+func (hs *HitableSlice) Random(o vec3.Vec3Impl, random *fastrandom.LCG) vec3.Vec3Impl {
 	index := int(random.Float64() * float64(len(hs.hitables)))
 	return hs.hitables[index].Random(o, random)
 }

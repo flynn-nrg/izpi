@@ -62,7 +62,7 @@ func NewSpectralNeutral(reflectance float64) *SpectralConstant {
 // Value returns the spectral response at the given wavelength.
 // For tabulated data: interpolates between the nearest wavelength values
 // For Gaussian: uses the Gaussian function centered at centerWavelength
-func (c *SpectralConstant) Value(_ float64, _ float64, lambda float64, _ *vec3.Vec3Impl) float64 {
+func (c *SpectralConstant) Value(_ float64, _ float64, lambda float64, _ vec3.Vec3Impl) float64 {
 	if c.useTabulated {
 		return c.interpolateSPD(lambda)
 	}

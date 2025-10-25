@@ -49,7 +49,7 @@ func (xyr *XYRect) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRec
 
 	u := (x - xyr.x0) / (xyr.x1 - xyr.x0)
 	v := (y - xyr.y0) / (xyr.y1 - xyr.y0)
-	return hitrecord.New(t, u, v, r.PointAtParameter(t), &vec3.Vec3Impl{Z: 1}), xyr.material, true
+	return hitrecord.New(t, u, v, r.PointAtParameter(t), vec3.Vec3Impl{Z: 1}), xyr.material, true
 }
 
 func (xyr *XYRect) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
@@ -60,20 +60,20 @@ func (xyr *XYRect) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.Hi
 
 	segments := []*segment.Segment{
 		{
-			A: &vec3.Vec3Impl{X: xyr.x0, Y: xyr.y0, Z: xyr.k},
-			B: &vec3.Vec3Impl{X: xyr.x1, Y: xyr.y0, Z: xyr.k},
+			A: vec3.Vec3Impl{X: xyr.x0, Y: xyr.y0, Z: xyr.k},
+			B: vec3.Vec3Impl{X: xyr.x1, Y: xyr.y0, Z: xyr.k},
 		},
 		{
-			A: &vec3.Vec3Impl{X: xyr.x1, Y: xyr.y0, Z: xyr.k},
-			B: &vec3.Vec3Impl{X: xyr.x1, Y: xyr.y1, Z: xyr.k},
+			A: vec3.Vec3Impl{X: xyr.x1, Y: xyr.y0, Z: xyr.k},
+			B: vec3.Vec3Impl{X: xyr.x1, Y: xyr.y1, Z: xyr.k},
 		},
 		{
-			A: &vec3.Vec3Impl{X: xyr.x1, Y: xyr.y1, Z: xyr.k},
-			B: &vec3.Vec3Impl{X: xyr.x0, Y: xyr.y1, Z: xyr.k},
+			A: vec3.Vec3Impl{X: xyr.x1, Y: xyr.y1, Z: xyr.k},
+			B: vec3.Vec3Impl{X: xyr.x0, Y: xyr.y1, Z: xyr.k},
 		},
 		{
-			A: &vec3.Vec3Impl{X: xyr.x0, Y: xyr.y1, Z: xyr.k},
-			B: &vec3.Vec3Impl{X: xyr.x0, Y: xyr.y0, Z: xyr.k},
+			A: vec3.Vec3Impl{X: xyr.x0, Y: xyr.y1, Z: xyr.k},
+			B: vec3.Vec3Impl{X: xyr.x0, Y: xyr.y0, Z: xyr.k},
 		},
 	}
 
@@ -89,24 +89,24 @@ func (xyr *XYRect) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.Hi
 
 func (xyr *XYRect) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
 	return aabb.New(
-		&vec3.Vec3Impl{
+		vec3.Vec3Impl{
 			X: xyr.x0,
 			Y: xyr.y0,
 			Z: xyr.k - 0.0001,
 		},
-		&vec3.Vec3Impl{
+		vec3.Vec3Impl{
 			X: xyr.x1,
 			Y: xyr.y1,
 			Z: xyr.k + 0.001,
 		}), true
 }
 
-func (xyr *XYRect) PDFValue(o *vec3.Vec3Impl, v *vec3.Vec3Impl) float64 {
+func (xyr *XYRect) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
 	return 0.0
 }
 
-func (xyr *XYRect) Random(o *vec3.Vec3Impl, _ *fastrandom.LCG) *vec3.Vec3Impl {
-	return &vec3.Vec3Impl{X: 1}
+func (xyr *XYRect) Random(o vec3.Vec3Impl, _ *fastrandom.LCG) vec3.Vec3Impl {
+	return vec3.Vec3Impl{X: 1}
 }
 
 func (xyr *XYRect) IsEmitter() bool {

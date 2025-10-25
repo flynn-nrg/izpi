@@ -190,7 +190,7 @@ func (si *SpectralImage) rgbToSpectralValue(r, g, b, wavelength float64) float64
 }
 
 // Value returns the spectral value at the given UV coordinates and wavelength.
-func (si *SpectralImage) Value(u float64, v float64, lambda float64, _ *vec3.Vec3Impl) float64 {
+func (si *SpectralImage) Value(u float64, v float64, lambda float64, _ vec3.Vec3Impl) float64 {
 	// Convert UV to pixel coordinates
 	i := int(u * float64(si.sizeX))
 	j := int((1 - v) * (float64(si.sizeY) - 0.001))
