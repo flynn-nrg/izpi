@@ -4,14 +4,14 @@ import (
 	"sync"
 
 	"github.com/flynn-nrg/floatimage/colour"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
 	"github.com/flynn-nrg/izpi/internal/display"
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
 	"github.com/flynn-nrg/izpi/internal/spectral"
 )
 
-func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
+func renderRectSpectral(w workUnit, random *fastrandom.XorShift) {
 	var tile display.DisplayTile
 
 	nx := w.canvas.Bounds().Max.X
@@ -22,7 +22,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 			Width:  w.x1 - w.x0 + 1,
 			Height: 1,
 			PosX:   w.x0,
-			Pixels: make([]float64, (w.x1-w.x0+1)*4),
+			Pixels: make([]float32, (w.x1-w.x0+1)*4),
 		}
 	}
 
@@ -32,7 +32,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 		for x := w.x0; x <= w.x1; x++ {
 			r, g, b := RenderPixelSpectral(w.numSamples, x, y, nx, ny, w.scene, w.sampler, random)
 
-			w.canvas.Set(x, ny-y, colour.Float64NRGBA{R: r, G: g, B: b, A: 1.0})
+			w.canvas.Set(x, ny-y, colour.Float32NRGBA{R: r, G: g, B: b, A: 1.0})
 			if w.preview {
 				tile.Pixels[i] = b
 				tile.Pixels[i+1] = g
@@ -50,7 +50,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 	}
 }
 
-func workerSpectral(input chan workUnit, quit chan struct{}, random *fastrandom.LCG, wg *sync.WaitGroup) {
+func workerSpectral(input chan workUnit, quit chan struct{}, random *fastrandom.XorShift, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		select {
@@ -62,20 +62,20 @@ func workerSpectral(input chan workUnit, quit chan struct{}, random *fastrandom.
 	}
 }
 
-func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, sampler sampler.Sampler, random *fastrandom.LCG) (float64, float64, float64) {
+func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, sampler sampler.Sampler, random *fastrandom.XorShift) (float32, float32, float32) {
 	// Initialize XYZ accumulators for the pixel
-	var sumX, sumY, sumZ float64
+	var sumX, sumY, sumZ float32
 
 	for range numSamples {
 		// Importance sample a wavelength AND its PDF
-		lambda, pdf := spectral.SampleWavelength(random.Float64())
+		lambda, pdf := spectral.SampleWavelength(random.Float32())
 		if pdf == 0 {
 			continue
 		}
 
 		// Get camera ray for this specific wavelength
-		u := (float64(x) + random.Float64()) / float64(nx)
-		v := (float64(y) + random.Float64()) / float64(ny)
+		u := (float32(x) + random.Float32()) / float32(nx)
+		v := (float32(y) + random.Float32()) / float32(ny)
 		r := scene.Camera.GetRayWithLambda(u, v, lambda)
 
 		// Trace the path to get radiance at this wavelength
@@ -91,13 +91,13 @@ func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, s
 	}
 
 	// Average the accumulated XYZ values
-	invNumSamples := 1.0 / float64(numSamples)
+	invNumSamples := 1.0 / float32(numSamples)
 	finalX := sumX * invNumSamples
 	finalY := sumY * invNumSamples
 	finalZ := sumZ * invNumSamples
 
 	// Convert the final XYZ color to linear sRGB using the white balance matrix
-	exposure := 1.0
+	exposure := float32(1.0)
 	r, g, b := scene.WhiteBalance.Matrix.Apply(finalX*exposure, finalY*exposure, finalZ*exposure)
 
 	return r, g, b

@@ -1,7 +1,7 @@
 package segment
 
 import (
-	"github.com/flynn-nrg/izpi/internal/vec3"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 )
 
 // Segment represents a segment in the 3d space.

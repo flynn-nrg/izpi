@@ -7,9 +7,10 @@
 package display
 
 import (
-	"math"
 	"sync"
 	"time"
+
+	"github.com/flynn-nrg/go-vfx/math32"
 
 	"github.com/flynn-nrg/izpi/internal/common"
 	log "github.com/sirupsen/logrus"
@@ -211,9 +212,9 @@ func (sd *SDLDisplay) makeBackdrop() {
 
 }
 
-func floatToUint32(in float64) uint32 {
+func floatToUint32(in float32) uint32 {
 	// Gamma 2.0
-	in = math.Sqrt(in)
+	in = math32.Sqrt(in)
 	p := int(in * 255)
 	if p > 255 {
 		return 255

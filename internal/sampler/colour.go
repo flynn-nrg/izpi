@@ -1,14 +1,15 @@
 package sampler
 
 import (
-	"math"
 	"sync/atomic"
 
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32"
+
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/hitable"
 	"github.com/flynn-nrg/izpi/internal/pdf"
 	"github.com/flynn-nrg/izpi/internal/ray"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // Ensure interface compliance.
@@ -30,14 +31,14 @@ func NewColour(maxDepth int, background vec3.Vec3Impl, numRays *uint64) *Colour 
 	}
 }
 
-func (cs *Colour) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.LCG) vec3.Vec3Impl {
+func (cs *Colour) Sample(r ray.Ray, world *hitable.HitableSlice, lightShape hitable.Hitable, depth int, random *fastrandom.XorShift) vec3.Vec3Impl {
 	if depth >= cs.maxDepth {
 		return vec3.Vec3Impl{Z: 1.0}
 	}
 
 	atomic.AddUint64(cs.numRays, 1)
 
-	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
+	if rec, mat, ok := world.Hit(r, 0.001, math32.MaxFloat32); ok {
 		_, srec, ok := mat.Scatter(r, rec, random)
 		emitted := mat.Emitted(r, rec, rec.U(), rec.V(), rec.P())
 		if depth < cs.maxDepth && ok {

@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"github.com/flynn-nrg/floatimage/floatimage"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/common"
 	"github.com/flynn-nrg/izpi/internal/display"
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	"github.com/flynn-nrg/izpi/internal/grid"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
 	"github.com/flynn-nrg/izpi/internal/spectral"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 
@@ -32,7 +32,7 @@ type RendererImpl struct {
 	scene              *scene.Scene
 	numRays            uint64
 	remoteWorkers      []*RemoteWorkerConfig
-	canvas             *floatimage.Float64NRGBA
+	canvas             *floatimage.Float32NRGBA
 	previewChan        chan display.DisplayTile
 	maxDepth           int
 	background         vec3.Vec3Impl
@@ -54,7 +54,7 @@ type RemoteWorkerConfig struct {
 
 type workUnit struct {
 	scene       *scene.Scene
-	canvas      *floatimage.Float64NRGBA
+	canvas      *floatimage.Float32NRGBA
 	bar         *pb.ProgressBar
 	sampler     sampler.Sampler
 	previewChan chan display.DisplayTile
@@ -85,7 +85,7 @@ func New(
 	return &RendererImpl{
 		scene:              scene,
 		remoteWorkers:      remoteWorkers,
-		canvas:             floatimage.NewFloat64NRGBA(image.Rect(0, 0, sizeX, sizeY), make([]float64, sizeX*sizeY*4)),
+		canvas:             floatimage.NewFloat32NRGBA(image.Rect(0, 0, sizeX, sizeY), make([]float32, sizeX*sizeY*4)),
 		previewChan:        previewChan,
 		maxDepth:           maxDepth,
 		background:         background,

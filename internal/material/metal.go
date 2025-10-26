@@ -1,11 +1,11 @@
 package material
 
 import (
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/ray"
 	"github.com/flynn-nrg/izpi/internal/scatterrecord"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // Ensure interface compliance.
@@ -19,11 +19,11 @@ type Metal struct {
 	nonPathLength
 	nonWorldSetter
 	albedo vec3.Vec3Impl
-	fuzz   float64
+	fuzz   float32
 }
 
 // NewMetal returns an instance of the metal material.
-func NewMetal(albedo vec3.Vec3Impl, fuzz float64) *Metal {
+func NewMetal(albedo vec3.Vec3Impl, fuzz float32) *Metal {
 	return &Metal{
 		albedo: albedo,
 		fuzz:   fuzz,
@@ -31,7 +31,7 @@ func NewMetal(albedo vec3.Vec3Impl, fuzz float64) *Metal {
 }
 
 // Scatter computes how the ray bounces off the surface of a metallic object.
-func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	reflected := reflect(vec3.UnitVector(r.Direction()), hr.Normal())
 	specular := ray.New(hr.P(), vec3.Add(reflected, vec3.ScalarMul(randomInUnitSphere(random), m.fuzz)), r.Time())
 	attenuation := m.albedo
@@ -40,15 +40,15 @@ func (m *Metal) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.L
 }
 
 // ScatteringPDF implements the probability distribution function for metals.
-func (m *Metal) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
+func (m *Metal) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float32 {
 	return 0
 }
 
-func (m *Metal) Albedo(u float64, v float64, p vec3.Vec3Impl) vec3.Vec3Impl {
+func (m *Metal) Albedo(u float32, v float32, p vec3.Vec3Impl) vec3.Vec3Impl {
 	return m.albedo
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
-func (m *Metal) SpectralAlbedo(u float64, v float64, lambda float64, p vec3.Vec3Impl) float64 {
+func (m *Metal) SpectralAlbedo(u float32, v float32, lambda float32, p vec3.Vec3Impl) float32 {
 	return m.albedo.X // Use red component as approximation
 }

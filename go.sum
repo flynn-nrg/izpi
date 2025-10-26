@@ -30,6 +30,8 @@ github.com/flynn-nrg/floatimage v0.0.0-20250823091259-aa26060097d4 h1:qrKSQafS8L
 github.com/flynn-nrg/floatimage v0.0.0-20250823091259-aa26060097d4/go.mod h1:/8IMtUjljyew4UOlLunId1h4n66PPPdp2ag525kWPmc=
 github.com/flynn-nrg/go-vfx/go-oiio v0.0.0-20250823100644-216bb2227e44 h1:vHxkNUmHlz+Pc1Vmy4TC7YEkXxvPL2e751UI8dc8vq0=
 github.com/flynn-nrg/go-vfx/go-oiio v0.0.0-20250823100644-216bb2227e44/go.mod h1:rj1LDuEJ2HwZPCGoFoTq3ik8PzNX3NWUVnlq5E/wB7A=
+github.com/flynn-nrg/go-vfx/math32 v0.0.0-20251025152134-da9dbde69ad1 h1:aS6fv7u0CtbZC6AdWUsQZAHUfRHt98yVBk5C/KoMNmw=
+github.com/flynn-nrg/go-vfx/math32 v0.0.0-20251025152134-da9dbde69ad1/go.mod h1:Ox7UssmTFCHViaNOO4N+G8qfVbeM/j0YRqjf7oyLuws=
 github.com/flynn-nrg/gube v1.0.3 h1:lYCOeeyScb/nisBKKdv7mxbBjaIgHm+yZY76N5zV1DQ=
 github.com/flynn-nrg/gube v1.0.3/go.mod h1:fl2ubSq4Rxnqr9YyR6/kmRpvJG5/caaLHbmtXFOYQTQ=
 github.com/fredbi/uri v1.1.1 h1:xZHJC08GZNIUhbP5ImTHnt5Ya0T8FI2VAwI/37kh2Ko=

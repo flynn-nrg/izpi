@@ -2,7 +2,7 @@ package scenes
 
 import pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
 
-func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
+func CornellBoxPBRColouredGlassSpectral(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box PBR Spectral",
 		Version:              "1.0.0",

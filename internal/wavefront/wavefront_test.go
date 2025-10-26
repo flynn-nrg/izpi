@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/texture"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -45,12 +45,12 @@ func TestNewObjFromReader(t *testing.T) {
 				MtlLib: map[string]*Material{
 					"Material1": {
 						Name:  "Material1",
-						Kd:    []float64{0.48, 0.48, 0.48},
+						Kd:    []float32{0.48, 0.48, 0.48},
 						Ns:    256,
 						D:     1,
 						Illum: 2,
-						Ka:    []float64{0, 0, 0},
-						Ks:    []float64{0.04, 0.04, 0.04},
+						Ka:    []float32{0, 0, 0},
+						Ks:    []float32{0.04, 0.04, 0.04},
 					},
 				},
 

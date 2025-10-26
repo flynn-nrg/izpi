@@ -3,12 +3,12 @@ package hitable
 import (
 	"math"
 
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/aabb"
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/material"
 	"github.com/flynn-nrg/izpi/internal/ray"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // Ensure interface compliance.
@@ -27,7 +27,7 @@ func NewSlice(hitables []Hitable) *HitableSlice {
 }
 
 // Hit computes whether a ray intersects with any of the elements in the slice.
-func (hs *HitableSlice) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+func (hs *HitableSlice) Hit(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, material.Material, bool) {
 	var rec *hitrecord.HitRecord
 	var mat material.Material
 	var hitAnything bool
@@ -45,13 +45,13 @@ func (hs *HitableSlice) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.H
 }
 
 // HitEdge computes whether a ray intersects with the edge of any of the elements in the slice.
-func (hs *HitableSlice) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+func (hs *HitableSlice) HitEdge(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, bool, bool) {
 	var rec *hitrecord.HitRecord
 	var obj Hitable
 	var hitAnything bool
 
 	closestSoFar := tMax
-	epsilon := math.Nextafter(1, 2) - 1
+	epsilon := math.Nextafter32(1, 2) - 1
 
 	for _, h := range hs.hitables {
 		if tempRec, _, ok := h.Hit(r, tMin, closestSoFar); ok {
@@ -69,7 +69,7 @@ func (hs *HitableSlice) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitreco
 	return nil, false, false
 }
 
-func (hs *HitableSlice) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
+func (hs *HitableSlice) BoundingBox(time0 float32, time1 float32) (*aabb.AABB, bool) {
 	var tempBox *aabb.AABB
 	var box *aabb.AABB
 	var ok bool
@@ -95,17 +95,17 @@ func (hs *HitableSlice) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, b
 	return box, true
 }
 
-func (hs *HitableSlice) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
-	weight := 1.0 / float64(len(hs.hitables))
-	sum := float64(0)
+func (hs *HitableSlice) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float32 {
+	weight := 1.0 / float32(len(hs.hitables))
+	sum := float32(0)
 	for _, h := range hs.hitables {
 		sum += weight * h.PDFValue(o, v)
 	}
 	return sum
 }
 
-func (hs *HitableSlice) Random(o vec3.Vec3Impl, random *fastrandom.LCG) vec3.Vec3Impl {
-	index := int(random.Float64() * float64(len(hs.hitables)))
+func (hs *HitableSlice) Random(o vec3.Vec3Impl, random *fastrandom.XorShift) vec3.Vec3Impl {
+	index := int(random.Float32() * float32(len(hs.hitables)))
 	return hs.hitables[index].Random(o, random)
 }
 

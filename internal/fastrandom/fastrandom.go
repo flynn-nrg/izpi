@@ -38,10 +38,10 @@ func NewWithDefaults() *LCG {
 }
 
 // Generate a random floating point number between 0 and 1.
-func (l *LCG) Float64() float64 {
+func (l *LCG) float32() float32 {
 
 	/* Update the LCG state using the formula Xn+1 = (A*Xn + C) mod M */
 	l.state = (l.a*l.state + l.c) % l.m
 	/* Convert the LCG state to a floating point number between 0 and 1 */
-	return float64(l.state) / float64(l.m)
+	return float32(l.state) / float32(l.m)
 }

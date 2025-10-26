@@ -4,8 +4,9 @@ package display
 import (
 	"image"
 	"image/color"
-	"math"
 	"sync"
+
+	"github.com/flynn-nrg/go-vfx/math32"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -149,9 +150,9 @@ func (fd *FyneDisplay) makeBackdrop() {
 	}
 }
 
-func floatToUint8(in float64) uint8 {
+func floatToUint8(in float32) uint8 {
 	// Gamma 2.0
-	in = math.Sqrt(in)
+	in = math32.Sqrt(in)
 	p := int(in * 255)
 	if p > 255 {
 		return 255

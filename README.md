@@ -42,7 +42,7 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
 * Network distributed system using [gRPC](https://grpc.io) and [Protocol Buffers](https://protobuf.dev).
 * Spectral rendering with support for dispersion and [Beer-Lambert Law](https://en.wikipedia.org/wiki/Beer–Lambert_law) in dielectric materials.
 * Phyisically correct light sources using [SPDs](https://en.wikipedia.org/wiki/Spectral_power_distribution) from [Michael Royer](https://doi.org/10.6084/m9.figshare.7704566.v1) and the [CIE Standard Illuminant](https://en.wikipedia.org/wiki/Standard_illuminant) F-Series.
-* Rendering into a float64 image buffer.
+* Rendering into a float32 image buffer.
 * Direct, indirect and image-based lighting.
 * Primitives: Spheres, boxes, rectangles and triangles.
 * Wavefront OBJ import.

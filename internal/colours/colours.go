@@ -2,8 +2,8 @@
 package colours
 
 import (
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/spectral"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 var (

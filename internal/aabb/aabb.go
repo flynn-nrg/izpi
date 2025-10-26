@@ -2,10 +2,10 @@
 package aabb
 
 import (
-	"math"
+	"github.com/flynn-nrg/go-vfx/math32"
 
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/ray"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // AABB represents an axis-aligned bounding box.
@@ -25,14 +25,14 @@ func New(min vec3.Vec3Impl, max vec3.Vec3Impl) *AABB {
 // SurroundingBox computes the box that encloses the two supplied boxes.
 func SurroundingBox(box0 *AABB, box1 *AABB) *AABB {
 	small := vec3.Vec3Impl{
-		X: math.Min(box0.min.X, box1.min.X),
-		Y: math.Min(box0.min.Y, box1.min.Y),
-		Z: math.Min(box0.min.Z, box1.min.Z),
+		X: math32.Min(box0.min.X, box1.min.X),
+		Y: math32.Min(box0.min.Y, box1.min.Y),
+		Z: math32.Min(box0.min.Z, box1.min.Z),
 	}
 	big := vec3.Vec3Impl{
-		X: math.Max(box0.max.X, box1.max.X),
-		Y: math.Max(box0.max.Y, box1.max.Y),
-		Z: math.Max(box0.max.Z, box1.max.Z),
+		X: math32.Max(box0.max.X, box1.max.X),
+		Y: math32.Max(box0.max.Y, box1.max.Y),
+		Z: math32.Max(box0.max.Z, box1.max.Z),
 	}
 
 	return New(small, big)
@@ -64,12 +64,12 @@ func (a *AABB) Max() vec3.Vec3Impl {
 }
 
 // Hit returns true if a ray intersects with the bounding box.
-func (a *AABB) Hit(r ray.Ray, tMin float64, tMax float64) bool {
+func (a *AABB) Hit(r ray.Ray, tMin float32, tMax float32) bool {
 
-	mins := []float64{a.min.X, a.min.Y, a.min.Z}
-	maxs := []float64{a.max.X, a.max.Y, a.max.Z}
-	origs := []float64{r.Origin().X, r.Origin().Y, r.Origin().Z}
-	dirs := []float64{r.Direction().X, r.Direction().Y, r.Direction().Z}
+	mins := []float32{a.min.X, a.min.Y, a.min.Z}
+	maxs := []float32{a.max.X, a.max.Y, a.max.Z}
+	origs := []float32{r.Origin().X, r.Origin().Y, r.Origin().Z}
+	dirs := []float32{r.Direction().X, r.Direction().Y, r.Direction().Z}
 
 	for i := range mins {
 		invD := 1.0 / dirs[i]
@@ -81,8 +81,8 @@ func (a *AABB) Hit(r ray.Ray, tMin float64, tMax float64) bool {
 			t1 = t
 		}
 
-		tMin = math.Max(t0, tMin)
-		tMax = math.Min(t1, tMax)
+		tMin = math32.Max(t0, tMin)
+		tMax = math32.Min(t1, tMax)
 		if tMax <= tMin {
 			return false
 		}

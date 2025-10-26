@@ -1,8 +1,8 @@
 package pdf
 
 import (
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
-	"github.com/flynn-nrg/izpi/internal/vec3"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 )
 
 // Ensure interface compliance.
@@ -20,12 +20,12 @@ func NewMixture(p0 PDF, p1 PDF) *Mixture {
 	}
 }
 
-func (m *Mixture) Value(direction vec3.Vec3Impl) float64 {
+func (m *Mixture) Value(direction vec3.Vec3Impl) float32 {
 	return 0.5*m.p[0].Value(direction) + 0.5*m.p[1].Value(direction)
 }
 
-func (m *Mixture) Generate(random *fastrandom.LCG) vec3.Vec3Impl {
-	if random.Float64() < 0.5 {
+func (m *Mixture) Generate(random *fastrandom.XorShift) vec3.Vec3Impl {
+	if random.Float32() < 0.5 {
 		return m.p[0].Generate(random)
 	}
 

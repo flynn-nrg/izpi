@@ -1,7 +1,7 @@
 package spectral
 
 import (
-	"math"
+	"github.com/flynn-nrg/go-vfx/math32"
 )
 
 const (
@@ -13,7 +13,7 @@ const (
 // These are the actual CIE x̄(λ), ȳ(λ), z̄(λ) functions
 // wikipedia: https://en.wikipedia.org/wiki/CIE_1931_color_space
 // We only cover the 380-750nm range.
-var cieX = []float64{
+var cieX = []float32{
 	0.0014, 0.0022, 0.0042, 0.0076, 0.0143, 0.0232, 0.0435, 0.0776, 0.1344, 0.2148,
 	0.2839, 0.3285, 0.3483, 0.3481, 0.3362, 0.3187, 0.2908, 0.2511, 0.1954, 0.1421,
 	0.0956, 0.0580, 0.0320, 0.0147, 0.0049, 0.0024, 0.0093, 0.0291, 0.0633, 0.1096,
@@ -24,7 +24,7 @@ var cieX = []float64{
 	0.0015, 0.0011, 0.0008, 0.0006, 0.0004,
 }
 
-var cieY = []float64{
+var cieY = []float32{
 	0.0000, 0.0001, 0.0001, 0.0002, 0.0004, 0.0006, 0.0012, 0.0022, 0.0040, 0.0073,
 	0.0116, 0.0168, 0.0230, 0.0298, 0.0380, 0.0480, 0.0600, 0.0739, 0.0910, 0.1126,
 	0.1390, 0.1693, 0.2080, 0.2586, 0.3230, 0.4073, 0.5030, 0.6082, 0.7100, 0.7932,
@@ -35,7 +35,7 @@ var cieY = []float64{
 	0.0005, 0.0004, 0.0003, 0.0002, 0.0001,
 }
 
-var cieZ = []float64{
+var cieZ = []float32{
 	0.0065, 0.0105, 0.0201, 0.0362, 0.0679, 0.1102, 0.2074, 0.3713, 0.6456, 1.0391,
 	1.3856, 1.6230, 1.7471, 1.7826, 1.7721, 1.7441, 1.6692, 1.5281, 1.2876, 1.0419,
 	0.8130, 0.6162, 0.4652, 0.3533, 0.2720, 0.2123, 0.1582, 0.1117, 0.0782, 0.0573,
@@ -47,7 +47,7 @@ var cieZ = []float64{
 }
 
 // Wavelengths corresponding to the CIE data (380-750nm in 5nm steps)
-var cieWavelengths = []float64{
+var cieWavelengths = []float32{
 	380, 385, 390, 395, 400, 405, 410, 415, 420, 425,
 	430, 435, 440, 445, 450, 455, 460, 465, 470, 475,
 	480, 485, 490, 495, 500, 505, 510, 515, 520, 525,
@@ -65,12 +65,12 @@ const cieYIntegral = 21.3768 // Sum of all values in the cieY array
 
 // SpectralPowerDistribution represents spectral data
 type SpectralPowerDistribution struct {
-	wavelengths []float64
-	values      []float64
+	wavelengths []float32
+	values      []float32
 }
 
 // NewSPD creates a new spectral power distribution
-func NewSPD(wavelengths, values []float64) *SpectralPowerDistribution {
+func NewSPD(wavelengths, values []float32) *SpectralPowerDistribution {
 	return &SpectralPowerDistribution{
 		wavelengths: wavelengths,
 		values:      values,
@@ -80,19 +80,19 @@ func NewSPD(wavelengths, values []float64) *SpectralPowerDistribution {
 func NewEmptyCIESPD() *SpectralPowerDistribution {
 	return &SpectralPowerDistribution{
 		wavelengths: cieWavelengths,
-		values:      make([]float64, len(cieWavelengths)),
+		values:      make([]float32, len(cieWavelengths)),
 	}
 }
 
 // NewCIESPD creates a new spectral power distribution using CIE wavelengths
 // and the provided values. The values slice must have exactly 75 elements,
 // corresponding to wavelengths from 380nm to 750nm in 5nm steps.
-func NewCIESPD(values []float64) *SpectralPowerDistribution {
+func NewCIESPD(values []float32) *SpectralPowerDistribution {
 	if len(values) != len(cieWavelengths) {
 		panic("values slice must have exactly 75 elements to match cieWavelengths")
 	}
 	// Make a copy to avoid external modification
-	valuesCopy := make([]float64, len(values))
+	valuesCopy := make([]float32, len(values))
 	copy(valuesCopy, values)
 	return &SpectralPowerDistribution{
 		wavelengths: cieWavelengths,
@@ -100,11 +100,11 @@ func NewCIESPD(values []float64) *SpectralPowerDistribution {
 	}
 }
 
-func (spd *SpectralPowerDistribution) SetValue(index int, value float64) {
+func (spd *SpectralPowerDistribution) SetValue(index int, value float32) {
 	spd.values[index] = value
 }
 
-func (spd *SpectralPowerDistribution) AddValue(index int, value float64) {
+func (spd *SpectralPowerDistribution) AddValue(index int, value float32) {
 	if index < 0 || index >= len(spd.values) {
 		// Ignore out-of-bounds indices
 		return
@@ -116,7 +116,7 @@ func (spd *SpectralPowerDistribution) NumWavelengths() int {
 	return len(spd.wavelengths)
 }
 
-func (spd *SpectralPowerDistribution) Wavelength(index int) float64 {
+func (spd *SpectralPowerDistribution) Wavelength(index int) float32 {
 	if index < 0 || index >= len(spd.wavelengths) {
 		// Return a safe default value if index is out of bounds
 		if len(spd.wavelengths) > 0 {
@@ -131,24 +131,24 @@ func (spd *SpectralPowerDistribution) Normalise(numSamples int) {
 	if numSamples == 0 {
 		return
 	}
-	invNumSamples := 1.0 / float64(numSamples)
+	invNumSamples := 1.0 / float32(numSamples)
 	for i := range spd.values {
 		spd.values[i] *= invNumSamples
 	}
 }
 
 // Wavelengths returns the wavelengths array
-func (spd *SpectralPowerDistribution) Wavelengths() []float64 {
+func (spd *SpectralPowerDistribution) Wavelengths() []float32 {
 	return spd.wavelengths
 }
 
 // Values returns the values array
-func (spd *SpectralPowerDistribution) Values() []float64 {
+func (spd *SpectralPowerDistribution) Values() []float32 {
 	return spd.values
 }
 
 // Value returns the spectral value at the given wavelength, interpolating if necessary
-func (spd *SpectralPowerDistribution) Value(wavelength float64) float64 {
+func (spd *SpectralPowerDistribution) Value(wavelength float32) float32 {
 	if len(spd.wavelengths) == 0 {
 		return 0.0
 	}
@@ -181,14 +181,14 @@ func (spd *SpectralPowerDistribution) Value(wavelength float64) float64 {
 }
 
 // / SampleWavelength now returns both the sampled wavelength and its PDF.
-func SampleWavelength(random float64) (lambda, pdf float64) {
+func SampleWavelength(random float32) (lambda, pdf float32) {
 	// Use CIE Y function as importance sampling distribution
 	// This samples wavelengths according to human eye sensitivity
 
 	// Find the wavelength that corresponds to the random value
 	// by inverting the cumulative distribution function (CDF) of the CIE Y curve.
 	target := random * cieYIntegral
-	current := 0.0
+	current := float32(0.0)
 
 	for i, y := range cieY {
 		if current+y >= target {
@@ -224,7 +224,7 @@ func SampleWavelength(random float64) (lambda, pdf float64) {
 }
 
 // GetCIEValues returns the CIE color matching function values for a given wavelength
-func GetCIEValues(wavelength float64) (x, y, z float64) {
+func GetCIEValues(wavelength float32) (x, y, z float32) {
 	// Clamp to the valid range of our tabulated data
 	if wavelength <= cieWavelengths[0] {
 		return cieX[0], cieY[0], cieZ[0]
@@ -253,7 +253,7 @@ func GetCIEValues(wavelength float64) (x, y, z float64) {
 }
 
 // WavelengthToRGB is kept for debugging purposes.
-func WavelengthToRGB(wavelength float64) (r, g, b float64) {
+func WavelengthToRGB(wavelength float32) (r, g, b float32) {
 	x, y, z := GetCIEValues(wavelength)
 
 	// Convert XYZ to RGB using sRGB transformation matrix
@@ -262,9 +262,9 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 	b = 0.0556434*x - 0.2040259*y + 1.0572252*z
 
 	// Clamp to [0,1]
-	r = math.Max(0, math.Min(1, r))
-	g = math.Max(0, math.Min(1, g))
-	b = math.Max(0, math.Min(1, b))
+	r = math32.Max(0, math32.Min(1, r))
+	g = math32.Max(0, math32.Min(1, g))
+	b = math32.Max(0, math32.Min(1, b))
 
 	return r, g, b
 }
@@ -272,20 +272,23 @@ func WavelengthToRGB(wavelength float64) (r, g, b float64) {
 // NewBlackbodySPD creates a spectral power distribution for a blackbody radiator
 // at the given temperature using Planck's law. The SPD is normalized so that
 // the maximum value is 1.0.
-func NewBlackbodySPD(temperature float64) *SpectralPowerDistribution {
+func NewBlackbodySPD(temperature float32) *SpectralPowerDistribution {
 	// Physical constants
 	const (
-		h = 6.62607015e-34 // Planck's constant (J·s)
-		c = 2.99792458e8   // Speed of light (m/s)
-		k = 1.380649e-23   // Boltzmann constant (J/K)
+		// Planck's constant (J·s)
+		h = float32(6.62607e-34)
+		// Speed of light (m/s)
+		c = float32(2.99792e8)
+		// Boltzmann constant (J/K)
+		k = float32(1.38065e-23)
 	)
 
 	// Precompute constants
 	c1 := 2.0 * h * c * c
 	c2 := (h * c) / k
 
-	values := make([]float64, len(cieWavelengths))
-	maxValue := 0.0
+	values := make([]float32, len(cieWavelengths))
+	maxValue := float32(0.0)
 
 	// Calculate Planck's law for each wavelength
 	for i, wavelengthNm := range cieWavelengths {
@@ -300,7 +303,7 @@ func NewBlackbodySPD(temperature float64) *SpectralPowerDistribution {
 		if exponent > 700 {
 			values[i] = 0.0
 		} else {
-			values[i] = c1 / (wavelength5 * (math.Exp(exponent) - 1.0))
+			values[i] = c1 / (wavelength5 * (math32.Exp(exponent) - 1.0))
 		}
 
 		if values[i] > maxValue {

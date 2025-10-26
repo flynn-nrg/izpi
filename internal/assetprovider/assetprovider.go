@@ -138,18 +138,18 @@ func (s *assetProviderServer) StreamTextureFile(req *pb_transport.StreamTextureF
 	}
 
 	var totalSize uint64
-	var rawData []float64
+	var rawData []float32
 
-	if textureData, ok := imageText.GetData().(*floatimage.Float64NRGBA); ok {
+	if textureData, ok := imageText.GetData().(*floatimage.Float32NRGBA); ok {
 		rawData = textureData.Pix
-		totalSize = uint64(imageText.GetData().Bounds().Dx() * imageText.GetData().Bounds().Dy() * 4 * int(unsafe.Sizeof(float64(0))))
+		totalSize = uint64(imageText.GetData().Bounds().Dx() * imageText.GetData().Bounds().Dy() * 4 * int(unsafe.Sizeof(float32(0))))
 	} else {
 		return status.Errorf(codes.Internal, "texture data is not a floatimage.FloatNRGBA")
 	}
 
-	// rawData is []float64
-	// Convert []float64 to []byte using unsafe.Slice
-	byteData := unsafe.Slice((*byte)(unsafe.Pointer(&rawData[0])), len(rawData)*int(unsafe.Sizeof(float64(0))))
+	// rawData is []float32
+	// Convert []float32 to []byte using unsafe.Slice
+	byteData := unsafe.Slice((*byte)(unsafe.Pointer(&rawData[0])), len(rawData)*int(unsafe.Sizeof(float32(0))))
 
 	// Ensure offset is within bounds
 	if req.GetOffset() >= totalSize && totalSize > 0 {

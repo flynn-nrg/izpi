@@ -1,13 +1,13 @@
 package material
 
 import (
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/pdf"
 	"github.com/flynn-nrg/izpi/internal/ray"
 	"github.com/flynn-nrg/izpi/internal/scatterrecord"
 	"github.com/flynn-nrg/izpi/internal/texture"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // Ensure interface compliance.
@@ -30,7 +30,7 @@ func NewIsotropic(albedo texture.Texture) *Isotropic {
 }
 
 // Scatter computes how the ray bounces off the surface of a diffuse material.
-func (i *Isotropic) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
+func (i *Isotropic) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
 	scattered := ray.New(hr.P(), randomInUnitSphere(random), r.Time())
 	attenuation := i.albedo.Value(hr.U(), hr.V(), hr.P())
 	pdf := pdf.NewCosine(hr.Normal())
@@ -39,7 +39,7 @@ func (i *Isotropic) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrand
 }
 
 // SpectralScatter computes how the ray bounces off the surface of an isotropic material with spectral properties.
-func (i *Isotropic) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
+func (i *Isotropic) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.XorShift) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
 	scattered := ray.NewWithLambda(hr.P(), randomInUnitSphere(random), r.Time(), r.Lambda())
 	lambda := r.Lambda()
 	albedo := i.albedo.Value(hr.U(), hr.V(), hr.P()).X // Use red component as approximation
@@ -49,15 +49,15 @@ func (i *Isotropic) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *
 }
 
 // ScatteringPDF implements the probability distribution function for isotropic materials.
-func (i *Isotropic) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float64 {
+func (i *Isotropic) ScatteringPDF(r ray.Ray, hr *hitrecord.HitRecord, scattered ray.Ray) float32 {
 	return 0
 }
 
-func (i *Isotropic) Albedo(u float64, v float64, p vec3.Vec3Impl) vec3.Vec3Impl {
+func (i *Isotropic) Albedo(u float32, v float32, p vec3.Vec3Impl) vec3.Vec3Impl {
 	return i.albedo.Value(u, v, p)
 }
 
 // SpectralAlbedo returns the spectral albedo at the given wavelength.
-func (i *Isotropic) SpectralAlbedo(u float64, v float64, lambda float64, p vec3.Vec3Impl) float64 {
+func (i *Isotropic) SpectralAlbedo(u float32, v float32, lambda float32, p vec3.Vec3Impl) float32 {
 	return i.albedo.Value(u, v, p).X // Use red component as approximation
 }

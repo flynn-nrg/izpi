@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_discovery "github.com/flynn-nrg/izpi/internal/proto/discovery"
 	"github.com/flynn-nrg/izpi/internal/render"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 	"github.com/pbnjay/memory"
 	log "github.com/sirupsen/logrus"
 )
@@ -20,18 +20,18 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	x1 := req.GetX1()
 	y1 := req.GetY1()
 
-	rand := s.randPool.Get().(*fastrandom.LCG)
+	rand := s.randPool.Get().(*fastrandom.XorShift)
 	defer s.randPool.Put(rand)
 
 	stripSize := req.GetStripHeight() * 4 * (x1 - x0 + 1)
 
 	responseWidth := x1 - x0 + 1
 
-	nx := float64(s.imageResolutionX)
-	ny := float64(s.imageResolutionY)
+	nx := float32(s.imageResolutionX)
+	ny := float32(s.imageResolutionY)
 
 	for y := y0; y <= y1; y++ {
-		pixels := make([]float64, stripSize)
+		pixels := make([]float32, stripSize)
 
 		i := 0
 		for x := x0; x <= x1; x++ {
@@ -43,9 +43,9 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 				var col vec3.Vec3Impl
 				switch s.samplerType {
 				case pb_control.SamplerType_COLOUR, pb_control.SamplerType_NORMAL, pb_control.SamplerType_WIRE_FRAME, pb_control.SamplerType_ALBEDO:
-					col = s.renderTileRGB(float64(x), float64(y), nx, ny, rand)
+					col = s.renderTileRGB(float32(x), float32(y), nx, ny, rand)
 				case pb_control.SamplerType_SPECTRAL:
-					col = s.renderTileSpectral(float64(x), float64(y), nx, ny, rand)
+					col = s.renderTileSpectral(float32(x), float32(y), nx, ny, rand)
 				}
 
 				pixels[i] = col.Z
@@ -74,19 +74,19 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 	return nil
 }
 
-func (s *workerServer) renderTileRGB(x, y, nx, ny float64, rand *fastrandom.LCG) vec3.Vec3Impl {
+func (s *workerServer) renderTileRGB(x, y, nx, ny float32, rand *fastrandom.XorShift) vec3.Vec3Impl {
 	col := vec3.Vec3Impl{}
 	for sample := 0; sample < s.samplesPerPixel; sample++ {
-		u := (float64(x) + rand.Float64()) / nx
-		v := (float64(y) + rand.Float64()) / ny
+		u := (float32(x) + rand.Float32()) / nx
+		v := (float32(y) + rand.Float32()) / ny
 		r := s.scene.Camera.GetRay(u, v)
 		col = vec3.Add(col, vec3.DeNAN(s.sampler.Sample(r, s.scene.World, s.scene.Lights, 0, rand)))
 	}
 
-	return vec3.ScalarDiv(col, float64(s.samplesPerPixel))
+	return vec3.ScalarDiv(col, float32(s.samplesPerPixel))
 }
 
-func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom.LCG) vec3.Vec3Impl {
+func (s *workerServer) renderTileSpectral(x, y, nx, ny float32, rand *fastrandom.XorShift) vec3.Vec3Impl {
 	r, g, b := render.RenderPixelSpectral(s.samplesPerPixel, int(x), int(y), int(nx), int(ny), s.scene, s.sampler, rand)
 
 	return vec3.Vec3Impl{

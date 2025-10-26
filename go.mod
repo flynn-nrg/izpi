@@ -8,6 +8,7 @@ require (
 	github.com/cheggaaa/pb/v3 v3.1.7
 	github.com/flynn-nrg/floatimage v0.0.0-20250823091259-aa26060097d4
 	github.com/flynn-nrg/go-vfx/go-oiio v0.0.0-20250823100644-216bb2227e44
+	github.com/flynn-nrg/go-vfx/math32 v0.0.0-20251025152134-da9dbde69ad1
 	github.com/flynn-nrg/gube v1.0.3
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/google/go-cmp v0.7.0

@@ -1,12 +1,12 @@
 package hitable
 
 import (
+	"github.com/flynn-nrg/go-vfx/math32/fastrandom"
+	"github.com/flynn-nrg/go-vfx/math32/vec3"
 	"github.com/flynn-nrg/izpi/internal/aabb"
-	"github.com/flynn-nrg/izpi/internal/fastrandom"
 	"github.com/flynn-nrg/izpi/internal/hitrecord"
 	"github.com/flynn-nrg/izpi/internal/material"
 	"github.com/flynn-nrg/izpi/internal/ray"
-	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 
 // Ensure interface compliance.
@@ -41,23 +41,23 @@ func NewBox(p0 vec3.Vec3Impl, p1 vec3.Vec3Impl, mat material.Material) *Box {
 	}
 }
 
-func (b *Box) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+func (b *Box) Hit(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, material.Material, bool) {
 	return b.sides.Hit(r, tMin, tMax)
 }
 
-func (b *Box) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+func (b *Box) HitEdge(r ray.Ray, tMin float32, tMax float32) (*hitrecord.HitRecord, bool, bool) {
 	return b.sides.HitEdge(r, tMin, tMax)
 }
 
-func (b *Box) BoundingBox(time0 float64, time1 float64) (*aabb.AABB, bool) {
+func (b *Box) BoundingBox(time0 float32, time1 float32) (*aabb.AABB, bool) {
 	return b.sides.BoundingBox(time0, time1)
 }
 
-func (b *Box) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float64 {
+func (b *Box) PDFValue(o vec3.Vec3Impl, v vec3.Vec3Impl) float32 {
 	return 0.0
 }
 
-func (b *Box) Random(o vec3.Vec3Impl, _ *fastrandom.LCG) vec3.Vec3Impl {
+func (b *Box) Random(o vec3.Vec3Impl, _ *fastrandom.XorShift) vec3.Vec3Impl {
 	return vec3.Vec3Impl{X: 1}
 }
 

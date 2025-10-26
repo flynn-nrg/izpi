@@ -4,7 +4,7 @@ import (
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
 )
 
-func CornellBoxPBRRGB(aspect float64) *pb_transport.Scene {
+func CornellBoxPBRRGB(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box PBR RGB",
 		Version:              "1.0.0",
@@ -585,7 +585,7 @@ func CornellBoxPBRRGB(aspect float64) *pb_transport.Scene {
 	return protoScene
 }
 
-func CornellBoxPBRSpectral(aspect float64) *pb_transport.Scene {
+func CornellBoxPBRSpectral(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box PBR Spectral",
 		Version:              "1.0.0",
@@ -1171,7 +1171,7 @@ func CornellBoxPBRSpectral(aspect float64) *pb_transport.Scene {
 	return protoScene
 }
 
-func CornellBoxEmptySpectral(aspect float64) *pb_transport.Scene {
+func CornellBoxEmptySpectral(aspect float32) *pb_transport.Scene {
 	protoScene := &pb_transport.Scene{
 		Name:                 "Cornell Box Empty Spectral",
 		Version:              "1.0.0",
