@@ -70,7 +70,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 			log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
 		}
 	*/
-	protoScene = scenes.CornellBoxPBRColouredGlassSpectral(aspectRatio)
+	protoScene = scenes.CornellBoxPBRStanfordDragonSpectral(aspectRatio)
 
 	// Override the colour sampler if the scene is spectral.
 	if protoScene.GetColourRepresentation() == pb_transport.ColourRepresentation_SPECTRAL && cfg.Sampler == "colour" {

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -242,7 +243,6 @@ func (wo *WavefrontObj) GroupToTransportTrianglesWithMaterial(index int, materia
 }
 
 func (wo *WavefrontObj) faceToTransportTriangle(face *Face, materialName string) *pb_transport.Triangle {
-
 	vertex0 := wo.Vertices[face.Vertices[0].VIdx-1]
 	vertex1 := wo.Vertices[face.Vertices[1].VIdx-1]
 	vertex2 := wo.Vertices[face.Vertices[2].VIdx-1]
@@ -265,16 +265,16 @@ func (wo *WavefrontObj) faceToTransportTriangle(face *Face, materialName string)
 			Z: float32(vertex2.Z),
 		},
 		Uv0: &pb_transport.Vec2{
-			U: float32(wo.VertexUV[face.Vertices[0].VtIdx-1].U),
-			V: float32(wo.VertexUV[face.Vertices[0].VtIdx-1].V),
+			U: 0,
+			V: 0,
 		},
 		Uv1: &pb_transport.Vec2{
-			U: float32(wo.VertexUV[face.Vertices[1].VtIdx-1].U),
-			V: float32(wo.VertexUV[face.Vertices[1].VtIdx-1].V),
+			U: 0,
+			V: 0,
 		},
 		Uv2: &pb_transport.Vec2{
-			U: float32(wo.VertexUV[face.Vertices[2].VtIdx-1].U),
-			V: float32(wo.VertexUV[face.Vertices[2].VtIdx-1].V),
+			U: 0,
+			V: 0,
 		},
 	}
 }
@@ -391,19 +391,58 @@ func (wo *WavefrontObj) triangulate(face *Face, mat material.Material) []*hitabl
 // Translate translates all the vertices in this object by the specified amount.
 func (wo *WavefrontObj) Translate(translate vec3.Vec3Impl) {
 	wo.Centre = vec3.Add(wo.Centre, translate)
-	for _, v := range wo.Vertices {
-		v.X += translate.X
-		v.Y += translate.Y
-		v.Z += translate.Z
+	for i := range wo.Vertices {
+		wo.Vertices[i].X += translate.X
+		wo.Vertices[i].Y += translate.Y
+		wo.Vertices[i].Z += translate.Z
 	}
 }
 
 // Scale scales all the vertices in this object by the specified amount.
 func (wo *WavefrontObj) Scale(scale vec3.Vec3Impl) {
-	for _, v := range wo.Vertices {
-		v.X = ((v.X - wo.Centre.X) * scale.X) + wo.Centre.X
-		v.Y = ((v.Y - wo.Centre.Y) * scale.Y) + wo.Centre.Y
-		v.Z = ((v.Z - wo.Centre.Z) * scale.Z) + wo.Centre.Z
+	for i := range wo.Vertices {
+		wo.Vertices[i].X = ((wo.Vertices[i].X - wo.Centre.X) * scale.X) + wo.Centre.X
+		wo.Vertices[i].Y = ((wo.Vertices[i].Y - wo.Centre.Y) * scale.Y) + wo.Centre.Y
+		wo.Vertices[i].Z = ((wo.Vertices[i].Z - wo.Centre.Z) * scale.Z) + wo.Centre.Z
+	}
+}
+
+// Rotate rotates all the vertices in this object by the specified amount.
+// alpha: rotation around X-axis, beta: rotation around Y-axis, gamma: rotation around Z-axis
+// Applies rotations in Z-Y-X order (intrinsic rotations)
+func (wo *WavefrontObj) Rotate(alpha, beta, gamma float64) {
+	cosAlpha := math.Cos(alpha)
+	sinAlpha := math.Sin(alpha)
+	cosBeta := math.Cos(beta)
+	sinBeta := math.Sin(beta)
+	cosGamma := math.Cos(gamma)
+	sinGamma := math.Sin(gamma)
+
+	for i := range wo.Vertices {
+		// Translate to origin (relative to center)
+		x := wo.Vertices[i].X - wo.Centre.X
+		y := wo.Vertices[i].Y - wo.Centre.Y
+		z := wo.Vertices[i].Z - wo.Centre.Z
+
+		// Apply Z-axis rotation (gamma)
+		x1 := x*cosGamma - y*sinGamma
+		y1 := x*sinGamma + y*cosGamma
+		z1 := z
+
+		// Apply Y-axis rotation (beta)
+		x2 := x1*cosBeta + z1*sinBeta
+		y2 := y1
+		z2 := -x1*sinBeta + z1*cosBeta
+
+		// Apply X-axis rotation (alpha)
+		x3 := x2
+		y3 := y2*cosAlpha - z2*sinAlpha
+		z3 := y2*sinAlpha + z2*cosAlpha
+
+		// Translate back
+		wo.Vertices[i].X = x3 + wo.Centre.X
+		wo.Vertices[i].Y = y3 + wo.Centre.Y
+		wo.Vertices[i].Z = z3 + wo.Centre.Z
 	}
 }
 
