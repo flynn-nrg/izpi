@@ -29,6 +29,13 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 			Focusdist: 10,
 			Time0:     0,
 			Time1:     1,
+			WhiteBalance: &pb_transport.WhiteBalance{
+				WhiteBalanceProperties: &pb_transport.WhiteBalance_WhiteBalanceFromLightSource{
+					WhiteBalanceFromLightSource: &pb_transport.WhiteBalanceFromLightSource{
+						LightSourceName: "cie_illuminant_a_2856k",
+					},
+				},
+			},
 		},
 		Objects: &pb_transport.SceneObjects{
 			Triangles: []*pb_transport.Triangle{
@@ -120,7 +127,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 				},
 			},
 			Spheres: []*pb_transport.Sphere{
-				// Glass sphere
+				// Red glass sphere
 				{
 					Center: &pb_transport.Vec3{
 						X: 30,
@@ -128,7 +135,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 						Z: 30,
 					},
 					Radius:       15,
-					MaterialName: "Glass",
+					MaterialName: "RedGlass",
 				},
 				// PBR spheres from the YAML file
 				{
@@ -174,7 +181,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 						Z: 10,
 					},
 					Radius:       5,
-					MaterialName: "RedGlass",
+					MaterialName: "lightgold",
 				},
 			},
 		},
@@ -241,19 +248,15 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 					Diffuselight: &pb_transport.DiffuseLightMaterial{
 						EmissionProperties: &pb_transport.DiffuseLightMaterial_SpectralEmit{
 							SpectralEmit: &pb_transport.SpectralConstantTexture{
-								SpectralProperties: &pb_transport.SpectralConstantTexture_Tabulated{
-									Tabulated: &pb_transport.TabulatedSpectralConstant{
-										// Wavelengths in nanometers (visible spectrum)
-										Wavelengths: []float32{380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 650, 660, 670, 680, 690, 700, 710, 720, 730, 740, 750},
-										// White light spectrum (daylight-like, balanced across all wavelengths)
-										Values: []float32{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+								SpectralProperties: &pb_transport.SpectralConstantTexture_FromLightSourceLibrary{
+									FromLightSourceLibrary: &pb_transport.FromLightSourceLibrary{
+										LightSourceName: "cie_illuminant_a_2856k",
 									},
 								},
 							},
 						},
 					},
-				},
-			},
+				}},
 			"Glass": {
 				Name: "Glass",
 				Type: pb_transport.MaterialType_DIELECTRIC,
@@ -295,7 +298,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 							SpectralAbsorptionCoeff: &pb_transport.SpectralConstantTexture{
 								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
 									Gaussian: &pb_transport.GaussianSpectralConstant{
-										PeakValue:        0.5,   // Strong absorption at green wavelengths to allow red transmission
+										PeakValue:        0.15,  // Reduced absorption for more transparency while maintaining red tint
 										CenterWavelength: 530.0, // Green wavelength (absorb green, transmit red)
 										Width:            80.0,  // Broad absorption in green region
 									},
@@ -501,6 +504,55 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 					},
 				},
 			},
+			"lightgold": {
+				Name: "lightgold",
+				Type: pb_transport.MaterialType_PBR,
+				MaterialProperties: &pb_transport.Material_Pbr{
+					Pbr: &pb_transport.PBRMaterial{
+						Albedo: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "textures/lightgold_albedo.png",
+								},
+							},
+						},
+						Roughness: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "textures/lightgold_roughness.png",
+								},
+							},
+						},
+						Metalness: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "textures/lightgold_metallic.png",
+								},
+							},
+						},
+						NormalMap: &pb_transport.Texture{
+							Type: pb_transport.TextureType_IMAGE,
+							TextureProperties: &pb_transport.Texture_Image{
+								Image: &pb_transport.ImageTexture{
+									Filename: "textures/lightgold_normal-ogl.png",
+								},
+							},
+						},
+						Sss: &pb_transport.Texture{
+							Type: pb_transport.TextureType_CONSTANT,
+							TextureProperties: &pb_transport.Texture_Constant{
+								Constant: &pb_transport.ConstantTexture{
+									Value: &pb_transport.Vec3{X: 0.0, Y: 0.0, Z: 0.0},
+								},
+							},
+						},
+						SssRadius: 0.0,
+					},
+				},
+			},
 		},
 		ImageTextures: map[string]*pb_transport.ImageTextureMetadata{
 			"textures/rusty-metal_albedo.png": {
@@ -547,6 +599,18 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 			},
 			"textures/bamboo-wood-semigloss-normal.png": {
 				Filename: "textures/bamboo-wood-semigloss-normal.png",
+			},
+			"textures/lightgold_albedo.png": {
+				Filename: "textures/lightgold_albedo.png",
+			},
+			"textures/lightgold_roughness.png": {
+				Filename: "textures/lightgold_roughness.png",
+			},
+			"textures/lightgold_metallic.png": {
+				Filename: "textures/lightgold_metallic.png",
+			},
+			"textures/lightgold_normal-ogl.png": {
+				Filename: "textures/lightgold_normal-ogl.png",
 			},
 		},
 		// Spectral background - black (no emission)
