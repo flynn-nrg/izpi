@@ -648,7 +648,7 @@ func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 
 	dragonMesh.Scale(vec3.Vec3Impl{X: 90.0, Y: 90.0, Z: 90.0})
 	dragonMesh.Rotate(0.0, -(60.0 * math.Pi / 180.0), 0.0)
-	dragonMesh.Translate(vec3.Vec3Impl{X: 50.0, Y: 25.0, Z: 60.0})
+	dragonMesh.Translate(vec3.Vec3Impl{X: 50.0, Y: 50.0, Z: 60.0})
 
 	var dragonTriangles []*pb_transport.Triangle
 
