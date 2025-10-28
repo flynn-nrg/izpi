@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/flynn-nrg/izpi/internal/materials"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 	"github.com/flynn-nrg/izpi/internal/wavefront"
@@ -648,12 +649,12 @@ func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 
 	dragonMesh.Scale(vec3.Vec3Impl{X: 90.0, Y: 90.0, Z: 90.0})
 	dragonMesh.Rotate(0.0, -(60.0 * math.Pi / 180.0), 0.0)
-	dragonMesh.Translate(vec3.Vec3Impl{X: 50.0, Y: 50.0, Z: 60.0})
+	dragonMesh.Translate(vec3.Vec3Impl{X: 50.0, Y: 25.1, Z: 60.0})
 
 	var dragonTriangles []*pb_transport.Triangle
 
 	for i := 0; i < dragonMesh.NumGroups(); i++ {
-		triangles, err := dragonMesh.GroupToTransportTrianglesWithMaterial(i, "BlueGlass")
+		triangles, err := dragonMesh.GroupToTransportTrianglesWithMaterial(i, "Porcelain")
 		if err != nil {
 			log.Fatalf("Error converting dragon mesh to transport triangles: %v", err)
 		}
@@ -971,6 +972,7 @@ func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 					},
 				},
 			},
+			"Porcelain": materials.CreatePorcelainProtobufMaterial(),
 		},
 
 		// Spectral background - black (no emission)
