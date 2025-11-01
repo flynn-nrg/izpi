@@ -654,7 +654,7 @@ func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 	var dragonTriangles []*pb_transport.Triangle
 
 	for i := 0; i < dragonMesh.NumGroups(); i++ {
-		triangles, err := dragonMesh.GroupToTransportTrianglesWithMaterial(i, "Porcelain")
+		triangles, err := dragonMesh.GroupToTransportTrianglesWithMaterial(i, "Porcelain", wavefront.WITHOUT_UVS)
 		if err != nil {
 			log.Fatalf("Error converting dragon mesh to transport triangles: %v", err)
 		}

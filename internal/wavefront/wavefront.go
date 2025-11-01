@@ -41,6 +41,13 @@ const (
 	OBJ_FACE_TYPE_POLYGON
 )
 
+type TransformOption int
+
+const (
+	INVALID_TRANSFORM_OPTION TransformOption = iota
+	WITHOUT_UVS
+)
+
 var (
 	ErrUnsupportedPolygonType = errors.New("unsupported polygon type")
 	ErrInvalidFaceData        = errors.New("invalid face data")
@@ -228,13 +235,13 @@ func (wo *WavefrontObj) NumGroups() int {
 	return len(wo.Groups)
 }
 
-func (wo *WavefrontObj) GroupToTransportTrianglesWithMaterial(index int, materialName string) ([]*pb_transport.Triangle, error) {
+func (wo *WavefrontObj) GroupToTransportTrianglesWithMaterial(index int, materialName string, opts ...TransformOption) ([]*pb_transport.Triangle, error) {
 	g := wo.Groups[index]
 	switch g.FaceType {
 	case OBJ_FACE_TYPE_POLYGON:
 		triangles := []*pb_transport.Triangle{}
 		for _, face := range g.Faces {
-			triangles = append(triangles, wo.faceToTransportTriangle(face, materialName))
+			triangles = append(triangles, wo.faceToTransportTriangle(face, materialName, opts...))
 		}
 		return triangles, nil
 	default:
@@ -242,10 +249,38 @@ func (wo *WavefrontObj) GroupToTransportTrianglesWithMaterial(index int, materia
 	}
 }
 
-func (wo *WavefrontObj) faceToTransportTriangle(face *Face, materialName string) *pb_transport.Triangle {
+func (wo *WavefrontObj) faceToTransportTriangle(face *Face, materialName string, opts ...TransformOption) *pb_transport.Triangle {
+	ignoreUVs := false
+
+	for _, opt := range opts {
+		switch opt {
+		case WITHOUT_UVS:
+			ignoreUVs = true
+		}
+	}
+
 	vertex0 := wo.Vertices[face.Vertices[0].VIdx-1]
 	vertex1 := wo.Vertices[face.Vertices[1].VIdx-1]
 	vertex2 := wo.Vertices[face.Vertices[2].VIdx-1]
+
+	uv0 := &pb_transport.Vec2{}
+	uv1 := &pb_transport.Vec2{}
+	uv2 := &pb_transport.Vec2{}
+
+	if !ignoreUVs {
+		uv0 = &pb_transport.Vec2{
+			U: float32(wo.VertexUV[face.Vertices[0].VtIdx-1].U),
+			V: float32(wo.VertexUV[face.Vertices[0].VtIdx-1].V),
+		}
+		uv1 = &pb_transport.Vec2{
+			U: float32(wo.VertexUV[face.Vertices[1].VtIdx-1].U),
+			V: float32(wo.VertexUV[face.Vertices[1].VtIdx-1].V),
+		}
+		uv2 = &pb_transport.Vec2{
+			U: float32(wo.VertexUV[face.Vertices[2].VtIdx-1].U),
+			V: float32(wo.VertexUV[face.Vertices[2].VtIdx-1].V),
+		}
+	}
 
 	return &pb_transport.Triangle{
 		MaterialName: materialName,
@@ -264,18 +299,10 @@ func (wo *WavefrontObj) faceToTransportTriangle(face *Face, materialName string)
 			Y: float32(vertex2.Y),
 			Z: float32(vertex2.Z),
 		},
-		Uv0: &pb_transport.Vec2{
-			U: 0,
-			V: 0,
-		},
-		Uv1: &pb_transport.Vec2{
-			U: 0,
-			V: 0,
-		},
-		Uv2: &pb_transport.Vec2{
-			U: 0,
-			V: 0,
-		},
+
+		Uv0: uv0,
+		Uv1: uv1,
+		Uv2: uv2,
 	}
 }
 
