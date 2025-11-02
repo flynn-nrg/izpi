@@ -2,7 +2,6 @@ package render
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"sync"
 
@@ -65,21 +64,19 @@ func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderC
 
 		i := 0
 		for x := posX; x < posX+width; x++ {
-			w.canvas.Set(x, ny-posY, colour.Float64NRGBA{B: pixels[i], G: pixels[i+1], R: pixels[i+2], A: pixels[i+3]})
-			r := pixels[i]
-			g := pixels[i+1]
-			b := pixels[i+2]
-			fmt.Printf("r: %v, g: %v, b: %v\n", r, g, b)
+			colX, colY, colZ, alpha := pixels[i], pixels[i+1], pixels[i+2], pixels[i+3]
+			w.canvas.Set(x, ny-posY, colour.Float64NRGBA{R: colX, G: colY, B: colZ, A: alpha})
+
 			if w.preview {
 				if isSpectral {
 					exposure := w.scene.Exposure
-					r, g, b = w.scene.WhiteBalance.Matrix.Apply(r*exposure, g*exposure, b*exposure)
+					colX, colY, colZ = w.scene.WhiteBalance.Matrix.Apply(colX*exposure, colY*exposure, colZ*exposure)
 				}
 
-				tile.Pixels[i] = r
-				tile.Pixels[i+1] = g
-				tile.Pixels[i+2] = b
-				tile.Pixels[i+3] = pixels[i+3]
+				tile.Pixels[i] = colZ
+				tile.Pixels[i+1] = colY
+				tile.Pixels[i+2] = colX
+				tile.Pixels[i+3] = alpha
 				i += 4
 			}
 		}

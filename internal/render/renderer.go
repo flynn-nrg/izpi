@@ -213,5 +213,10 @@ func (r *RendererImpl) Render(ctx context.Context) image.Image {
 	log.Infof("Rendering completed in %v using %v rays", time.Since(startTime), r.numRays)
 
 	// If spectral rendering is enabled, perform firefly rejection and convert to sRGB.
+	if r.samplerType == sampler.SpectralSampler {
+		spectral.FireflyRejection(r.canvas)
+		return spectral.XYZToRGB(r.canvas, r.exposure, r.scene.WhiteBalance)
+	}
+
 	return r.canvas
 }
