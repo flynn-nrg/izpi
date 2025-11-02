@@ -49,9 +49,9 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 				}
 
 				fmt.Printf("col: %v\n", col)
-				pixels[i] = 11111
-				pixels[i+1] = 22222
-				pixels[i+2] = 33333
+				pixels[i] = col.X
+				pixels[i+1] = col.Y
+				pixels[i+2] = col.Z
 				pixels[i+3] = 1.0
 				i += 4
 			}
