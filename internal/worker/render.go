@@ -48,7 +48,6 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 					col = s.renderTileSpectral(float64(x), float64(y), nx, ny, rand)
 				}
 
-				fmt.Printf("col: %v\n", col)
 				pixels[i] = col.X
 				pixels[i+1] = col.Y
 				pixels[i+2] = col.Z
