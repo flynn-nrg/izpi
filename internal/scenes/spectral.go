@@ -696,6 +696,7 @@ func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 					},
 				},
 			},
+			Exposure: 1.0,
 		},
 		Objects: &pb_transport.SceneObjects{
 			Triangles: []*pb_transport.Triangle{

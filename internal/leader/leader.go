@@ -70,6 +70,7 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 			log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
 		}
 	*/
+
 	protoScene = scenes.CornellBoxPBRStanfordDragonSpectral(aspectRatio)
 
 	// Override the colour sampler if the scene is spectral.
@@ -138,7 +139,13 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 		colours.Black,
 		colours.White,
 		colours.SpectralBlack,
-		int(cfg.NumWorkers), remoteWorkers, cfg.Verbose, previewChan, cfg.Preview, sampler.StringToType(cfg.Sampler))
+		int(cfg.NumWorkers),
+		remoteWorkers,
+		cfg.Verbose,
+		previewChan,
+		cfg.Preview,
+		sampler.StringToType(cfg.Sampler),
+	)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
