@@ -24,6 +24,7 @@ camera: {
       light_source_name: "cie_illuminant_a_2856k"
     }
   }
+  exposure: 1.0
 }
 materials: {
   key: "Green"
