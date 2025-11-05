@@ -94,6 +94,7 @@ message Camera {
   float time0 = 8;
   float time1 = 9;
   WhiteBalance white_balance = 10;
+  float exposure = 11;
 }
 
 

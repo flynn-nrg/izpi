@@ -148,7 +148,8 @@ func CornellBox(aspect float64) *scene.Scene {
 	vfov := float64(40.0)
 	time0 := 0.0
 	time1 := 1.0
-	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+	exposure := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1, exposure)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam)
 }
@@ -222,7 +223,8 @@ func Final(aspect float64) (*hitable.HitableSlice, *camera.Camera) {
 	vfov := float64(40.0)
 	time0 := 0.0
 	time1 := 1.0
-	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+	exposure := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1, exposure)
 
 	return hitable.NewSlice(list), cam
 }
@@ -255,7 +257,8 @@ func Environment(aspect float64) *scene.Scene {
 	vfov := float64(60.0)
 	time0 := 0.0
 	time1 := 1.0
-	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+	exposure := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1, exposure)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam)
 
@@ -329,7 +332,8 @@ func CornellBoxObj(aspect float64) (*scene.Scene, error) {
 	vfov := float64(40.0)
 	time0 := 0.0
 	time1 := 1.0
-	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+	exposure := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1, exposure)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }
@@ -412,7 +416,8 @@ func DisplacementTest(aspect float64) (*scene.Scene, error) {
 	vfov := float64(40.0)
 	time0 := 0.0
 	time1 := 1.0
-	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1)
+	exposure := 1.0
+	cam := camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, distToFocus, time0, time1, exposure)
 
 	return scene.New(hitable.NewSlice(hitables), hitable.NewSlice(lights), cam), nil
 }

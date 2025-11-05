@@ -83,6 +83,7 @@ func (t *Transport) ToScene() (*scene.Scene, error) {
 		Lights:       hitable.NewSlice(lights),
 		Camera:       camera,
 		WhiteBalance: whiteBalance,
+		Exposure:     camera.Exposure(),
 	}
 
 	// Set world reference on dielectric materials for path length calculation
@@ -549,7 +550,9 @@ func (t *Transport) toSceneCamera(aspectOverride float64) *camera.Camera {
 	time0 := float64(protoCamera.GetTime0())
 	time1 := float64(protoCamera.GetTime1())
 
-	return camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, focusDist, time0, time1)
+	exposure := float64(protoCamera.GetExposure())
+
+	return camera.New(lookFrom, lookAt, vup, vfov, aspect, aperture, focusDist, time0, time1, exposure)
 }
 
 func (t *Transport) toSceneObjects() ([]hitable.Hitable, error) {

@@ -20,6 +20,7 @@ type Scene struct {
 	Lights       *hitable.HitableSlice
 	Camera       *camera.Camera
 	WhiteBalance *spectral.WhiteBalanceConfig
+	Exposure     float64
 }
 
 // New returns a new scene instance.
@@ -29,5 +30,6 @@ func New(world *hitable.HitableSlice, lights *hitable.HitableSlice, camera *came
 		Lights:       lights,
 		Camera:       camera,
 		WhiteBalance: spectral.NewWhiteBalanceDefault(),
+		Exposure:     camera.Exposure(),
 	}
 }

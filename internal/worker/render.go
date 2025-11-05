@@ -32,7 +32,6 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 
 	for y := y0; y <= y1; y++ {
 		pixels := make([]float64, stripSize)
-
 		i := 0
 		for x := x0; x <= x1; x++ {
 			select {
@@ -45,12 +44,13 @@ func (s *workerServer) RenderTile(req *pb_control.RenderTileRequest, stream pb_c
 				case pb_control.SamplerType_COLOUR, pb_control.SamplerType_NORMAL, pb_control.SamplerType_WIRE_FRAME, pb_control.SamplerType_ALBEDO:
 					col = s.renderTileRGB(float64(x), float64(y), nx, ny, rand)
 				case pb_control.SamplerType_SPECTRAL:
+					// Spectral rendering is in CIE XYZ space.
 					col = s.renderTileSpectral(float64(x), float64(y), nx, ny, rand)
 				}
 
-				pixels[i] = col.Z
+				pixels[i] = col.X
 				pixels[i+1] = col.Y
-				pixels[i+2] = col.X
+				pixels[i+2] = col.Z
 				pixels[i+3] = 1.0
 				i += 4
 			}
@@ -87,12 +87,12 @@ func (s *workerServer) renderTileRGB(x, y, nx, ny float64, rand *fastrandom.LCG)
 }
 
 func (s *workerServer) renderTileSpectral(x, y, nx, ny float64, rand *fastrandom.LCG) vec3.Vec3Impl {
-	r, g, b := render.RenderPixelSpectral(s.samplesPerPixel, int(x), int(y), int(nx), int(ny), s.scene, s.sampler, rand)
+	cieX, cieY, cieZ := render.RenderPixelSpectral(s.samplesPerPixel, int(x), int(y), int(nx), int(ny), s.scene, s.sampler, rand)
 
 	return vec3.Vec3Impl{
-		X: r,
-		Y: g,
-		Z: b,
+		X: cieX,
+		Y: cieY,
+		Z: cieZ,
 	}
 }
 

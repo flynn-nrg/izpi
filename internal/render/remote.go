@@ -7,6 +7,7 @@ import (
 
 	"github.com/flynn-nrg/floatimage/colour"
 	"github.com/flynn-nrg/izpi/internal/display"
+	"github.com/flynn-nrg/izpi/internal/sampler"
 
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	log "github.com/sirupsen/logrus"
@@ -59,14 +60,23 @@ func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderC
 
 		tile.PosY = ny - posY
 
+		isSpectral := w.sampler.(*sampler.Spectral) != nil
+
 		i := 0
 		for x := posX; x < posX+width; x++ {
-			w.canvas.Set(x, ny-posY, colour.Float64NRGBA{B: pixels[i], G: pixels[i+1], R: pixels[i+2], A: pixels[i+3]})
+			colX, colY, colZ, alpha := pixels[i], pixels[i+1], pixels[i+2], pixels[i+3]
+			w.canvas.Set(x, ny-posY, colour.Float64NRGBA{R: colX, G: colY, B: colZ, A: alpha})
+
 			if w.preview {
-				tile.Pixels[i] = pixels[i]
-				tile.Pixels[i+1] = pixels[i+1]
-				tile.Pixels[i+2] = pixels[i+2]
-				tile.Pixels[i+3] = pixels[i+3]
+				if isSpectral {
+					exposure := w.scene.Exposure
+					colX, colY, colZ = w.scene.WhiteBalance.Matrix.Apply(colX*exposure, colY*exposure, colZ*exposure)
+				}
+
+				tile.Pixels[i] = colZ
+				tile.Pixels[i+1] = colY
+				tile.Pixels[i+2] = colX
+				tile.Pixels[i+3] = alpha
 				i += 4
 			}
 		}

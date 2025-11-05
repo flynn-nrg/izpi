@@ -26,7 +26,9 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
  - [X] Spectral Sampler to accurately simulate dispersion.
  - [ ] Nested dielectrics.
  - [X] Physically correct light sources library.
- - [ ] Firefly rejection.
+ - [X] Firefly rejection.
+ - [ ] BVH traversal performance improvements.
+ - [ ] Adaptive sampling.
  - [ ] Implement Bidirectional path tracing.
  - [ ] Materials library.
  - [ ] Water material.

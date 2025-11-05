@@ -15,6 +15,7 @@ type Camera struct {
 	lensRadius      float64
 	time0           float64
 	time1           float64
+	exposure        float64
 	u               vec3.Vec3Impl
 	v               vec3.Vec3Impl
 	origin          vec3.Vec3Impl
@@ -25,7 +26,7 @@ type Camera struct {
 
 // New returns an instance of a camera.
 func New(lookFrom vec3.Vec3Impl, lookAt vec3.Vec3Impl, vup vec3.Vec3Impl,
-	vfov float64, aspect float64, aperture float64, focusDist float64, time0 float64, time1 float64) *Camera {
+	vfov float64, aspect float64, aperture float64, focusDist float64, time0 float64, time1 float64, exposure float64) *Camera {
 
 	lensRadius := aperture / 2.0
 	theta := vfov * math.Pi / 180
@@ -48,6 +49,7 @@ func New(lookFrom vec3.Vec3Impl, lookAt vec3.Vec3Impl, vup vec3.Vec3Impl,
 		time1:           time1,
 		u:               u,
 		v:               v,
+		exposure:        exposure,
 		lowerLeftCorner: lowerLeftCorner,
 		horizontal:      horizontal,
 		vertical:        vertical,
@@ -84,4 +86,9 @@ func (c *Camera) randomInUnitDisc() vec3.Vec3Impl {
 			return p
 		}
 	}
+}
+
+// Exposure returns the exposure value associated with this camera.
+func (c *Camera) Exposure() float64 {
+	return c.exposure
 }

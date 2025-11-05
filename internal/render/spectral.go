@@ -30,9 +30,14 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 		i := 0
 		tile.PosY = ny - y
 		for x := w.x0; x <= w.x1; x++ {
-			r, g, b := RenderPixelSpectral(w.numSamples, x, y, nx, ny, w.scene, w.sampler, random)
+			cieX, cieY, cieZ := RenderPixelSpectral(w.numSamples, x, y, nx, ny, w.scene, w.sampler, random)
 
-			w.canvas.Set(x, ny-y, colour.Float64NRGBA{R: r, G: g, B: b, A: 1.0})
+			// Canvas information is in CIE XYZ space.
+			w.canvas.Set(x, ny-y, colour.Float64NRGBA{R: cieX, G: cieY, B: cieZ, A: 1.0})
+
+			exposure := w.scene.Exposure
+			r, g, b := w.scene.WhiteBalance.Matrix.Apply(cieX*exposure, cieY*exposure, cieZ*exposure)
+
 			if w.preview {
 				tile.Pixels[i] = b
 				tile.Pixels[i+1] = g
@@ -96,9 +101,5 @@ func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, s
 	finalY := sumY * invNumSamples
 	finalZ := sumZ * invNumSamples
 
-	// Convert the final XYZ color to linear sRGB using the white balance matrix
-	exposure := 1.0
-	r, g, b := scene.WhiteBalance.Matrix.Apply(finalX*exposure, finalY*exposure, finalZ*exposure)
-
-	return r, g, b
+	return finalX, finalY, finalZ
 }
