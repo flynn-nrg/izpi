@@ -101,9 +101,5 @@ func RenderPixelSpectral(numSamples int, x, y, nx, ny int, scene *scene.Scene, s
 	finalY := sumY * invNumSamples
 	finalZ := sumZ * invNumSamples
 
-	// Convert the final XYZ color to linear sRGB using the white balance matrix
-	//exposure := 1.0
-	//r, g, b := scene.WhiteBalance.Matrix.Apply(finalX*exposure, finalY*exposure, finalZ*exposure)
-
 	return finalX, finalY, finalZ
 }
