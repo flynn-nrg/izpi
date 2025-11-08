@@ -3,9 +3,6 @@ package leader
 import (
 	"context"
 	"image"
-	"io"
-	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -17,10 +14,9 @@ import (
 	"github.com/flynn-nrg/izpi/internal/render"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
+	"github.com/flynn-nrg/izpi/internal/scenes"
 	"github.com/flynn-nrg/izpi/internal/texture"
 	"github.com/flynn-nrg/izpi/internal/transport"
-	"google.golang.org/protobuf/encoding/prototext"
-	"google.golang.org/protobuf/proto"
 
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport"
@@ -43,37 +39,38 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 
 	aspectRatio := float64(cfg.XSize) / float64(cfg.YSize)
 
-	sceneFile, err := os.Open(cfg.Scene)
-	if err != nil {
-		log.Fatal(err)
-	}
+	/*
+		sceneFile, err := os.Open(cfg.Scene)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	defer sceneFile.Close()
+		defer sceneFile.Close()
 
-	switch filepath.Ext(cfg.Scene) {
-	case ".izpi":
-		payload, err := io.ReadAll(sceneFile)
-		if err != nil {
-			log.Fatalf("Error reading scene file: %v", err)
+		switch filepath.Ext(cfg.Scene) {
+		case ".izpi":
+			payload, err := io.ReadAll(sceneFile)
+			if err != nil {
+				log.Fatalf("Error reading scene file: %v", err)
+			}
+			err = proto.Unmarshal(payload, protoScene)
+			if err != nil {
+				log.Fatalf("Error unmarshalling scene: %v", err)
+			}
+		case ".pbtxt":
+			payload, err := os.ReadFile(cfg.Scene)
+			if err != nil {
+				log.Fatalf("Error reading scene file: %v", err)
+			}
+			err = prototext.Unmarshal(payload, protoScene)
+			if err != nil {
+				log.Fatalf("Error unmarshalling scene: %v", err)
+			}
+		default:
+			log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
 		}
-		err = proto.Unmarshal(payload, protoScene)
-		if err != nil {
-			log.Fatalf("Error unmarshalling scene: %v", err)
-		}
-	case ".pbtxt":
-		payload, err := os.ReadFile(cfg.Scene)
-		if err != nil {
-			log.Fatalf("Error reading scene file: %v", err)
-		}
-		err = prototext.Unmarshal(payload, protoScene)
-		if err != nil {
-			log.Fatalf("Error unmarshalling scene: %v", err)
-		}
-	default:
-		log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
-	}
-
-	//protoScene = scenes.CornellBoxPBRStanfordDragonSpectral(aspectRatio)
+	*/
+	protoScene = scenes.CornellBoxPBRStanfordDragonSpectral(aspectRatio)
 
 	// Override the colour sampler if the scene is spectral.
 	if protoScene.GetColourRepresentation() == pb_transport.ColourRepresentation_SPECTRAL && cfg.Sampler == "colour" {
