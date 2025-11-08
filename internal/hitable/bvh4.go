@@ -1,6 +1,7 @@
 package hitable
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"time"
@@ -46,6 +47,11 @@ type BVH4 struct {
 }
 
 func (bvh *BVH4) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, material.Material, bool) {
+	// Early exit if no nodes
+	if len(bvh.Nodes) == 0 {
+		return nil, nil, false
+	}
+
 	// Current best hit record found so far.
 	var bestHitRec *hitrecord.HitRecord
 	var bestMat material.Material
@@ -109,6 +115,11 @@ func (bvh *BVH4) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecor
 			childIndex := node.ChildIndex[i]
 			primitiveCount := node.PrimitiveCount[i]
 
+			// Skip invalid children (should not happen if AABB test is correct)
+			if childIndex == -1 {
+				continue
+			}
+
 			if primitiveCount > 0 {
 				// --- LEAF NODE: Perform scalar ray-primitive tests ---
 				for p := int32(0); p < primitiveCount; p++ {
@@ -153,6 +164,11 @@ func (bvh *BVH4) Hit(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecor
 }
 
 func (bvh *BVH4) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitRecord, bool, bool) {
+	// Early exit if no nodes
+	if len(bvh.Nodes) == 0 {
+		return nil, false, false
+	}
+
 	// Current best hit record found so far.
 	var bestHitRec *hitrecord.HitRecord
 	var bestHitEdge bool
@@ -205,6 +221,11 @@ func (bvh *BVH4) HitEdge(r ray.Ray, tMin float64, tMax float64) (*hitrecord.HitR
 
 			childIndex := node.ChildIndex[i]
 			primitiveCount := node.PrimitiveCount[i]
+
+			// Skip invalid children (should not happen if AABB test is correct)
+			if childIndex == -1 {
+				continue
+			}
 
 			if primitiveCount > 0 {
 				// LEAF NODE: Perform scalar ray-primitive tests
@@ -284,6 +305,164 @@ func (bvh *BVH4) Random(o vec3.Vec3Impl, _ *fastrandom.LCG) vec3.Vec3Impl {
 
 func (bvh *BVH4) IsEmitter() bool {
 	return false
+}
+
+// DebugStats returns statistics about the BVH4 structure
+func (bvh *BVH4) DebugStats() map[string]interface{} {
+	stats := make(map[string]interface{})
+	stats["num_nodes"] = len(bvh.Nodes)
+	stats["num_primitives"] = len(bvh.Primitives)
+
+	// Count leaf nodes and inner nodes
+	leafNodes := 0
+	innerNodes := 0
+	totalLeafPrimitives := 0
+	emptySlots := 0
+
+	for _, node := range bvh.Nodes {
+		hasLeaf := false
+		hasInner := false
+		for i := 0; i < 4; i++ {
+			if node.ChildIndex[i] == -1 {
+				emptySlots++
+				continue
+			}
+			if node.PrimitiveCount[i] > 0 {
+				hasLeaf = true
+				totalLeafPrimitives += int(node.PrimitiveCount[i])
+			} else {
+				hasInner = true
+			}
+		}
+		if hasLeaf {
+			leafNodes++
+		}
+		if hasInner {
+			innerNodes++
+		}
+	}
+
+	stats["leaf_nodes"] = leafNodes
+	stats["inner_nodes"] = innerNodes
+	stats["total_leaf_primitives"] = totalLeafPrimitives
+	stats["empty_slots"] = emptySlots
+	stats["avg_primitives_per_slot"] = float64(len(bvh.Primitives)) / float64(len(bvh.Nodes)*4-emptySlots)
+
+	// Check root node
+	if len(bvh.Nodes) > 0 {
+		root := bvh.Nodes[0]
+		rootChildren := 0
+		for i := 0; i < 4; i++ {
+			if root.ChildIndex[i] != -1 {
+				rootChildren++
+			}
+		}
+		stats["root_children"] = rootChildren
+
+		// Root bounding box
+		stats["root_bounds"] = map[string]interface{}{
+			"min": []float32{root.MinX[0], root.MinY[0], root.MinZ[0]},
+			"max": []float32{root.MaxX[0], root.MaxY[0], root.MaxZ[0]},
+		}
+	}
+
+	return stats
+}
+
+// TestRayAgainstRoot tests if a ray hits the root bounding box
+func (bvh *BVH4) TestRayAgainstRoot(r ray.Ray, tMin float64, tMax float64) bool {
+	if len(bvh.Nodes) == 0 {
+		return false
+	}
+
+	root := bvh.Nodes[0]
+	rayInvDir := vec3.Vec3Impl{
+		X: 1.0 / r.Direction().X,
+		Y: 1.0 / r.Direction().Y,
+		Z: 1.0 / r.Direction().Z,
+	}
+	rInvX, rInvY, rInvZ := float32(rayInvDir.X), float32(rayInvDir.Y), float32(rayInvDir.Z)
+	rOrgX, rOrgY, rOrgZ := float32(r.Origin().X), float32(r.Origin().Y), float32(r.Origin().Z)
+
+	mask := RayAABB4_SIMD(
+		&rOrgX, &rOrgY, &rOrgZ,
+		&rInvX, &rInvY, &rInvZ,
+		&root.MinX, &root.MinY, &root.MinZ,
+		&root.MaxX, &root.MaxY, &root.MaxZ,
+		float32(tMax),
+	)
+
+	return mask != 0
+}
+
+// Validate checks the integrity of the BVH4 structure and returns any errors found
+func (bvh *BVH4) Validate() []string {
+	var errors []string
+
+	if len(bvh.Nodes) == 0 {
+		errors = append(errors, "BVH4 has no nodes")
+		return errors
+	}
+
+	if len(bvh.Primitives) == 0 {
+		errors = append(errors, "BVH4 has no primitives")
+		return errors
+	}
+
+	// Count all primitives referenced in leaf nodes
+	primitivesReferenced := 0
+	visited := make(map[int32]bool)
+	toVisit := []int32{0} // Start with root
+
+	for len(toVisit) > 0 {
+		nodeIdx := toVisit[0]
+		toVisit = toVisit[1:]
+
+		if nodeIdx < 0 || nodeIdx >= int32(len(bvh.Nodes)) {
+			errors = append(errors, fmt.Sprintf("Invalid node index: %d", nodeIdx))
+			continue
+		}
+
+		if visited[nodeIdx] {
+			continue
+		}
+		visited[nodeIdx] = true
+
+		node := bvh.Nodes[nodeIdx]
+
+		for i := 0; i < 4; i++ {
+			childIdx := node.ChildIndex[i]
+			primCount := node.PrimitiveCount[i]
+
+			if childIdx == -1 {
+				// Invalid slot, skip
+				continue
+			}
+
+			if primCount > 0 {
+				// Leaf node - check primitive indices are valid
+				for p := int32(0); p < primCount; p++ {
+					idx := childIdx + p
+					if idx < 0 || idx >= int32(len(bvh.Primitives)) {
+						errors = append(errors, fmt.Sprintf("Leaf node %d slot %d references invalid primitive index %d (count %d, primitives len %d)",
+							nodeIdx, i, idx, primCount, len(bvh.Primitives)))
+					} else {
+						primitivesReferenced++
+					}
+				}
+			} else {
+				// Inner node - add to visit list
+				toVisit = append(toVisit, childIdx)
+			}
+		}
+	}
+
+	if primitivesReferenced != len(bvh.Primitives) {
+		errors = append(errors, fmt.Sprintf("Primitive count mismatch: %d referenced in leaves, %d in primitives array",
+			primitivesReferenced, len(bvh.Primitives)))
+	}
+
+	return errors
 }
 
 // RayAABB4_SIMD tests a ray against 4 AABBs simultaneously.
@@ -379,16 +558,39 @@ func NewBVH4(hitables []Hitable, time0 float64, time1 float64) *BVH4 {
 	randomFunc := fastrandom.NewWithDefaults().Float64
 	bvh := newBVH4(hitables, randomFunc, time0, time1)
 	log.Infof("Completed BVH4 construction in %v", time.Since(startTime))
+
+	// Log debug statistics
+	stats := bvh.DebugStats()
+	log.Infof("BVH4 Stats: nodes=%v, primitives=%v, leaf_nodes=%v, inner_nodes=%v, total_leaf_prims=%v, empty_slots=%v, root_children=%v",
+		stats["num_nodes"], stats["num_primitives"], stats["leaf_nodes"], stats["inner_nodes"],
+		stats["total_leaf_primitives"], stats["empty_slots"], stats["root_children"])
+
+	if rootBounds, ok := stats["root_bounds"].(map[string]interface{}); ok {
+		log.Infof("BVH4 Root bounds: min=%v, max=%v", rootBounds["min"], rootBounds["max"])
+	}
+
+	// Validate the structure
+	if errors := bvh.Validate(); len(errors) > 0 {
+		log.Errorf("BVH4 validation failed with %d errors:", len(errors))
+		for i, err := range errors {
+			log.Errorf("  Error %d: %s", i+1, err)
+			if i >= 9 { // Limit to first 10 errors
+				log.Errorf("  ... and %d more errors", len(errors)-10)
+				break
+			}
+		}
+	} else {
+		log.Info("BVH4 validation passed")
+	}
+
 	return bvh
 }
 
 // buildNode is a helper struct for building the BVH4 tree
 type buildNode struct {
-	box        *aabb.AABB
-	children   []*buildNode
-	primitives []Hitable
-	primStart  int32
-	primCount  int32
+	box              *aabb.AABB
+	children         []*buildNode
+	primitiveIndices []int // Indices into the original primitives array
 }
 
 func newBVH4(hitables []Hitable, randomFunc func() float64, time0 float64, time1 float64) *BVH4 {
@@ -403,8 +605,14 @@ func newBVH4(hitables []Hitable, randomFunc func() float64, time0 float64, time1
 		Primitives: hitables,
 	}
 
-	// Build a traditional binary BVH first
-	root := buildBinaryBVH(hitables, randomFunc, time0, time1)
+	// Create initial index array [0, 1, 2, ..., n-1]
+	indices := make([]int, len(hitables))
+	for i := range indices {
+		indices[i] = i
+	}
+
+	// Build a traditional binary BVH first, tracking indices
+	root := buildBinaryBVH(hitables, indices, randomFunc, time0, time1)
 
 	// Convert to 4-way BVH by flattening and collapsing levels
 	bvh.Nodes = make([]BVH4Node, 0)
@@ -423,7 +631,7 @@ func newBVH4(hitables []Hitable, randomFunc func() float64, time0 float64, time1
 }
 
 // buildBinaryBVH builds a traditional binary BVH tree
-func buildBinaryBVH(hitables []Hitable, randomFunc func() float64, time0 float64, time1 float64) *buildNode {
+func buildBinaryBVH(hitables []Hitable, indices []int, randomFunc func() float64, time0 float64, time1 float64) *buildNode {
 	if len(hitables) == 0 {
 		return nil
 	}
@@ -432,7 +640,7 @@ func buildBinaryBVH(hitables []Hitable, randomFunc func() float64, time0 float64
 
 	// Compute bounding box for all primitives
 	if len(hitables) == 1 {
-		node.primitives = hitables
+		node.primitiveIndices = indices
 		if box, ok := hitables[0].BoundingBox(time0, time1); ok {
 			node.box = box
 		}
@@ -455,63 +663,88 @@ func buildBinaryBVH(hitables []Hitable, randomFunc func() float64, time0 float64
 	// Select a random axis for splitting (0=x, 1=y, 2=z)
 	axis := int(3 * randomFunc())
 
-	// Sort along the chosen axis
-	sortHitables(hitables, axis, time0, time1)
+	// Make working copies to avoid corrupting shared slice memory
+	// This MUST be done BEFORE sorting!
+	workingHitables := make([]Hitable, len(hitables))
+	workingIndices := make([]int, len(indices))
+	copy(workingHitables, hitables)
+	copy(workingIndices, indices)
 
-	if len(hitables) <= 4 {
+	// Sort both hitables and indices together along the chosen axis
+	sortHitablesWithIndices(workingHitables, workingIndices, axis, time0, time1)
+
+	if len(workingHitables) <= 4 {
 		// Create leaf node
-		node.primitives = hitables
+		node.primitiveIndices = workingIndices
 		return node
 	}
 
 	// Split in the middle
-	mid := len(hitables) / 2
-	leftChild := buildBinaryBVH(hitables[:mid], randomFunc, time0, time1)
-	rightChild := buildBinaryBVH(hitables[mid:], randomFunc, time0, time1)
+	mid := len(workingHitables) / 2
+
+	leftChild := buildBinaryBVH(workingHitables[:mid], workingIndices[:mid], randomFunc, time0, time1)
+	rightChild := buildBinaryBVH(workingHitables[mid:], workingIndices[mid:], randomFunc, time0, time1)
 
 	node.children = []*buildNode{leftChild, rightChild}
 	return node
 }
 
-// sortHitables sorts hitables along the specified axis
-func sortHitables(hitables []Hitable, axis int, time0 float64, time1 float64) {
+// sortHitablesWithIndices sorts hitables and their indices together along the specified axis
+func sortHitablesWithIndices(hitables []Hitable, indices []int, axis int, time0 float64, time1 float64) {
+	// Wrapper to sort both slices together
+	type pair struct {
+		hitable Hitable
+		index   int
+	}
+
+	pairs := make([]pair, len(hitables))
+	for i := range hitables {
+		pairs[i] = pair{hitables[i], indices[i]}
+	}
+
 	switch axis {
 	case 0: // X
-		sort.Slice(hitables, func(i, j int) bool {
+		sort.Slice(pairs, func(i, j int) bool {
 			var box0, box1 *aabb.AABB
 			var ok bool
-			if box0, ok = hitables[i].BoundingBox(time0, time1); !ok {
+			if box0, ok = pairs[i].hitable.BoundingBox(time0, time1); !ok {
 				return false
 			}
-			if box1, ok = hitables[j].BoundingBox(time0, time1); !ok {
+			if box1, ok = pairs[j].hitable.BoundingBox(time0, time1); !ok {
 				return false
 			}
 			return aabb.BoxLessX(box0, box1)
 		})
 	case 1: // Y
-		sort.Slice(hitables, func(i, j int) bool {
+		sort.Slice(pairs, func(i, j int) bool {
 			var box0, box1 *aabb.AABB
 			var ok bool
-			if box0, ok = hitables[i].BoundingBox(time0, time1); !ok {
+			if box0, ok = pairs[i].hitable.BoundingBox(time0, time1); !ok {
 				return false
 			}
-			if box1, ok = hitables[j].BoundingBox(time0, time1); !ok {
+			if box1, ok = pairs[j].hitable.BoundingBox(time0, time1); !ok {
 				return false
 			}
 			return aabb.BoxLessY(box0, box1)
 		})
 	case 2: // Z
-		sort.Slice(hitables, func(i, j int) bool {
+		sort.Slice(pairs, func(i, j int) bool {
 			var box0, box1 *aabb.AABB
 			var ok bool
-			if box0, ok = hitables[i].BoundingBox(time0, time1); !ok {
+			if box0, ok = pairs[i].hitable.BoundingBox(time0, time1); !ok {
 				return false
 			}
-			if box1, ok = hitables[j].BoundingBox(time0, time1); !ok {
+			if box1, ok = pairs[j].hitable.BoundingBox(time0, time1); !ok {
 				return false
 			}
 			return aabb.BoxLessZ(box0, box1)
 		})
+	}
+
+	// Copy sorted pairs back
+	for i := range pairs {
+		hitables[i] = pairs[i].hitable
+		indices[i] = pairs[i].index
 	}
 }
 
@@ -525,36 +758,30 @@ func flattenBVH4(node *buildNode, bvh *BVH4, primitiveIndices *[]int) int32 {
 	bvh4Node := BVH4Node{}
 
 	// Initialize all children as invalid
+	// Use a degenerate AABB that will always fail the ray test
+	// (set all bounds to MaxFloat32 so tNear will be huge and fail tNear <= tMax)
 	for i := 0; i < 4; i++ {
 		bvh4Node.ChildIndex[i] = -1
 		bvh4Node.PrimitiveCount[i] = 0
 		bvh4Node.MinX[i] = math.MaxFloat32
 		bvh4Node.MinY[i] = math.MaxFloat32
 		bvh4Node.MinZ[i] = math.MaxFloat32
-		bvh4Node.MaxX[i] = -math.MaxFloat32
-		bvh4Node.MaxY[i] = -math.MaxFloat32
-		bvh4Node.MaxZ[i] = -math.MaxFloat32
+		bvh4Node.MaxX[i] = math.MaxFloat32
+		bvh4Node.MaxY[i] = math.MaxFloat32
+		bvh4Node.MaxZ[i] = math.MaxFloat32
 	}
 
 	// Check if this is a leaf node
-	if len(node.primitives) > 0 {
+	if len(node.primitiveIndices) > 0 {
 		// This is a leaf - store primitives
 		primStart := int32(len(*primitiveIndices))
 
 		// Add primitive indices
-		for _, prim := range node.primitives {
-			// Find the index of this primitive in the original list
-			for idx, p := range bvh.Primitives {
-				if p == prim {
-					*primitiveIndices = append(*primitiveIndices, idx)
-					break
-				}
-			}
-		}
+		*primitiveIndices = append(*primitiveIndices, node.primitiveIndices...)
 
 		// Store in first child slot
 		bvh4Node.ChildIndex[0] = primStart
-		bvh4Node.PrimitiveCount[0] = int32(len(node.primitives))
+		bvh4Node.PrimitiveCount[0] = int32(len(node.primitiveIndices))
 
 		if node.box != nil {
 			// Use conservative conversion to ensure we never miss intersections
@@ -572,6 +799,11 @@ func flattenBVH4(node *buildNode, bvh *BVH4, primitiveIndices *[]int) int32 {
 
 	// This is an internal node - collect up to 4 children by collapsing binary tree levels
 	children := collectChildren(node, 4)
+
+	// CRITICAL CHECK: If we got more than 4 children, we're losing geometry!
+	if len(children) > 4 {
+		log.Warnf("collectChildren returned %d children, but BVH4 can only handle 4! Geometry will be lost!", len(children))
+	}
 
 	// Reserve space for this node
 	bvh.Nodes = append(bvh.Nodes, bvh4Node)
@@ -598,38 +830,63 @@ func flattenBVH4(node *buildNode, bvh *BVH4, primitiveIndices *[]int) int32 {
 }
 
 // collectChildren collects up to maxChildren children by flattening internal nodes
+// It performs a breadth-first expansion of the tree, stopping when we have exactly maxChildren.
 func collectChildren(node *buildNode, maxChildren int) []*buildNode {
-	if node == nil || len(node.primitives) > 0 {
+	if node == nil || len(node.primitiveIndices) > 0 {
+		return []*buildNode{node}
+	}
+
+	// Start with just the input node's children
+	if len(node.children) == 0 {
 		return []*buildNode{node}
 	}
 
 	result := make([]*buildNode, 0, maxChildren)
-	queue := []*buildNode{node}
 
-	for len(queue) > 0 && len(result) < maxChildren {
-		current := queue[0]
-		queue = queue[1:]
-
-		if current == nil {
-			continue
+	// Initialize with direct children
+	for _, child := range node.children {
+		if child != nil {
+			result = append(result, child)
 		}
+	}
 
-		// If it's a leaf, add it to results
-		if len(current.primitives) > 0 {
-			result = append(result, current)
-			continue
-		}
+	// Try to expand internal nodes until we have maxChildren
+	expanded := true
+	for expanded && len(result) < maxChildren {
+		expanded = false
 
-		// If it's an internal node and we have space, expand it
-		if len(current.children) > 0 {
-			// Check if expanding would exceed limit
-			if len(result)+len(current.children) <= maxChildren {
-				queue = append(queue, current.children...)
-			} else {
-				// Can't expand further, treat as a subtree
-				result = append(result, current)
+		// Find the first internal node we can expand
+		for i := 0; i < len(result); i++ {
+			current := result[i]
+
+			// Skip if it's a leaf
+			if len(current.primitiveIndices) > 0 {
+				continue
+			}
+
+			// Skip if it has no children
+			if len(current.children) == 0 {
+				continue
+			}
+
+			// Calculate if we have room to expand this node
+			numNewChildren := len(current.children)
+			numAfterExpansion := len(result) - 1 + numNewChildren // -1 because we're replacing current
+
+			if numAfterExpansion <= maxChildren {
+				// We have room - expand this node
+				// Remove current node and add its children
+				result = append(result[:i], result[i+1:]...)
+				result = append(result, current.children...)
+				expanded = true
+				break // Start over
 			}
 		}
+	}
+
+	// Ensure we don't return more than maxChildren
+	if len(result) > maxChildren {
+		result = result[:maxChildren]
 	}
 
 	return result

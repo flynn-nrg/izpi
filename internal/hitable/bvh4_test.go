@@ -450,6 +450,72 @@ func TestBVH4PrecisionCorrectness(t *testing.T) {
 	}
 }
 
+// TestBVH4LargeScene tests BVH4 with many primitives similar to dragon scene
+func TestBVH4LargeScene(t *testing.T) {
+	// Create a scene with thousands of spheres
+	const numSpheres = 10000
+	spheres := make([]Hitable, numSpheres)
+	for i := 0; i < numSpheres; i++ {
+		x := float64(i%100) * 0.5
+		y := float64((i/100)%100) * 0.5
+		z := float64(i/10000) * 0.5
+		spheres[i] = makeSphere(x, y, z-50, 0.2)
+	}
+
+	randomFunc := func() float64 { return 0 }
+	bvh2 := newBVH(spheres, randomFunc, 0, 1)
+	bvh4 := newBVH4(spheres, randomFunc, 0, 1)
+
+	// CRITICAL: Validate primitive count
+	if len(bvh4.Primitives) != numSpheres {
+		t.Fatalf("BVH4 has %d primitives, expected %d", len(bvh4.Primitives), numSpheres)
+	}
+
+	// Validate the BVH4 structure
+	if errors := bvh4.Validate(); len(errors) > 0 {
+		t.Errorf("BVH4 validation failed with %d errors:", len(errors))
+		for i, err := range errors {
+			t.Errorf("  Error %d: %s", i+1, err)
+			if i >= 4 {
+				break
+			}
+		}
+	}
+
+	// Check stats
+	stats := bvh4.DebugStats()
+	t.Logf("BVH4 Stats: nodes=%v, primitives=%v, leaf_nodes=%v, total_leaf_prims=%v",
+		stats["num_nodes"], stats["num_primitives"], stats["leaf_nodes"], stats["total_leaf_primitives"])
+
+	if stats["num_primitives"] != numSpheres {
+		t.Errorf("BVH4 stats show %v primitives, expected %d", stats["num_primitives"], numSpheres)
+	}
+
+	if stats["total_leaf_primitives"] != numSpheres {
+		t.Errorf("BVH4 leaf nodes reference %v primitives, expected %d", stats["total_leaf_primitives"], numSpheres)
+	}
+
+	// Test multiple rays
+	testRays := []ray.Ray{
+		ray.New(vec3.Vec3Impl{X: 5, Y: 5, Z: 0}, vec3.Vec3Impl{X: 0, Y: 0, Z: -1}, 0),
+		ray.New(vec3.Vec3Impl{X: 10, Y: 10, Z: 0}, vec3.Vec3Impl{X: 0, Y: 0, Z: -1}, 0),
+		ray.New(vec3.Vec3Impl{X: 25, Y: 25, Z: 0}, vec3.Vec3Impl{X: 0, Y: 0, Z: -1}, 0),
+	}
+
+	for i, testRay := range testRays {
+		_, _, hit2 := bvh2.Hit(testRay, 0.001, 1000)
+		_, _, hit4 := bvh4.Hit(testRay, 0.001, 1000)
+
+		if hit2 != hit4 {
+			t.Errorf("Ray %d: BVH4 hit=%v, BVH2 hit=%v (mismatch!)", i, hit4, hit2)
+			
+			// Additional debug info
+			hitRoot := bvh4.TestRayAgainstRoot(testRay, 0.001, 1000)
+			t.Errorf("  Ray hits root: %v", hitRoot)
+		}
+	}
+}
+
 // Benchmark the BVH4 Hit method
 func BenchmarkBVH4Hit(b *testing.B) {
 	// Create a scene with many spheres
