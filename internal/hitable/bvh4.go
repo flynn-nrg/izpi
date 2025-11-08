@@ -467,7 +467,8 @@ func (bvh *BVH4) Validate() []string {
 
 // RayAABB4_SIMD tests a ray against 4 AABBs simultaneously.
 // Returns a 4-bit mask where bit i is set if the ray hits AABB i.
-// This is the pure Go version; assembly versions for ARM64 and AMD64 will be added later.
+// On ARM64 and AMD64, this uses SIMD assembly for true parallel execution.
+// On other platforms, it falls back to the pure Go implementation.
 func RayAABB4_SIMD(
 	rayOrgX, rayOrgY, rayOrgZ *float32,
 	rayInvDirX, rayInvDirY, rayInvDirZ *float32,
@@ -475,42 +476,18 @@ func RayAABB4_SIMD(
 	maxX, maxY, maxZ *[4]float32,
 	tMax float32,
 ) uint8 {
-	var mask uint8 = 0
-
-	for i := 0; i < 4; i++ {
-		// Compute intersection distances for X axis
-		t0x := (minX[i] - *rayOrgX) * *rayInvDirX
-		t1x := (maxX[i] - *rayOrgX) * *rayInvDirX
-		if t0x > t1x {
-			t0x, t1x = t1x, t0x
-		}
-
-		// Compute intersection distances for Y axis
-		t0y := (minY[i] - *rayOrgY) * *rayInvDirY
-		t1y := (maxY[i] - *rayOrgY) * *rayInvDirY
-		if t0y > t1y {
-			t0y, t1y = t1y, t0y
-		}
-
-		// Compute intersection distances for Z axis
-		t0z := (minZ[i] - *rayOrgZ) * *rayInvDirZ
-		t1z := (maxZ[i] - *rayOrgZ) * *rayInvDirZ
-		if t0z > t1z {
-			t0z, t1z = t1z, t0z
-		}
-
-		// Find the overlap
-		tNear := max32(max32(t0x, t0y), t0z)
-		tFar := min32(min32(t1x, t1y), t1z)
-
-		// Check if there's an intersection
-		if tNear <= tFar && tFar >= 0 && tNear <= tMax {
-			mask |= (1 << i)
-		}
-	}
-
-	return mask
+	// Use assembly version if available, otherwise fall back to Go
+	return rayAABB4_SIMD_impl(rayOrgX, rayOrgY, rayOrgZ,
+		rayInvDirX, rayInvDirY, rayInvDirZ,
+		minX, minY, minZ,
+		maxX, maxY, maxZ,
+		tMax)
 }
+
+// rayAABB4_SIMD_impl is implemented in platform-specific files:
+// - bvh4_simd_arm64.go for ARM64 (calls assembly)
+// - bvh4_simd_amd64.go for AMD64 (calls assembly)
+// - bvh4_simd_generic.go for other platforms (pure Go)
 
 // Helper functions for float32 min/max
 func min32(a, b float32) float32 {
