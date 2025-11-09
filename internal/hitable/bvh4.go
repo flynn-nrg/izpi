@@ -307,8 +307,8 @@ func (bvh *BVH4) IsEmitter() bool {
 	return false
 }
 
-// DebugStats returns statistics about the BVH4 structure
-func (bvh *BVH4) DebugStats() map[string]interface{} {
+// debugStats returns statistics about the BVH4 structure
+func (bvh *BVH4) debugStats() map[string]interface{} {
 	stats := make(map[string]interface{})
 	stats["num_nodes"] = len(bvh.Nodes)
 	stats["num_primitives"] = len(bvh.Primitives)
@@ -395,8 +395,8 @@ func (bvh *BVH4) TestRayAgainstRoot(r ray.Ray, tMin float64, tMax float64) bool 
 	return mask != 0
 }
 
-// Validate checks the integrity of the BVH4 structure and returns any errors found
-func (bvh *BVH4) Validate() []string {
+// validate checks the integrity of the BVH4 structure and returns any errors found
+func (bvh *BVH4) validate() []string {
 	var errors []string
 
 	if len(bvh.Nodes) == 0 {
@@ -520,8 +520,8 @@ func NewBVH4(hitables []Hitable, time0 float64, time1 float64) *BVH4 {
 	log.Infof("Completed BVH4 construction in %v", time.Since(startTime))
 
 	// Log debug statistics
-	stats := bvh.DebugStats()
-	log.Infof("BVH4 Stats: nodes=%v, primitives=%v, leaf_nodes=%v, inner_nodes=%v, total_leaf_prims=%v, empty_slots=%v, root_children=%v",
+	stats := bvh.debugStats()
+	log.Debugf("BVH4 Stats: nodes=%v, primitives=%v, leaf_nodes=%v, inner_nodes=%v, total_leaf_prims=%v, empty_slots=%v, root_children=%v",
 		stats["num_nodes"], stats["num_primitives"], stats["leaf_nodes"], stats["inner_nodes"],
 		stats["total_leaf_primitives"], stats["empty_slots"], stats["root_children"])
 
@@ -530,7 +530,7 @@ func NewBVH4(hitables []Hitable, time0 float64, time1 float64) *BVH4 {
 	}
 
 	// Validate the structure
-	if errors := bvh.Validate(); len(errors) > 0 {
+	if errors := bvh.validate(); len(errors) > 0 {
 		log.Errorf("BVH4 validation failed with %d errors:", len(errors))
 		for i, err := range errors {
 			log.Errorf("  Error %d: %s", i+1, err)

@@ -472,7 +472,7 @@ func TestBVH4LargeScene(t *testing.T) {
 	}
 
 	// Validate the BVH4 structure
-	if errors := bvh4.Validate(); len(errors) > 0 {
+	if errors := bvh4.validate(); len(errors) > 0 {
 		t.Errorf("BVH4 validation failed with %d errors:", len(errors))
 		for i, err := range errors {
 			t.Errorf("  Error %d: %s", i+1, err)
@@ -483,7 +483,7 @@ func TestBVH4LargeScene(t *testing.T) {
 	}
 
 	// Check stats
-	stats := bvh4.DebugStats()
+	stats := bvh4.debugStats()
 	t.Logf("BVH4 Stats: nodes=%v, primitives=%v, leaf_nodes=%v, total_leaf_prims=%v",
 		stats["num_nodes"], stats["num_primitives"], stats["leaf_nodes"], stats["total_leaf_primitives"])
 
@@ -508,7 +508,7 @@ func TestBVH4LargeScene(t *testing.T) {
 
 		if hit2 != hit4 {
 			t.Errorf("Ray %d: BVH4 hit=%v, BVH2 hit=%v (mismatch!)", i, hit4, hit2)
-			
+
 			// Additional debug info
 			hitRoot := bvh4.TestRayAgainstRoot(testRay, 0.001, 1000)
 			t.Errorf("  Ray hits root: %v", hitRoot)
