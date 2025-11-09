@@ -79,7 +79,7 @@ func (t *Transport) ToScene() (*scene.Scene, error) {
 
 	// Create the scene
 	scene := &scene.Scene{
-		World:        hitable.NewSlice([]hitable.Hitable{hitable.NewBVH4(hitables, 0, 1)}),
+		World:        hitable.NewSlice([]hitable.Hitable{hitable.NewBVH8(hitables, 0, 1)}),
 		Lights:       hitable.NewSlice(lights),
 		Camera:       camera,
 		WhiteBalance: whiteBalance,
