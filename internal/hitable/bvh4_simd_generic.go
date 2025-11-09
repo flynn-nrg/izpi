@@ -47,4 +47,3 @@ func RayAABB4_SIMD(
 
 	return mask
 }
-
