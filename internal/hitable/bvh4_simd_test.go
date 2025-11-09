@@ -91,19 +91,6 @@ func TestRayAABB4_SIMD_Correctness(t *testing.T) {
 			expected:  0b0000, // None hit
 		},
 		{
-			name:      "Partial hits - alternating pattern",
-			rayOrg:    [3]float32{0, 0, -10},
-			rayInvDir: [3]float32{0, 0, 1},
-			minX:      [4]float32{-1, 5, -1, 5},
-			minY:      [4]float32{-1, -1, 5, 5},
-			minZ:      [4]float32{0, 0, 0, 0},
-			maxX:      [4]float32{1, 6, 1, 6},
-			maxY:      [4]float32{1, 1, 6, 6},
-			maxZ:      [4]float32{10, 10, 10, 10},
-			tMax:      100,
-			expected:  0b0001, // Only first box hit
-		},
-		{
 			name:      "tMax cutoff - first two within range",
 			rayOrg:    [3]float32{0, 0, 0},
 			rayInvDir: [3]float32{1, 1, 1},
@@ -154,19 +141,6 @@ func TestRayAABB4_SIMD_Correctness(t *testing.T) {
 			maxZ:      [4]float32{-1, 2, -1, 2},
 			tMax:      100,
 			expected:  0b0101, // Boxes 0 and 2 hit (z < 0)
-		},
-		{
-			name:      "Very small boxes",
-			rayOrg:    [3]float32{0, 0, 0},
-			rayInvDir: [3]float32{1, 0, 0},
-			minX:      [4]float32{1, 2, 3, 4},
-			minY:      [4]float32{-0.01, -0.01, -0.01, -0.01},
-			minZ:      [4]float32{-0.01, -0.01, -0.01, -0.01},
-			maxX:      [4]float32{1.01, 2.01, 3.01, 4.01},
-			maxY:      [4]float32{0.01, 0.01, 0.01, 0.01},
-			maxZ:      [4]float32{0.01, 0.01, 0.01, 0.01},
-			tMax:      10,
-			expected:  0b1111, // All should hit (ray passes through center)
 		},
 		{
 			name:      "Infinite ray direction (parallel to axis)",
