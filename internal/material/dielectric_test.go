@@ -101,13 +101,15 @@ func TestColoredGlassScattering(t *testing.T) {
 	direction := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
 	r := ray.New(origin, direction, 0.0)
 
-	random := fastrandom.NewWithDefaults()
+	// Use a fixed seed for deterministic testing (avoid CI flakiness)
+	// We need enough iterations to ensure we hit both reflection and transmission cases
+	random := fastrandom.New(12345, 4294967296, 1664525, 1013904223)
 
 	// Test multiple times to account for random reflection/transmission
 	foundAttenuation := false
 	foundNoAttenuation := false
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1000; i++ {
 		scattered, scatterRecord, ok := dielectric.Scatter(r, hr, random)
 
 		if !ok {
@@ -167,13 +169,15 @@ func TestSpectralColoredGlassScattering(t *testing.T) {
 	direction := vec3.Vec3Impl{X: 0.0, Y: 0.0, Z: 1.0}
 	r := ray.NewWithLambda(origin, direction, 0.0, 480.0) // Blue wavelength
 
-	random := fastrandom.NewWithDefaults()
+	// Use a fixed seed for deterministic testing (avoid CI flakiness)
+	// We need enough iterations to ensure we hit both reflection and transmission cases
+	random := fastrandom.New(12345, 4294967296, 1664525, 1013904223)
 
 	// Test multiple times to account for random reflection/transmission
 	foundAttenuation := false
 	foundNoAttenuation := false
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1000; i++ {
 		scattered, scatterRecord, ok := dielectric.SpectralScatter(r, hr, random)
 
 		if !ok {
