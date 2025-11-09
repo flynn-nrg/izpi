@@ -186,7 +186,7 @@ func TestRayAABB4_SIMD_Correctness(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Test SIMD implementation
-			simdResult := rayAABB4_SIMD_impl(
+			simdResult := RayAABB4_SIMD(
 				&tt.rayOrg[0], &tt.rayOrg[1], &tt.rayOrg[2],
 				&tt.rayInvDir[0], &tt.rayInvDir[1], &tt.rayInvDir[2],
 				&tt.minX, &tt.minY, &tt.minZ,
@@ -263,7 +263,7 @@ func TestRayAABB4_SIMD_RandomCases(t *testing.T) {
 		tMax := float32(50 + i%50)
 
 		// Compare SIMD vs reference
-		simdResult := rayAABB4_SIMD_impl(
+		simdResult := RayAABB4_SIMD(
 			&rayOrg[0], &rayOrg[1], &rayOrg[2],
 			&rayInvDir[0], &rayInvDir[1], &rayInvDir[2],
 			&minX, &minY, &minZ,
@@ -308,7 +308,7 @@ func BenchmarkRayAABB4_SIMD(b *testing.B) {
 	var result uint8
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		result = rayAABB4_SIMD_impl(
+		result = RayAABB4_SIMD(
 			&rayOrg[0], &rayOrg[1], &rayOrg[2],
 			&rayInvDir[0], &rayInvDir[1], &rayInvDir[2],
 			&minX, &minY, &minZ,
@@ -344,4 +344,3 @@ func BenchmarkRayAABB4_Reference(b *testing.B) {
 	}
 	_ = result
 }
-

@@ -476,12 +476,41 @@ func RayAABB4_SIMD(
 	maxX, maxY, maxZ *[4]float32,
 	tMax float32,
 ) uint8 {
-	// Use assembly version if available, otherwise fall back to Go
-	return rayAABB4_SIMD_impl(rayOrgX, rayOrgY, rayOrgZ,
-		rayInvDirX, rayInvDirY, rayInvDirZ,
-		minX, minY, minZ,
-		maxX, maxY, maxZ,
-		tMax)
+	var mask uint8 = 0
+
+	for i := 0; i < 4; i++ {
+		// Compute intersection distances for X axis
+		t0x := (minX[i] - *rayOrgX) * *rayInvDirX
+		t1x := (maxX[i] - *rayOrgX) * *rayInvDirX
+		if t0x > t1x {
+			t0x, t1x = t1x, t0x
+		}
+
+		// Compute intersection distances for Y axis
+		t0y := (minY[i] - *rayOrgY) * *rayInvDirY
+		t1y := (maxY[i] - *rayOrgY) * *rayInvDirY
+		if t0y > t1y {
+			t0y, t1y = t1y, t0y
+		}
+
+		// Compute intersection distances for Z axis
+		t0z := (minZ[i] - *rayOrgZ) * *rayInvDirZ
+		t1z := (maxZ[i] - *rayOrgZ) * *rayInvDirZ
+		if t0z > t1z {
+			t0z, t1z = t1z, t0z
+		}
+
+		// Find the overlap
+		tNear := max32(max32(t0x, t0y), t0z)
+		tFar := min32(min32(t1x, t1y), t1z)
+
+		// Check if there's an intersection
+		if tNear <= tFar && tFar >= 0 && tNear <= tMax {
+			mask |= (1 << i)
+		}
+	}
+
+	return mask
 }
 
 // rayAABB4_SIMD_impl is implemented in platform-specific files:
