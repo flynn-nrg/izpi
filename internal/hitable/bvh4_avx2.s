@@ -17,14 +17,14 @@
 // - YMM6-YMM11: AABB bounds (minX, minY, minZ, maxX, maxY, maxZ)
 // - YMM12-YMM15: Temporary computation registers
 
-// func rayAABB4_SIMD_impl(
+// func RayAABB4_SIMD(
 //     rayOrgX, rayOrgY, rayOrgZ *float32,
 //     rayInvDirX, rayInvDirY, rayInvDirZ *float32,
 //     minX, minY, minZ *[4]float32,
 //     maxX, maxY, maxZ *[4]float32,
 //     tMax float32,
 // ) uint8
-TEXT ·rayAABB4_SIMD_impl(SB), NOSPLIT, $0-105
+TEXT ·RayAABB4_SIMD(SB), NOSPLIT, $0-105
     // Load argument pointers
     MOVQ    rayOrgX+0(FP), AX
     MOVQ    rayOrgY+8(FP), BX

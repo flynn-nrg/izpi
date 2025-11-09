@@ -2,7 +2,7 @@
 
 package hitable
 
-// rayAABB4_SIMD_impl is the pure Go implementation for ARM64
+// RayAABB4_SIMD is the pure Go implementation for ARM64
 //
 // Performance: Delivers 2.91x speedup (22m59s → 7m54s) on M2 Max
 //
@@ -17,7 +17,7 @@ package hitable
 //
 // Go's compiler does a solid job here, and the algorithm improvement
 // is far more important than micro-optimizations.
-func rayAABB4_SIMD_impl(
+func RayAABB4_SIMD(
 	rayOrgX, rayOrgY, rayOrgZ *float32,
 	rayInvDirX, rayInvDirY, rayInvDirZ *float32,
 	minX, minY, minZ *[4]float32,

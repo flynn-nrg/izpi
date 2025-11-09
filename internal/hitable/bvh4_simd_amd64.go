@@ -2,8 +2,8 @@
 
 package hitable
 
-// rayAABB4_SIMD_impl is the AMD64 AVX2 implementation
-// Implemented in bvh4_avx2.s using 256-bit YMM registers
+// RayAABB4_SIMD is the AMD64 AVX2 assembly implementation.
+// Implemented in bvh4_avx2.s using 256-bit YMM registers.
 //
 // AVX2 provides true 4-wide SIMD parallelism:
 // - YMM registers can hold 8x float32 (we use lower 4)
@@ -19,11 +19,10 @@ package hitable
 // Requires: AVX2 support (all modern AMD64 CPUs since ~2013)
 //
 //go:noescape
-func rayAABB4_SIMD_impl(
+func RayAABB4_SIMD(
 	rayOrgX, rayOrgY, rayOrgZ *float32,
 	rayInvDirX, rayInvDirY, rayInvDirZ *float32,
 	minX, minY, minZ *[4]float32,
 	maxX, maxY, maxZ *[4]float32,
 	tMax float32,
 ) uint8
-
