@@ -50,9 +50,13 @@ Implemented a 4-way Bounding Volume Hierarchy (BVH4) to accelerate ray tracing p
 - **CGO overhead**: Tested ARM64 NEON intrinsics via CGO, but call overhead (35ns vs 15ns) negated SIMD benefits
   - Micro-benchmark: CGO was 2.4x **slower** than pure Go
   - Full rendering: CGO was 64x **slower** (19s vs 0.3s for 10 samples)
+- **Assembly limitations**: Go's ARM64 assembler lacks mnemonics for critical NEON instructions:
+  - `FMUL`, `FMIN`, `FMAX`, `FCMGE`, `USHR` all require WORD directive encoding
+  - Manual hex encoding is error-prone and unmaintainable
 - **Future-proof**: Go compiler may auto-vectorize in future versions
 - **Portability**: Works on all platforms without assembly
 - **Maintainability**: Much easier to understand and debug
+- **Performance**: Algorithm > micro-optimization - the BVH4 structure is the real win
 
 ### 2. Structure-of-Arrays Layout
 
