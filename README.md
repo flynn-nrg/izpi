@@ -43,8 +43,8 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
 * Automatic worker node discovery via [Zeroconf](https://en.wikipedia.org/wiki/Zero-configuration_networking), with [Avahi](https://en.wikipedia.org/wiki/Avahi_(software)) integration on Linux and FreeBSD hosts.
 * Network distributed system using [gRPC](https://grpc.io) and [Protocol Buffers](https://protobuf.dev).
 * Spectral rendering with support for dispersion and [Beer-Lambert Law](https://en.wikipedia.org/wiki/Beer–Lambert_law) in dielectric materials.
-* [SoA](https://en.wikipedia.org/wiki/AoS_and_SoA) [BVH4](https://en.wikipedia.org/wiki/Bounding_volume_hierarchy) with AVX2-optimised code on AMD64 based on [An Efficient and Robust Ray–Box Intersection Algorithm by Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley](https://people.csail.mit.edu/amy/papers/box-jgt.pdf) and [Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of
-Incoherent Rays by H. Dammertz, J. Hanika, and A. Keller](https://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.inst.100/institut/Papers/QBVH.pdf).
+* [SoA](https://en.wikipedia.org/wiki/AoS_and_SoA) [BVH4](https://en.wikipedia.org/wiki/Bounding_volume_hierarchy) with AVX2-optimised code on AMD64 based on ["An Efficient and Robust Ray–Box Intersection Algorithm"](https://people.csail.mit.edu/amy/papers/box-jgt.pdf) by Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley and ["Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of
+Incoherent Rays"](https://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.inst.100/institut/Papers/QBVH.pdf) by H. Dammertz, J. Hanika, and A. Keller.
 * Phyisically correct light sources using [SPDs](https://en.wikipedia.org/wiki/Spectral_power_distribution) from [Michael Royer](https://doi.org/10.6084/m9.figshare.7704566.v1) and the [CIE Standard Illuminant](https://en.wikipedia.org/wiki/Standard_illuminant) F-Series.
 * Rendering into a float64 image buffer.
 * Direct, indirect and image-based lighting.
