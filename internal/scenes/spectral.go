@@ -647,14 +647,14 @@ func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 		log.Fatalf("Error parsing dragon mesh: %v", err)
 	}
 
-	dragonMesh.Scale(vec3.Vec3Impl{X: 90.0, Y: 90.0, Z: 90.0})
+	dragonMesh.Scale(vec3.Vec3Impl{X: 50.0, Y: 50.0, Z: 50.0})
 	dragonMesh.Rotate(0.0, -(60.0 * math.Pi / 180.0), 0.0)
 	dragonMesh.Translate(vec3.Vec3Impl{X: 50.0, Y: 25.1, Z: 60.0})
 
 	var dragonTriangles []*pb_transport.Triangle
 
 	for i := 0; i < dragonMesh.NumGroups(); i++ {
-		triangles, err := dragonMesh.GroupToTransportTrianglesWithMaterial(i, "Porcelain", wavefront.WITHOUT_UVS)
+		triangles, err := dragonMesh.GroupToTransportTrianglesWithMaterial(i, "BlueGlass", wavefront.WITHOUT_UVS)
 		if err != nil {
 			log.Fatalf("Error converting dragon mesh to transport triangles: %v", err)
 		}
@@ -932,7 +932,7 @@ func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 							SpectralAbsorptionCoeff: &pb_transport.SpectralConstantTexture{
 								SpectralProperties: &pb_transport.SpectralConstantTexture_Gaussian{
 									Gaussian: &pb_transport.GaussianSpectralConstant{
-										PeakValue:        0.2,   // Absorb yellow/orange wavelengths to transmit blue
+										PeakValue:        0.05,  // Increased absorption for visible blue tint
 										CenterWavelength: 590.0, // Yellow/orange wavelength (absorb to transmit blue)
 										Width:            90.0,  // Broad absorption in yellow-red region
 									},

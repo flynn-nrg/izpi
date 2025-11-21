@@ -53,7 +53,7 @@ func (s *Spectral) SampleSpectral(r ray.Ray, world *hitable.HitableSlice, lightS
 	atomic.AddUint64(s.numRays, 1)
 
 	// L(λ) = Le(λ) + ∫ f(λ) * L(λ) * cos(θ) / p(ω) dω
-	if rec, mat, ok := world.Hit(r, 0.001, math.MaxFloat64); ok {
+	if rec, mat, ok := world.Hit(r, 1e-5, math.MaxFloat64); ok {
 		_, srec, ok := mat.SpectralScatter(r, rec, random)
 		emitted := mat.EmittedSpectral(r, rec, rec.U(), rec.V(), r.Lambda(), rec.P())
 		if depth < s.maxDepth && ok {

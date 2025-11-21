@@ -92,10 +92,10 @@ func (d *Dielectric) scatterCommon(r ray.Ray, hr *hitrecord.HitRecord, random *f
 	}
 
 	if random.Float64() < reflectProb {
-		scattered = ray.NewWithLambda(hr.P(), reflected, r.Time(), r.Lambda())
+		scattered = ray.NewWithLambda(vec3.Add(hr.P(), vec3.ScalarMul(reflected, 1e-5)), reflected, r.Time(), r.Lambda())
 		isReflected = true
 	} else {
-		scattered = ray.NewWithLambda(hr.P(), refracted, r.Time(), r.Lambda())
+		scattered = ray.NewWithLambda(vec3.Add(hr.P(), vec3.ScalarMul(refracted, 1e-5)), refracted, r.Time(), r.Lambda())
 		isReflected = false
 	}
 	return scattered, isReflected, true
@@ -124,7 +124,7 @@ func (d *Dielectric) calculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, sca
 
 	// For convex geometries, we can trace the scattered ray to find the exit point
 	// Start from a small offset from the hit point to avoid self-intersection
-	epsilon := 0.001
+	epsilon := 1e-5
 
 	// Create a ray starting from slightly inside the material
 	startPoint := vec3.Add(hr.P(), vec3.ScalarMul(scattered.Direction(), epsilon))
@@ -132,7 +132,8 @@ func (d *Dielectric) calculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, sca
 
 	// Trace the ray through the scene to find the exit point
 	// We use a large tMax to ensure we find the exit point
-	if exitHit, _, hit := sceneWorld.Hit(traceRay, 0.0, 1000.0); hit {
+	// Use a small tMin to avoid hitting the starting geometry again (self-intersection)
+	if exitHit, _, hit := sceneWorld.Hit(traceRay, 1e-3, 1000.0); hit {
 		// Calculate the path length from entry to exit
 		pathLength := vec3.Sub(exitHit.P(), hr.P()).Length()
 
@@ -154,27 +155,18 @@ func (d *Dielectric) calculatePathLength(r ray.Ray, hr *hitrecord.HitRecord, sca
 
 // Scatter computes how the ray bounces off the surface of a dielectric material.
 func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.ScatterRecord, bool) {
-	scattered, isReflected, ok := d.scatterCommon(r, hr, random, d.refIdx)
+	scattered, _, ok := d.scatterCommon(r, hr, random, d.refIdx)
 	if !ok {
 		return nil, nil, false
 	}
 
 	// Calculate Beer-Lambert attenuation for RGB rendering
 	var attenuation vec3.Vec3Impl
-	if d.computeBeerLambertAttenuation && d.absorptionCoeff != (vec3.Vec3Impl{}) && !isReflected {
-		// Only apply absorption to transmitted rays, not reflected rays
-		// Use the new path length calculation with world geometry
-		pathLength := d.calculatePathLength(r, hr, scattered, d.world)
-		// Apply Beer-Lambert law for each RGB component
-		attenuation = vec3.Vec3Impl{
-			X: math.Exp(-d.absorptionCoeff.X * pathLength),
-			Y: math.Exp(-d.absorptionCoeff.Y * pathLength),
-			Z: math.Exp(-d.absorptionCoeff.Z * pathLength),
-		}
-	} else {
-		// No absorption for reflected rays or clear glass
-		attenuation = vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0}
-	}
+	// Only apply absorption to transmitted rays (not reflected) AND when entering the material
+	// We are entering the material if the ray direction and normal are opposed (dot product < 0)
+	//entering := vec3.Dot(r.Direction(), hr.Normal()) < 0
+	// No absorption for reflected rays or clear glass
+	attenuation = vec3.Vec3Impl{X: 1.0, Y: 1.0, Z: 1.0}
 
 	scatterRecord := scatterrecord.New(scattered, true, attenuation, vec3.Vec3Impl{}, vec3.Vec3Impl{}, vec3.Vec3Impl{}, nil)
 	return scattered, scatterRecord, true
@@ -183,24 +175,29 @@ func (d *Dielectric) Scatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastran
 // SpectralScatter computes how the ray bounces off the surface of a dielectric material with spectral properties.
 func (d *Dielectric) SpectralScatter(r ray.Ray, hr *hitrecord.HitRecord, random *fastrandom.LCG) (*ray.RayImpl, *scatterrecord.SpectralScatterRecord, bool) {
 	lambda := r.Lambda()
-	refIdx := d.spectralRefIdx.Value(hr.U(), hr.V(), lambda, hr.P())
+	// refIdx := d.spectralRefIdx.Value(hr.U(), hr.V(), lambda, hr.P())
+	refIdx := 1.5 // Hardcoded for debugging
 
-	scattered, isReflected, ok := d.scatterCommon(r, hr, random, refIdx)
+	scattered, _, ok := d.scatterCommon(r, hr, random, refIdx)
 	if !ok {
 		return nil, nil, false
 	}
 
 	// Calculate Beer-Lambert attenuation for spectral rendering
 	var albedo float64
-	if !isReflected {
-		// Only apply absorption to transmitted rays, not reflected rays
-		// Use the new path length calculation with world geometry
-		pathLength := d.calculatePathLength(r, hr, scattered, d.world)
-		albedo = d.calculateBeerLambertAttenuation(pathLength, lambda, hr.U(), hr.V(), hr.P())
-	} else {
-		// No absorption for reflected rays
-		albedo = 1.0
-	}
+	// Only apply absorption to transmitted rays (not reflected) AND when entering the material
+	//entering := vec3.Dot(r.Direction(), hr.Normal()) < 0
+	// Temporarily disable Beer-Lambert for debugging
+	// if !isReflected && entering {
+	// 	// Only apply absorption to transmitted rays, not reflected rays
+	// 	// Use the new path length calculation with world geometry
+	// 	pathLength := d.calculatePathLength(r, hr, scattered, d.world)
+	// 	albedo = d.calculateBeerLambertAttenuation(pathLength, lambda, hr.U(), hr.V(), hr.P())
+	// } else {
+	// 	// No absorption for reflected rays
+	// 	albedo = 1.0
+	// }
+	albedo = 1.0
 
 	scatterRecord := scatterrecord.NewSpectralScatterRecord(scattered, true, albedo, lambda, nil, 0.0, 0.0, nil)
 	return scattered, scatterRecord, true
