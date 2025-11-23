@@ -636,6 +636,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 
 func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 
+	// https://www.cgtrader.com/items/5133250/download-page
 	dragonReader, err := os.Open("meshes/diamonds.obj")
 	if err != nil {
 		log.Fatalf("Error opening dragon mesh: %v", err)
