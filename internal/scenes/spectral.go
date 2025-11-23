@@ -636,20 +636,20 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 
 func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 
-	dragonReader, err := os.Open("meshes/dragon_tri.obj")
+	dragonReader, err := os.Open("meshes/diamonds.obj")
 	if err != nil {
 		log.Fatalf("Error opening dragon mesh: %v", err)
 	}
 	defer dragonReader.Close()
 
-	dragonMesh, err := wavefront.NewObjFromReader(dragonReader, filepath.Dir("meshes/dragon.obj"))
+	dragonMesh, err := wavefront.NewObjFromReader(dragonReader, filepath.Dir("meshes/diamonds.obj"))
 	if err != nil {
 		log.Fatalf("Error parsing dragon mesh: %v", err)
 	}
 
-	dragonMesh.Scale(vec3.Vec3Impl{X: 50.0, Y: 50.0, Z: 50.0})
+	dragonMesh.Scale(vec3.Vec3Impl{X: 20.0, Y: 20.0, Z: 20.0})
 	dragonMesh.Rotate(0.0, -(60.0 * math.Pi / 180.0), 0.0)
-	dragonMesh.Translate(vec3.Vec3Impl{X: 50.0, Y: 25.1, Z: 60.0})
+	dragonMesh.Translate(vec3.Vec3Impl{X: 70.0, Y: -19.0, Z: 30.0})
 
 	var dragonTriangles []*pb_transport.Triangle
 
@@ -791,9 +791,9 @@ func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 				// Red glass sphere
 				{
 					Center: &pb_transport.Vec3{
-						X: 30,
+						X: 50,
 						Y: 15,
-						Z: 30,
+						Z: 55,
 					},
 					Radius:       15,
 					MaterialName: "Glass",
