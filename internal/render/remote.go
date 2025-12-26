@@ -8,6 +8,7 @@ import (
 	"github.com/flynn-nrg/floatimage/colour"
 	"github.com/flynn-nrg/izpi/internal/display"
 	"github.com/flynn-nrg/izpi/internal/sampler"
+	"github.com/flynn-nrg/izpi/internal/spectral"
 
 	pb_control "github.com/flynn-nrg/izpi/internal/proto/control"
 	log "github.com/sirupsen/logrus"
@@ -69,8 +70,9 @@ func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderC
 
 			if w.preview {
 				if isSpectral {
+					// Apply exposure and convert to ACEScg for preview
 					exposure := w.scene.Exposure
-					colX, colY, colZ = w.scene.WhiteBalance.Matrix.Apply(colX*exposure, colY*exposure, colZ*exposure)
+					colX, colY, colZ = spectral.XYZToACEScg(colX*exposure, colY*exposure, colZ*exposure)
 				}
 
 				tile.Pixels[i] = colZ

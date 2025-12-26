@@ -40,13 +40,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 			Focusdist: 10,
 			Time0:     0,
 			Time1:     1,
-			WhiteBalance: &pb_transport.WhiteBalance{
-				WhiteBalanceProperties: &pb_transport.WhiteBalance_WhiteBalanceFromLightSource{
-					WhiteBalanceFromLightSource: &pb_transport.WhiteBalanceFromLightSource{
-						LightSourceName: "cie_illuminant_a_2856k",
-					},
-				},
-			},
+			Exposure:  1.0,
 		},
 		Objects: &pb_transport.SceneObjects{
 			Triangles: []*pb_transport.Triangle{
@@ -328,7 +322,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 							Type: pb_transport.TextureType_IMAGE,
 							TextureProperties: &pb_transport.Texture_Image{
 								Image: &pb_transport.ImageTexture{
-									Filename: "textures/rusty-metal_albedo.png",
+									Filename: "textures/rusty-metal_albedo.exr",
 								},
 							},
 						},
@@ -377,7 +371,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 							Type: pb_transport.TextureType_IMAGE,
 							TextureProperties: &pb_transport.Texture_Image{
 								Image: &pb_transport.ImageTexture{
-									Filename: "textures/grainy-concrete_albedo.png",
+									Filename: "textures/grainy-concrete_albedo.exr",
 								},
 							},
 						},
@@ -426,7 +420,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 							Type: pb_transport.TextureType_IMAGE,
 							TextureProperties: &pb_transport.Texture_Image{
 								Image: &pb_transport.ImageTexture{
-									Filename: "textures/fleshy_granite1_albedo.png",
+									Filename: "textures/fleshy_granite1_albedo.exr",
 								},
 							},
 						},
@@ -475,7 +469,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 							Type: pb_transport.TextureType_IMAGE,
 							TextureProperties: &pb_transport.Texture_Image{
 								Image: &pb_transport.ImageTexture{
-									Filename: "textures/bamboo-wood-semigloss-albedo.png",
+									Filename: "textures/bamboo-wood-semigloss-albedo.exr",
 								},
 							},
 						},
@@ -524,7 +518,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 							Type: pb_transport.TextureType_IMAGE,
 							TextureProperties: &pb_transport.Texture_Image{
 								Image: &pb_transport.ImageTexture{
-									Filename: "textures/lightgold_albedo.png",
+									Filename: "textures/lightgold_albedo.exr",
 								},
 							},
 						},
@@ -567,7 +561,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 		},
 		ImageTextures: map[string]*pb_transport.ImageTextureMetadata{
 			"textures/rusty-metal_albedo.png": {
-				Filename: "textures/rusty-metal_albedo.png",
+				Filename: "textures/rusty-metal_albedo.exr",
 			},
 			"textures/rusty-metal_roughness.png": {
 				Filename: "textures/rusty-metal_roughness.png",
@@ -579,7 +573,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 				Filename: "textures/rusty-metal_normal-ogl.png",
 			},
 			"textures/grainy-concrete_albedo.png": {
-				Filename: "textures/grainy-concrete_albedo.png",
+				Filename: "textures/grainy-concrete_albedo.exr",
 			},
 			"textures/grainy-concrete_roughness.png": {
 				Filename: "textures/grainy-concrete_roughness.png",
@@ -591,7 +585,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 				Filename: "textures/grainy-concrete_normal-ogl.png",
 			},
 			"textures/fleshy_granite1_albedo.png": {
-				Filename: "textures/fleshy_granite1_albedo.png",
+				Filename: "textures/fleshy_granite1_albedo.exr",
 			},
 			"textures/fleshy_granite1_metallic.png": {
 				Filename: "textures/fleshy_granite1_metallic.png",
@@ -600,7 +594,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 				Filename: "textures/fleshy_granite1_normal-ogl.png",
 			},
 			"textures/bamboo-wood-semigloss-albedo.png": {
-				Filename: "textures/bamboo-wood-semigloss-albedo.png",
+				Filename: "textures/bamboo-wood-semigloss-albedo.exr",
 			},
 			"textures/bamboo-wood-semigloss-roughness.png": {
 				Filename: "textures/bamboo-wood-semigloss-roughness.png",
@@ -612,7 +606,7 @@ func CornellBoxPBRColouredGlassSpectral(aspect float64) *pb_transport.Scene {
 				Filename: "textures/bamboo-wood-semigloss-normal.png",
 			},
 			"textures/lightgold_albedo.png": {
-				Filename: "textures/lightgold_albedo.png",
+				Filename: "textures/lightgold_albedo.exr",
 			},
 			"textures/lightgold_roughness.png": {
 				Filename: "textures/lightgold_roughness.png",
@@ -689,14 +683,7 @@ func CornellBoxPBRStanfordDragonSpectral(aspect float64) *pb_transport.Scene {
 			Focusdist: 10,
 			Time0:     0,
 			Time1:     1,
-			WhiteBalance: &pb_transport.WhiteBalance{
-				WhiteBalanceProperties: &pb_transport.WhiteBalance_WhiteBalanceFromLightSource{
-					WhiteBalanceFromLightSource: &pb_transport.WhiteBalanceFromLightSource{
-						LightSourceName: "cie_illuminant_a_2856k",
-					},
-				},
-			},
-			Exposure: 1.0,
+			Exposure:  1.0,
 		},
 		Objects: &pb_transport.SceneObjects{
 			Triangles: []*pb_transport.Triangle{
