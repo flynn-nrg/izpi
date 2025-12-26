@@ -71,19 +71,12 @@ func (t *Transport) ToScene() (*scene.Scene, error) {
 		}
 	}
 
-	// Compute white balance configuration
-	whiteBalance, err := t.computeWhiteBalance()
-	if err != nil {
-		return nil, fmt.Errorf("failed to compute white balance: %w", err)
-	}
-
 	// Create the scene
 	scene := &scene.Scene{
-		World:        hitable.NewSlice([]hitable.Hitable{hitable.NewBVH4(hitables, 0, 1)}),
-		Lights:       hitable.NewSlice(lights),
-		Camera:       camera,
-		WhiteBalance: whiteBalance,
-		Exposure:     camera.Exposure(),
+		World:    hitable.NewSlice([]hitable.Hitable{hitable.NewBVH4(hitables, 0, 1)}),
+		Lights:   hitable.NewSlice(lights),
+		Camera:   camera,
+		Exposure: camera.Exposure(),
 	}
 
 	// Set world reference on dielectric materials for path length calculation
@@ -684,56 +677,6 @@ func (t *Transport) toSceneSphere(sphere *pb_transport.Sphere) (*hitable.Sphere,
 	radius := float64(sphere.GetRadius())
 
 	return hitable.NewSphere(center, center, 0, 1, radius, material), nil
-}
-
-// computeWhiteBalance extracts white balance settings from the camera and computes
-// the appropriate transformation matrix
-func (t *Transport) computeWhiteBalance() (*spectral.WhiteBalanceConfig, error) {
-	protoCamera := t.protoScene.GetCamera()
-	whiteBalance := protoCamera.GetWhiteBalance()
-
-	// If no white balance is specified, use default (D65)
-	if whiteBalance == nil {
-		log.Warn("No white balance specified, using D65 default")
-		return spectral.NewWhiteBalanceDefault(), nil
-	}
-
-	// Check if white balance is from a light source
-	if wbFromLight := whiteBalance.GetWhiteBalanceFromLightSource(); wbFromLight != nil {
-		lightSourceName := wbFromLight.GetLightSourceName()
-
-		// Look up the light source in the library
-		spd, ok := lightsources.GetLightSource(lightSourceName)
-		if !ok {
-			log.Warnf("Light source '%s' not found in library, using D65 default", lightSourceName)
-			return spectral.NewWhiteBalanceDefault(), nil
-		}
-
-		config, err := spectral.NewWhiteBalanceFromSPD(spd, lightSourceName)
-		if err != nil {
-			return nil, fmt.Errorf("failed to compute white balance from light source '%s': %w", lightSourceName, err)
-		}
-
-		log.Infof("White balance set from light source: %s", lightSourceName)
-		return config, nil
-	}
-
-	// Check if white balance is from a temperature
-	if wbFromTemp := whiteBalance.GetWhiteBalanceFromTemperature(); wbFromTemp != nil {
-		temperature := float64(wbFromTemp.GetTemperature())
-
-		config, err := spectral.NewWhiteBalanceFromTemperature(temperature)
-		if err != nil {
-			return nil, fmt.Errorf("failed to compute white balance from temperature: %w", err)
-		}
-
-		log.Infof("White balance set from temperature: %.0fK", temperature)
-		return config, nil
-	}
-
-	// No valid white balance property found
-	log.Warn("White balance specified but no valid property found, using D65 default")
-	return spectral.NewWhiteBalanceDefault(), nil
 }
 
 // sceneGeometryAdapter adapts HitableSlice to SceneGeometry interface

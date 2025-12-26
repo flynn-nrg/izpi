@@ -35,10 +35,11 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 			// Canvas information is in CIE XYZ space.
 			w.canvas.Set(x, ny-y, colour.Float64NRGBA{R: cieX, G: cieY, B: cieZ, A: 1.0})
 
-			exposure := w.scene.Exposure
-			r, g, b := w.scene.WhiteBalance.Matrix.Apply(cieX*exposure, cieY*exposure, cieZ*exposure)
-
 			if w.preview {
+				// Apply exposure and convert to ACEScg for preview
+				exposure := w.scene.Exposure
+				r, g, b := spectral.XYZToACEScg(cieX*exposure, cieY*exposure, cieZ*exposure)
+
 				tile.Pixels[i] = b
 				tile.Pixels[i+1] = g
 				tile.Pixels[i+2] = r

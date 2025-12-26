@@ -19,11 +19,6 @@ camera: {
   aspect: 1
   focusdist: 10
   time1: 1
-  white_balance: {
-    white_balance_from_light_source: {
-      light_source_name: "cie_illuminant_a_2856k"
-    }
-  }
   exposure: 1.0
 }
 materials: {
@@ -138,7 +133,7 @@ materials: {
     diffuselight: {
       spectral_emit: {
         from_light_source_library: {
-          light_source_name: "cie_illuminant_a_2856k"
+          light_source_name: "cie_f1_daylight_fluorescent"
         }
       }
     }
