@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/flynn-nrg/go-vfx/go-oiio/oiio"
 	"github.com/flynn-nrg/izpi/internal/colours"
 	"github.com/flynn-nrg/izpi/internal/config"
 	"github.com/flynn-nrg/izpi/internal/display"
@@ -72,8 +73,6 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 	default:
 		log.Fatalf("Unknown scene file extension: %s", filepath.Ext(cfg.Scene))
 	}
-
-	//protoScene = scenes.CornellBoxPBRStanfordDragonSpectral(aspectRatio)
 
 	// Override the colour sampler if the scene is spectral.
 	if protoScene.GetColourRepresentation() == pb_transport.ColourRepresentation_SPECTRAL && cfg.Sampler == "colour" {
@@ -199,9 +198,26 @@ func RunAsLeader(ctx context.Context, cfg *config.Config, standalone bool) {
 
 	case "exr":
 		outFileName := strings.Replace(cfg.OutputFile, "png", "exr", 1)
-		out, err := output.NewOIIO(outFileName)
-		if err != nil {
-			log.Fatal(err)
+
+		// Use ACES writer for spectral rendering, standard writer for others
+		var out output.Output
+		if cfg.Sampler == "spectral" {
+			metadata := &oiio.ACESMetadata{
+				DisplayWindow:    canvas.Bounds(),
+				DataWindow:       canvas.Bounds(),
+				PixelAspectRatio: 1.0,
+				ACESVersion:      "ACES 1.3",
+			}
+			out, err = output.NewOIIOACES(outFileName, metadata)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Infof("Writing spectral render in ACEScg color space")
+		} else {
+			out, err = output.NewOIIO(outFileName)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		err = out.Write(canvas)
