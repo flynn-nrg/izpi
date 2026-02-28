@@ -20,7 +20,8 @@ import "simd/archsimd"
 // - Compiler can optimize across function boundaries
 //
 // Requires: SSE/AVX support (all modern AMD64 CPUs)
-//          GOEXPERIMENT=simd to enable intrinsics
+//
+//	GOEXPERIMENT=simd to enable intrinsics
 //
 //go:inline
 func RayAABB4_SIMD(
