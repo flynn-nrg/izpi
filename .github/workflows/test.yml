@@ -4,9 +4,11 @@ jobs:
   test:
     strategy:
       matrix:
-        go-version: [1.25.x]
+        go-version: [1.26.x]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      GOEXPERIMENT: simd
     steps:
     - name: Setup Linux dependencies
       if: runner.os == 'Linux'
@@ -28,9 +30,16 @@ jobs:
         go-version: ${{ matrix.go-version }}
     - name: Checkout code
       uses: actions/checkout@v2
+    - name: Verify SIMD Support
+      run: |
+        echo "Go version: $(go version)"
+        echo "GOEXPERIMENT: $GOEXPERIMENT"
+        go env GOEXPERIMENT
     - name: Test
       run: go test -v -race ./...
+    - name: Test SIMD Correctness
+      run: go test -v ./internal/hitable -run TestRayAABB4_SIMD
     - name: Format
-      if: matrix.go-version == '1.25.x'
+      if: matrix.go-version == '1.26.x'
       run: diff -u <(echo -n) <(gofmt -d .)
 
