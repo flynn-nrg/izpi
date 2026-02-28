@@ -3,7 +3,10 @@
 package hitable
 
 // RayAABB4_SIMD is the pure Go fallback implementation.
-// This is used on platforms without SIMD assembly optimizations.
+// This is used on platforms without SIMD intrinsics support.
+// 
+// On AMD64 and ARM64, platform-specific implementations provide
+// better performance using SIMD intrinsics (Go 1.26+).
 func RayAABB4_SIMD(
 	rayOrgX, rayOrgY, rayOrgZ *float32,
 	rayInvDirX, rayInvDirY, rayInvDirZ *float32,
