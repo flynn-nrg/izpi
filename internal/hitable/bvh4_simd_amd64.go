@@ -4,21 +4,22 @@ package hitable
 
 import "simd/archsimd"
 
-// RayAABB4_SIMD is the AMD64 AVX2 implementation using Go 1.26 SIMD intrinsics.
-// Implemented using the simd/archsimd package with 256-bit Float32x8 vectors.
+// RayAABB4_SIMD is the AMD64 SSE/AVX implementation using Go 1.26 SIMD intrinsics.
+// Implemented using the simd/archsimd package with 128-bit Float32x4 vectors.
 //
-// AVX2 provides true 4-wide SIMD parallelism:
-// - Float32x8 vectors can hold 8x float32 (we use lower 4 for 4 AABBs)
-// - BroadcastFloat32x8 efficiently replicates scalars
+// Uses 128-bit SSE/AVX operations for optimal 4-wide parallelism:
+// - Float32x4 vectors hold exactly 4 float32 (perfect match for 4 AABBs)
+// - BroadcastFloat32x4 replicates scalars efficiently
 // - Parallel min/max/multiply operations
-// - ToBits() extracts comparison mask to integer
+// - ToBits() extracts 4-bit comparison mask
+// - No memory copy overhead (loads directly from [4]float32)
 //
 // Performance expectations:
-// - ~10-30% faster than pure Go (inlining + no call overhead)
-// - Could bring BVH4 from 3m38s down to ~3min or less
-// - Better than assembly: enables inlining and compiler optimizations
+// - Should match or exceed assembly version with inlining benefits
+// - Eliminates call overhead through inlining
+// - Compiler can optimize across function boundaries
 //
-// Requires: AVX2 support (all modern AMD64 CPUs since ~2013)
+// Requires: SSE/AVX support (all modern AMD64 CPUs)
 //          GOEXPERIMENT=simd to enable intrinsics
 //
 //go:inline
@@ -29,38 +30,23 @@ func RayAABB4_SIMD(
 	maxX, maxY, maxZ *[4]float32,
 	tMaxParam float32,
 ) uint8 {
-	// Broadcast ray origin components to all 8 lanes (we'll use lower 4)
-	orgX := archsimd.BroadcastFloat32x8(*rayOrgX)
-	orgY := archsimd.BroadcastFloat32x8(*rayOrgY)
-	orgZ := archsimd.BroadcastFloat32x8(*rayOrgZ)
+	// Broadcast ray origin components to all 4 lanes
+	orgX := archsimd.BroadcastFloat32x4(*rayOrgX)
+	orgY := archsimd.BroadcastFloat32x4(*rayOrgY)
+	orgZ := archsimd.BroadcastFloat32x4(*rayOrgZ)
 
 	// Broadcast ray inverse direction
-	invDirX := archsimd.BroadcastFloat32x8(*rayInvDirX)
-	invDirY := archsimd.BroadcastFloat32x8(*rayInvDirY)
-	invDirZ := archsimd.BroadcastFloat32x8(*rayInvDirZ)
+	invDirX := archsimd.BroadcastFloat32x4(*rayInvDirX)
+	invDirY := archsimd.BroadcastFloat32x4(*rayInvDirY)
+	invDirZ := archsimd.BroadcastFloat32x4(*rayInvDirZ)
 
-	// Load AABB bounds (4 float32 values each)
-	// We need to create [8]float32 arrays with the 4 values in the lower half
-	var minXArray [8]float32
-	var minYArray [8]float32
-	var minZArray [8]float32
-	var maxXArray [8]float32
-	var maxYArray [8]float32
-	var maxZArray [8]float32
-
-	copy(minXArray[:4], minX[:])
-	copy(minYArray[:4], minY[:])
-	copy(minZArray[:4], minZ[:])
-	copy(maxXArray[:4], maxX[:])
-	copy(maxYArray[:4], maxY[:])
-	copy(maxZArray[:4], maxZ[:])
-
-	minXVec := archsimd.LoadFloat32x8(&minXArray)
-	minYVec := archsimd.LoadFloat32x8(&minYArray)
-	minZVec := archsimd.LoadFloat32x8(&minZArray)
-	maxXVec := archsimd.LoadFloat32x8(&maxXArray)
-	maxYVec := archsimd.LoadFloat32x8(&maxYArray)
-	maxZVec := archsimd.LoadFloat32x8(&maxZArray)
+	// Load AABB bounds directly (no copy needed - perfect fit!)
+	minXVec := archsimd.LoadFloat32x4(minX)
+	minYVec := archsimd.LoadFloat32x4(minY)
+	minZVec := archsimd.LoadFloat32x4(minZ)
+	maxXVec := archsimd.LoadFloat32x4(maxX)
+	maxYVec := archsimd.LoadFloat32x4(maxY)
+	maxZVec := archsimd.LoadFloat32x4(maxZ)
 
 	// ====== X AXIS ======
 	// Compute t0x = (minX - orgX) * invDirX
@@ -104,20 +90,20 @@ func RayAABB4_SIMD(
 	cond1 := tMaxVec.GreaterEqual(tMin)
 
 	// Check 2: t_max >= 0.0
-	zero := archsimd.BroadcastFloat32x8(0.0)
+	zero := archsimd.BroadcastFloat32x4(0.0)
 	cond2 := tMaxVec.GreaterEqual(zero)
 
 	// Check 3: t_min <= tMaxParam (equivalent to tMaxParam >= t_min)
-	tMaxScalar := archsimd.BroadcastFloat32x8(tMaxParam)
+	tMaxScalar := archsimd.BroadcastFloat32x4(tMaxParam)
 	cond3 := tMaxScalar.GreaterEqual(tMin)
 
 	// Combine all conditions with AND
 	finalMask := cond1.And(cond2).And(cond3)
 
-	// Extract mask to integer (lower 4 bits are what we care about)
-	// ToBits() uses VMOVMSKPS instruction
+	// Extract mask to 4-bit integer
+	// ToBits() uses MOVMSKPS instruction
 	maskBits := finalMask.ToBits()
 
-	// Return lower 4 bits as uint8 (upper 4 bits are for lanes 4-7, which we don't use)
+	// Return 4-bit mask
 	return maskBits & 0x0F
 }
