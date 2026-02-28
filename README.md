@@ -6,6 +6,13 @@
 
 A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as a Golang implementation of [Peter Shirley's Raytracing books](https://raytracing.github.io). It has since grown in scope and gained more features that were not part of the original version.
 
+## Requirements
+
+* Go 1.26 or later
+* For optimal BVH4 performance, build with `GOEXPERIMENT=simd` to enable SIMD intrinsics
+* On AMD64: Requires AVX2 support (all CPUs since ~2013)
+* On ARM64: Uses optimized pure Go (NEON intrinsics coming in Go 1.27)
+
 ## Goals
 
 * Have fun.
@@ -45,7 +52,7 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
 * Network distributed system using [gRPC](https://grpc.io) and [Protocol Buffers](https://protobuf.dev).
 * Spectral rendering with support for dispersion and [Beer-Lambert Law](https://en.wikipedia.org/wiki/Beer–Lambert_law) in dielectric materials.
 * Full [ACEScg](https://en.wikipedia.org/wiki/Academy_Color_Encoding_System#ACEScg) workflow support.
-* [SoA](https://en.wikipedia.org/wiki/AoS_and_SoA) [BVH4](https://en.wikipedia.org/wiki/Bounding_volume_hierarchy) with AVX2-optimised code on AMD64 based on ["An Efficient and Robust Ray–Box Intersection Algorithm"](https://people.csail.mit.edu/amy/papers/box-jgt.pdf) by Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley and ["Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of
+* [SoA](https://en.wikipedia.org/wiki/AoS_and_SoA) [BVH4](https://en.wikipedia.org/wiki/Bounding_volume_hierarchy) with Go 1.26 SIMD intrinsics (AVX2 on AMD64, optimized pure Go on ARM64) based on ["An Efficient and Robust Ray–Box Intersection Algorithm"](https://people.csail.mit.edu/amy/papers/box-jgt.pdf) by Amy Williams, Steve Barrus, R. Keith Morley, and Peter Shirley and ["Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of
 Incoherent Rays"](https://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.inst.100/institut/Papers/QBVH.pdf) by H. Dammertz, J. Hanika, and A. Keller.
 * Phyisically correct light sources using [SPDs](https://en.wikipedia.org/wiki/Spectral_power_distribution) from [Michael Royer](https://doi.org/10.6084/m9.figshare.7704566.v1) and the [CIE Standard Illuminant](https://en.wikipedia.org/wiki/Standard_illuminant) F-Series.
 * Rendering into a float64 image buffer.

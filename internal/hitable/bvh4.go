@@ -468,9 +468,11 @@ func (bvh *BVH4) validate() []string {
 // RayAABB4_SIMD tests a ray against 4 AABBs simultaneously.
 // Returns a 4-bit mask where bit i is set if the ray hits AABB i.
 // Implemented in platform-specific files with build tags:
-// - bvh4_simd_amd64.go - AMD64 AVX2 assembly
-// - bvh4_simd_arm64.go - ARM64 pure Go
+// - bvh4_simd_amd64.go - AMD64 with Go 1.26 SIMD intrinsics (AVX2)
+// - bvh4_simd_arm64.go - ARM64 pure Go (NEON intrinsics in Go 1.27)
 // - bvh4_simd_generic.go - Other platforms pure Go fallback
+//
+// Requires: GOEXPERIMENT=simd for optimal AMD64 performance
 
 // Helper functions for float32 min/max
 func min32(a, b float32) float32 {
