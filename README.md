@@ -10,21 +10,19 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
 
 * Go 1.26 or later
 * For optimal BVH4 performance, build with `GOEXPERIMENT=simd` to enable SIMD intrinsics
-* On AMD64: Requires AVX2 support (all CPUs since ~2013)
-* On ARM64: Uses optimized pure Go (NEON intrinsics coming in Go 1.27)
 
 ## Goals
 
 * Have fun.
 * Learn about advanced computer graphics topics and put them to practice.
 * Create a well-written and robust renderer that is usable with real world scene workloads. 
+* Integrate with DCC tools.
+* Support professional VFX flows. 
 
 ## Non-goals
 
 * Write the most performant path tracer possible.
 * Build a GPU-based path tracer.
-* Integrate with DCC tools.
-* Support professional VFX flows. 
 
 ## Roadmap
 
@@ -36,6 +34,10 @@ A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as
  - [X] Firefly rejection.
  - [X] BVH traversal performance improvements.
  - [X] ACEScg workflow support.
+ - [ ] [MaterialX](https://materialx.org) support.
+ - [ ] [OpenSubdiv](https://opensubdiv.org/docs/intro.html) support.
+ - [ ] [OpenUSD](https://openusd.org/release/index.html) support.
+ - [ ] Implement a [Hydra](https://openusd.org/release/api/_page__hydra__getting__started__guide.html) render delegate.
  - [ ] Adaptive sampling.
  - [ ] Implement Bidirectional path tracing.
  - [ ] Materials library.
