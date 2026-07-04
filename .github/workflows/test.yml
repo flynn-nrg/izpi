@@ -1,45 +1,51 @@
-on: [push, pull_request]
 name: Test
+on: [push, pull_request]
+
 jobs:
   test:
+    # Only run this job when executing on GitHub's infrastructure
+    if: github.server_url == 'https://github.com'
+    
     strategy:
       matrix:
         go-version: [1.26.x]
         os: [ubuntu-latest]
+        
     runs-on: ${{ matrix.os }}
     env:
       GOEXPERIMENT: simd
+      
     steps:
-    - name: Setup Linux dependencies
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install \
-          libsdl2-dev \
-          pkg-config \
-          ${NULL+}
-    - name: Install OpenImageIO Dependencies
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libopenimageio-dev
-        sudo apt-get install -y libfmt-dev
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ${{ matrix.go-version }}
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Verify SIMD Support
-      run: |
-        echo "Go version: $(go version)"
-        echo "GOEXPERIMENT: $GOEXPERIMENT"
-        go env GOEXPERIMENT
-    - name: Test
-      run: go test -v -race ./...
-    - name: Test SIMD Correctness
-      run: go test -v ./internal/hitable -run TestRayAABB4_SIMD
-    - name: Format
-      if: matrix.go-version == '1.26.x'
-      run: diff -u <(echo -n) <(gofmt -d .)
+      - name: Setup Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install libsdl2-dev pkg-config
+
+      - name: Install OpenImageIO Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenimageio-dev libfmt-dev
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify SIMD Support
+        run: |
+          echo "Go version: $(go version)"
+          echo "GOEXPERIMENT: $GOEXPERIMENT"
+          go env GOEXPERIMENT
+
+      - name: Test
+        run: go test -v -race ./...
+
+      - name: Test SIMD Correctness
+        run: go test -v ./internal/hitable -run TestRayAABB4_SIMD
+
+      - name: Format
+        run: diff -u <(echo -n) <(gofmt -d .)
 
