@@ -3,47 +3,36 @@ on: [push, pull_request]
 
 jobs:
   test:
+    # Only run this job when executing on GitHub's infrastructure
+    if: github.server_url == 'https://github.com'
+    
     strategy:
       matrix:
-        include:
-          - os: freebsd
-            go-version: 'system'
-          - os: ubuntu-latest
-            go-version: '1.26.x'
+        go-version: [1.26.x]
+        os: [ubuntu-latest]
+        
     runs-on: ${{ matrix.os }}
     env:
       GOEXPERIMENT: simd
+      
     steps:
-      # --- LINUX ONLY: Bootstrap C++ Dependencies ---
       - name: Setup Linux dependencies
-        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get -y install libsdl2-dev pkg-config
 
       - name: Install OpenImageIO Dependencies
-        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y libopenimageio-dev libfmt-dev
 
-      # --- LINUX ONLY: Setup Go ---
-      - name: Install Go (GitHub Actions)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Install Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
 
-      # --- UNIVERSAL STEPS: Runs on both FreeBSD and Linux ---
       - name: Checkout code
         uses: actions/checkout@v4
-
-      # Guide the linker to look in FreeBSD's port standard location
-      - name: Set FreeBSD Cgo Flags
-        if: matrix.os == 'freebsd'
-        run: |
-          echo "CGO_CFLAGS=-I/usr/local/include" >> $GITHUB_ENV
-          echo "CGO_LDFLAGS=-L/usr/local/lib" >> $GITHUB_ENV
 
       - name: Verify SIMD Support
         run: |
