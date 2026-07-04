@@ -1,0 +1,31 @@
+name: Local FreeBSD Test
+on: [push, pull_request]
+
+jobs:
+  test-native:
+    runs-on: freebsd
+    env:
+      GOEXPERIMENT: simd
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Guide the linker to look in FreeBSD's port standard location
+      - name: Set FreeBSD Cgo Flags
+        run: |
+          echo "CGO_CFLAGS=-I/usr/local/include" >> $GITHUB_ENV
+          echo "CGO_LDFLAGS=-L/usr/local/lib" >> $GITHUB_ENV
+
+      - name: Verify SIMD Support
+        run: |
+          echo "Go version: $(go version)"
+          go env GOEXPERIMENT
+
+      - name: Test Natively
+        run: go test -v -race ./...
+
+      - name: Test SIMD Correctness
+        run: go test -v ./internal/hitable -run TestRayAABB4_SIMD
+
+      - name: Format
+        run: diff -u <(echo -n) <(gofmt -d .)
