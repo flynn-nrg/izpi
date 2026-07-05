@@ -1,7 +1,6 @@
 # Izpi
 
 ![Unit Tests](https://github.com/flynn-nrg/izpi/actions/workflows/test.yml/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/flynn-nrg/izpi)](https://goreportcard.com/report/github.com/flynn-nrg/izpi)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/flynn-nrg/izpi)
 
 A [path tracer](https://en.wikipedia.org/wiki/Path_tracing) that started life as a Golang implementation of [Peter Shirley's Raytracing books](https://raytracing.github.io). It has since grown in scope and gained more features that were not part of the original version.
