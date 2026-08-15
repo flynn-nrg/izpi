@@ -22,7 +22,7 @@ jobs:
           go env GOEXPERIMENT
 
       - name: Test Natively
-        run: go test -v -race ./...
+        run: go test -v -race -tags x11 ./...
 
       - name: Test SIMD Correctness
         run: go test -v ./internal/hitable -run TestRayAABB4_SIMD

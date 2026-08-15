@@ -1,25 +1,32 @@
 .PHONY: build test bench test-simd bench-simd clean
 
 # Default Go flags
-GOFLAGS ?= 
+GOFLAGS ?=
 # Enable SIMD intrinsics for optimal BVH4 performance
 SIMD_FLAGS = GOEXPERIMENT=simd
+# go-gl/glfw's default (no build tags) build compiles the Wayland Go bindings
+# unconditionally on BSDs but only compiles their C implementation when the
+# "wayland" tag is passed, leaving undefined symbols at link time. Force X11.
+GOOS := $(shell go env GOOS)
+ifneq (,$(filter freebsd netbsd openbsd,$(GOOS)))
+BSD_TAGS := -tags x11
+endif
 
 # Build the izpi command
 build:
-	cd cmd/izpi && $(SIMD_FLAGS) go build $(GOFLAGS)
+	cd cmd/izpi && $(SIMD_FLAGS) go build $(BSD_TAGS) $(GOFLAGS)
 
 # Build without SIMD (for comparison)
 build-no-simd:
-	cd cmd/izpi && go build $(GOFLAGS)
+	cd cmd/izpi && go build $(BSD_TAGS) $(GOFLAGS)
 
 # Run all tests
 test:
-	$(SIMD_FLAGS) go test ./...
+	$(SIMD_FLAGS) go test $(BSD_TAGS) ./...
 
 # Run all tests without SIMD
 test-no-simd:
-	go test ./...
+	go test $(BSD_TAGS) ./...
 
 # Run SIMD-specific tests
 test-simd:
