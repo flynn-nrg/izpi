@@ -2,68 +2,144 @@
 
 package hitable
 
-// RayAABB4_SIMD is the pure Go implementation for ARM64
+import "simd/archsimd"
+
+// RayAABB4_SIMD is the ARM64 NEON implementation using Go 1.27+ SIMD intrinsics.
+// Implemented using the simd/archsimd package with 128-bit Float32x4 vectors.
 //
-// Performance: Delivers 2.91x speedup (22m59s → 7m54s) on M2 Max
+// NEON provides native 4-wide SIMD parallelism:
+//   - Float32x4 vectors (128-bit Q registers) hold exactly 4 float32 values
+//   - BroadcastFloat32x4 efficiently replicates scalars
+//   - Parallel min/max/multiply operations via FMIN, FMAX, FMUL
+//   - FCMGE provides comparison operations
+//   - Per-lane extraction (GetElem) builds the 4-bit result mask, since NEON
+//     has no MOVMSKPS-equivalent instruction and archsimd exposes no
+//     Mask32x4.ToBits() on arm64
 //
-// NOTE: Go 1.26's simd/archsimd package does not yet support ARM64/NEON intrinsics.
-// ARM64 NEON intrinsics are planned for Go 1.27 on the dev.simd branch.
-// Until then, this pure Go implementation provides excellent performance.
+// Performance expectations:
+// - ~20-40% faster than pure Go loop version
+// - Should bring M2 Max from 7m54s down to ~5m30s-6m20s
+// - Eliminates loop overhead and branch mispredictions
+// - Enables compiler inlining and optimizations
 //
-// This pure Go implementation outperforms alternatives:
-// - CGO + NEON intrinsics: 2.4x SLOWER due to call overhead (35ns vs 15ns)
-// - Hand-coded assembly: Would require WORD directives for FMUL, FMIN, FMAX, FCMGE
+// Requires: ARM64 with NEON support (all modern ARM64 CPUs)
 //
-// The speedup comes from:
-// 1. BVH4 tree structure (fewer nodes to traverse)
-// 2. Structure-of-Arrays memory layout (better cache utilization)
-// 3. Reduced branch mispredictions
-// 4. Go's compiler optimization on this loop structure
+//	Go 1.27+ with GOEXPERIMENT=simd
 //
-// When Go 1.27 adds NEON intrinsics, we can replace this with:
-// - archsimd.Float32x4 vectors for native NEON operations
-// - Elimination of loop overhead and branch mispredictions
-// - Compiler inlining for further optimization
+//go:inline
 func RayAABB4_SIMD(
 	rayOrgX, rayOrgY, rayOrgZ *float32,
 	rayInvDirX, rayInvDirY, rayInvDirZ *float32,
 	minX, minY, minZ *[4]float32,
 	maxX, maxY, maxZ *[4]float32,
-	tMax float32,
+	tMaxParam float32,
 ) uint8 {
-	var mask uint8 = 0
+	// Broadcast ray origin components to all 4 lanes
+	// Note: On ARM64, Float32x4 maps directly to NEON Q registers (128-bit)
+	orgX := archsimd.BroadcastFloat32x4(*rayOrgX)
+	orgY := archsimd.BroadcastFloat32x4(*rayOrgY)
+	orgZ := archsimd.BroadcastFloat32x4(*rayOrgZ)
 
-	for i := 0; i < 4; i++ {
-		// Compute intersection distances for X axis
-		t0x := (minX[i] - *rayOrgX) * *rayInvDirX
-		t1x := (maxX[i] - *rayOrgX) * *rayInvDirX
-		if t0x > t1x {
-			t0x, t1x = t1x, t0x
-		}
+	// Broadcast ray inverse direction
+	invDirX := archsimd.BroadcastFloat32x4(*rayInvDirX)
+	invDirY := archsimd.BroadcastFloat32x4(*rayInvDirY)
+	invDirZ := archsimd.BroadcastFloat32x4(*rayInvDirZ)
 
-		// Compute intersection distances for Y axis
-		t0y := (minY[i] - *rayOrgY) * *rayInvDirY
-		t1y := (maxY[i] - *rayOrgY) * *rayInvDirY
-		if t0y > t1y {
-			t0y, t1y = t1y, t0y
-		}
+	// Load AABB bounds (4 float32 values each - perfect for Float32x4)
+	minXVec := archsimd.LoadFloat32x4Array(minX)
+	minYVec := archsimd.LoadFloat32x4Array(minY)
+	minZVec := archsimd.LoadFloat32x4Array(minZ)
+	maxXVec := archsimd.LoadFloat32x4Array(maxX)
+	maxYVec := archsimd.LoadFloat32x4Array(maxY)
+	maxZVec := archsimd.LoadFloat32x4Array(maxZ)
 
-		// Compute intersection distances for Z axis
-		t0z := (minZ[i] - *rayOrgZ) * *rayInvDirZ
-		t1z := (maxZ[i] - *rayOrgZ) * *rayInvDirZ
-		if t0z > t1z {
-			t0z, t1z = t1z, t0z
-		}
+	// ====== X AXIS ======
+	// Compute t0x = (minX - orgX) * invDirX  =>  FSUB + FMUL
+	t0x := minXVec.Sub(orgX).Mul(invDirX)
 
-		// Find the overlap
-		tNear := max32(max32(t0x, t0y), t0z)
-		tFar := min32(min32(t1x, t1y), t1z)
+	// Compute t1x = (maxX - orgX) * invDirX
+	t1x := maxXVec.Sub(orgX).Mul(invDirX)
 
-		// Check if there's an intersection
-		if tNear <= tFar && tFar >= 0 && tNear <= tMax {
-			mask |= (1 << i)
-		}
+	// Get tNearX = min(t0x, t1x) and tFarX = max(t0x, t1x)  =>  FMIN + FMAX
+	tNearX := t0x.Min(t1x)
+	tFarX := t0x.Max(t1x)
+
+	// Initialize t_min = tNearX, t_max = tFarX
+	tMin := tNearX
+	tMaxVec := tFarX
+
+	// ====== Y AXIS ======
+	t0y := minYVec.Sub(orgY).Mul(invDirY)
+	t1y := maxYVec.Sub(orgY).Mul(invDirY)
+
+	tNearY := t0y.Min(t1y)
+	tFarY := t0y.Max(t1y)
+
+	// Update t_min = max(t_min, tNearY), t_max = min(t_max, tFarY)
+	tMin = tMin.Max(tNearY)
+	tMaxVec = tMaxVec.Min(tFarY)
+
+	// ====== Z AXIS ======
+	t0z := minZVec.Sub(orgZ).Mul(invDirZ)
+	t1z := maxZVec.Sub(orgZ).Mul(invDirZ)
+
+	tNearZ := t0z.Min(t1z)
+	tFarZ := t0z.Max(t1z)
+
+	// Final t_min and t_max
+	tMin = tMin.Max(tNearZ)
+	tMaxVec = tMaxVec.Min(tFarZ)
+
+	// ====== CULLING CHECKS ======
+	// Check 1: t_max >= t_min  =>  FCMGE (compare greater-equal)
+	cond1 := tMaxVec.GreaterEqual(tMin)
+
+	// Check 2: t_max >= 0.0
+	zero := archsimd.BroadcastFloat32x4(0.0)
+	cond2 := tMaxVec.GreaterEqual(zero)
+
+	// Check 3: t_min <= tMaxParam (equivalent to tMaxParam >= t_min)
+	tMaxScalar := archsimd.BroadcastFloat32x4(tMaxParam)
+	cond3 := tMaxScalar.GreaterEqual(tMin)
+
+	// Combine all conditions with AND  =>  NEON AND on vector masks
+	finalMask := cond1.And(cond2).And(cond3)
+
+	// NEON has no MOVMSKPS-equivalent instruction, so archsimd doesn't expose
+	// Mask32x4.ToBits() on arm64 (unlike amd64). Extract each lane instead.
+	maskInts := finalMask.ToInt32x4()
+
+	var maskBits uint8
+	if maskInts.GetElem(0) != 0 {
+		maskBits |= 1 << 0
+	}
+	if maskInts.GetElem(1) != 0 {
+		maskBits |= 1 << 1
+	}
+	if maskInts.GetElem(2) != 0 {
+		maskBits |= 1 << 2
+	}
+	if maskInts.GetElem(3) != 0 {
+		maskBits |= 1 << 3
 	}
 
-	return mask
+	// Return 4-bit mask
+	return maskBits & 0x0F
 }
+
+// NEON instruction mapping:
+//
+// Go Intrinsic              | ARM NEON Instruction
+// --------------------------|----------------------
+// BroadcastFloat32x4()      | DUP (duplicate scalar)
+// LoadFloat32x4Array()      | LD1 (load 4x float32)
+// vec.Sub(other)            | FSUB (vector subtract)
+// vec.Mul(other)            | FMUL (vector multiply)
+// vec.Min(other)            | FMIN (vector minimum)
+// vec.Max(other)            | FMAX (vector maximum)
+// vec.GreaterEqual(other)   | FCMGE (compare GE, result in mask)
+// mask.And(other)           | AND (bitwise AND on mask)
+// mask.ToInt32x4().GetElem()| Per-lane mask extraction (no MOVMSKPS on NEON)
+//
+// All operations work on 128-bit Q registers (4x float32)
+// NEON guarantees support on all ARM64 CPUs
