@@ -42,12 +42,12 @@ func RayAABB4_SIMD(
 	invDirZ := archsimd.BroadcastFloat32x4(*rayInvDirZ)
 
 	// Load AABB bounds directly (no copy needed - perfect fit!)
-	minXVec := archsimd.LoadFloat32x4(minX)
-	minYVec := archsimd.LoadFloat32x4(minY)
-	minZVec := archsimd.LoadFloat32x4(minZ)
-	maxXVec := archsimd.LoadFloat32x4(maxX)
-	maxYVec := archsimd.LoadFloat32x4(maxY)
-	maxZVec := archsimd.LoadFloat32x4(maxZ)
+	minXVec := archsimd.LoadFloat32x4Array(minX)
+	minYVec := archsimd.LoadFloat32x4Array(minY)
+	minZVec := archsimd.LoadFloat32x4Array(minZ)
+	maxXVec := archsimd.LoadFloat32x4Array(maxX)
+	maxYVec := archsimd.LoadFloat32x4Array(maxY)
+	maxZVec := archsimd.LoadFloat32x4Array(maxZ)
 
 	// ====== X AXIS ======
 	// Compute t0x = (minX - orgX) * invDirX
