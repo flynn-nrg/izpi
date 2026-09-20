@@ -30,6 +30,16 @@ type FyneDisplay struct {
 
 func NewFyneDisplay(name string, width int, height int, input chan DisplayTile) *FyneDisplay {
 	myApp := app.New()
+
+	// Declare that this app follows the fyne.Do threading model so
+	// app.Run() doesn't print its "not migrated" warning.
+	meta := myApp.Metadata()
+	if meta.Migrations == nil {
+		meta.Migrations = map[string]bool{}
+	}
+	meta.Migrations["fyneDo"] = true
+	app.SetMetadata(meta)
+
 	window := myApp.NewWindow("Izpi render output")
 	window.Resize(fyne.NewSize(float32(width), float32(height)))
 	window.SetMaster()
