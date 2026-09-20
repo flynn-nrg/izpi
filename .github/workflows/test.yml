@@ -21,10 +21,21 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install libsdl2-dev pkg-config
 
-      - name: Install OpenImageIO Dependencies
+      # Ubuntu's apt repo only ships OpenImageIO 2.4, but the wrapper in
+      # internal/oiio targets the 3.1 API, so pull 3.1 from conda.
+      - name: Install OpenImageIO 3.1 (conda-forge)
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          channels: conda-forge
+          channel-priority: strict
+
+      - name: Configure OpenImageIO 3.1 for cgo
+        shell: bash -el {0}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libopenimageio-dev libfmt-dev
+          conda install -y -c conda-forge "openimageio=3.1.17" fmt
+          echo "PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> "$GITHUB_ENV"
 
       - name: Install Go
         uses: actions/setup-go@v5
