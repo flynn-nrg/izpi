@@ -4,8 +4,8 @@ import (
 	"errors"
 	"image"
 
-	"github.com/flynn-nrg/floatimage/colour"
-	"github.com/flynn-nrg/floatimage/floatimage"
+	"github.com/flynn-nrg/izpi/internal/floatcolor"
+	"github.com/flynn-nrg/izpi/internal/floatimage"
 	"github.com/flynn-nrg/izpi/internal/scene"
 )
 
@@ -32,7 +32,7 @@ func (c *Clamp) Apply(i image.Image, _ *scene.Scene) error {
 	for y := i.Bounds().Min.Y; y <= i.Bounds().Max.Y; y++ {
 		for x := i.Bounds().Min.X; x <= i.Bounds().Max.X; x++ {
 			pixel := im.Float64NRGBAAt(x, y)
-			im.Set(x, y, colour.Float64NRGBA{
+			im.Set(x, y, floatcolor.Float64NRGBA{
 				R: clamp(pixel.R, c.max),
 				G: clamp(pixel.G, c.max),
 				B: clamp(pixel.B, c.max),

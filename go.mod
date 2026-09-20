@@ -6,7 +6,6 @@ require (
 	fyne.io/fyne/v2 v2.8.0
 	github.com/alecthomas/kong v1.16.1
 	github.com/cheggaaa/pb/v3 v3.2.1
-	github.com/flynn-nrg/floatimage v0.0.0-20250823091259-aa26060097d4
 	github.com/flynn-nrg/go-vfx/go-oiio v0.0.0-20260816125307-35f132d03e7e
 	github.com/flynn-nrg/gube v1.0.3
 	github.com/godbus/dbus/v5 v5.2.2
@@ -29,6 +28,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/fatih/color v1.19.0 // indirect
+	github.com/flynn-nrg/floatimage v0.0.0-20250823091259-aa26060097d4 // indirect
 	github.com/fredbi/uri v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fyne-io/gl-js v0.2.1-0.20260315212741-029c47fd27e8 // indirect

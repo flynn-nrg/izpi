@@ -9,10 +9,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/flynn-nrg/go-vfx/go-oiio/oiio"
 	"github.com/flynn-nrg/izpi/internal/colours"
 	"github.com/flynn-nrg/izpi/internal/config"
 	"github.com/flynn-nrg/izpi/internal/display"
+	"github.com/flynn-nrg/izpi/internal/oiio"
 	"github.com/flynn-nrg/izpi/internal/output"
 	"github.com/flynn-nrg/izpi/internal/postprocess"
 	"github.com/flynn-nrg/izpi/internal/render"

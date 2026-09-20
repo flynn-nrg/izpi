@@ -3,7 +3,7 @@ package spectral
 import (
 	"math"
 
-	"github.com/flynn-nrg/floatimage/floatimage"
+	"github.com/flynn-nrg/izpi/internal/floatimage"
 )
 
 // FireflyRejection performs in-place firefly rejection on CIE XYZ image data.

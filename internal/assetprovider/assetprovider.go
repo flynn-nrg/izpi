@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
-	"github.com/flynn-nrg/floatimage/floatimage"
+	"github.com/flynn-nrg/izpi/internal/floatimage"
 	pb_transport "github.com/flynn-nrg/izpi/internal/proto/transport" // Your generated transport proto
 	"github.com/flynn-nrg/izpi/internal/texture"
 )

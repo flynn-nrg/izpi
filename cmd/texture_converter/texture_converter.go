@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/flynn-nrg/go-vfx/go-oiio/oiio"
+	"github.com/flynn-nrg/izpi/internal/oiio"
 
 	"github.com/alecthomas/kong"
 	log "github.com/sirupsen/logrus"

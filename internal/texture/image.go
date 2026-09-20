@@ -6,8 +6,8 @@ import (
 	"image/png"
 	"io"
 
-	"github.com/flynn-nrg/floatimage/floatimage"
-	"github.com/flynn-nrg/go-vfx/go-oiio/oiio"
+	"github.com/flynn-nrg/izpi/internal/floatimage"
+	"github.com/flynn-nrg/izpi/internal/oiio"
 	"github.com/flynn-nrg/izpi/internal/vec3"
 )
 

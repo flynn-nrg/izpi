@@ -5,8 +5,8 @@ import (
 	"io"
 	"sync"
 
-	"github.com/flynn-nrg/floatimage/colour"
 	"github.com/flynn-nrg/izpi/internal/display"
+	"github.com/flynn-nrg/izpi/internal/floatcolor"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/spectral"
 
@@ -66,7 +66,7 @@ func renderRectRemote(ctx context.Context, w workUnit, client pb_control.RenderC
 		i := 0
 		for x := posX; x < posX+width; x++ {
 			colX, colY, colZ, alpha := pixels[i], pixels[i+1], pixels[i+2], pixels[i+3]
-			w.canvas.Set(x, ny-posY, colour.Float64NRGBA{R: colX, G: colY, B: colZ, A: alpha})
+			w.canvas.Set(x, ny-posY, floatcolor.Float64NRGBA{R: colX, G: colY, B: colZ, A: alpha})
 
 			if w.preview {
 				if isSpectral {

@@ -3,8 +3,8 @@ package spectral
 import (
 	"image"
 
-	"github.com/flynn-nrg/floatimage/colour"
-	"github.com/flynn-nrg/floatimage/floatimage"
+	"github.com/flynn-nrg/izpi/internal/floatcolor"
+	"github.com/flynn-nrg/izpi/internal/floatimage"
 )
 
 // XYZ to ACEScg (AP1) transformation matrix with D60 white point.
@@ -44,7 +44,7 @@ func XYZToRGB(in *floatimage.Float64NRGBA, exposure float64) *floatimage.Float64
 		for x := range width {
 			// Get XYZ values from the input image
 			// Note: R, G, B channels contain X, Y, Z respectively
-			xyzColor := in.At(x, y).(colour.Float64NRGBA)
+			xyzColor := in.At(x, y).(floatcolor.Float64NRGBA)
 			xVal := xyzColor.R
 			yVal := xyzColor.G
 			zVal := xyzColor.B
@@ -59,7 +59,7 @@ func XYZToRGB(in *floatimage.Float64NRGBA, exposure float64) *floatimage.Float64
 			r, g, b := xyzToACEScgMatrix.Apply(xVal, yVal, zVal)
 
 			// Set the ACEScg RGB values in the output image
-			out.Set(x, y, colour.Float64NRGBA{R: r, G: g, B: b, A: alpha})
+			out.Set(x, y, floatcolor.Float64NRGBA{R: r, G: g, B: b, A: alpha})
 		}
 	}
 

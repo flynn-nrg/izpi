@@ -5,9 +5,9 @@ import (
 	"image"
 	"io"
 
-	"github.com/flynn-nrg/floatimage/colour"
-	"github.com/flynn-nrg/floatimage/floatimage"
 	"github.com/flynn-nrg/gube/gube"
+	"github.com/flynn-nrg/izpi/internal/floatcolor"
+	"github.com/flynn-nrg/izpi/internal/floatimage"
 	"github.com/flynn-nrg/izpi/internal/scene"
 )
 
@@ -43,7 +43,7 @@ func (cg *ColourGrading) Apply(i image.Image, _ *scene.Scene) error {
 			if err != nil {
 				return err
 			}
-			im.Set(x, y, colour.Float64NRGBA{
+			im.Set(x, y, floatcolor.Float64NRGBA{
 				R: rgb[0],
 				G: rgb[1],
 				B: rgb[2],

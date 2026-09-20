@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/flynn-nrg/floatimage/floatimage"
 	"github.com/flynn-nrg/izpi/internal/common"
 	"github.com/flynn-nrg/izpi/internal/display"
 	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	"github.com/flynn-nrg/izpi/internal/floatimage"
 	"github.com/flynn-nrg/izpi/internal/grid"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"

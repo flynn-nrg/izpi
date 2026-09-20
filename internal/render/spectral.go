@@ -3,9 +3,9 @@ package render
 import (
 	"sync"
 
-	"github.com/flynn-nrg/floatimage/colour"
 	"github.com/flynn-nrg/izpi/internal/display"
 	"github.com/flynn-nrg/izpi/internal/fastrandom"
+	"github.com/flynn-nrg/izpi/internal/floatcolor"
 	"github.com/flynn-nrg/izpi/internal/sampler"
 	"github.com/flynn-nrg/izpi/internal/scene"
 	"github.com/flynn-nrg/izpi/internal/spectral"
@@ -33,7 +33,7 @@ func renderRectSpectral(w workUnit, random *fastrandom.LCG) {
 			cieX, cieY, cieZ := RenderPixelSpectral(w.numSamples, x, y, nx, ny, w.scene, w.sampler, random)
 
 			// Canvas information is in CIE XYZ space.
-			w.canvas.Set(x, ny-y, colour.Float64NRGBA{R: cieX, G: cieY, B: cieZ, A: 1.0})
+			w.canvas.Set(x, ny-y, floatcolor.Float64NRGBA{R: cieX, G: cieY, B: cieZ, A: 1.0})
 
 			if w.preview {
 				// Apply exposure and convert to ACEScg for preview

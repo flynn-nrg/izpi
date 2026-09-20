@@ -3,7 +3,7 @@ package output
 import (
 	"image"
 
-	"github.com/flynn-nrg/go-vfx/go-oiio/oiio"
+	"github.com/flynn-nrg/izpi/internal/oiio"
 )
 
 var _ Output = (*OIIO)(nil)
